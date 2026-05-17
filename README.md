@@ -19,7 +19,7 @@ This project requires the original th07.exe 1.00b executable for extracting the 
 Run the python script in the root directory of the repo with uv:
 
 ```
-uv run build.py
+uv run scripts/build.py
 ```
 
 The resulting build can be found at `build/th07.exe`.
@@ -27,7 +27,7 @@ The resulting build can be found at `build/th07.exe`.
 If you don't have the original executable, you can still build the program without the icon.
 
 ```
-uv run build.py --no-icon
+uv run scripts/build.py --no-icon
 ```
 
 Note that this build script was not tested on Windows.

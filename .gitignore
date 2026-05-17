@@ -8,3 +8,4 @@ thirdparty/*
 resources/th07.exe
 reccmp-user.yml
 reccmp-build.yml
+scripts/__pycache__/

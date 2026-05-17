@@ -6,12 +6,12 @@ First, copy the original game binary `th07.exe` into the resources directory of 
 
 Then, simply run the command:
 ```sh
-uv run build.py reccmp --init
+uv run scripts/build.py reccmp --init
 ```
 
 Now, you can finally start diffing. After each (re)build, run `uv run reccmp-reccmp --target TH07 --html index.html --nolib` to get a matching summary of all files in the program, and output a webpage showing the diff of every function in the program. Or, alternatively, run `uv run reccmp-reccmp --target TH07 --verbose 0x00FNADDR` on a particular function to diff that function in specific. You'll get a lot of "\[ERROR\] Failed to match xyz" errors in the console. These can be ignored.
 
-For convenience purposes, you can also use `uv run build.py reccmp` to rebuild and run reccmp at the same time, or `uv run build.py reccmp 0x00FNADDR` to rebuild and diff a function at the same time.
+For convenience purposes, you can also use `uv run scripts/build.py reccmp` to rebuild and run reccmp at the same time, or `uv run scripts/build.py reccmp 0x00FNADDR` to rebuild and diff a function at the same time.
 
 # Matching
 
@@ -29,7 +29,7 @@ void EclManager::Unload() {
 }
 ```
 
-This function is still mostly unprocessed Ghidra decompiler output. While it looks reasonable, it may have different output than the original assembly. Call `uv run build.py reccmp 0x0040e4f0` to get a detailed diff. Note that the original executable is the "older" version in the diff, so it'll be marked with `-`.
+This function is still mostly unprocessed Ghidra decompiler output. While it looks reasonable, it may have different output than the original assembly. Call `uv run scripts/build.py reccmp 0x0040e4f0` to get a detailed diff. Note that the original executable is the "older" version in the diff, so it'll be marked with `-`.
 
 ```
 ---
@@ -79,7 +79,7 @@ Immediately from the assembly diff, you can determine a few things just from thi
 
 * Firstly, PCB was compiled with debug settings (for most files), so you can see that the frame pointer here was not omitted. This means we can determine the amount of stack "space" we need. In this case, the very first instruction `sub esp, 8` means we should be subtracting 8 bytes from the frame pointer, `esp`. That means we need to have 8 bytes on the stack.
 
-* Secondly, since this is a _member function_ of EclManager, `this` is located at `ecx`, which is then immediately moved to the end of the stack at `[ebp - 8]` in the original binary. Thus, since `this` already occupies a stack "slot," it means that we are only missing 4 bytes of stack space from our version. Just to make sure, though, we can use a tool that comes with `reccmp`, called `stackcmp`. Call `uv run build.py stackcmp 0x0040e4f0` to get:
+* Secondly, since this is a _member function_ of EclManager, `this` is located at `ecx`, which is then immediately moved to the end of the stack at `[ebp - 8]` in the original binary. Thus, since `this` already occupies a stack "slot," it means that we are only missing 4 bytes of stack space from our version. Just to make sure, though, we can use a tool that comes with `reccmp`, called `stackcmp`. Call `uv run scripts/build.py stackcmp 0x0040e4f0` to get:
 
 ```
 [ERROR] Structural mismatch at orig=0x40e506:
@@ -152,6 +152,15 @@ Congrats, you've matched a function!
 
 There's also an alternative way to match this function. For at least this compiler in particular, MSVC 2002, inline functions create compiler temporaries, which can be used for matching. These compiler temporaries are placed _below_ user-defined stack variables on the stack, (so, for example, if I had two stack variables at `[ebp - 4]` and `[ebp - 8]`, and a simple getter inline function, it would move its result to `[ebp - 0xc]`), but _above_ the stack variable for the `this` pointer (if there is any). This is particularly necessary for if stack variables are mismatched, and `stackcmp` indicates that a user-defined variable and temporary variable (the unnamed ones) are swapped.
 
+Generally speaking if it seems like the compiler unnecessarily spilt a variable right before it was used (instead of just using that variable directly), as in this case:
+
+```c++
+EclRawHeader *file = this->eclFile;
+free(file);
+```
+
+Then it probably was using an inline function.
+
 This means that you can also have this
 
 ```c++
@@ -166,7 +175,7 @@ void EclManager::Unload()
 }
 ```
 
-Which has basically the same result to reccmp.
+Which has basically the same result to reccmp, and probably matches the original program better.
 
 ```
 0x4547b0: AnmManager::LoadSurface 100% match.
@@ -174,7 +183,7 @@ Which has basically the same result to reccmp.
 ✨ OK! ✨
 ```
 
-Ternary operators create their temporaries _below_ the `this` pointer, so if there is more stack space than the offset of the `this` pointer variable indicates, then that usually indicates that the function uses at least one ternary operator.
+Ternary operators create their temporaries _below_ the `this` pointer. If the `this` pointer is located at, for example, `[ebp - 0xc]`, then a temporary that stores the result of the operation will be located at `[ebp - 0x10]`. If there is more stack space than the offset of the `this` pointer variable indicates, then that usually indicates that the function uses at least one ternary operator.
 
 Let's look at another example, this time `AnmManager::LoadSurface`.
 

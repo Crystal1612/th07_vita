@@ -1,21 +1,24 @@
 #include "FileSystem.hpp"
 
 #include "GameErrorContext.hpp"
+#include "ZunMemory.hpp"
 #include "dsutil.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
 // GLOBAL: TH07 0x004b9e64
 u32 g_LastFileSize;
 
+#pragma var_order(entryIdx, filename, fsize, buf, hFile)
 // FUNCTION: TH07 0x00431330
 u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
 {
-    u8 *buf;
     HANDLE hFile;
+    u8 *buf;
     DWORD fsize;
     const char *filename;
+    i32 entryIdx;
 
-    i32 entryIdx = -1;
+    entryIdx = -1;
     if (isExternalResource == 0)
     {
         filename = strrchr(filepath, '\\');
@@ -50,7 +53,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
         {
             // STRING: TH07 0x00497d24
             DebugPrint("%s Decode ... \r\n", filename);
-            buf = (u8 *)malloc(fsize);
+            buf = (u8 *)ZunMemory::Alloc(fsize);
             if (buf == NULL)
             {
                 return NULL;
@@ -71,7 +74,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
     }
 
     fsize = GetFileSize(hFile, NULL);
-    buf = (u8 *)malloc(fsize);
+    buf = (u8 *)ZunMemory::Alloc(fsize);
     if (buf == NULL)
     {
         CloseHandle(hFile);
