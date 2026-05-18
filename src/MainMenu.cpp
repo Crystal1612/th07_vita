@@ -170,8 +170,6 @@ const char *g_MainMenuStrings[8] = {
     "‚¢‚ë‚¢‚ë‚ÆI—¹‚µ‚Ü‚·",
 };
 
-#pragma optimize("s", on)
-
 // FUNCTION: TH07 0x004553fa
 void InitializeTimingVars(Supervisor *arg)
 {
@@ -307,7 +305,7 @@ u32 MainMenu::OnUpdatePreInput()
             this->cursorVm->SetPendingInterrupt(2);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
-        for (i = 0; i < 8; i++)
+        for (i = 0; (u32)i < 8; i++)
         {
             g_AnmManager->DrawStringFormat2(&this->vms[i], 0xfff0e0, 0x300000,
                                             g_MainMenuStrings[i]);
@@ -2793,5 +2791,3 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     UselessStack::EightBytes();
     return ZUN_SUCCESS;
 }
-
-#pragma optimize("s", off)

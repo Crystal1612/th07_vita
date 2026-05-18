@@ -71,6 +71,21 @@ SOURCES: List[Path] = list(
     )
 )
 
+SMALL_SOURCES: List[Path] = list(
+    map(
+        lambda x: Path(x),
+        [
+            "GameManager.cpp",
+            "Gui.cpp",
+            "MainMenu.cpp",
+            "MusicRoom.cpp",
+            "ResultScreen.cpp",
+            "Supervisor.cpp",
+            "TextHelper.cpp",
+        ],
+    )
+)
+
 parser = argparse.ArgumentParser()
 _ = parser.add_argument(
     "--no-icon",
@@ -131,17 +146,14 @@ if not EXE_PATH.exists():
 if not shutil.which("ninja"):
     sys.exit("ninja must be installed when building")
 
-env = os.environ.copy()
-
 download_dx8(DX8_PATH)
 download_msvc(MSVC_PATH, VS_PATH, VC_PATH)
-install_hackery(CL_PATH, MSVC_PATH, VC_PATH, env)
+install_hackery(CL_PATH, MSVC_PATH, VC_PATH)
 
 cflags = [
     "/nologo",
     "/W3",
     "/MT",
-    "/Od",
     "/Ob1",
     "/Oi",
     "/EHsc",
@@ -167,7 +179,7 @@ lflags = [
     "/INCREMENTAL:NO",
     "/MAP",
     "/OPT:REF",
-    "/OPT:NOICF",
+    "/OPT:ICF",
     "/DEBUG",
 ]
 
@@ -201,12 +213,13 @@ with open("build.ninja", "w") as f:
     f.write(f'link = {wine_cmd}"{conv_path(LINK_PATH)}"\n')
     f.write(f'rc = {wine_cmd}"{conv_path(RC_PATH)}"\n')
 
-    f.write(f"cflags = {' '.join(cflags)}\n")
+    f.write(f"cflags = {'/Od ' + ' '.join(cflags)}\n")
+    f.write(f"cflags_small = {'/Os ' + ' '.join(cflags)}\n")
     f.write(f"lflags = {' '.join(lflags)}\n")
     f.write(f"libs = {' '.join(libs)}\n\n")
 
     f.write("rule cxx\n")
-    f.write("  command = $cl /showIncludes $cflags /c $in /Fo$out /Fd$pdb\n")
+    f.write("  command = $cl /showIncludes $in_cflags /c $in /Fo$out /Fd$pdb\n")
     f.write("  description = cxx $out\n")
     f.write("  deps = msvc\n\n")
 
@@ -224,14 +237,22 @@ with open("build.ninja", "w") as f:
         obj_name = "obj/" + src.with_suffix(".obj").as_posix()
         pdb_name = "obj/" + src.with_suffix(".pdb").as_posix()
         f.write(f"build {obj_name}: cxx ../src/{src_name}\n")
+        if src not in SMALL_SOURCES:
+            f.write(f"  in_cflags = $cflags\n")
+        else:
+            f.write(f"  in_cflags = $cflags_small\n")
         f.write(f"  pdb = {pdb_name}\n")
         objects.append(obj_name)
     f.write("\n")
 
     if not args.no_icon:
         icon_path = extract_icon(EXE_PATH)
-        with open("resources.rc", "w") as g:
-            _ = g.write(f'1 ICON "{icon_path.name}"\n')
+        try:
+            with open("resources.rc", "x") as g:
+                g.write(f'1 ICON "{icon_path.name}"\n')
+        except FileExistsError:
+            pass
+
         f.write("build resources.res: rc resources.rc\n\n")
         objects.append("resources.res")
 

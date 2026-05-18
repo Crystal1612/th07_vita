@@ -22,8 +22,6 @@
 #include "dxutil.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
-#pragma optimize("s", on)
-
 // GLOBAL: TH07 0x0049ee40
 ControllerMapping g_ControllerMapping = {0, 1, 2, 4, -1, -1, -1, -1, 3};
 
@@ -813,11 +811,6 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00438fef
-DummyMidiTimer::~DummyMidiTimer()
-{
-}
-
 #pragma var_order(chain, res, mgr)
 // FUNCTION: TH07 0x00439000
 ZunResult Supervisor::RegisterChain()
@@ -916,8 +909,8 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                         sprintf(g_FpsCounterBuffer2, "%2d", (i32)g_Supervisor.curFps);
                     }
                 }
-                goto LAB_00439350;
             }
+            goto LAB_00439350;
         }
 
         if (g_PerformanceCounter.LowPart == 0)
@@ -1672,5 +1665,3 @@ ZunResult Supervisor::CheckIntegrity(const char *version, i32 exeSize,
     }
 #endif
 }
-
-#pragma optimize("s", off)

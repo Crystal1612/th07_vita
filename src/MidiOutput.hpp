@@ -23,7 +23,6 @@ struct MidiTimer
     u32 StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data);
     void StartTimerDefault();
     i32 StopTimer();
-    void UpdatePerfCounter();
 
     virtual void OnTimerElapsed()
     {
@@ -200,8 +199,6 @@ C_ASSERT(sizeof(MidiOutput) == 0x300);
 // VTABLE: TH07 0x00496c0c
 struct DummyMidiTimer : MidiTimer
 {
-    ~DummyMidiTimer();
-
-    virtual void OnTimerElapsed();
+    void OnTimerElapsed();
 };
 extern LARGE_INTEGER g_PerfCounter;

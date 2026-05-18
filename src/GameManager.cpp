@@ -19,8 +19,6 @@
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 
-#pragma optimize("s", on)
-
 // GLOBAL: TH07 0x0049f5d0
 i32 g_RankArray[6][3] = {
     {16, 12, 20},
@@ -1098,5 +1096,3 @@ i32 GameManager::HasUnlockedPhantomAndMaxClears()
            this->clrd[4].difficultyClearedWithRetries[5] == 99 ||
            this->clrd[5].difficultyClearedWithRetries[5] == 99;
 }
-
-#pragma optimize("s", off)

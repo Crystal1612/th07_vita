@@ -8,8 +8,6 @@
 #include "SoundPlayer.hpp"
 #include "Supervisor.hpp"
 
-#pragma optimize("s", on)
-
 // FUNCTION: TH07 0x0043a760
 ZunResult MusicRoom::CheckInputEnable()
 {
@@ -419,5 +417,3 @@ ZunResult MusicRoom::RegisterChain()
     g_Chain.AddToDrawChain(musicRoom->drawChain, 0);
     return ZUN_SUCCESS;
 }
-
-#pragma optimize("s", off)

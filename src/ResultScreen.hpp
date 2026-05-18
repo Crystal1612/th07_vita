@@ -18,8 +18,6 @@
 #define LSNM_MAGIC 'MNSL'
 #define VRSM_MAGIC 'MSRV'
 
-#pragma optimize("s", on)
-
 struct Th7k
 {
     u32 magic;
@@ -219,5 +217,3 @@ struct ResultScreen
     ReplayHeaderAndData defaultReplay;
 };
 C_ASSERT(sizeof(ResultScreen) == 0xce6c);
-
-#pragma optimize("s", off)

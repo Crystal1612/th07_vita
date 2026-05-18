@@ -19,7 +19,7 @@
 // Name: CSoundManager::CSoundManager()
 // Desc: Constructs the class
 //-----------------------------------------------------------------------------
-// FUNCTION: TH07 0x0045c6f0
+// FUNCTION: TH07 0x0045c6f0 FOLDED
 CSoundManager::CSoundManager()
 {
     pDS = NULL;

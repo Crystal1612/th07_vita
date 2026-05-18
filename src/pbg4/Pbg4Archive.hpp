@@ -5,6 +5,12 @@
 
 struct Pbg4Entry
 {
+    // FUNCTION: TH07 0x0045c6f0 FOLDED
+    Pbg4Entry()
+    {
+        filename = NULL;
+    }
+
     // FUNCTION: TH07 0x0045f680
     ~Pbg4Entry()
     {
@@ -36,6 +42,12 @@ struct Pbg4Archive
     bool OpenArchive(const char *path);
     u8 *ReadDecompressEntry(const char *filename, u8 *buf);
     void Release();
+
+    DWORD ReadFile(void *data, u32 len)
+    {
+        Pbg4File *file = this->fileAbstraction;
+        return file->Read(data, len);
+    }
 
     Pbg4Entry *entries;
     i32 numOfEntries;

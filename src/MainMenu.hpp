@@ -5,8 +5,6 @@
 #include "ReplayManager.hpp"
 #include "Supervisor.hpp"
 
-#pragma optimize("s", on)
-
 typedef enum GameState
 {
     STATE_PRE_INPUT = 0,
@@ -109,5 +107,3 @@ struct MainMenu
     GameConfiguration cfg;
 };
 C_ASSERT(sizeof(MainMenu) == 0xd158);
-
-#pragma optimize("s", off)

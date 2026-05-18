@@ -76,7 +76,7 @@ struct GameConfiguration
 };
 C_ASSERT(sizeof(GameConfiguration) == 0x38);
 
-#pragma pack(push, 4)
+#pragma pack(4)
 struct Supervisor
 {
     static void DebugPrint2(const char *fmt, ...);
@@ -167,7 +167,6 @@ struct Supervisor
     i32 versionTableSize;
     char *version;
 };
-#pragma pack(pop)
 C_ASSERT(sizeof(Supervisor) == 0x2d0);
 extern Supervisor g_Supervisor;
 

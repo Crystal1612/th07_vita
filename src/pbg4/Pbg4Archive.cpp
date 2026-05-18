@@ -163,7 +163,7 @@ Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
 }
 
 #pragma var_order(decompressedData, decompressedSize, magic, fileSize, \
-                  headerSize, compressedData, ab1, ab2, ab3, ab4)
+                  headerSize, compressedData)
 // FUNCTION: TH07 0x0045fb50
 bool Pbg4Archive::OpenArchive(const char *path)
 {
@@ -185,8 +185,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
         goto err;
     }
 
-    Pbg4File *ab1 = this->fileAbstraction;
-    if (ab1->Read(&magic, 4) == 0)
+    if (ReadFile(&magic, 4) == 0)
     {
         goto err;
     }
@@ -195,8 +194,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
         goto err;
     }
 
-    Pbg4File *ab2 = this->fileAbstraction;
-    if (ab2->Read(&this->numOfEntries, 4) == 0)
+    if (ReadFile(&this->numOfEntries, 4) == 0)
     {
         goto err;
     }
@@ -207,8 +205,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     fileSize = this->fileAbstraction->GetSize();
 
-    Pbg4File *ab3 = this->fileAbstraction;
-    if (ab3->Read(&headerSize, 4) == 0)
+    if (ReadFile(&headerSize, 4) == 0)
     {
         goto err;
     }
@@ -219,8 +216,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     fileSize -= headerSize;
 
-    Pbg4File *ab4 = this->fileAbstraction;
-    if (ab4->Read(&decompressedSize, 4) == 0)
+    if (ReadFile(&decompressedSize, 4) == 0)
     {
         goto err;
     }
@@ -281,36 +277,46 @@ err:
     return false;
 }
 
+#pragma var_order(entryData, i, entries)
 // FUNCTION: TH07 0x0045fde0
-Pbg4Entry *Pbg4Archive::AllocEntries(LPVOID param_1, i32 count, u32 dataOffset)
+Pbg4Entry *Pbg4Archive::AllocEntries(void *param_1, i32 count, u32 dataOffset)
 {
-    u8 *local_3c;
-    Pbg4Entry *buffer = NULL;
+    Pbg4Entry *entries = NULL;
+    i32 i;
+    u8 *entryData;
 
-    buffer = new Pbg4Entry[count + 1];
+    entries = new Pbg4Entry[count + 1];
 
-    if (buffer == NULL)
+    if (entries == NULL)
     {
-        SAFE_DELETE_ARRAY(buffer);
-        return NULL;
+        goto err;
     }
 
-    u8 *entryData = (u8 *)param_1;
-    for (i32 i = 0; i < count; i++)
+    entryData = (u8 *)param_1;
+    for (i = 0; i < count; i++)
     {
-        buffer[i].filename = CopyFileName((char *)entryData);
-        local_3c = entryData;
+        entries[i].filename = CopyFileName((char *)entryData);
 
-        local_3c += strlen((char *)local_3c);
-        buffer[i].dataOffset = *(u32 *)(local_3c + 1);
-        buffer[i].decompressedSize = *(u32 *)(local_3c + 5);
-        buffer[i].magicThing = *(u32 *)(local_3c + 9);
-        entryData = local_3c + 0xd;
+        entryData += strlen((char *)entryData) + 1;
+
+        entries[i].dataOffset = *(u32 *)entryData;
+        entryData += 4;
+
+        entries[i].decompressedSize = *(u32 *)entryData;
+        entryData += 4;
+
+        entries[i].magicThing = *(u32 *)entryData;
+        entryData += 4;
     }
-    buffer[count].dataOffset = dataOffset;
-    buffer[count].decompressedSize = 0;
 
-    return buffer;
+    entries[count].dataOffset = dataOffset;
+    entries[count].decompressedSize = 0;
+
+    return entries;
+
+err:
+    SAFE_DELETE_ARRAY(entries);
+    return NULL;
 }
 
 // FUNCTION: TH07 0x0045ffc0

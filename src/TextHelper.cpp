@@ -8,8 +8,6 @@
 #include "dxutil.hpp"
 #include "inttypes.hpp"
 
-#pragma optimize("s", on)
-
 // GLOBAL: TH07 0x0049ed98
 FormatInfo g_FormatInfoArray[7] = {
     {
@@ -449,5 +447,3 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
                                &srcRect, 4, 0);
     SAFE_RELEASE(dstSurface);
 }
-
-#pragma optimize("s", off)

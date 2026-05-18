@@ -108,7 +108,7 @@ MidiTimer::MidiTimer()
     this->timerId = 0;
 }
 
-// FUNCTION: TH07 0x004362d0
+// FUNCTION: TH07 0x004362d0 FOLDED
 MidiTimer::~MidiTimer()
 {
     StopTimer();
@@ -697,13 +697,8 @@ void MidiOutput::FadeOutSetVolume(i32 vol)
     }
 }
 
-void DummyMidiTimer::OnTimerElapsed()
-{
-    UpdatePerfCounter();
-}
-
 // FUNCTION: TH07 0x004378b0
-void MidiTimer::UpdatePerfCounter()
+void DummyMidiTimer::OnTimerElapsed()
 {
     QueryPerformanceCounter(&g_PerfCounter);
 }

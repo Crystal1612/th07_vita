@@ -15,8 +15,6 @@
 #include "ZunResult.hpp"
 #include "pbg4/Lzss.hpp"
 
-#pragma optimize("s", on)
-
 // GLOBAL: TH07 0x004964f4
 static const f32 g_DifficultyWeightsList[] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
 
@@ -2800,5 +2798,3 @@ ZunResult ResultScreen::RegisterChain(u32 param_1)
 
     return ZUN_SUCCESS;
 }
-
-#pragma optimize("s", off)

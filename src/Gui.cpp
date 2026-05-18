@@ -19,8 +19,6 @@
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 
-#pragma optimize("s", on)
-
 // GLOBAL: TH07 0x0049f618
 D3DCOLOR g_SpellcardTimeColors[4] = {
     0xa0d0ff,
@@ -2155,5 +2153,3 @@ void Gui::CutChain()
     g_Chain.Cut(&g_GuiCalcChain);
     g_Chain.Cut(&g_GuiDrawChain);
 }
-
-#pragma optimize("s", off)

@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path, PureWindowsPath
-from typing import Dict, Iterator
+from typing import Iterator
 from zipfile import ZipFile
 
 import requests
@@ -23,10 +23,11 @@ def conv_path(path: Path) -> str:
     return "Z:" + str(path.resolve())
 
 
-def run_program(name: str, *args: str, env: Dict[str, str]):
+def run_program(name: str, *args: str):
     if sys.platform == "win32":
         cmd = [name] + list(args)
     else:
+        env = os.environ.copy()
         env["LANG"] = "ja_JP.UTF-8"
         env["WINEDEBUG"] = "fixme-all"
         cmd = ["wine", name] + list(args)
@@ -139,6 +140,10 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
             os.remove(file)
         elif file.is_dir():
             shutil.rmtree(file)
+    for file in (vc_path / "INCLUDE").iterdir():
+        _ = shutil.move(file, file.with_name(file.name.lower()))
+    for file in (vc_path / "PLATFORMSDK" / "COMMON" / "Include").iterdir():
+        _ = shutil.move(file, file.with_name(file.name.lower()))
     # cl dll dependencies
     _ = (vs_path / "COMMON7" / "IDE" / "MSPDB70.DLL").rename(
         vc_path / "BIN" / "MSPDB70.DLL"
@@ -149,7 +154,7 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
 
 
 # provides pragma var_order
-def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path, env: Dict[str, str]):
+def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path):
     c1xx_path = vc_path / "BIN" / "C1XX.DLL"
     orig_path = vc_path / "BIN" / "C1XXOrig.dll"
 
@@ -161,10 +166,13 @@ def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path, env: Dict[str
         _ = shutil.copy(c1xx_path, orig_path)
     _ = run_program(
         str(cl_path),
+        f'/I"{vc_path / "INCLUDE"}"',
+        f'/I"{vc_path / "PLATFORMSDK" / "COMMON" / "Include"}"',
         "/LD",
         conv_path(msvc_path / "hackery.cpp"),
         "/link",
+        f"/LIBPATH:{vc_path / 'LIB'}",
+        f"/LIBPATH:{vc_path / 'PLATFORMSDK' / 'COMMON' / 'lib'}",
         f"/OUT:{msvc_path / 'C1XX.DLL'}",
-        env=env,
     )
     _ = (msvc_path / "C1XX.DLL").replace(c1xx_path)

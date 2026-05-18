@@ -13,7 +13,7 @@ typedef enum RenderResult
     RENDER_RESULT_EXIT_ERROR = 2
 } RenderResult;
 
-#pragma pack(push, 4)
+#pragma pack(4)
 struct GameWindow
 {
     static ZunResult CheckForRunningGameInstance(HINSTANCE hInstance);
@@ -45,6 +45,5 @@ struct GameWindow
     u32 low_power_active;
     u32 power_off_active;
 };
-#pragma pack(pop)
 C_ASSERT(sizeof(GameWindow) == 0x2c);
 extern GameWindow g_GameWindow;
