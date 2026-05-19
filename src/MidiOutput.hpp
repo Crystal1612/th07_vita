@@ -81,7 +81,7 @@ typedef enum MidiOpcode
 struct MidiTrack
 {
     u32 trackPlaying;
-    u32 trackLengthOther;
+    i32 trackLengthOther;
     u32 trackLength;
     u8 opcode;
     // pad 3
@@ -179,7 +179,7 @@ struct MidiOutput : MidiTimer
     MidiDevice midiOutDev;
     u8 unused_144[16];
     MidiChannel channels[16];
-    u8 pitchTranspose;
+    i8 pitchTranspose;
     // pad 3
     f32 fadeOutVolumeMultiplier;
     i32 fadeOutLastSetVolume;

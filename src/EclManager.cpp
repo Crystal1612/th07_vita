@@ -78,7 +78,7 @@ void EclManager::Unload()
 {
     if (this->eclFile != NULL)
     {
-        free(this->GetFile());
+        ZunMemory::Free(this->eclFile);
     }
     this->eclFile = NULL;
 }

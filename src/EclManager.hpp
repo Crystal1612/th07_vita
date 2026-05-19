@@ -174,10 +174,5 @@ struct EclManager
 
     EclRawHeader *eclFile;
     EclRawInstr **subTable;
-
-    EclRawHeader *GetFile()
-    {
-        return this->eclFile;
-    }
 };
 extern EclManager g_EclManager;

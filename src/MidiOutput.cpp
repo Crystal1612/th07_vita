@@ -3,6 +3,7 @@
 #include "FileSystem.hpp"
 #include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
+#include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dsutil.hpp"
 #include "inttypes.hpp"
@@ -118,22 +119,18 @@ MidiTimer::~MidiTimer()
 // FUNCTION: TH07 0x00436300
 u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
 {
-    MMRESULT timerId;
-
     StopTimer();
     timeBeginPeriod(this->timeCaps.wPeriodMin);
-    if (cb == NULL)
+    if (cb != NULL)
     {
-        timerId =
-            timeSetEvent(delay, this->timeCaps.wPeriodMin, DefaultTimerCallback,
-                         (DWORD_PTR)this, TIME_PERIODIC);
-        this->timerId = timerId;
+        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, cb,
+                                     data, TIME_PERIODIC);
     }
     else
     {
-        timerId =
-            timeSetEvent(delay, this->timeCaps.wPeriodMin, cb, data, TIME_PERIODIC);
-        this->timerId = timerId;
+        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin,
+                                     DefaultTimerCallback, (DWORD_PTR)this,
+                                     TIME_PERIODIC);
     }
     return this->timerId;
 }
@@ -181,7 +178,7 @@ u32 MidiOutput::SkipVariableLength(u8 **curTrackDataCursor)
     {
         tmp = **curTrackDataCursor;
         *curTrackDataCursor = *curTrackDataCursor + 1;
-        length = length * 0x80 + (tmp & 0x7f);
+        length = length * 0x80 + (tmp & 127);
     } while ((tmp & 0x80) != 0);
     return length;
 }
@@ -251,7 +248,7 @@ ZunResult MidiOutput::ReadFileData(i32 fileIdx, const char *path)
 // FUNCTION: TH07 0x004366c0
 void MidiOutput::ReleaseFileData(u32 idx)
 {
-    free(this->midiFileData[idx]);
+    ZunMemory::Free(this->midiFileData[idx]);
     this->midiFileData[idx] = NULL;
 }
 
@@ -262,46 +259,59 @@ void MidiOutput::ClearTracks()
 
     for (i = 0; i < this->numTracks; i++)
     {
-        free(this->tracks[i].trackData);
+        ZunMemory::Free(this->tracks[i].trackData);
     }
-    free(this->tracks);
+    ZunMemory::Free(this->tracks);
     this->tracks = NULL;
     this->numTracks = 0;
 }
 
+#pragma var_order(i, currentCursor, trackChunk, fileData, hdrLength, hdrRaw, \
+                  trackLength, header)
 // FUNCTION: TH07 0x00436790
 ZunResult MidiOutput::ParseFile(i32 fileIdx)
 {
-    u32 trackLength;
-    u8 *currentCursor;
+    u8 hdrRaw[8];
     i32 i;
-    MidiHeader *fileData;
+    u8 *currentCursor;
+    u8 *trackChunk;
+    u8 *fileData;
     u32 hdrLength;
+    u32 trackLength;
+    u16 *header;
 
     ClearTracks();
-    fileData = (MidiHeader *)this->midiFileData[fileIdx];
-    if (fileData == NULL)
+    currentCursor = this->midiFileData[fileIdx];
+    fileData = currentCursor;
+    if (currentCursor == NULL)
     {
         // STRING: TH07 0x00497290
         DebugPrint("error : ‚Ü‚¾MIDI‚ª“Ç‚Ýž‚Ü‚ê‚Ä‚¢‚È‚¢‚Ì‚ÉÄ¶‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚é\r\n");
         return ZUN_ERROR;
     }
 
-    hdrLength = Ntohl(fileData->length);
-    currentCursor = ((u8 *)fileData + 8 + hdrLength);
-    this->format = Ntohs(fileData->format);
-    this->divisions = Ntohs(fileData->divisions);
-    this->numTracks = Ntohs(fileData->numTracks);
-    this->tracks = (MidiTrack *)malloc(this->numTracks << 5);
+    memcpy(&hdrRaw, currentCursor, 8);
+    currentCursor += sizeof(hdrRaw);
+    hdrLength = Ntohl(*(u32 *)(&hdrRaw[4]));
+    header = (u16 *)currentCursor;
+    currentCursor += hdrLength;
+
+    this->format = Ntohs(header[0]);
+    this->divisions = Ntohs(header[2]);
+    this->numTracks = Ntohs(header[1]);
+    this->tracks =
+        (MidiTrack *)ZunMemory::Alloc(this->numTracks * sizeof(MidiTrack));
     memset(this->tracks, 0, this->numTracks * sizeof(MidiTrack));
     for (i = 0; i < this->numTracks; i++)
     {
-        trackLength = Ntohl(*(u32 *)(currentCursor + 4));
+        trackChunk = currentCursor;
+        currentCursor += 8;
+        trackLength = Ntohl(((u32 *)trackChunk)[1]);
         this->tracks[i].trackLength = trackLength;
         this->tracks[i].trackData = (u8 *)malloc(trackLength);
         this->tracks[i].trackPlaying = 1;
-        memcpy(this->tracks[i].trackData, currentCursor + 8, trackLength);
-        currentCursor = currentCursor + 8 + trackLength;
+        memcpy(this->tracks[i].trackData, currentCursor, trackLength);
+        currentCursor += trackLength;
     }
     this->tempo = 1000000;
     this->fileIdx = fileIdx;
@@ -327,6 +337,7 @@ ZunResult MidiOutput::LoadFile(const char *path)
 void MidiOutput::LoadTracks()
 {
     MidiTrack *track;
+    i32 i;
 
     track = this->tracks;
     this->fadeOutVolumeMultiplier = 1.0f;
@@ -334,13 +345,12 @@ void MidiOutput::LoadTracks()
     this->fadeOutFlag = 0;
     this->volume = 0;
     this->field_0x130 = 0;
-    for (i32 i = 0; i < this->numTracks; i++)
+    for (i = 0; i < this->numTracks; i++, track++)
     {
         track->curTrackDataCursor = track->trackData;
         track->savedTrackDataCursor = track->curTrackDataCursor;
         track->trackPlaying = 1;
         track->trackLengthOther = SkipVariableLength(&track->curTrackDataCursor);
-        track = track + 1;
     }
 }
 
@@ -429,12 +439,13 @@ ZunResult MidiOutput::SetFadeOut(i32 interval)
     return ZUN_SUCCESS;
 }
 
+#pragma var_order(i, local_14, trackLoaded)
 // FUNCTION: TH07 0x00436ce0
 void MidiOutput::OnTimerElapsed()
 {
     u64 local_14;
-    i32 trackIndex;
-    bool trackLoaded;
+    i32 i;
+    i32 trackLoaded;
 
     trackLoaded = false;
 
@@ -442,65 +453,69 @@ void MidiOutput::OnTimerElapsed()
         this->field_0x130 + (this->volume * this->divisions * 1000) / this->tempo;
     if (this->fadeOutFlag != 0)
     {
-        if (this->fadeOutInterval <= this->fadeOutElapsedMs)
+        if (this->fadeOutElapsedMs < this->fadeOutInterval)
         {
-            this->fadeOutVolumeMultiplier = 0.0;
-            return;
-        }
-        this->fadeOutVolumeMultiplier =
-            1.0 - (f32)this->fadeOutElapsedMs / (f32)this->fadeOutInterval;
-        if (this->fadeOutVolumeMultiplier * 128.0 != this->fadeOutLastSetVolume)
-        {
-            FadeOutSetVolume(0);
-        }
-        this->fadeOutLastSetVolume = this->fadeOutVolumeMultiplier * 128.0;
-        this->fadeOutElapsedMs = this->fadeOutElapsedMs + 1;
-    }
-    trackIndex = 0;
-    while (true)
-    {
-        if (this->numTracks <= trackIndex)
-        {
-            this->volume += 1;
-            if (!trackLoaded)
+            this->fadeOutVolumeMultiplier =
+                1.0f - (f32)this->fadeOutElapsedMs / (f32)this->fadeOutInterval;
+            if ((i32)(this->fadeOutVolumeMultiplier * 128.0f) != this->fadeOutLastSetVolume)
             {
-                LoadTracks();
+                FadeOutSetVolume(0);
             }
+            this->fadeOutLastSetVolume = this->fadeOutVolumeMultiplier * 128.0f;
+            this->fadeOutElapsedMs = this->fadeOutElapsedMs + 1;
+        }
+        else
+        {
+            this->fadeOutVolumeMultiplier = 0.0f;
             return;
         }
-        if (this->tracks[trackIndex].trackPlaying != 0)
+    }
+    for (i = 0; i < this->numTracks; i++)
+    {
+        if (this->tracks[i].trackPlaying != 0)
         {
             trackLoaded = true;
-            while (this->tracks[trackIndex].trackPlaying != 0)
+            while (this->tracks[i].trackPlaying != 0)
             {
-                if (this->tracks[trackIndex].trackLengthOther <= local_14)
+                if (this->tracks[i].trackLengthOther <= local_14)
                 {
-                    ProcessMsg(&this->tracks[trackIndex]);
+                    ProcessMsg(&this->tracks[i]);
                     local_14 = this->field_0x130 +
-                               (this->volume * this->divisions * 1000) / this->tempo;
+                               this->volume * this->divisions * 1000 / this->tempo;
                     continue;
                 }
                 break;
             }
         }
-        trackIndex += 1;
+    }
+
+    this->volume += 1;
+    if (!trackLoaded)
+    {
+        LoadTracks();
     }
 }
 
+#pragma var_order(nextTrackLength, i, arg2, volumeClamped, opcodeLow,      \
+                  opcodeHigh, opcode, arg1, curTrackLength, pmh, metaType, \
+                  bpm, curTrack1, curTrack2)
 // FUNCTION: TH07 0x00436f50
 void MidiOutput::ProcessMsg(MidiTrack *track)
 {
-    u8 uVar1;
-    i32 iVar4;
-    u8 MVar5;
-    MidiTrack *local_30;
-    MidiTrack *local_2c;
+    MidiTrack *curTrack2;
+    MidiTrack *curTrack1;
+    i32 bpm;
+    u8 metaType;
+    LPMIDIHDR pmh;
+    i32 curTrackLength;
     u8 arg1;
     u8 opcode;
-    i32 iStack_14;
+    u8 opcodeHigh;
+    u8 opcodeLow;
+    i32 volumeClamped;
     u8 arg2;
     i32 i;
-    LPMIDIHDR pmh;
+    i32 nextTrackLength;
 
     opcode = *track->curTrackDataCursor;
     if (opcode < OPCODE_NOTE_OFF)
@@ -509,27 +524,12 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
     }
     else
     {
-        track->curTrackDataCursor = track->curTrackDataCursor + 1;
+        track->curTrackDataCursor++;
     }
-    MVar5 = opcode & OPCODE_CHANNEL_F;
-    switch (opcode & OPCODE_SYSTEM_EXCLUSIVE)
+    opcodeHigh = opcode & 0xf0;
+    opcodeLow = opcode & 0x0f;
+    switch (opcodeHigh)
     {
-    case OPCODE_NOTE_OFF:
-    case OPCODE_NOTE_ON:
-    case OPCODE_POLYPHONIC_AFTERTOUCH:
-    case OPCODE_MODE_CHANGE:
-    case OPCODE_PITCH_BEND_CHANGE:
-        arg1 = *track->curTrackDataCursor;
-        track->curTrackDataCursor = track->curTrackDataCursor + 1;
-        arg2 = *track->curTrackDataCursor;
-        track->curTrackDataCursor = track->curTrackDataCursor + 1;
-        break;
-    case OPCODE_PROGRAM_CHANGE:
-    case OPCODE_CHANNEL_AFTERTOUCH:
-        arg1 = *track->curTrackDataCursor;
-        track->curTrackDataCursor = track->curTrackDataCursor + 1;
-        arg2 = 0;
-        break;
     case OPCODE_SYSTEM_EXCLUSIVE:
         if (opcode == OPCODE_SYSTEM_EXCLUSIVE)
         {
@@ -537,163 +537,183 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             {
                 UnprepareHeader(this->midiHeaders[this->midiHeadersCursor]);
             }
-            this->midiHeaders[this->midiHeadersCursor] = (MIDIHDR *)malloc(0x40);
-            pmh = this->midiHeaders[this->midiHeadersCursor];
-            iVar4 = SkipVariableLength(&track->curTrackDataCursor);
+            pmh = this->midiHeaders[this->midiHeadersCursor] =
+                (MIDIHDR *)ZunMemory::Alloc2(sizeof(MIDIHDR));
+            curTrackLength = SkipVariableLength(&track->curTrackDataCursor);
             memset(pmh, 0, sizeof(MIDIHDR));
-            pmh->lpData = (LPSTR)malloc(iVar4 + 1);
-            *pmh->lpData = -0x10;
+            pmh->lpData = (LPSTR)malloc(curTrackLength + 1);
+            pmh->lpData[0] = -0x10;
             pmh->dwFlags = 0;
-            pmh->dwBufferLength = iVar4 + 1;
-            for (i = 0; i < iVar4; i++)
+            pmh->dwBufferLength = curTrackLength + 1;
+            for (i = 0; i < curTrackLength; i++)
             {
                 pmh->lpData[i + 1] = *track->curTrackDataCursor;
-                track->curTrackDataCursor = track->curTrackDataCursor + 1;
+                track->curTrackDataCursor++;
             }
             if (this->midiOutDev.SendLongMsg(pmh) != 0)
             {
-                free(pmh->lpData);
-                free(pmh);
+                ZunMemory::Free(pmh->lpData);
+                ZunMemory::Free(pmh);
                 this->midiHeaders[this->midiHeadersCursor] = NULL;
             }
-            this->midiHeadersCursor = this->midiHeadersCursor + 1;
+            this->midiHeadersCursor++;
             this->midiHeadersCursor = this->midiHeadersCursor % 32;
         }
         else if (opcode == OPCODE_SYSTEM_RESET)
         {
-            uVar1 = *track->curTrackDataCursor;
-            track->curTrackDataCursor = track->curTrackDataCursor + 1;
-            iVar4 = SkipVariableLength(&track->curTrackDataCursor);
-            if (uVar1 == 0x2f)
+            metaType = *track->curTrackDataCursor;
+            track->curTrackDataCursor++;
+            curTrackLength = SkipVariableLength(&track->curTrackDataCursor);
+            if (metaType == 0x2f)
             {
                 track->trackPlaying = 0;
                 return;
             }
-            if (uVar1 == 0x51)
+            if (metaType == 0x51)
             {
                 this->field_0x130 +=
-                    (this->volume * this->divisions * 1000) / this->tempo;
+                    this->volume * this->divisions * 1000 / this->tempo;
                 this->volume = 0;
                 this->tempo = 0;
-                for (i = 0; i < iVar4; i++)
+                for (i = 0; i < curTrackLength; i++)
                 {
-                    this->tempo += this->tempo * 0x100 + (u32)*track->curTrackDataCursor;
-                    track->curTrackDataCursor = track->curTrackDataCursor + 1;
+                    this->tempo += this->tempo * 0x100 + *track->curTrackDataCursor;
+                    track->curTrackDataCursor++;
                 }
+                bpm = 60000000 / this->tempo;
+                break;
             }
-            else
-            {
-                track->curTrackDataCursor = track->curTrackDataCursor + iVar4;
-            }
+            track->curTrackDataCursor = track->curTrackDataCursor + curTrackLength;
         }
+        break;
+    case OPCODE_NOTE_OFF:
+    case OPCODE_NOTE_ON:
+    case OPCODE_POLYPHONIC_AFTERTOUCH:
+    case OPCODE_MODE_CHANGE:
+    case OPCODE_PITCH_BEND_CHANGE:
+        arg1 = *track->curTrackDataCursor;
+        track->curTrackDataCursor++;
+        arg2 = *track->curTrackDataCursor;
+        track->curTrackDataCursor++;
+        break;
+    case OPCODE_PROGRAM_CHANGE:
+    case OPCODE_CHANNEL_AFTERTOUCH:
+        arg1 = *track->curTrackDataCursor;
+        track->curTrackDataCursor++;
+        arg2 = 0;
+        break;
     }
-    switch (opcode & OPCODE_SYSTEM_EXCLUSIVE)
+    switch (opcodeHigh)
     {
     case OPCODE_NOTE_ON:
         if (arg2 != 0)
         {
             arg1 += this->pitchTranspose;
-            this->channels[MVar5].keyPressedFlags[(i32)(u32)arg1 >> 3] =
-                this->channels[MVar5].keyPressedFlags[(i32)(u32)arg1 >> 3] |
+            this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] |=
                 (u8)(1 << (arg1 & 7));
             break;
         }
     case OPCODE_NOTE_OFF:
         arg1 += this->pitchTranspose;
-        this->channels[MVar5].keyPressedFlags[(i32)(u32)arg1 >> 3] =
-            this->channels[MVar5].keyPressedFlags[(i32)(u32)arg1 >> 3] &
-            ~(u8)(1 << (arg1 & 7));
+        this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] &=
+            (u8) ~(1 << (arg1 & 7));
+        break;
+    case OPCODE_PROGRAM_CHANGE:
+        this->channels[opcodeLow].instrument = arg1;
         break;
     case OPCODE_MODE_CHANGE:
         switch (arg1)
         {
         case 0:
-            this->channels[MVar5].instrumentBank = arg2;
+            this->channels[opcodeLow].instrumentBank = arg2;
+            break;
+        case 7:
+            this->channels[opcodeLow].channelVolume = arg2;
+            volumeClamped = (f32)arg2 * this->fadeOutVolumeMultiplier;
+            if (volumeClamped < 0)
+            {
+                volumeClamped = 0;
+            }
+            else if (volumeClamped > 127)
+            {
+                volumeClamped = 127;
+            }
+            this->channels[opcodeLow].modifiedVolume = (u8)volumeClamped;
+            arg2 = (u8)volumeClamped;
+            break;
+        case 0x5b:
+            this->channels[opcodeLow].effectOneDepth = arg2;
+            break;
+        case 0x5d:
+            this->channels[opcodeLow].effectThreeDepth = arg2;
+            break;
+        case 10:
+            this->channels[opcodeLow].pan = arg2;
             break;
         case 2:
-            local_2c = this->tracks;
-            for (i = 0; i < this->numTracks; i++)
+            for (curTrack1 = this->tracks, i = 0; i < this->numTracks; i++, curTrack1++)
             {
-                local_2c->savedTrackDataCursor = local_2c->curTrackDataCursor;
-                local_2c->savedTrackLengthOther = local_2c->trackLengthOther;
-                local_2c = local_2c + 1;
+                curTrack1->savedTrackDataCursor = curTrack1->curTrackDataCursor;
+                curTrack1->savedTrackLengthOther = curTrack1->trackLengthOther;
             }
             this->savedTempo = this->tempo;
             this->savedVolume = this->volume;
             this->savedfield_0x130 = this->field_0x130;
             break;
         case 4:
-            local_30 = this->tracks;
-            for (i = 0; i < this->numTracks; i++)
+            for (curTrack2 = this->tracks, i = 0; i < this->numTracks; i++, curTrack2++)
             {
-                local_30->curTrackDataCursor = local_30->savedTrackDataCursor;
-                local_30->trackLengthOther = local_30->savedTrackLengthOther;
-                local_30 = local_30 + 1;
+                curTrack2->curTrackDataCursor = curTrack2->savedTrackDataCursor;
+                curTrack2->trackLengthOther = curTrack2->savedTrackLengthOther;
             }
             this->tempo = this->savedTempo;
             this->volume = this->savedVolume;
             this->field_0x130 = this->savedfield_0x130;
             break;
-        case 7:
-            this->channels[MVar5].channelVolume = arg2;
-            iStack_14 = (f32)arg2 * this->fadeOutVolumeMultiplier;
-            if (iStack_14 < 0)
-            {
-                iStack_14 = 0;
-            }
-            else if (0x7f < iStack_14)
-            {
-                iStack_14 = 0x7f;
-            }
-            this->channels[MVar5].modifiedVolume = (u8)iStack_14;
-            arg2 = (u8)iStack_14;
-            break;
-        case 10:
-            this->channels[MVar5].pan = arg2;
-            break;
-        case 0x5b:
-            this->channels[MVar5].effectOneDepth = arg2;
-            break;
-        case 0x5d:
-            this->channels[MVar5].effectThreeDepth = arg2;
         }
         break;
-    case OPCODE_PROGRAM_CHANGE:
-        this->channels[MVar5].instrument = arg1;
     }
     if (opcode < OPCODE_SYSTEM_EXCLUSIVE)
     {
         this->midiOutDev.SendShortMsg(opcode, arg1, arg2);
     }
     track->opcode = opcode;
-    track->trackLengthOther =
-        track->trackLengthOther + SkipVariableLength(&track->curTrackDataCursor);
+    nextTrackLength = SkipVariableLength(&track->curTrackDataCursor);
+    track->trackLengthOther += nextTrackLength;
 }
 
+#pragma var_order(arg1, i, volumeByte, midiStatus, volumeClamped)
 // FUNCTION: TH07 0x004377f0
 void MidiOutput::FadeOutSetVolume(i32 vol)
 {
-    i32 local_18;
-    u8 local_10;
+    i32 volumeClamped;
+    u32 midiStatus;
+    u32 volumeByte;
+    i32 i;
+    i32 arg1;
 
-    if (this->disableFadeOut == 0)
+    if (this->disableFadeOut != 0)
     {
-        for (i32 i = 0; i < 0x10; i++)
+        return;
+    }
+
+    arg1 = 7;
+    for (i = 0; i < 0x10; i++)
+    {
+        midiStatus = (u8)(i + 0xb0);
+        volumeClamped = (i32)(this->channels[i].channelVolume *
+                              this->fadeOutVolumeMultiplier) +
+                        vol;
+        if (volumeClamped < 0)
         {
-            local_18 = (i32)((f32)this->channels[i].channelVolume *
-                             this->fadeOutVolumeMultiplier) +
-                       vol;
-            if (local_18 < 0)
-            {
-                local_18 = 0;
-            }
-            else if (0x7f < local_18)
-            {
-                local_18 = 0x7f;
-            }
-            local_10 = (u8)local_18;
-            this->midiOutDev.SendShortMsg((u8)i + 0xb0, 7, local_10);
+            volumeClamped = 0;
         }
+        else if (volumeClamped > 127)
+        {
+            volumeClamped = 127;
+        }
+        volumeByte = (u8)volumeClamped;
+        this->midiOutDev.SendShortMsg(midiStatus, arg1, volumeByte);
     }
 }
 
