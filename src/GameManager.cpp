@@ -528,11 +528,11 @@ void IncrementCappedAgain(u32 *param, u32 cap)
     }
 }
 
-#pragma var_order(size, shotTypeAndChar, uVar2)
+#pragma var_order(size, shotTypeAndChar, oldSeed)
 // FUNCTION: TH07 0x0042e83e
 ZunResult GameManager::AddedCallback(GameManager *arg)
 {
-    u16 uVar2;
+    u16 oldSeed;
     i32 shotTypeAndChar;
     u32 size;
 
@@ -772,9 +772,9 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     {
         arg->InitializeRank();
         ReplayManager::RegisterChain(1, g_GameManager.replayFilename);
-        uVar2 = g_Rng.seed;
+        oldSeed = g_Rng.seed;
         arg->RegenerateGameIntegrityCsum();
-        g_Rng.seed = uVar2;
+        g_Rng.seed = oldSeed;
     }
     arg->stageRngSeed = g_Rng.seed;
     if (Stage::RegisterChain(arg->currentStage) != ZUN_SUCCESS)

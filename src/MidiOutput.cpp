@@ -394,17 +394,19 @@ ZunResult MidiOutput::StopPlayback()
 // FUNCTION: TH07 0x00436bc0
 ZunResult MidiOutput::UnprepareHeader(LPMIDIHDR pmh)
 {
+    i32 i;
+
     if (pmh == NULL)
     {
         // STRING: TH07 0x00497268
         DebugPrint("error :\r\n");
     }
+
     if (this->midiOutDev.handle == NULL)
     {
         DebugPrint("error :\r\n");
     }
 
-    i32 i;
     for (i = 0; i < 0x20; i++)
     {
         if (this->midiHeaders[i] == pmh)
@@ -422,8 +424,7 @@ success:
         DebugPrint("error :\r\n");
     }
 
-    void *lpData = pmh->lpData;
-    free(lpData);
+    ZunMemory::Free(pmh->lpData);
     free(pmh);
     return ZUN_SUCCESS;
 }

@@ -239,12 +239,6 @@ struct BulletManager
                           f32 angle);
     void StopBulletMovement();
 
-    // i have no idea why this exists either
-    static void AnInlineFunctionThatAllocates4BytesAndNothingElse()
-    {
-        i32 idk;
-    }
-
     BulletTypeSprites bulletTypeTemplates[16];
     Bullet bullets[1025];
     Laser lasers[64];

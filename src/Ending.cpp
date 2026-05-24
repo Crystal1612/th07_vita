@@ -441,18 +441,16 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
         g_GameErrorContext.Log("error : エンディングファイルが読み込めない、ファイルが破壊されています\r\n");
         return ZUN_ERROR;
     }
-    else
+
+    this->endFileDataPtr = this->endFileData;
+    this->line2Delay = 8;
+    this->timer2 = 0;
+    this->timer1 = 0;
+    if (endFileDat != NULL)
     {
-        this->endFileDataPtr = this->endFileData;
-        this->line2Delay = 8;
-        this->timer2 = 0;
-        this->timer1 = 0;
-        if (endFileDat != NULL)
-        {
-            free(endFileDat);
-        }
-        return ZUN_SUCCESS;
+        free(endFileDat);
     }
+    return ZUN_SUCCESS;
 }
 
 #pragma var_order(endingPath, unusedShotType, shotType, i)

@@ -606,15 +606,13 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 // FUNCTION: TH07 0x0044e6f0
 void AnmManager::ReleaseTexture(i32 textureIdx)
 {
-    void *imageData;
     if (textureIdx < 0 || (u32)textureIdx >= 0x108)
     {
         return;
     }
 
     SAFE_RELEASE(this->textures[textureIdx]);
-    imageData = this->imageDataArray[textureIdx];
-    free(imageData);
+    ZunMemory::Free(this->imageDataArray[textureIdx]);
     this->imageDataArray[textureIdx] = NULL;
 }
 
@@ -1686,6 +1684,12 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
     i32 i;
     f32 t;
 
+#define GET_INT_PTR(argIdx) \
+    vm->GetVar(&instr->args[argIdx].i, instr->flags, argIdx)
+
+#define GET_FLOAT_PTR(argIdx) \
+    vm->GetFloatVar(&instr->args[argIdx].f, instr->flags, argIdx)
+
 #define GET_INT_VALUE(argIdx) \
     (((instr->flags & (1 << argIdx)) != 0) ? vm->GetVarValue(instr->args[argIdx].i) : instr->args[argIdx].i)
 
@@ -1734,7 +1738,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[0].i);
             continue;
         case ANM_DEC_JUMP:
-            (*vm->GetVar(&instr->args[0].i, instr->flags, 0))--;
+            (*GET_INT_PTR(0))--;
             if (GET_INT_VALUE(0) > 0)
             {
                 vm->currentTimeInScript = instr->args[2].i;
@@ -1982,124 +1986,94 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->updateScale = 1;
             break;
         case ANM_MOV:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1);
             break;
         case ANM_MOV_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                GET_FLOAT_VALUE(1);
+            *GET_FLOAT_PTR(0) = GET_FLOAT_VALUE(1);
             break;
         case ANM_ADD_2:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1) + GET_INT_VALUE(2);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1) + GET_INT_VALUE(2);
             break;
         case ANM_ADD_FLOAT_2:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                GET_FLOAT_VALUE(1) + GET_FLOAT_VALUE(2);
+            *GET_FLOAT_PTR(0) = GET_FLOAT_VALUE(1) + GET_FLOAT_VALUE(2);
             break;
         case ANM_SUB_2:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1) - GET_INT_VALUE(2);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1) - GET_INT_VALUE(2);
             break;
         case ANM_SUB_FLOAT_2:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                GET_FLOAT_VALUE(1) - GET_FLOAT_VALUE(2);
+            *GET_FLOAT_PTR(0) = GET_FLOAT_VALUE(1) - GET_FLOAT_VALUE(2);
             break;
         case ANM_MUL_2:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1) * GET_INT_VALUE(2);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1) * GET_INT_VALUE(2);
             break;
         case ANM_MUL_FLOAT_2:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                GET_FLOAT_VALUE(1) * GET_FLOAT_VALUE(2);
+            *GET_FLOAT_PTR(0) = GET_FLOAT_VALUE(1) * GET_FLOAT_VALUE(2);
             break;
         case ANM_DIV_2:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1) / GET_INT_VALUE(2);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1) / GET_INT_VALUE(2);
             break;
         case ANM_DIV_FLOAT_2:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                GET_FLOAT_VALUE(1) / GET_FLOAT_VALUE(2);
+            *GET_FLOAT_PTR(0) = GET_FLOAT_VALUE(1) / GET_FLOAT_VALUE(2);
             break;
         case ANM_MOD_2:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                GET_INT_VALUE(1) % GET_INT_VALUE(2);
+            *GET_INT_PTR(0) = GET_INT_VALUE(1) % GET_INT_VALUE(2);
             break;
         case ANM_MOD_FLOAT_2:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                fmodf(GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
+            *GET_FLOAT_PTR(0) = fmodf(GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
             break;
         case ANM_ADD:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) +=
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) += GET_INT_VALUE(1);
             break;
         case ANM_ADD_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) +=
-                GET_FLOAT_VALUE(1);
+            *GET_FLOAT_PTR(0) += GET_FLOAT_VALUE(1);
             break;
         case ANM_SUB:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) -=
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) -= GET_INT_VALUE(1);
             break;
         case ANM_SUB_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) -=
-                GET_FLOAT_VALUE(1);
+            *GET_FLOAT_PTR(0) -= GET_FLOAT_VALUE(1);
             break;
         case ANM_MUL:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) *=
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) *= GET_INT_VALUE(1);
             break;
         case ANM_MUL_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) *=
-                GET_FLOAT_VALUE(1);
+            *GET_FLOAT_PTR(0) *= GET_FLOAT_VALUE(1);
             break;
         case ANM_DIV:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) /=
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) /= GET_INT_VALUE(1);
             break;
         case ANM_DIV_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) /=
-                GET_FLOAT_VALUE(1);
+            *GET_FLOAT_PTR(0) /= GET_FLOAT_VALUE(1);
             break;
         case ANM_MOD:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) %=
-                GET_INT_VALUE(1);
+            *GET_INT_PTR(0) %= GET_INT_VALUE(1);
             break;
         case ANM_MOD_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                fmodf(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = fmodf(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1));
             break;
         case ANM_RAND:
-            *vm->GetVar(&instr->args[0].i, instr->flags, 0) =
-                g_Rng.GetRandomU32InRange(GET_INT_VALUE(1));
+            *GET_INT_PTR(0) = g_Rng.GetRandomU32InRange(GET_INT_VALUE(1));
             break;
         case ANM_RAND_FLOAT:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(1));
             break;
         case ANM_SIN:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                sinf(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = sinf(GET_FLOAT_VALUE(1));
             break;
         case ANM_COS:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                cosf(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = cosf(GET_FLOAT_VALUE(1));
             break;
         case ANM_TAN:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                tanf(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = tanf(GET_FLOAT_VALUE(1));
             break;
         case ANM_ACOS:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                acosf(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = acosf(GET_FLOAT_VALUE(1));
             break;
         case ANM_ATAN:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                atanf(GET_FLOAT_VALUE(1));
+            *GET_FLOAT_PTR(0) = atanf(GET_FLOAT_VALUE(1));
             break;
         case ANM_ADD_NORMALIZE_ANGLE:
-            *vm->GetFloatVar(&instr->args[0].f, instr->flags, 0) =
-                utils::AddNormalizeAngle(GET_FLOAT_VALUE(0), 0.0f);
+            *GET_FLOAT_PTR(0) = utils::AddNormalizeAngle(GET_FLOAT_VALUE(0), 0.0f);
             break;
         case ANM_JUMP_IF_EQ:
             if (GET_INT_VALUE(0) == GET_INT_VALUE(1))
