@@ -170,6 +170,21 @@ struct Gui
     void ShowSpellcardBonus(i32 fmtArg);
     void UpdateGui();
 
+    void SetSpellcardSecondsRemaining(i32 seconds)
+    {
+        this->spellcardSecondsRemaining = seconds;
+    }
+
+    void SetBossHealthBar(f32 amount)
+    {
+        this->bossHealthBar = amount;
+    }
+
+    bool BossPresent()
+    {
+        return this->bossPresent;
+    }
+
     i32 frameCounter;
     u32 flags;
     struct GuiImpl *impl;
@@ -179,7 +194,7 @@ struct Gui
     i32 bossLifeMarkers;
     i32 spellcardSecondsRemaining;
     i32 lastSpellcardSecondsRemaining;
-    u8 bossPresent;
+    bool bossPresent;
     // pad 3
     f32 bossHealthBar;
     f32 bossHealthBarEased;

@@ -329,6 +329,11 @@ struct AnmManager
         this->flushesThisFrame = 0;
     }
 
+    AnmLoadedSprite *GetSprite(i32 spriteIdx)
+    {
+        return &this->sprites[spriteIdx];
+    }
+
     ZunColor color;
     i32 colorMulEnabled;
     i32 scriptsExecutedThisFrame;

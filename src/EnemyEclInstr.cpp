@@ -58,7 +58,7 @@ void EnemyEclInstr::ExInsSetPosToBoss(Enemy *enemy, EclRawInstr *instr)
     enemy->position = g_EnemyManager.bosses[bossIdx]->position;
     enemy->axisSpeed = g_EnemyManager.bosses[bossIdx]->axisSpeed;
     enemy->angle = g_EnemyManager.bosses[bossIdx]->angle;
-    enemy->flags4 |= 1;
+    enemy->disableMovement = 1;
 }
 
 #pragma var_order(i, bullet, local_10)

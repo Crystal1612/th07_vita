@@ -47,15 +47,15 @@ i32 Gui::IsStageFinished()
 void Gui::EndPlayerSpellcard()
 {
     this->impl->bombSpellcardName.pendingInterrupt = 1;
-    this->impl->bombSpellcardNameBg.pendingInterrupt = 2;
+    this->impl->bombSpellcardNameBg.SetPendingInterrupt(2);
 }
 
 // FUNCTION: TH07 0x00427b54
 void Gui::EndEnemySpellcard()
 {
     this->impl->enemySpellcardName.pendingInterrupt = 1;
-    this->impl->enemySpellcardNameBg.pendingInterrupt = 2;
-    this->impl->spellcardBonusIndicator.pendingInterrupt = 2;
+    this->impl->enemySpellcardNameBg.SetPendingInterrupt(2);
+    this->impl->spellcardBonusIndicator.SetPendingInterrupt(2);
 }
 
 // FUNCTION: TH07 0x00427ba2
@@ -76,9 +76,7 @@ i32 Gui::IsDialogueSkippable()
 // FUNCTION: TH07 0x00427bf8
 void Gui::ShowBonusScore(i32 score)
 {
-    this->impl->bonusScore.pos.x = 416.0f;
-    this->impl->bonusScore.pos.y = 48.0f;
-    this->impl->bonusScore.pos.z = 0.0f;
+    this->impl->bonusScore.pos = D3DXVECTOR3(416.0f, 48.0f, 0.0f);
     this->impl->bonusScore.isShown = 1;
     this->impl->bonusScore.timer = 0;
     this->impl->bonusScore.fmtArg = score;
@@ -88,9 +86,7 @@ void Gui::ShowBonusScore(i32 score)
 // FUNCTION: TH07 0x00427c81
 void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 {
-    this->impl->fullPowerMode.pos.x = 416.0f;
-    this->impl->fullPowerMode.pos.y = 168.0f;
-    this->impl->fullPowerMode.pos.z = 0.0f;
+    this->impl->fullPowerMode.pos = D3DXVECTOR3(416.0f, 168.0f, 0.0f);
     this->impl->fullPowerMode.isShown = isShown;
     this->impl->fullPowerMode.timer = 0;
     this->impl->fullPowerMode.fmtArg = fmtArg;
@@ -100,9 +96,7 @@ void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 // FUNCTION: TH07 0x00427d09
 void Gui::ShowSpellcardBonus(i32 fmtArg)
 {
-    this->impl->spellCardBonus.pos.x = 224.0f;
-    this->impl->spellCardBonus.pos.y = 16.0f;
-    this->impl->spellCardBonus.pos.z = 0.0f;
+    this->impl->spellCardBonus.pos = D3DXVECTOR3(224.0f, 16.0f, 0.0f);
     this->impl->spellCardBonus.isShown = 1;
     this->impl->spellCardBonus.timer = 0;
     this->impl->spellCardBonus.fmtArg = fmtArg;
@@ -115,10 +109,10 @@ void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
     RECT local_24;
     RECT local_14;
 
-    local_24.left = g_AnmManager->sprites[0x609].startPixelInclusive.x;
-    local_24.top = g_AnmManager->sprites[0x609].startPixelInclusive.y;
-    local_24.right = g_AnmManager->sprites[0x609].endPixelInclusive.x;
-    local_24.bottom = g_AnmManager->sprites[0x609].endPixelInclusive.y;
+    local_24.left = g_AnmManager->GetSprite(0x609)->startPixelInclusive.x;
+    local_24.top = g_AnmManager->GetSprite(0x609)->startPixelInclusive.y;
+    local_24.right = g_AnmManager->GetSprite(0x609)->endPixelInclusive.x;
+    local_24.bottom = g_AnmManager->GetSprite(0x609)->endPixelInclusive.y;
     local_14.left = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
     local_14.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
     local_14.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;

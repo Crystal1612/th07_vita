@@ -96,7 +96,7 @@ struct Enemy
     i32 maxLife;
     i32 score;
     ZunTimer timer;
-    union ZunColor color;
+    ZunColor color;
     EnemyBulletShooter bulletProps;
     i32 shootInterval;
     ZunTimer shootIntervalTimer;
@@ -106,16 +106,59 @@ struct Enemy
     i32 laserIdx;
     i32 itemDrop;
     i8 deathAnm1;
-    i8 deathAnm2;
+    u8 deathAnm2;
     i8 deathAnm3;
     u8 bossId;
     u8 damageTintTimer;
     // pad 3
     ZunTimer unused_2e1c;
-    i8 flags1;
-    i8 flags2;
-    i8 flags3;
-    i8 flags4;
+    union {
+        i8 flags1;
+        struct
+        {
+            u8 moveMode : 2;
+            u8 interpEasing : 3;
+            u8 disableBullets : 1;
+            u8 mirror : 1;
+            u8 active : 1;
+        };
+    };
+    union {
+        i8 flags2;
+        struct
+        {
+            u8 canDie : 1;
+            u8 hasContactHitbox : 1;
+            u8 canBeDamaged : 1;
+            u8 hasNoCollision : 1;
+            u8 isHittable : 1;
+            u8 isProjectile : 1;
+            u8 isBoss : 1;
+            u8 hasMovementBounds : 1;
+        };
+    };
+    union {
+        i8 flags3;
+        struct
+        {
+            u8 deathType : 3;
+            u8 isInBounds : 1;
+            u8 primaryVmAutoRotate : 1;
+            u8 noStackRet : 1;
+            u8 isSurvivalSpellcard : 1;
+            u8 disableOOBDespawn : 1;
+        };
+    };
+    union {
+        i8 flags4;
+        struct
+        {
+            u8 disableMovement : 1;
+            u8 customSpecialEffectPos : 1;
+            u8 bombInvulnerable : 1;
+            u8 freezeEclDuringBombs : 1;
+        };
+    };
     i16 spellcardDelayTimer;
     u8 anmExFlags;
     u8 zLayer;
@@ -173,9 +216,9 @@ struct EnemyManager
     i32 HasActiveBoss();
     i32 RemoveAllEnemies(i32 scoreMax, i32 scoreMin);
     static void RunEclTimeline(EclTimeline *timeline);
-    Enemy *SpawnEnemy(i16 eclSubId, D3DXVECTOR3 *pos, i32 life, char itemDrop,
+    Enemy *SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
                       i32 score, u8 param_6);
-    Enemy *SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
+    Enemy *SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i8 itemDrop,
                         i32 score, EclContextArgs *args);
 
     const char *stgEnmAnmFilename;

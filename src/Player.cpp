@@ -1241,13 +1241,13 @@ void Player::ScoreGraze(D3DXVECTOR3 *param_1)
     {
         if (this->isFocus == 0)
         {
-            g_GameManager.IncreaseCherryMax(0x50);
-            g_GameManager.IncreaseCherry(0x50);
+            g_GameManager.IncreaseCherryMax(80);
+            g_GameManager.IncreaseCherry(80);
         }
         else
         {
-            g_GameManager.IncreaseCherryMax(0x1e);
-            g_GameManager.IncreaseCherry(0x1e);
+            g_GameManager.IncreaseCherryMax(30);
+            g_GameManager.IncreaseCherry(30);
         }
     }
 }
@@ -1915,7 +1915,7 @@ void Player::Respawn()
     this->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->playerSprite.color.color =
-        (this->invulnerabilityTimer.current * 0xff) / 0x1e << 0x18 | 0xffffff;
+        (this->invulnerabilityTimer.current * 0xff) / 30 << 0x18 | 0xffffff;
     this->respawnTimer = 0;
     if (0x1d < this->invulnerabilityTimer.current)
     {
@@ -1932,7 +1932,7 @@ void Player::Respawn()
 // FUNCTION: TH07 0x00441330
 void Player::UpdateState()
 {
-    ZunColor local_8;
+    ZunColor color;
 
     if (this->bulletGracePeriod != 0)
     {
@@ -1946,7 +1946,7 @@ void Player::UpdateState()
             this->effect->pos1 = this->positionCenter;
         }
         this->invulnerabilityTimer--;
-        if (this->invulnerabilityTimer < 1)
+        if (this->invulnerabilityTimer.GetCurrent() <= 0)
         {
             if (this->effect != NULL)
             {
@@ -1959,7 +1959,7 @@ void Player::UpdateState()
         }
         else
         {
-            if ((i32)this->invulnerabilityTimer.current % 8 < 2)
+            if (this->invulnerabilityTimer.GetCurrent() % 8 < 2)
             {
                 this->playerSprite.color.color = 0xff404040;
             }
@@ -1975,22 +1975,22 @@ void Player::UpdateState()
         {
             this->borderEffect->pos1 = this->positionCenter;
         }
-        g_GameManager.cherryPlus = (this->invulnerabilityTimer.current * 50000) /
-                                   this->borderTimer.current;
+        g_GameManager.cherryPlus = (this->invulnerabilityTimer.GetCurrent() * 50000) /
+                                   this->borderTimer.GetCurrent();
         if (g_GameManager.cherryPlus < 0)
         {
             g_GameManager.cherryPlus = 0;
         }
         g_GameManager.cherryPlus += g_GameManager.globals->cherryStart;
         this->invulnerabilityTimer--;
-        if (this->invulnerabilityTimer < 1)
+        if (this->invulnerabilityTimer.GetCurrent() <= 0)
         {
             this->playerSprite.color.color = 0xffffffff;
             BreakBorderNaturally();
         }
         else
         {
-            if (this->invulnerabilityTimer.current % 4 < 2)
+            if (this->invulnerabilityTimer.GetCurrent() % 4 < 2)
             {
                 this->playerSprite.color.color = 0xffff0000;
             }
@@ -1998,33 +1998,26 @@ void Player::UpdateState()
             {
                 this->playerSprite.color.color = 0xffffffff;
             }
-            if (g_Player.invulnerabilityTimer < 0x1fe)
+            color.bytes.a = 0x80;
+            if (g_Player.invulnerabilityTimer >= 510)
             {
-                if (g_Player.invulnerabilityTimer < 0x1e)
-                {
-                    local_8.bytes.g =
-                        -0x80 -
-                        (char)((g_Player.invulnerabilityTimer.current * 0x50) / 0x1e);
-                    local_8.bytes.b = local_8.bytes.g;
-                    local_8.bytes.r = local_8.bytes.g;
-                    local_8.bytes.a = 0x80;
-                }
-                else
-                {
-                    local_8.color = 0x80303030;
-                }
+                color.bytes.r = color.bytes.g = color.bytes.b =
+                    128 -
+                    (((540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80) /
+                     30);
+            }
+            else if (g_Player.invulnerabilityTimer < 30)
+            {
+                color.bytes.r = color.bytes.g = color.bytes.b =
+                    128 -
+                    ((g_Player.invulnerabilityTimer.GetCurrent() * 80) /
+                     30);
             }
             else
             {
-                local_8.bytes.g =
-                    -0x80 -
-                    (char)(((0x21c - g_Player.invulnerabilityTimer.current) * 0x50) /
-                           0x1e);
-                local_8.bytes.b = local_8.bytes.g;
-                local_8.bytes.r = local_8.bytes.g;
-                local_8.bytes.a = 0x80;
+                color.bytes.r = color.bytes.g = color.bytes.b = 0x30;
             }
-            g_Stage.SmoothBlendColor(local_8);
+            g_Stage.SmoothBlendColor(color);
         }
     }
     else
@@ -2036,13 +2029,14 @@ void Player::UpdateState()
 // FUNCTION: TH07 0x00441670
 void Player::BreakBorderNaturally()
 {
-    i32 fmtArg;
+    i32 cherryDiff;
 
     g_GameManager.IncreaseCherryMax(10000);
     g_GameManager.IncreaseCherry(10000);
-    fmtArg = (g_GameManager.cherry - g_GameManager.globals->cherryStart) * 10;
-    g_GameManager.globals->score = fmtArg / 10 + g_GameManager.globals->score;
-    g_Gui.ShowFullPowerMode(fmtArg, 4);
+    cherryDiff = g_GameManager.cherry - g_GameManager.globals->cherryStart;
+    cherryDiff *= 10;
+    g_GameManager.AddScore(cherryDiff);
+    g_Gui.ShowFullPowerMode(cherryDiff, 4);
     g_GameManager.cherryPlus = g_GameManager.globals->cherryStart;
     g_SoundPlayer.PlaySoundByIdx(SOUND_BORDER_BREAK, 0);
     if (this->playerState == PLAYER_STATE_SPAWNING)
@@ -2065,28 +2059,29 @@ void Player::BreakBorderNaturally()
     }
 }
 
+#pragma var_order(i, bomb)
 // FUNCTION: TH07 0x00441800
 BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
                                             f32 posZ, f32 size, i32 payload)
 {
-    BombProjectile *local_c;
-    i32 local_8;
+    BombProjectile *bomb;
+    i32 i;
 
-    local_8 = 0;
-    for (local_c = this->bombHitboxes;
-         (local_8 < 0x5f &&
-          (local_c->pos.z != 0.0f || (local_c->size.y != 0.0f)));
-         local_c = local_c + 1)
+    bomb = this->bombHitboxes;
+    for (i = 0; i < 0x5f; i++, bomb++)
     {
-        local_8 += 1;
+        if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
+        {
+            break;
+        }
     }
-    local_c->pos.x = centerPosition->x;
-    local_c->pos.y = centerPosition->y;
-    local_c->pos.z = posZ;
-    local_c->size.x = size;
-    local_c->lifetime = 0;
-    local_c->payload = payload;
-    return local_c;
+    bomb->pos.x = centerPosition->x;
+    bomb->pos.y = centerPosition->y;
+    bomb->pos.z = posZ;
+    bomb->size.x = size;
+    bomb->lifetime = 0;
+    bomb->payload = payload;
+    return bomb;
 }
 
 #pragma var_order(local_8, bomb)
@@ -2095,11 +2090,10 @@ BombProjectile *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
                                         i32 lifetime, i32 payload)
 {
     BombProjectile *bomb;
-    i32 local_8;
+    i32 i;
 
-    for (bomb = this->bombHitboxes, local_8 = 0;
-         local_8 < 0x5f;
-         local_8++, bomb++)
+    bomb = this->bombHitboxes;
+    for (i = 0; i < 0x5f; i++, bomb++)
     {
         if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
         {
@@ -2191,18 +2185,18 @@ void Player::BreakBorder(u32 unused)
     effect = g_EffectManager.SpawnEffect(0x1c, &this->positionCenter, 4, 1,
                                          0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
-    effect->vm.interpEndTimes[4] = 0x1e;
+    effect->vm.interpEndTimes[4] = 30;
     effect->vm.interpModes[4] = 0;
     effect->vm.scaleInterpInitial.x = 0.0625f;
     effect->vm.scaleInterpInitial.y = 0.0625f;
     effect->vm.scaleInterpFinal.x = 1.3f;
     effect->vm.scaleInterpFinal.y = 1.3f;
     effect->vm.interpStartTimes[2] = 0;
-    effect->vm.interpEndTimes[2] = 0x1e;
+    effect->vm.interpEndTimes[2] = 30;
     effect->vm.interpModes[2] = 1;
     effect->vm.colorInterpInitialColor.bytes.a = effect->vm.color.bytes.a;
     effect->vm.colorInterpFinalColor.bytes.a = 0;
-    effect->vm.intVars1[0] = 0x1e;
+    effect->vm.intVars1[0] = 30;
     this->borderEffect = effect;
     g_EnemyManager.spellcardInfo.captureScore = 0;
     g_EnemyManager.spellcardInfo.isCapturing = 0;
@@ -2300,7 +2294,7 @@ WHY:
 // FUNCTION: TH07 0x004420b0
 u32 Player::OnDrawHighPrio(Player *arg)
 {
-    ZunColor local_8;
+    ZunColor color;
 
     arg->DrawBullets();
     if (arg->bombInfo.isInUse != 0)
@@ -2341,10 +2335,10 @@ u32 Player::OnDrawHighPrio(Player *arg)
             g_AnmManager->Draw(&arg->orbsSprite[1]);
         }
     }
-    if ((arg->playerState == PLAYER_STATE_BORDER) &&
-        (0 < arg->invulnerabilityTimer.current))
+    if (arg->playerState == PLAYER_STATE_BORDER &&
+        arg->invulnerabilityTimer.GetCurrent() > 0)
     {
-        if (arg->invulnerabilityTimer.current % 4 < 2)
+        if (arg->invulnerabilityTimer.GetCurrent() % 4 < 2)
         {
             arg->playerSprite.color.color = 0xffff0000;
         }
@@ -2352,33 +2346,26 @@ u32 Player::OnDrawHighPrio(Player *arg)
         {
             arg->playerSprite.color.color = 0xffffffff;
         }
-        if (g_Player.invulnerabilityTimer < 0x1fe)
+        color.bytes.a = 0x80;
+        if (g_Player.invulnerabilityTimer >= 510)
         {
-            if (g_Player.invulnerabilityTimer < 0x1e)
-            {
-                local_8.bytes.g =
-                    -0x80 -
-                    (char)((g_Player.invulnerabilityTimer.current * 0x50) / 0x1e);
-                local_8.bytes.b = local_8.bytes.g;
-                local_8.bytes.r = local_8.bytes.g;
-                local_8.bytes.a = 0x80;
-            }
-            else
-            {
-                local_8.color = 0x80303030;
-            }
+            color.bytes.r = color.bytes.g = color.bytes.b =
+                128 -
+                (((540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80) /
+                 30);
+        }
+        else if (g_Player.invulnerabilityTimer < 30)
+        {
+            color.bytes.r = color.bytes.g = color.bytes.b =
+                128 -
+                ((g_Player.invulnerabilityTimer.GetCurrent() * 80) /
+                 30);
         }
         else
         {
-            local_8.bytes.g =
-                -0x80 -
-                (char)(((0x21c - g_Player.invulnerabilityTimer.current) * 0x50) /
-                       0x1e);
-            local_8.bytes.b = local_8.bytes.g;
-            local_8.bytes.r = local_8.bytes.g;
-            local_8.bytes.a = 0x80;
+            color.bytes.r = color.bytes.g = color.bytes.b = 0x30;
         }
-        g_Stage.SmoothBlendColor(local_8);
+        g_Stage.SmoothBlendColor(color);
     }
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
@@ -2509,9 +2496,9 @@ ZunResult Player::AddedCallback(Player *arg)
         g_AsciiManager.cherryGauge.pendingInterrupt = 1;
         g_AsciiManager.uiFadeState = 1;
     }
-    g_AsciiManager.bossMarkers[0].pendingInterrupt = 2;
-    g_AsciiManager.bossMarkers[1].pendingInterrupt = 2;
-    g_AsciiManager.bossMarkers[2].pendingInterrupt = 2;
+    g_AsciiManager.GetBossMarker(0)->pendingInterrupt = 2;
+    g_AsciiManager.GetBossMarker(1)->pendingInterrupt = 2;
+    g_AsciiManager.GetBossMarker(2)->pendingInterrupt = 2;
     if (g_GameManager.cherryPlus >= g_GameManager.globals->cherryStart + 50000)
     {
         g_GameManager.cherryPlus = g_GameManager.globals->cherryStart + 50000;
@@ -2529,9 +2516,9 @@ ZunResult Player::DeletedCallback(Player *arg)
         g_AnmManager->ReleaseAnm(10);
         g_AsciiManager.cherryGauge.pendingInterrupt = 99;
         g_AsciiManager.uiFadeState = 99;
-        g_AsciiManager.bossMarkers[0].pendingInterrupt = 99;
-        g_AsciiManager.bossMarkers[1].pendingInterrupt = 99;
-        g_AsciiManager.bossMarkers[2].pendingInterrupt = 99;
+        g_AsciiManager.GetBossMarker(0)->pendingInterrupt = 99;
+        g_AsciiManager.GetBossMarker(1)->pendingInterrupt = 99;
+        g_AsciiManager.GetBossMarker(2)->pendingInterrupt = 99;
     }
     SAFE_FREE(g_Player.shooterData);
     SAFE_FREE(g_Player.shooterData2);

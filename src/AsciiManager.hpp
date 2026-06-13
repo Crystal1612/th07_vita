@@ -97,6 +97,21 @@ struct AsciiManager
         return this->uiFadeState;
     }
 
+    AnmVm *GetBossMarker(i32 idx)
+    {
+        return &this->bossMarkers[idx];
+    }
+
+    void SetBossMarkerPos(i32 idx, D3DXVECTOR3 *pos)
+    {
+        this->bossMarkers[idx].pos = *pos;
+    }
+
+    void SetBossDamageTint(i32 idx, D3DCOLOR color)
+    {
+        this->bossDamageTint[idx] = color;
+    }
+
     AnmVm vm0;
     AnmVm vm1;
     AnmVm cherryGauge;

@@ -33,7 +33,7 @@ struct Catk : Th7k
 {
     u32 highScorePerShot[7];
     i16 idx;
-    char nameCsum;
+    u8 nameCsum;
     char name[49];
     u16 numAttemptsPerShot[7];
     u16 numSuccessesPerShot[7];

@@ -96,6 +96,11 @@ struct EclRawHeader
     i16 timelineCount;
     struct EclTimelineInstr *timelinePtr[16];
     EclRawInstr *subTable[];
+
+    EclTimelineInstr *GetTimeline(i32 idx)
+    {
+        return this->timelinePtr[idx];
+    }
 };
 
 struct EclRawInstr
@@ -114,13 +119,23 @@ struct EclRawInstr
     }
 };
 
+struct EclTimelineInstrArgs
+{
+    AnyArg args[6];
+
+    D3DXVECTOR3 *AsVec()
+    {
+        return (D3DXVECTOR3 *)&this->args;
+    }
+};
+
 struct EclTimelineInstr
 {
     i16 time;
     i16 arg0;
-    u16 opcode;
+    i16 opcode;
     i16 size;
-    AnyArg args[6];
+    EclTimelineInstrArgs args;
 };
 
 struct EclTimeline

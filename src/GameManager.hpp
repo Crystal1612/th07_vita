@@ -163,6 +163,11 @@ struct GameManager
         return this->cherry >= this->cherryMax;
     }
 
+    void SetCurrentPower(i32 amount)
+    {
+        this->globals->currentPower = amount;
+    }
+
     static ZunResult RegisterChain();
     static void CutChain();
 
@@ -195,6 +200,11 @@ struct GameManager
     void ResetRegionsPos();
 
     static void DrawLoadingSprite();
+
+    u8 GetShotTypeAndCharacter()
+    {
+        return this->shotTypeAndCharacter;
+    }
 
     void *tmpBuffer;
     GameConfiguration *defaultCfg;
