@@ -34,6 +34,7 @@ uv run scripts/build.py --no-icon
 
 * Clean up this complete mess of code.
 * Start matching (and fixing issues).
+* Get a better build system than whatever this is
 
 ## Contributing
 

@@ -609,6 +609,510 @@ Now, after rerunning the diff command:
 
 This function is now 100% matching.
 
+## Using the var_order pragma
+
+Sometimes you'll have functions like these:
+
+```c++
+// FUNCTION: TH07 0x00409990
+void BombData::BombReimuADrawFocus(Player *player)
+{
+    i32 i;
+    AnmVm *vm;
+
+    DarkenViewport(player);
+    for (i = 0; i < 8; i++)
+    {
+        if (player->bombInfo.subInfo[i].state == 0)
+        {
+            continue;
+        }
+
+        vm = player->bombInfo.subInfo[i].vms;
+        vm->pos = player->bombInfo.subInfo[i].bombRegionPositions + vm->offset;
+        player->SetToTopLeftPos(vm);
+        g_AnmManager->DrawNoRotation(vm);
+        vm++;
+        vm->pos =
+            player->bombInfo.subInfo[i].bombRegionPositions + vm->offset;
+        player->SetToTopLeftPos(vm);
+        g_AnmManager->DrawNoRotation(vm);
+        vm++;
+        vm->pos =
+            player->bombInfo.subInfo[i].bombRegionPositions + vm->offset;
+        player->SetToTopLeftPos(vm);
+        g_AnmManager->DrawNoRotation(vm);
+        vm++;
+        vm->pos =
+            player->bombInfo.subInfo[i].bombRegionPositions + vm->offset;
+        player->SetToTopLeftPos(vm);
+        g_AnmManager->DrawNoRotation(vm);
+        vm++;
+    }
+}
+```
+```
+---
++++
+@@ -0x409990,38 +0x409710,38 @@
+0x409990 : push ebp 	(BombData.cpp:479)
+0x409991 : mov ebp, esp
+0x409993 : sub esp, 0xac
+0x409999 : mov dword ptr [ebp - 0x8c], ecx
+0x40999f : mov ecx, dword ptr [ebp - 0x8c] 	(BombData.cpp:483)
+0x4099a5 : call BombData::DarkenViewport (FUNCTION)
+0x4099aa : -mov dword ptr [ebp - 8], 0
+         : +mov dword ptr [ebp - 4], 0 	(BombData.cpp:484)
+0x4099b1 : jmp 0x9
+0x4099b3 : -mov eax, dword ptr [ebp - 8]
+         : +mov eax, dword ptr [ebp - 4]
+0x4099b6 : add eax, 1
+0x4099b9 : -mov dword ptr [ebp - 8], eax
+0x4099bc : -cmp dword ptr [ebp - 8], 8
+         : +mov dword ptr [ebp - 4], eax
+         : +cmp dword ptr [ebp - 4], 8
+0x4099c0 : jge 0x3fd
+0x4099c6 : -mov ecx, dword ptr [ebp - 8]
+         : +mov ecx, dword ptr [ebp - 4] 	(BombData.cpp:486)
+0x4099c9 : imul ecx, ecx, 0x1428
+0x4099cf : mov edx, dword ptr [ebp - 0x8c]
+0x4099d5 : cmp dword ptr [edx + ecx + 0x16a4c], 0
+0x4099dd : jne 0x2
+0x4099df : jmp -0x2e 	(BombData.cpp:488)
+0x4099e1 : -mov eax, dword ptr [ebp - 8]
+         : +mov eax, dword ptr [ebp - 4] 	(BombData.cpp:491)
+0x4099e4 : imul eax, eax, 0x1428
+0x4099ea : mov ecx, dword ptr [ebp - 0x8c]
+0x4099f0 : lea edx, [ecx + eax + 0x16c04]
+0x4099f7 : -mov dword ptr [ebp - 4], edx
+0x4099fa : -mov eax, dword ptr [ebp - 4]
+         : +mov dword ptr [ebp - 8], edx
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:492)
+0x4099fd : add eax, 0x230
+0x409a02 : mov dword ptr [ebp - 0x48], eax
+0x409a05 : -mov ecx, dword ptr [ebp - 8]
+         : +mov ecx, dword ptr [ebp - 4]
+0x409a08 : imul ecx, ecx, 0x1428
+0x409a0e : mov edx, dword ptr [ebp - 0x8c]
+0x409a14 : lea eax, [edx + ecx + 0x16a60]
+0x409a1b : mov dword ptr [ebp - 0x4c], eax
+0x409a1e : mov ecx, dword ptr [ebp - 0x4c]
+0x409a21 : mov edx, dword ptr [ebp - 0x48]
+0x409a24 : fld dword ptr [ecx + 8]
+0x409a27 : fadd dword ptr [edx + 8]
+0x409a2a : fstp dword ptr [ebp - 0x3c]
+0x409a2d : mov eax, dword ptr [ebp - 0x4c]
+
+---
++++
+@@ -0x409a3f,57 +0x4097bf,57 @@
+0x409a3f : mov eax, dword ptr [ebp - 0x48]
+0x409a42 : fld dword ptr [edx]
+0x409a44 : fadd dword ptr [eax]
+0x409a46 : fstp dword ptr [ebp - 0x44]
+0x409a49 : mov ecx, dword ptr [ebp - 0x44]
+0x409a4c : mov dword ptr [ebp - 0x14], ecx
+0x409a4f : mov edx, dword ptr [ebp - 0x40]
+0x409a52 : mov dword ptr [ebp - 0x10], edx
+0x409a55 : mov eax, dword ptr [ebp - 0x3c]
+0x409a58 : mov dword ptr [ebp - 0xc], eax
+0x409a5b : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8]
+0x409a5e : add ecx, 0x1c8
+0x409a64 : mov edx, dword ptr [ebp - 0x14]
+0x409a67 : mov dword ptr [ecx], edx
+0x409a69 : mov eax, dword ptr [ebp - 0x10]
+0x409a6c : mov dword ptr [ecx + 4], eax
+0x409a6f : mov edx, dword ptr [ebp - 0xc]
+0x409a72 : mov dword ptr [ecx + 8], edx
+0x409a75 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:493)
+0x409a78 : add eax, 0x1c8
+0x409a7d : mov dword ptr [ebp - 0x90], eax
+0x409a83 : mov ecx, dword ptr [ebp - 0x90]
+0x409a89 : fld dword ptr [g_GameManager+38388 (OFFSET)]
+0x409a8f : fadd dword ptr [ecx]
+0x409a91 : mov edx, dword ptr [ebp - 0x90]
+0x409a97 : fstp dword ptr [edx]
+0x409a99 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409a9c : add eax, 0x1cc
+0x409aa1 : mov dword ptr [ebp - 0x94], eax
+0x409aa7 : mov ecx, dword ptr [ebp - 0x94]
+0x409aad : fld dword ptr [g_GameManager+38392 (OFFSET)]
+0x409ab3 : fadd dword ptr [ecx]
+0x409ab5 : mov edx, dword ptr [ebp - 0x94]
+0x409abb : fstp dword ptr [edx]
+0x409abd : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409ac0 : mov dword ptr [eax + 0x1d0], 0
+0x409aca : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8] 	(BombData.cpp:494)
+0x409acd : push ecx
+0x409ace : mov ecx, dword ptr [g_AnmManager (DATA)]
+0x409ad4 : call AnmManager::DrawNoRotation (FUNCTION)
+0x409ad9 : -mov edx, dword ptr [ebp - 4]
+         : +mov edx, dword ptr [ebp - 8] 	(BombData.cpp:495)
+0x409adc : add edx, 0x24c
+0x409ae2 : -mov dword ptr [ebp - 4], edx
+0x409ae5 : -mov eax, dword ptr [ebp - 4]
+         : +mov dword ptr [ebp - 8], edx
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:497)
+0x409ae8 : add eax, 0x230
+0x409aed : mov dword ptr [ebp - 0x5c], eax
+0x409af0 : -mov ecx, dword ptr [ebp - 8]
+         : +mov ecx, dword ptr [ebp - 4]
+0x409af3 : imul ecx, ecx, 0x1428
+0x409af9 : mov edx, dword ptr [ebp - 0x8c]
+0x409aff : lea eax, [edx + ecx + 0x16a60]
+0x409b06 : mov dword ptr [ebp - 0x60], eax
+0x409b09 : mov ecx, dword ptr [ebp - 0x60]
+0x409b0c : mov edx, dword ptr [ebp - 0x5c]
+0x409b0f : fld dword ptr [ecx + 8]
+0x409b12 : fadd dword ptr [edx + 8]
+0x409b15 : fstp dword ptr [ebp - 0x50]
+0x409b18 : mov eax, dword ptr [ebp - 0x60]
+
+---
++++
+@@ -0x409b2a,57 +0x4098aa,57 @@
+0x409b2a : mov eax, dword ptr [ebp - 0x5c]
+0x409b2d : fld dword ptr [edx]
+0x409b2f : fadd dword ptr [eax]
+0x409b31 : fstp dword ptr [ebp - 0x58]
+0x409b34 : mov ecx, dword ptr [ebp - 0x58]
+0x409b37 : mov dword ptr [ebp - 0x20], ecx
+0x409b3a : mov edx, dword ptr [ebp - 0x54]
+0x409b3d : mov dword ptr [ebp - 0x1c], edx
+0x409b40 : mov eax, dword ptr [ebp - 0x50]
+0x409b43 : mov dword ptr [ebp - 0x18], eax
+0x409b46 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8]
+0x409b49 : add ecx, 0x1c8
+0x409b4f : mov edx, dword ptr [ebp - 0x20]
+0x409b52 : mov dword ptr [ecx], edx
+0x409b54 : mov eax, dword ptr [ebp - 0x1c]
+0x409b57 : mov dword ptr [ecx + 4], eax
+0x409b5a : mov edx, dword ptr [ebp - 0x18]
+0x409b5d : mov dword ptr [ecx + 8], edx
+0x409b60 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:498)
+0x409b63 : add eax, 0x1c8
+0x409b68 : mov dword ptr [ebp - 0x98], eax
+0x409b6e : mov ecx, dword ptr [ebp - 0x98]
+0x409b74 : fld dword ptr [g_GameManager+38388 (OFFSET)]
+0x409b7a : fadd dword ptr [ecx]
+0x409b7c : mov edx, dword ptr [ebp - 0x98]
+0x409b82 : fstp dword ptr [edx]
+0x409b84 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409b87 : add eax, 0x1cc
+0x409b8c : mov dword ptr [ebp - 0x9c], eax
+0x409b92 : mov ecx, dword ptr [ebp - 0x9c]
+0x409b98 : fld dword ptr [g_GameManager+38392 (OFFSET)]
+0x409b9e : fadd dword ptr [ecx]
+0x409ba0 : mov edx, dword ptr [ebp - 0x9c]
+0x409ba6 : fstp dword ptr [edx]
+0x409ba8 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409bab : mov dword ptr [eax + 0x1d0], 0
+0x409bb5 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8] 	(BombData.cpp:499)
+0x409bb8 : push ecx
+0x409bb9 : mov ecx, dword ptr [g_AnmManager (DATA)]
+0x409bbf : call AnmManager::DrawNoRotation (FUNCTION)
+0x409bc4 : -mov edx, dword ptr [ebp - 4]
+         : +mov edx, dword ptr [ebp - 8] 	(BombData.cpp:500)
+0x409bc7 : add edx, 0x24c
+0x409bcd : -mov dword ptr [ebp - 4], edx
+0x409bd0 : -mov eax, dword ptr [ebp - 4]
+         : +mov dword ptr [ebp - 8], edx
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:502)
+0x409bd3 : add eax, 0x230
+0x409bd8 : mov dword ptr [ebp - 0x70], eax
+0x409bdb : -mov ecx, dword ptr [ebp - 8]
+         : +mov ecx, dword ptr [ebp - 4]
+0x409bde : imul ecx, ecx, 0x1428
+0x409be4 : mov edx, dword ptr [ebp - 0x8c]
+0x409bea : lea eax, [edx + ecx + 0x16a60]
+0x409bf1 : mov dword ptr [ebp - 0x74], eax
+0x409bf4 : mov ecx, dword ptr [ebp - 0x74]
+0x409bf7 : mov edx, dword ptr [ebp - 0x70]
+0x409bfa : fld dword ptr [ecx + 8]
+0x409bfd : fadd dword ptr [edx + 8]
+0x409c00 : fstp dword ptr [ebp - 0x64]
+0x409c03 : mov eax, dword ptr [ebp - 0x74]
+
+---
++++
+@@ -0x409c15,57 +0x409995,57 @@
+0x409c15 : mov eax, dword ptr [ebp - 0x70]
+0x409c18 : fld dword ptr [edx]
+0x409c1a : fadd dword ptr [eax]
+0x409c1c : fstp dword ptr [ebp - 0x6c]
+0x409c1f : mov ecx, dword ptr [ebp - 0x6c]
+0x409c22 : mov dword ptr [ebp - 0x2c], ecx
+0x409c25 : mov edx, dword ptr [ebp - 0x68]
+0x409c28 : mov dword ptr [ebp - 0x28], edx
+0x409c2b : mov eax, dword ptr [ebp - 0x64]
+0x409c2e : mov dword ptr [ebp - 0x24], eax
+0x409c31 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8]
+0x409c34 : add ecx, 0x1c8
+0x409c3a : mov edx, dword ptr [ebp - 0x2c]
+0x409c3d : mov dword ptr [ecx], edx
+0x409c3f : mov eax, dword ptr [ebp - 0x28]
+0x409c42 : mov dword ptr [ecx + 4], eax
+0x409c45 : mov edx, dword ptr [ebp - 0x24]
+0x409c48 : mov dword ptr [ecx + 8], edx
+0x409c4b : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:503)
+0x409c4e : add eax, 0x1c8
+0x409c53 : mov dword ptr [ebp - 0xa0], eax
+0x409c59 : mov ecx, dword ptr [ebp - 0xa0]
+0x409c5f : fld dword ptr [g_GameManager+38388 (OFFSET)]
+0x409c65 : fadd dword ptr [ecx]
+0x409c67 : mov edx, dword ptr [ebp - 0xa0]
+0x409c6d : fstp dword ptr [edx]
+0x409c6f : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409c72 : add eax, 0x1cc
+0x409c77 : mov dword ptr [ebp - 0xa4], eax
+0x409c7d : mov ecx, dword ptr [ebp - 0xa4]
+0x409c83 : fld dword ptr [g_GameManager+38392 (OFFSET)]
+0x409c89 : fadd dword ptr [ecx]
+0x409c8b : mov edx, dword ptr [ebp - 0xa4]
+0x409c91 : fstp dword ptr [edx]
+0x409c93 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409c96 : mov dword ptr [eax + 0x1d0], 0
+0x409ca0 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8] 	(BombData.cpp:504)
+0x409ca3 : push ecx
+0x409ca4 : mov ecx, dword ptr [g_AnmManager (DATA)]
+0x409caa : call AnmManager::DrawNoRotation (FUNCTION)
+0x409caf : -mov edx, dword ptr [ebp - 4]
+         : +mov edx, dword ptr [ebp - 8] 	(BombData.cpp:505)
+0x409cb2 : add edx, 0x24c
+0x409cb8 : -mov dword ptr [ebp - 4], edx
+0x409cbb : -mov eax, dword ptr [ebp - 4]
+         : +mov dword ptr [ebp - 8], edx
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:507)
+0x409cbe : add eax, 0x230
+0x409cc3 : mov dword ptr [ebp - 0x84], eax
+0x409cc9 : -mov ecx, dword ptr [ebp - 8]
+         : +mov ecx, dword ptr [ebp - 4]
+0x409ccc : imul ecx, ecx, 0x1428
+0x409cd2 : mov edx, dword ptr [ebp - 0x8c]
+0x409cd8 : lea eax, [edx + ecx + 0x16a60]
+0x409cdf : mov dword ptr [ebp - 0x88], eax
+0x409ce5 : mov ecx, dword ptr [ebp - 0x88]
+0x409ceb : mov edx, dword ptr [ebp - 0x84]
+0x409cf1 : fld dword ptr [ecx + 8]
+0x409cf4 : fadd dword ptr [edx + 8]
+0x409cf7 : fstp dword ptr [ebp - 0x78]
+0x409cfa : mov eax, dword ptr [ebp - 0x88]
+
+---
++++
+@@ -0x409d15,47 +0x409a95,47 @@
+0x409d15 : mov eax, dword ptr [ebp - 0x84]
+0x409d1b : fld dword ptr [edx]
+0x409d1d : fadd dword ptr [eax]
+0x409d1f : fstp dword ptr [ebp - 0x80]
+0x409d22 : mov ecx, dword ptr [ebp - 0x80]
+0x409d25 : mov dword ptr [ebp - 0x38], ecx
+0x409d28 : mov edx, dword ptr [ebp - 0x7c]
+0x409d2b : mov dword ptr [ebp - 0x34], edx
+0x409d2e : mov eax, dword ptr [ebp - 0x78]
+0x409d31 : mov dword ptr [ebp - 0x30], eax
+0x409d34 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8]
+0x409d37 : add ecx, 0x1c8
+0x409d3d : mov edx, dword ptr [ebp - 0x38]
+0x409d40 : mov dword ptr [ecx], edx
+0x409d42 : mov eax, dword ptr [ebp - 0x34]
+0x409d45 : mov dword ptr [ecx + 4], eax
+0x409d48 : mov edx, dword ptr [ebp - 0x30]
+0x409d4b : mov dword ptr [ecx + 8], edx
+0x409d4e : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8] 	(BombData.cpp:508)
+0x409d51 : add eax, 0x1c8
+0x409d56 : mov dword ptr [ebp - 0xa8], eax
+0x409d5c : mov ecx, dword ptr [ebp - 0xa8]
+0x409d62 : fld dword ptr [g_GameManager+38388 (OFFSET)]
+0x409d68 : fadd dword ptr [ecx]
+0x409d6a : mov edx, dword ptr [ebp - 0xa8]
+0x409d70 : fstp dword ptr [edx]
+0x409d72 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409d75 : add eax, 0x1cc
+0x409d7a : mov dword ptr [ebp - 0xac], eax
+0x409d80 : mov ecx, dword ptr [ebp - 0xac]
+0x409d86 : fld dword ptr [g_GameManager+38392 (OFFSET)]
+0x409d8c : fadd dword ptr [ecx]
+0x409d8e : mov edx, dword ptr [ebp - 0xac]
+0x409d94 : fstp dword ptr [edx]
+0x409d96 : -mov eax, dword ptr [ebp - 4]
+         : +mov eax, dword ptr [ebp - 8]
+0x409d99 : mov dword ptr [eax + 0x1d0], 0
+0x409da3 : -mov ecx, dword ptr [ebp - 4]
+         : +mov ecx, dword ptr [ebp - 8] 	(BombData.cpp:509)
+0x409da6 : push ecx
+0x409da7 : mov ecx, dword ptr [g_AnmManager (DATA)]
+0x409dad : call AnmManager::DrawNoRotation (FUNCTION)
+0x409db2 : -mov edx, dword ptr [ebp - 4]
+         : +mov edx, dword ptr [ebp - 8] 	(BombData.cpp:510)
+0x409db5 : add edx, 0x24c
+0x409dbb : -mov dword ptr [ebp - 4], edx
+         : +mov dword ptr [ebp - 8], edx
+0x409dbe : jmp -0x410 	(BombData.cpp:511)
+0x409dc3 : mov esp, ebp 	(BombData.cpp:512)
+0x409dc5 : pop ebp
+0x409dc6 : ret
+
+
+BombData::BombReimuADrawFocus is only 84.42% similar to the original, diff above
+```
+
+The diff appears large, and it may look as though the function isn't very close to matching. However, if you more closely inspect the diff:
+
+```
+0x409dbb : -mov dword ptr [ebp - 4], edx
+         : +mov dword ptr [ebp - 8], edx
+```
+
+The real issue here is that the stack slots are wrongly ordered. The variable that should be in `[ebp - 4]` is located in `[ebp - 8]`, and vice versa. In other words, we need to swap the positions of these variables as they appear in the stack. Just to confirm though, the `reccmp` suite already has exactly the tool to verify this, `stackcmp`:
+
+```
+Ordered by original stack (left=orig, right=recomp):
+✓  ebp - 0xac: ebp - 0xac
+✓  ebp - 0xa8: ebp - 0xa8
+✓  ebp - 0xa4: ebp - 0xa4
+✓  ebp - 0xa0: ebp - 0xa0
+✓  ebp - 0x9c: ebp - 0x9c
+✓  ebp - 0x98: ebp - 0x98
+✓  ebp - 0x94: ebp - 0x94
+✓  ebp - 0x90: ebp - 0x90
+✓  ebp - 0x8c: ebp - 0x8c  player
+✓  ebp - 0x88: ebp - 0x88
+✓  ebp - 0x84: ebp - 0x84
+✓  ebp - 0x80: ebp - 0x80
+✓  ebp - 0x7c: ebp - 0x7c
+✓  ebp - 0x78: ebp - 0x78
+✓  ebp - 0x74: ebp - 0x74
+✓  ebp - 0x70: ebp - 0x70
+✓  ebp - 0x6c: ebp - 0x6c
+✓  ebp - 0x68: ebp - 0x68
+✓  ebp - 0x64: ebp - 0x64
+✓  ebp - 0x60: ebp - 0x60
+✓  ebp - 0x5c: ebp - 0x5c
+✓  ebp - 0x58: ebp - 0x58
+✓  ebp - 0x54: ebp - 0x54
+✓  ebp - 0x50: ebp - 0x50
+✓  ebp - 0x4c: ebp - 0x4c
+✓  ebp - 0x48: ebp - 0x48
+✓  ebp - 0x44: ebp - 0x44
+✓  ebp - 0x40: ebp - 0x40
+✓  ebp - 0x3c: ebp - 0x3c
+✓  ebp - 0x38: ebp - 0x38
+✓  ebp - 0x34: ebp - 0x34
+✓  ebp - 0x30: ebp - 0x30
+✓  ebp - 0x2c: ebp - 0x2c
+✓  ebp - 0x28: ebp - 0x28
+✓  ebp - 0x24: ebp - 0x24
+✓  ebp - 0x20: ebp - 0x20
+✓  ebp - 0x1c: ebp - 0x1c
+✓  ebp - 0x18: ebp - 0x18
+✓  ebp - 0x14: ebp - 0x14
+✓  ebp - 0x10: ebp - 0x10
+✓  ebp - 0x0c: ebp - 0x0c
+⇄  ebp - 0x08: ebp - 0x04  i
+⇄  ebp - 0x04: ebp - 0x08  vm
+
+Ordered by recomp stack (left=orig, right=recomp):
+✓  ebp - 0xac: ebp - 0xac
+✓  ebp - 0xa8: ebp - 0xa8
+✓  ebp - 0xa4: ebp - 0xa4
+✓  ebp - 0xa0: ebp - 0xa0
+✓  ebp - 0x9c: ebp - 0x9c
+✓  ebp - 0x98: ebp - 0x98
+✓  ebp - 0x94: ebp - 0x94
+✓  ebp - 0x90: ebp - 0x90
+✓  ebp - 0x8c: ebp - 0x8c  player
+✓  ebp - 0x88: ebp - 0x88
+✓  ebp - 0x84: ebp - 0x84
+✓  ebp - 0x80: ebp - 0x80
+✓  ebp - 0x7c: ebp - 0x7c
+✓  ebp - 0x78: ebp - 0x78
+✓  ebp - 0x74: ebp - 0x74
+✓  ebp - 0x70: ebp - 0x70
+✓  ebp - 0x6c: ebp - 0x6c
+✓  ebp - 0x68: ebp - 0x68
+✓  ebp - 0x64: ebp - 0x64
+✓  ebp - 0x60: ebp - 0x60
+✓  ebp - 0x5c: ebp - 0x5c
+✓  ebp - 0x58: ebp - 0x58
+✓  ebp - 0x54: ebp - 0x54
+✓  ebp - 0x50: ebp - 0x50
+✓  ebp - 0x4c: ebp - 0x4c
+✓  ebp - 0x48: ebp - 0x48
+✓  ebp - 0x44: ebp - 0x44
+✓  ebp - 0x40: ebp - 0x40
+✓  ebp - 0x3c: ebp - 0x3c
+✓  ebp - 0x38: ebp - 0x38
+✓  ebp - 0x34: ebp - 0x34
+✓  ebp - 0x30: ebp - 0x30
+✓  ebp - 0x2c: ebp - 0x2c
+✓  ebp - 0x28: ebp - 0x28
+✓  ebp - 0x24: ebp - 0x24
+✓  ebp - 0x20: ebp - 0x20
+✓  ebp - 0x1c: ebp - 0x1c
+✓  ebp - 0x18: ebp - 0x18
+✓  ebp - 0x14: ebp - 0x14
+✓  ebp - 0x10: ebp - 0x10
+✓  ebp - 0x0c: ebp - 0x0c
+⇄  ebp - 0x04: ebp - 0x08  vm
+⇄  ebp - 0x08: ebp - 0x04  i
+
+Legend:
+⇄ : This stack variable matches 1:1, but the order of variables is not correct.
+✗ : This stack variable matches multiple variables in the other binary.
+? : This stack variable did not appear in the diff. It either matches or only appears in structural mismatches.
+```
+
+The output of `stackcmp` may be misleading if there are severe structural mismatches, so you can't rely on it too early. In this case however, there are no structural mismatches.
+
+Inside of `stackcmp`, at least in this situation, you can basically ignore the bottom half that says "Ordered by recomp stack" and focus on the top half. This tells us the order that these variables need to be in, in order to match the original. Instead of playing around with the variables, the preferred way to force a match is to use the `var_order` pragma that comes with this repo. Simply put, just add `#pragma var_order(foo, bar)` in the order recommended by `stackcmp`. Applied to this case:
+
+```c++
+#pragma var_order(vm, i)
+// FUNCTION: TH07 0x00409990
+void BombData::BombReimuADrawFocus(Player *player)
+{
+    i32 i;
+    AnmVm *vm;
+    // ...
+}
+```
+
+Make sure that the pragma is above the reccmp annotation and that the variables you declared are ordered in stack layout order _starting from the bottom_, as such: 
+```c++
+i32 i;
+AnmVm *vm;
+```
+This is not for any reason in particular, it's just for consistency and to align with the stackcmp output.
+
+Now, if you run reccmp again on the function:
+
+```
+0x409990: BombData::BombReimuADrawFocus 100% match.
+
+✨ OK!
+```
+
+It'll appear 100% matching.
+
 # Renaming
 
 Most of the functions have poorly named variables that definitely require some renaming. Take for instance, this function in `Pbg4Archive::ReadDecompressEntry`.
