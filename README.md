@@ -30,8 +30,6 @@ If you don't have the original executable, you can still build the program witho
 uv run scripts/build.py --no-icon
 ```
 
-Note that this build script was not tested on Windows.
-
 ## Todo
 
 * Clean up this complete mess of code.

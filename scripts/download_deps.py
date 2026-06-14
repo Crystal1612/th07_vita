@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path, PureWindowsPath
 from typing import Iterator
 from zipfile import ZipFile
@@ -24,10 +25,10 @@ def conv_path(path: Path) -> str:
 
 
 def run_program(name: str, *args: str):
+    env = os.environ.copy()
     if sys.platform == "win32":
         cmd = [name] + list(args)
     else:
-        env = os.environ.copy()
         env["LANG"] = "ja_JP.UTF-8"
         env["WINEDEBUG"] = "fixme-all"
         cmd = ["wine", name] + list(args)
@@ -111,15 +112,21 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
     with ZipFile(archive_path, "r") as zip:
         _ = zip.extractall(path)
     if sys.platform == "win32":
-        _ = subprocess.check_call(
-            [
-                "msiexec",
-                "/a",
-                str(path / "VS_SETUP.MSI"),
-                "/qb",
-                f'TARGETDIR="{path}"',
-            ]
-        )
+        with tempfile.TemporaryDirectory() as tempdir:
+            _ = subprocess.check_call(
+                [
+                    "msiexec",
+                    "/a",
+                    path / "VS_SETUP.MSI",
+                    "/qb",
+                    f"TARGETDIR={tempdir}",
+                ]
+            )
+            _ = shutil.copytree(
+                Path(tempdir) / "Program Files",
+                path / "Program Files",
+                dirs_exist_ok=True,
+            )
     else:
         _ = subprocess.check_call(["msiextract", "-C", path, path / "VS_SETUP.MSI"])
         fixup_msiextract(path)
@@ -137,9 +144,15 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
         ):
             continue
         if file.is_file():
-            os.remove(file)
+            try:
+                os.remove(file)
+            except PermissionError:
+                pass
         elif file.is_dir():
-            shutil.rmtree(file)
+            try:
+                shutil.rmtree(file)
+            except PermissionError:
+                pass
     for file in (vc_path / "INCLUDE").iterdir():
         _ = shutil.move(file, file.with_name(file.name.lower()))
     for file in (vc_path / "PLATFORMSDK" / "COMMON" / "Include").iterdir():
@@ -150,6 +163,9 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
     )
     _ = (vs_path / "COMMON7" / "IDE" / "MSOBJ10.DLL").rename(
         vc_path / "BIN" / "MSOBJ10.DLL"
+    )
+    _ = (vs_path / "COMMON7" / "PACKAGES" / "DEBUGGER" / "MSVCR70.DLL").rename(
+        vc_path / "BIN" / "MSVCR70.DLL"
     )
 
 
