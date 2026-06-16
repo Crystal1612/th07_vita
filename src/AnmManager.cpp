@@ -23,13 +23,13 @@
 AnmManager *g_AnmManager;
 
 // GLOBAL: TH07 0x004b9fa8
-VertexTex1DiffuseXyzrwh g_PrimitivesToDrawNoVertexBuf[4];
+VertexTex1DiffuseXyzrwh g_QuadVertices[4];
 
 // GLOBAL: TH07 0x004ba018
-VertexTex1Xyzrwh g_PrimitivesToDrawVertexBuf[4];
+VertexTex1Xyzrwh g_QuadTemplate[4];
 
 // GLOBAL: TH07 0x004ba078
-VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
+VertexTex1DiffuseXyz g_Quad3DFallback[4];
 
 // FUNCTION: TH07 0x0044d3e0
 AnmManager::AnmManager()
@@ -40,30 +40,30 @@ AnmManager::AnmManager()
     {
         this->sprites[i].sourceFileIndex = -1;
     }
-    g_PrimitivesToDrawVertexBuf[3].w = 1.0f;
-    g_PrimitivesToDrawVertexBuf[2].w = g_PrimitivesToDrawVertexBuf[3].w;
-    g_PrimitivesToDrawVertexBuf[1].w = g_PrimitivesToDrawVertexBuf[2].w;
-    g_PrimitivesToDrawVertexBuf[0].w = g_PrimitivesToDrawVertexBuf[1].w;
-    g_PrimitivesToDrawVertexBuf[0].textureUV.x = 0.0f;
-    g_PrimitivesToDrawVertexBuf[0].textureUV.y = 0.0f;
-    g_PrimitivesToDrawVertexBuf[1].textureUV.x = 1.0f;
-    g_PrimitivesToDrawVertexBuf[1].textureUV.y = 0.0f;
-    g_PrimitivesToDrawVertexBuf[2].textureUV.x = 0.0f;
-    g_PrimitivesToDrawVertexBuf[2].textureUV.y = 1.0f;
-    g_PrimitivesToDrawVertexBuf[3].textureUV.x = 1.0f;
-    g_PrimitivesToDrawVertexBuf[3].textureUV.y = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[3].w = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[2].w = g_PrimitivesToDrawNoVertexBuf[3].w;
-    g_PrimitivesToDrawNoVertexBuf[1].w = g_PrimitivesToDrawNoVertexBuf[2].w;
-    g_PrimitivesToDrawNoVertexBuf[0].w = g_PrimitivesToDrawNoVertexBuf[1].w;
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.x = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.y = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[1].textureUV.x = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[1].textureUV.y = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[2].textureUV.x = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[2].textureUV.y = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[3].textureUV.x = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[3].textureUV.y = 1.0f;
+    g_QuadTemplate[0].w =
+        g_QuadTemplate[1].w =
+            g_QuadTemplate[2].w =
+                g_QuadTemplate[3].w = 1.0f;
+    g_QuadTemplate[0].textureUV.x = 0.0f;
+    g_QuadTemplate[0].textureUV.y = 0.0f;
+    g_QuadTemplate[1].textureUV.x = 1.0f;
+    g_QuadTemplate[1].textureUV.y = 0.0f;
+    g_QuadTemplate[2].textureUV.x = 0.0f;
+    g_QuadTemplate[2].textureUV.y = 1.0f;
+    g_QuadTemplate[3].textureUV.x = 1.0f;
+    g_QuadTemplate[3].textureUV.y = 1.0f;
+    g_QuadVertices[0].w =
+        g_QuadVertices[1].w =
+            g_QuadVertices[2].w =
+                g_QuadVertices[3].w = 1.0f;
+    g_QuadVertices[0].textureUV.x = 0.0f;
+    g_QuadVertices[0].textureUV.y = 0.0f;
+    g_QuadVertices[1].textureUV.x = 1.0f;
+    g_QuadVertices[1].textureUV.y = 0.0f;
+    g_QuadVertices[2].textureUV.x = 0.0f;
+    g_QuadVertices[2].textureUV.y = 1.0f;
+    g_QuadVertices[3].textureUV.x = 1.0f;
+    g_QuadVertices[3].textureUV.y = 1.0f;
 
     this->vertexBuffer = NULL;
     this->currentTexture = NULL;
@@ -106,29 +106,29 @@ void AnmManager::SetupVertexBuffer()
     this->vertexBufferContents[0].textureUV.y = 0.0f;
     this->vertexBufferContents[3].textureUV.y = 1.0f;
     this->vertexBufferContents[2].textureUV.y = 1.0f;
-    g_PrimitivesToDrawUnknown[0].position =
+    g_Quad3DFallback[0].position =
         this->vertexBufferContents[0].position;
-    g_PrimitivesToDrawUnknown[1].position =
+    g_Quad3DFallback[1].position =
         this->vertexBufferContents[1].position;
-    g_PrimitivesToDrawUnknown[2].position =
+    g_Quad3DFallback[2].position =
         this->vertexBufferContents[2].position;
-    g_PrimitivesToDrawUnknown[3].position =
+    g_Quad3DFallback[3].position =
         this->vertexBufferContents[3].position;
-    g_PrimitivesToDrawUnknown[0].textureUV.x =
+    g_Quad3DFallback[0].textureUV.x =
         this->vertexBufferContents[0].textureUV.x;
-    g_PrimitivesToDrawUnknown[0].textureUV.y =
+    g_Quad3DFallback[0].textureUV.y =
         this->vertexBufferContents[0].textureUV.y;
-    g_PrimitivesToDrawUnknown[1].textureUV.x =
+    g_Quad3DFallback[1].textureUV.x =
         this->vertexBufferContents[1].textureUV.x;
-    g_PrimitivesToDrawUnknown[1].textureUV.y =
+    g_Quad3DFallback[1].textureUV.y =
         this->vertexBufferContents[1].textureUV.y;
-    g_PrimitivesToDrawUnknown[2].textureUV.x =
+    g_Quad3DFallback[2].textureUV.x =
         this->vertexBufferContents[2].textureUV.x;
-    g_PrimitivesToDrawUnknown[2].textureUV.y =
+    g_Quad3DFallback[2].textureUV.y =
         this->vertexBufferContents[2].textureUV.y;
-    g_PrimitivesToDrawUnknown[3].textureUV.x =
+    g_Quad3DFallback[3].textureUV.x =
         this->vertexBufferContents[3].textureUV.x;
-    g_PrimitivesToDrawUnknown[3].textureUV.y =
+    g_Quad3DFallback[3].textureUV.y =
         this->vertexBufferContents[3].textureUV.y;
     if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
     {
@@ -550,13 +550,13 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     return local_8 + 1;
 }
 
-#pragma var_order(spriteIdx, spriteIdxOffset, i, local_14, afterHdr, rawEntry)
+#pragma var_order(spriteIdx, spriteIdxOffset, i, uvX, afterHdr, rawEntry)
 // FUNCTION: TH07 0x0044e4e0
 void AnmManager::ReleaseAnm(i32 anmIdx)
 {
     AnmRawEntry *rawEntry;
     i32 *afterHdr;
-    i32 local_14;
+    i32 uvX;
     i32 i;
     i32 spriteIdxOffset;
     i32 *spriteIdx;
@@ -571,10 +571,10 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         afterHdr = (this->anmFiles[anmIdx].raw)->spriteOffsets;
         spriteIdxOffset = this->anmFiles[anmIdx].spriteIndexOffset;
         rawEntry = this->anmFiles[anmIdx].raw;
-        local_14 = anmIdx + 1;
-        for (i = 1; i < this->anmFiles[anmIdx].childCount; i++, local_14++)
+        uvX = anmIdx + 1;
+        for (i = 1; i < this->anmFiles[anmIdx].childCount; i++, uvX++)
         {
-            ReleaseAnm(local_14);
+            ReleaseAnm(uvX);
         }
         for (i = 0; i < rawEntry->numSprites; i++, afterHdr++)
         {
@@ -624,16 +624,16 @@ void AnmManager::LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite)
 
     this->sprites[spriteIdx].uvStart.x =
         this->sprites[spriteIdx].startPixelInclusive.x /
-        this->sprites[spriteIdx].textureWidth;
+        (this->sprites[spriteIdx].textureWidth);
     this->sprites[spriteIdx].uvEnd.x =
         this->sprites[spriteIdx].endPixelInclusive.x /
-        this->sprites[spriteIdx].textureWidth;
+        (this->sprites[spriteIdx].textureWidth);
     this->sprites[spriteIdx].uvStart.y =
         this->sprites[spriteIdx].startPixelInclusive.y /
-        this->sprites[spriteIdx].textureHeight;
+        (this->sprites[spriteIdx].textureHeight);
     this->sprites[spriteIdx].uvEnd.y =
         this->sprites[spriteIdx].endPixelInclusive.y /
-        this->sprites[spriteIdx].textureHeight;
+        (this->sprites[spriteIdx].textureHeight);
     this->sprites[spriteIdx].widthPx =
         (this->sprites[spriteIdx].endPixelInclusive.x -
          this->sprites[spriteIdx].startPixelInclusive.x) /
@@ -651,21 +651,24 @@ ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
     {
         return ZUN_ERROR;
     }
-    else
+
+    vm->activeSpriteIdx = (i16)spriteIdx;
+    vm->sprite = &this->sprites[spriteIdx];
+    D3DXMatrixIdentity(&vm->matrix);
+    D3DXMatrixIdentity(&vm->uvMatrix);
+    if (vm->sprite->cols < 1.0f)
     {
-        vm->activeSpriteIdx = (i16)spriteIdx;
-        vm->sprite = &this->sprites[spriteIdx];
-        D3DXMatrixIdentity(&vm->matrix);
-        D3DXMatrixIdentity(&vm->uvMatrix);
-        vm->matrix.m[0][0] = vm->sprite->widthPx / 256.0f;
-        vm->matrix.m[1][1] = vm->sprite->heightPx / 256.0f;
-        vm->uvMatrix.m[0][0] =
-            (vm->sprite->widthPx / vm->sprite->textureWidth) * vm->sprite->cols;
-        vm->uvMatrix.m[1][1] =
-            (vm->sprite->heightPx / vm->sprite->textureHeight) * vm->sprite->rows;
-        vm->worldTransformMatrix = vm->matrix;
-        return ZUN_SUCCESS;
+        // This is despite the fact that spriteIdx is never used ever again
+        spriteIdx = 0;
     }
+    vm->matrix.m[0][0] = vm->sprite->widthPx / 256.0f;
+    vm->matrix.m[1][1] = vm->sprite->heightPx / 256.0f;
+    vm->uvMatrix.m[0][0] =
+        (vm->sprite->widthPx / vm->sprite->textureWidth) * vm->sprite->cols;
+    vm->uvMatrix.m[1][1] =
+        (vm->sprite->heightPx / vm->sprite->textureHeight) * vm->sprite->rows;
+    vm->worldTransformMatrix = vm->matrix;
+    return ZUN_SUCCESS;
 }
 
 // FUNCTION: TH07 0x0044ea20
@@ -690,17 +693,17 @@ void AnmManager::SetAndExecuteScript(AnmVm *vm, AnmRawInstr *beginningOfScript)
     }
 }
 
+#pragma var_order(color, local_c, local_10, uvX, local_18, local_1c, \
+                  local_20, local_24, local_28)
 // FUNCTION: TH07 0x0044eae0
 void AnmManager::SetRenderStateForVm(AnmVm *vm)
 {
-    ZunColor DVar2;
-    ZunColor local_30;
     u32 local_28;
     u32 local_24;
     u32 local_20;
     u32 local_1c;
     u32 local_18;
-    u32 local_14;
+    u32 uvX;
     u32 local_10;
     u32 local_c;
     ZunColor color;
@@ -717,51 +720,36 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
             g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 2);
         }
     }
-    if (vm->useColor2 == 0)
-    {
-        local_30 = vm->color;
-    }
-    else
-    {
-        local_30 = vm->color2;
-    }
-    color = local_30;
-    DVar2 = color;
-    color.bytes.r = local_30.bytes.r;
-    color.bytes.a = local_30.bytes.a;
-    color.bytes.b = local_30.bytes.b;
-    color.bytes.g = local_30.bytes.g;
+    color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
     if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
     {
-        if (this->colorMulEnabled != 0)
+        if (this->colorMulEnabled)
         {
-            local_c = (u32)color.bytes.r * (u32)(this->color).bytes.r >> 7;
-            if (0xff < local_c)
+            local_c = ((u32)color.bytes.r * this->color.bytes.r) >> 7;
+            if (local_c >= 256)
             {
                 local_c = 0xff;
             }
             color.bytes.r = (u8)local_c;
-            local_10 = (u32)color.bytes.g * (u32)(this->color).bytes.g >> 7;
-            if (0xff < local_10)
+            local_10 = ((u32)color.bytes.g * this->color.bytes.g) >> 7;
+            if (local_10 >= 256)
             {
                 local_10 = 0xff;
             }
             color.bytes.g = (u8)local_10;
-            local_14 = (u32)color.bytes.b * (u32)(this->color).bytes.b >> 7;
-            if (0xff < local_14)
+            uvX = ((u32)color.bytes.b * this->color.bytes.b) >> 7;
+            if (uvX >= 256)
             {
-                local_14 = 0xff;
+                uvX = 0xff;
             }
-            color.bytes.b = (u8)local_14;
-            local_18 = (u32)color.bytes.a * (u32)(this->color).bytes.a >> 7;
-            if (0xff < local_18)
+            color.bytes.b = (u8)uvX;
+            local_18 = ((u32)color.bytes.a * this->color.bytes.a) >> 7;
+            if (local_18 >= 256)
             {
                 local_18 = 0xff;
             }
             color.bytes.a = (u8)local_18;
-            DVar2 = color;
         }
-        color = DVar2;
         if (this->currentTextureFactor.color != color.color)
         {
             this->currentTextureFactor.color = color.color;
@@ -771,46 +759,44 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
     }
     else
     {
-        if (this->colorMulEnabled != 0)
+        if (this->colorMulEnabled)
         {
-            local_1c = (u32)color.bytes.r * (u32)(this->color).bytes.r >> 7;
-            if (0xff < local_1c)
+            local_1c = ((u32)color.bytes.r * this->color.bytes.r) >> 7;
+            if (local_1c >= 256)
             {
                 local_1c = 0xff;
             }
             color.bytes.r = (u8)local_1c;
-            local_20 = (u32)color.bytes.g * (u32)(this->color).bytes.g >> 7;
-            if (0xff < local_20)
+            local_20 = ((u32)color.bytes.g * this->color.bytes.g) >> 7;
+            if (local_20 >= 256)
             {
                 local_20 = 0xff;
             }
             color.bytes.g = (u8)local_20;
-            local_24 = (u32)color.bytes.b * (u32)(this->color).bytes.b >> 7;
-            if (0xff < local_24)
+            local_24 = ((u32)color.bytes.b * this->color.bytes.b) >> 7;
+            if (local_24 >= 256)
             {
                 local_24 = 0xff;
             }
             color.bytes.b = (u8)local_24;
-            local_28 = (u32)color.bytes.a * (u32)(this->color).bytes.a >> 7;
-            if (0xff < local_28)
+            local_28 = ((u32)color.bytes.a * this->color.bytes.a) >> 7;
+            if (local_28 >= 256)
             {
                 local_28 = 0xff;
             }
             color.bytes.a = (u8)local_28;
-            DVar2 = color;
         }
-        color = DVar2;
-        g_PrimitivesToDrawNoVertexBuf[0].color = color;
-        g_PrimitivesToDrawNoVertexBuf[1].color = color;
-        g_PrimitivesToDrawNoVertexBuf[2].color = color;
-        g_PrimitivesToDrawNoVertexBuf[3].color = color;
-        g_PrimitivesToDrawUnknown[0].diffuse = color;
-        g_PrimitivesToDrawUnknown[1].diffuse = color;
-        g_PrimitivesToDrawUnknown[2].diffuse = color;
-        g_PrimitivesToDrawUnknown[3].diffuse = color;
+        g_QuadVertices[0].color = color;
+        g_QuadVertices[1].color = color;
+        g_QuadVertices[2].color = color;
+        g_QuadVertices[3].color = color;
+        g_Quad3DFallback[0].diffuse = color;
+        g_Quad3DFallback[1].diffuse = color;
+        g_Quad3DFallback[2].diffuse = color;
+        g_Quad3DFallback[3].diffuse = color;
     }
-    if (((g_Supervisor.cfg.opts >> 6 & 1) == 0) &&
-        ((u32)this->currentZWriteDisable != vm->zWriteDisable))
+    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
+        (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
         if (this->currentZWriteDisable == 0)
@@ -837,7 +823,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
             g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
         }
     }
-    this->renderStateChangesThisFrame += 1;
+    this->renderStateChangesThisFrame++;
 }
 
 // FUNCTION: TH07 0x0044eec0
@@ -871,7 +857,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
     this->renderStateChangesThisFrame += 1;
 }
 
-static f32 g_ZeroPointFive = 0.5;
+static const f32 g_ZeroPointFive = 0.5;
 
 #pragma var_order(triangleY1, triangleY2, triangleX2, triangleX1, color, r, g, b, a)
 // FUNCTION: TH07 0x0044efb0
@@ -881,85 +867,85 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 param2)
     f32 triangleX1, triangleX2, triangleY1, triangleY2;
     u32 r, g, b, a;
 
-    g_PrimitivesToDrawNoVertexBuf[0].pos.x += this->offset.x;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.y += this->offset.y;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.x += this->offset.x;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.y += this->offset.y;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.x += this->offset.x;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.y += this->offset.y;
-    g_PrimitivesToDrawNoVertexBuf[3].pos.x += this->offset.x;
-    g_PrimitivesToDrawNoVertexBuf[3].pos.y += this->offset.y;
+    g_QuadVertices[0].pos.x += this->offset.x;
+    g_QuadVertices[0].pos.y += this->offset.y;
+    g_QuadVertices[1].pos.x += this->offset.x;
+    g_QuadVertices[1].pos.y += this->offset.y;
+    g_QuadVertices[2].pos.x += this->offset.x;
+    g_QuadVertices[2].pos.y += this->offset.y;
+    g_QuadVertices[3].pos.x += this->offset.x;
+    g_QuadVertices[3].pos.y += this->offset.y;
 
     if ((param2 & 1) != 0)
     {
-        /*g_PrimitivesToDrawNoVertexBuf[0].pos.x =
-            roundf(g_PrimitivesToDrawNoVertexBuf[0].pos.x) - 0.5f;
-        g_PrimitivesToDrawNoVertexBuf[1].pos.x =
-            roundf(g_PrimitivesToDrawNoVertexBuf[1].pos.x) - 0.5f;
-        g_PrimitivesToDrawNoVertexBuf[0].pos.y =
-            roundf(g_PrimitivesToDrawNoVertexBuf[0].pos.y) - 0.5f;
-        g_PrimitivesToDrawNoVertexBuf[2].pos.y =
-            roundf(g_PrimitivesToDrawNoVertexBuf[2].pos.y) - 0.5f;
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y =
-            g_PrimitivesToDrawNoVertexBuf[0].pos.y;
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x =
-            g_PrimitivesToDrawNoVertexBuf[0].pos.x;
-        g_PrimitivesToDrawNoVertexBuf[3].pos.x =
-            g_PrimitivesToDrawNoVertexBuf[1].pos.x;
-        g_PrimitivesToDrawNoVertexBuf[3].pos.y =
-        g_PrimitivesToDrawNoVertexBuf[2].pos.y;*/
+        /*g_QuadVertices[0].pos.x =
+            roundf(g_QuadVertices[0].pos.x) - 0.5f;
+        g_QuadVertices[1].pos.x =
+            roundf(g_QuadVertices[1].pos.x) - 0.5f;
+        g_QuadVertices[0].pos.y =
+            roundf(g_QuadVertices[0].pos.y) - 0.5f;
+        g_QuadVertices[2].pos.y =
+            roundf(g_QuadVertices[2].pos.y) - 0.5f;
+        g_QuadVertices[1].pos.y =
+            g_QuadVertices[0].pos.y;
+        g_QuadVertices[2].pos.x =
+            g_QuadVertices[0].pos.x;
+        g_QuadVertices[3].pos.x =
+            g_QuadVertices[1].pos.x;
+        g_QuadVertices[3].pos.y =
+        g_QuadVertices[2].pos.y;*/
         __asm {
-        fld g_PrimitivesToDrawNoVertexBuf[0 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
+        fld g_QuadVertices[0 * TYPE g_QuadVertices].pos.x
         frndint
         fsub g_ZeroPointFive
-        fld g_PrimitivesToDrawNoVertexBuf[1 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
+        fld g_QuadVertices[1 * TYPE g_QuadVertices].pos.x
         frndint
         fsub g_ZeroPointFive
-        fld g_PrimitivesToDrawNoVertexBuf[0 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
+        fld g_QuadVertices[0 * TYPE g_QuadVertices].pos.y
         frndint
         fsub g_ZeroPointFive
-        fld g_PrimitivesToDrawNoVertexBuf[2 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
+        fld g_QuadVertices[2 * TYPE g_QuadVertices].pos.y
         frndint
         fsub g_ZeroPointFive
-        fst g_PrimitivesToDrawNoVertexBuf[2 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
-        fstp g_PrimitivesToDrawNoVertexBuf[3 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
-        fst g_PrimitivesToDrawNoVertexBuf[0 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
-        fstp g_PrimitivesToDrawNoVertexBuf[1 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.y
-        fst g_PrimitivesToDrawNoVertexBuf[1 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
-        fstp g_PrimitivesToDrawNoVertexBuf[3 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
-        fst g_PrimitivesToDrawNoVertexBuf[0 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
-        fstp g_PrimitivesToDrawNoVertexBuf[2 * TYPE g_PrimitivesToDrawNoVertexBuf].pos.x
+        fst g_QuadVertices[2 * TYPE g_QuadVertices].pos.y
+        fstp g_QuadVertices[3 * TYPE g_QuadVertices].pos.y
+        fst g_QuadVertices[0 * TYPE g_QuadVertices].pos.y
+        fstp g_QuadVertices[1 * TYPE g_QuadVertices].pos.y
+        fst g_QuadVertices[1 * TYPE g_QuadVertices].pos.x
+        fstp g_QuadVertices[3 * TYPE g_QuadVertices].pos.x
+        fst g_QuadVertices[0 * TYPE g_QuadVertices].pos.x
+        fstp g_QuadVertices[2 * TYPE g_QuadVertices].pos.x
         }
     }
 
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.x = g_PrimitivesToDrawNoVertexBuf[2].textureUV.x =
+    g_QuadVertices[0].textureUV.x = g_QuadVertices[2].textureUV.x =
         vm->sprite->uvStart.x + vm->uvScrollPos.x;
-    g_PrimitivesToDrawNoVertexBuf[1].textureUV.x = g_PrimitivesToDrawNoVertexBuf[3].textureUV.x =
+    g_QuadVertices[1].textureUV.x = g_QuadVertices[3].textureUV.x =
         vm->sprite->uvEnd.x + vm->uvScrollPos.x;
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.y = g_PrimitivesToDrawNoVertexBuf[1].textureUV.y =
+    g_QuadVertices[0].textureUV.y = g_QuadVertices[1].textureUV.y =
         vm->sprite->uvStart.y + vm->uvScrollPos.y;
-    g_PrimitivesToDrawNoVertexBuf[2].textureUV.y = g_PrimitivesToDrawNoVertexBuf[3].textureUV.y =
+    g_QuadVertices[2].textureUV.y = g_QuadVertices[3].textureUV.y =
         vm->sprite->uvEnd.y + vm->uvScrollPos.y;
 
-    triangleX1 = max(g_PrimitivesToDrawNoVertexBuf[0].pos.x,
-                     g_PrimitivesToDrawNoVertexBuf[1].pos.x);
-    triangleX1 = max(g_PrimitivesToDrawNoVertexBuf[2].pos.x, triangleX1);
-    triangleX1 = max(g_PrimitivesToDrawNoVertexBuf[3].pos.x, triangleX1);
+    triangleX1 = max(g_QuadVertices[0].pos.x,
+                     g_QuadVertices[1].pos.x);
+    triangleX1 = max(g_QuadVertices[2].pos.x, triangleX1);
+    triangleX1 = max(g_QuadVertices[3].pos.x, triangleX1);
 
-    triangleY1 = max(g_PrimitivesToDrawNoVertexBuf[0].pos.y,
-                     g_PrimitivesToDrawNoVertexBuf[1].pos.y);
-    triangleY1 = max(g_PrimitivesToDrawNoVertexBuf[2].pos.y, triangleY1);
-    triangleY1 = max(g_PrimitivesToDrawNoVertexBuf[3].pos.y, triangleY1);
+    triangleY1 = max(g_QuadVertices[0].pos.y,
+                     g_QuadVertices[1].pos.y);
+    triangleY1 = max(g_QuadVertices[2].pos.y, triangleY1);
+    triangleY1 = max(g_QuadVertices[3].pos.y, triangleY1);
 
-    triangleX2 = min(g_PrimitivesToDrawNoVertexBuf[0].pos.x,
-                     g_PrimitivesToDrawNoVertexBuf[1].pos.x);
-    triangleX2 = min(g_PrimitivesToDrawNoVertexBuf[2].pos.x, triangleX2);
-    triangleX2 = min(g_PrimitivesToDrawNoVertexBuf[3].pos.x, triangleX2);
+    triangleX2 = min(g_QuadVertices[0].pos.x,
+                     g_QuadVertices[1].pos.x);
+    triangleX2 = min(g_QuadVertices[2].pos.x, triangleX2);
+    triangleX2 = min(g_QuadVertices[3].pos.x, triangleX2);
 
-    triangleY2 = min(g_PrimitivesToDrawNoVertexBuf[0].pos.y,
-                     g_PrimitivesToDrawNoVertexBuf[1].pos.y);
-    triangleY2 = min(g_PrimitivesToDrawNoVertexBuf[2].pos.y, triangleY2);
-    triangleY2 = min(g_PrimitivesToDrawNoVertexBuf[3].pos.y, triangleY2);
+    triangleY2 = min(g_QuadVertices[0].pos.y,
+                     g_QuadVertices[1].pos.y);
+    triangleY2 = min(g_QuadVertices[2].pos.y, triangleY2);
+    triangleY2 = min(g_QuadVertices[3].pos.y, triangleY2);
 
     if (triangleX1 < g_Supervisor.viewport.X ||
         triangleY1 < g_Supervisor.viewport.Y ||
@@ -1015,13 +1001,13 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 param2)
             }
             color.bytes.a = (u8)a;
         }
-        g_PrimitivesToDrawNoVertexBuf[0].color = color;
-        g_PrimitivesToDrawNoVertexBuf[1].color = color;
-        g_PrimitivesToDrawNoVertexBuf[2].color = color;
-        g_PrimitivesToDrawNoVertexBuf[3].color = color;
+        g_QuadVertices[0].color = color;
+        g_QuadVertices[1].color = color;
+        g_QuadVertices[2].color = color;
+        g_QuadVertices[3].color = color;
     }
     SyncRenderState(vm);
-    PushSprite(g_PrimitivesToDrawNoVertexBuf);
+    PushSprite(g_QuadVertices);
     return ZUN_SUCCESS;
 }
 
@@ -1070,55 +1056,63 @@ ZunResult AnmManager::PushSprite(VertexTex1DiffuseXyzrwh *spriteVertex)
 // FUNCTION: TH07 0x0044f770
 ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
 {
-    if (vm->visible == 0 || vm->active == 0 ||
-        vm->color.bytes.a == 0)
+    f32 centerY;
+    f32 centerX;
+
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
 
-    f32 centerX = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
-    f32 centerY = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
-    f32 fVar1;
+    if (!vm->active)
+    {
+        return ZUN_ERROR;
+    }
+
+    if (vm->color.bytes.a == 0)
+    {
+        return ZUN_ERROR;
+    }
+
+    centerX = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
+    centerY = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
 
     if ((vm->anchor & 1) == 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x = vm->pos.x - centerX;
-        fVar1 = vm->pos.x;
+        g_QuadVertices[0].pos.x =
+            g_QuadVertices[2].pos.x = vm->pos.x - centerX;
+        g_QuadVertices[1].pos.x =
+            g_QuadVertices[3].pos.x = centerX + vm->pos.x;
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x = vm->pos.x;
-        fVar1 = centerX + vm->pos.x;
+        g_QuadVertices[0].pos.x =
+            g_QuadVertices[2].pos.x = vm->pos.x;
+        g_QuadVertices[1].pos.x =
+            g_QuadVertices[3].pos.x = centerX + vm->pos.x +
+                                                     centerX;
     }
-    g_PrimitivesToDrawNoVertexBuf[3].pos.x = centerX + fVar1;
 
     if ((vm->anchor & 2) == 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y = vm->pos.y - centerY;
-        centerX = vm->pos.y;
+        g_QuadVertices[0].pos.y =
+            g_QuadVertices[1].pos.y = vm->pos.y - centerY;
+        g_QuadVertices[2].pos.y =
+            g_QuadVertices[3].pos.y = centerY + vm->pos.y;
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y = vm->pos.y;
-        centerX = centerY + vm->pos.y;
+        g_QuadVertices[0].pos.y =
+            g_QuadVertices[1].pos.y = vm->pos.y;
+        g_QuadVertices[2].pos.y =
+            g_QuadVertices[3].pos.y = centerY + vm->pos.y +
+                                                     centerY;
     }
-    g_PrimitivesToDrawNoVertexBuf[3].pos.y = centerY + centerX;
 
-    g_PrimitivesToDrawNoVertexBuf[0].pos.z = vm->pos.z;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.x =
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.y =
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.x =
-        g_PrimitivesToDrawNoVertexBuf[3].pos.x;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.y =
-        g_PrimitivesToDrawNoVertexBuf[3].pos.y;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-    g_PrimitivesToDrawNoVertexBuf[3].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
+    g_QuadVertices[0].pos.z =
+        g_QuadVertices[1].pos.z =
+            g_QuadVertices[2].pos.z =
+                g_QuadVertices[3].pos.z = vm->pos.z;
 
     return DrawInner(vm, 1);
 }
@@ -1132,182 +1126,208 @@ void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width,
     param_1->pos.y = width * param_4 + height * param_5 + yOffset;
 }
 
+#pragma var_order(sinZ, z, cosZ, width, height, yOffset, xOffset)
 // FUNCTION: TH07 0x0044f9a0
 ZunResult AnmManager::Draw(AnmVm *vm)
 {
+    f32 cosZ;
+    f32 sinZ;
+    f32 xOffset;
+    f32 yOffset;
+    f32 z;
+    f32 width;
+    f32 height;
+
     if (vm->rotation.z == 0.0f)
     {
         return DrawNoRotation(vm);
     }
-    else if (vm->visible == 0 || vm->active == 0 ||
-             vm->color.bytes.a == 0)
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
-    else
+    if (!vm->active)
     {
-        f32 cosZ;
-        f32 sinZ;
-
-        f32 z = vm->rotation.z;
-        sincosf_macro(sinZ, cosZ, z);
-        f32 width = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
-        f32 height = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
-
-        TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[0], -width, -height, sinZ,
-                          cosZ, vm->pos.x, vm->pos.y);
-        TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[1], width, -height, sinZ,
-                          cosZ, vm->pos.x, vm->pos.y);
-        TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[2], -width, height, sinZ,
-                          cosZ, vm->pos.x, vm->pos.y);
-        TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[3], width, height, sinZ,
-                          cosZ, vm->pos.x, vm->pos.y);
-
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z = vm->pos.z;
-        if ((vm->anchor & 1) != 0)
-        {
-            g_PrimitivesToDrawNoVertexBuf[0].pos.x += width;
-            g_PrimitivesToDrawNoVertexBuf[1].pos.x += width;
-            g_PrimitivesToDrawNoVertexBuf[2].pos.x += width;
-            g_PrimitivesToDrawNoVertexBuf[3].pos.x += width;
-        }
-        if ((vm->anchor & 2) != 0)
-        {
-            g_PrimitivesToDrawNoVertexBuf[0].pos.y += height;
-            g_PrimitivesToDrawNoVertexBuf[1].pos.y += height;
-            g_PrimitivesToDrawNoVertexBuf[2].pos.y += height;
-            g_PrimitivesToDrawNoVertexBuf[3].pos.y += height;
-        }
-        g_PrimitivesToDrawNoVertexBuf[1].pos.z =
-            g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-        g_PrimitivesToDrawNoVertexBuf[2].pos.z =
-            g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-        g_PrimitivesToDrawNoVertexBuf[3].pos.z =
-            g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-
-        return DrawInner(vm, 0);
+        return ZUN_ERROR;
     }
+    if (vm->color.bytes.a == 0)
+    {
+        return ZUN_ERROR;
+    }
+
+    z = vm->rotation.z;
+    sincosf_macro(sinZ, cosZ, z);
+    xOffset = vm->pos.x;
+    yOffset = vm->pos.y;
+    width = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
+    height = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
+
+    TranslateRotation(&g_QuadVertices[0], -width, -height, sinZ,
+                      cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[1], width, -height, sinZ,
+                      cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[2], -width, height, sinZ,
+                      cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[3], width, height, sinZ,
+                      cosZ, xOffset, yOffset);
+
+    g_QuadVertices[0].pos.z =
+        g_QuadVertices[1].pos.z =
+            g_QuadVertices[2].pos.z =
+                g_QuadVertices[3].pos.z = vm->pos.z;
+    if ((vm->anchor & 1) != 0)
+    {
+        g_QuadVertices[0].pos.x += width;
+        g_QuadVertices[1].pos.x += width;
+        g_QuadVertices[2].pos.x += width;
+        g_QuadVertices[3].pos.x += width;
+    }
+    if ((vm->anchor & 2) != 0)
+    {
+        g_QuadVertices[0].pos.y += height;
+        g_QuadVertices[1].pos.y += height;
+        g_QuadVertices[2].pos.y += height;
+        g_QuadVertices[3].pos.y += height;
+    }
+
+    return DrawInner(vm, 0);
 }
 
 // FUNCTION: TH07 0x0044fc10
 ZunResult AnmManager::DrawFacingCamera(AnmVm *vm)
 {
-    if (vm->visible == 0 || vm->active == 0 ||
-        vm->color.bytes.a == 0)
+    f32 centerY;
+    f32 centerX;
+
+    if (!vm->visible)
+    {
+        return ZUN_ERROR;
+    }
+    if (!vm->active)
+    {
+        return ZUN_ERROR;
+    }
+    if (vm->color.bytes.a == 0)
     {
         return ZUN_ERROR;
     }
 
-    f32 centerX = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
-    f32 centerY = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
-    f32 fVar1;
+    centerX = (vm->sprite->widthPx * vm->scale.x) / 2.0f;
+    centerY = (vm->sprite->heightPx * vm->scale.y) / 2.0f;
 
     if ((vm->anchor & 1) == 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x = vm->pos.x - centerX;
-        fVar1 = vm->pos.x;
+        g_QuadVertices[0].pos.x =
+            g_QuadVertices[2].pos.x = vm->pos.x - centerX;
+        g_QuadVertices[1].pos.x =
+            g_QuadVertices[3].pos.x = centerX + vm->pos.x;
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x = vm->pos.x;
-        fVar1 = centerX + vm->pos.x;
+        g_QuadVertices[0].pos.x =
+            g_QuadVertices[2].pos.x = vm->pos.x;
+        g_QuadVertices[1].pos.x =
+            g_QuadVertices[3].pos.x = centerX + vm->pos.x + centerX;
     }
-    g_PrimitivesToDrawNoVertexBuf[3].pos.x = centerX + fVar1;
 
     if ((vm->anchor & 2) == 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y = vm->pos.y - centerY;
-        centerX = vm->pos.y;
+        g_QuadVertices[0].pos.y =
+            g_QuadVertices[1].pos.y = vm->pos.y - centerY;
+        g_QuadVertices[2].pos.y =
+            g_QuadVertices[3].pos.y = centerY + vm->pos.y;
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y = vm->pos.y;
-        centerX = centerY + vm->pos.y;
+        g_QuadVertices[0].pos.y =
+            g_QuadVertices[1].pos.y = vm->pos.y;
+        g_QuadVertices[2].pos.y =
+            g_QuadVertices[3].pos.y = centerY + vm->pos.y + centerY;
     }
-    g_PrimitivesToDrawNoVertexBuf[3].pos.y = centerY + centerX;
 
-    g_PrimitivesToDrawNoVertexBuf[0].pos.z = vm->pos.z;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.x =
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.y =
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.x =
-        g_PrimitivesToDrawNoVertexBuf[3].pos.x;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.y =
-        g_PrimitivesToDrawNoVertexBuf[3].pos.y;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
-    g_PrimitivesToDrawNoVertexBuf[3].pos.z =
-        g_PrimitivesToDrawNoVertexBuf[0].pos.z;
+    g_QuadVertices[0].pos.z =
+        g_QuadVertices[1].pos.z =
+            g_QuadVertices[2].pos.z =
+                g_QuadVertices[3].pos.z = vm->pos.z;
 
     return DrawInner(vm, 0);
 }
 
+#pragma var_order(local_4, local_8, local_c, local_10, sinZ, matrix, z, \
+                  local_6c, local_78, local_80, cosZ, local_94)
 // FUNCTION: TH07 0x0044fe00
 ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
 {
-    f32 z = vm->rotation.z;
-    f32 cosZ;
+    f32 local_4;
+    f32 local_8;
+    f32 local_c;
+    f32 local_10;
     f32 sinZ;
+    D3DXMATRIX matrix;
+    f32 z = vm->rotation.z;
+    D3DXVECTOR3 local_6c;
+    D3DXVECTOR3 local_78;
+    D3DXVECTOR3 local_80;
+    f32 cosZ;
 
     sincosf_macro(sinZ, cosZ, z);
+
     D3DXVECTOR3 local_94(0.0f, 0.0f, 0.0f);
-    D3DXMATRIX matrix;
+
     D3DXMatrixIdentity(&matrix);
     matrix.m[3][0] = vm->pos.x;
     matrix.m[3][1] = vm->pos.y;
     matrix.m[3][2] = vm->pos.z;
 
-    D3DXVECTOR3 local_78;
     D3DXVec3Project(&local_78, &local_94, &g_Supervisor.viewport,
                     &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix,
                     &matrix);
-    if (local_78.z < 0.0f || 1.0f < local_78.z)
+
+    if (local_78.z < 0.0f || local_78.z > 1.0f)
     {
         return ZUN_ERROR;
     }
 
-    D3DXVECTOR3 local_6c;
     D3DXVec3Project(&local_6c, &g_Stage.camRight, &g_Supervisor.viewport,
                     &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix,
                     &matrix);
 
-    D3DXVECTOR3 local_84(local_6c.x - local_78.x, local_6c.y - local_78.y,
-                         local_6c.z - local_78.z);
-    f32 local_8 =
-        D3DXVec3Length(&local_84) * 0.5f * vm->sprite->widthPx * vm->scale.x;
-    f32 local_c =
-        D3DXVec3Length(&local_84) * 0.5f * vm->sprite->heightPx * vm->scale.y;
+    local_80 = local_6c - local_78;
 
-    TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[0], -local_8, -local_c, sinZ,
-                      cosZ, local_78.x, local_78.y);
-    TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[1], local_8, -local_c, sinZ,
-                      cosZ, local_78.x, local_78.y);
-    TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[2], -local_8, local_c, sinZ,
-                      cosZ, local_78.x, local_78.y);
-    TranslateRotation(&g_PrimitivesToDrawNoVertexBuf[3], local_8, local_c, sinZ,
-                      cosZ, local_78.x, local_78.y);
+    local_10 = D3DXVec3Length(&local_80) * 0.5f;
+    local_4 = local_10 * vm->sprite->widthPx * vm->scale.x;
+    local_8 = local_10 * vm->sprite->heightPx * vm->scale.y;
 
-    g_PrimitivesToDrawNoVertexBuf[3].pos.z = local_78.z;
-    g_PrimitivesToDrawNoVertexBuf[2].pos.z = local_78.z;
-    g_PrimitivesToDrawNoVertexBuf[1].pos.z = local_78.z;
-    g_PrimitivesToDrawNoVertexBuf[0].pos.z = local_78.z;
+    local_10 = local_78.x;
+    local_c = local_78.y;
+
+    TranslateRotation(&g_QuadVertices[0], -local_4, -local_8, sinZ,
+                      cosZ, local_10, local_c);
+    TranslateRotation(&g_QuadVertices[1], local_4, -local_8, sinZ,
+                      cosZ, local_10, local_c);
+    TranslateRotation(&g_QuadVertices[2], -local_4, local_8, sinZ,
+                      cosZ, local_10, local_c);
+    TranslateRotation(&g_QuadVertices[3], local_4, local_8, sinZ,
+                      cosZ, local_10, local_c);
+
+    g_QuadVertices[0].pos.z =
+        g_QuadVertices[1].pos.z =
+            g_QuadVertices[2].pos.z =
+                g_QuadVertices[3].pos.z = local_78.z;
 
     if ((vm->anchor & 1) != 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[0].pos.x += local_8;
-        g_PrimitivesToDrawNoVertexBuf[1].pos.x += local_8;
-        g_PrimitivesToDrawNoVertexBuf[2].pos.x += local_8;
-        g_PrimitivesToDrawNoVertexBuf[3].pos.x += local_8;
+        g_QuadVertices[0].pos.x += local_4;
+        g_QuadVertices[1].pos.x += local_4;
+        g_QuadVertices[2].pos.x += local_4;
+        g_QuadVertices[3].pos.x += local_4;
     }
     if ((vm->anchor & 2) != 0)
     {
-        g_PrimitivesToDrawNoVertexBuf[0].pos.y += local_c;
-        g_PrimitivesToDrawNoVertexBuf[1].pos.y += local_c;
-        g_PrimitivesToDrawNoVertexBuf[2].pos.y += local_c;
-        g_PrimitivesToDrawNoVertexBuf[3].pos.y += local_c;
+        g_QuadVertices[0].pos.y += local_8;
+        g_QuadVertices[1].pos.y += local_8;
+        g_QuadVertices[2].pos.y += local_8;
+        g_QuadVertices[3].pos.y += local_8;
     }
     return ZUN_SUCCESS;
 }
@@ -1393,19 +1413,19 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     }
     local_84.m[3][2] = vm->pos.z;
 
-    D3DXVec3Project((D3DXVECTOR3 *)&g_PrimitivesToDrawNoVertexBuf[0].pos,
+    D3DXVec3Project((D3DXVECTOR3 *)&g_QuadVertices[0].pos,
                     &this->vertexBufferContents[0].position,
                     &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
                     &g_Supervisor.viewMatrix, &local_84);
-    D3DXVec3Project((D3DXVECTOR3 *)&g_PrimitivesToDrawNoVertexBuf[1].pos,
+    D3DXVec3Project((D3DXVECTOR3 *)&g_QuadVertices[1].pos,
                     &this->vertexBufferContents[1].position,
                     &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
                     &g_Supervisor.viewMatrix, &local_84);
-    D3DXVec3Project((D3DXVECTOR3 *)&g_PrimitivesToDrawNoVertexBuf[2].pos,
+    D3DXVec3Project((D3DXVECTOR3 *)&g_QuadVertices[2].pos,
                     &this->vertexBufferContents[2].position,
                     &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
                     &g_Supervisor.viewMatrix, &local_84);
-    D3DXVec3Project((D3DXVECTOR3 *)&g_PrimitivesToDrawNoVertexBuf[3].pos,
+    D3DXVec3Project((D3DXVECTOR3 *)&g_QuadVertices[3].pos,
                     &this->vertexBufferContents[3].position,
                     &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
                     &g_Supervisor.viewMatrix, &local_84);
@@ -1559,7 +1579,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     else
     {
         g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2,
-                                                g_PrimitivesToDrawUnknown,
+                                                g_Quad3DFallback,
                                                 sizeof(VertexTex1DiffuseXyz));
     }
     return ZUN_SUCCESS;
@@ -2188,7 +2208,7 @@ stop:
             if (vm->interpStartTimes[i] >= vm->interpEndTimes[i].current)
             {
                 t = 1.0f;
-                vm->interpEndTimes[i].Initialize(0);
+                vm->interpEndTimes[i] = 0;
             }
             else
             {
@@ -2304,24 +2324,18 @@ stop:
     {
         vm->uvScrollPos.x -= 1.0f;
     }
-    else
+    else if (vm->uvScrollPos.x < 0.0f)
     {
-        if (vm->uvScrollPos.x < 0.0f)
-        {
-            vm->uvScrollPos.x += 1.0f;
-        }
+        vm->uvScrollPos.x += 1.0f;
     }
     vm->uvScrollPos.y += vm->uvScrollVel.y;
     if (vm->uvScrollPos.y >= 1.0f)
     {
         vm->uvScrollPos.y -= 1.0f;
     }
-    else
+    else if (vm->uvScrollPos.y < 0.0f)
     {
-        if (vm->uvScrollPos.y < 0.0f)
-        {
-            vm->uvScrollPos.y += 1.0f;
-        }
+        vm->uvScrollPos.y += 1.0f;
     }
     vm->currentTimeInScript++;
     this->scriptTicksThisFrame += 1;
@@ -2348,29 +2362,36 @@ void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width,
                                         outlineType, strToPrint, this->textures[spriteDstIdx]);
 }
 
+#pragma var_order(args, text, fontWidth)
 // FUNCTION: TH07 0x004542d0
 void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
                                D3DCOLOR textColor, u32 outlineType,
                                const char *param5, ...)
 {
-    u32 fontWidth = vm->fontWidth;
-    char local_54[516];
+    u32 fontWidth;
+    char text[72];
     va_list args;
+
+    fontWidth = vm->fontWidth;
+
     va_start(args, param5);
-    vsprintf(local_54, param5, args);
+    vsprintf(text, param5, args);
     va_end(args);
 
-    f32 scaleX = vm->sprite->rows;
-    f32 scaleY = vm->sprite->cols;
-    u32 fontHeight = vm->fontHeight;
-    u32 height = vm->sprite->textureHeight;
-    u32 width = vm->sprite->textureWidth;
-    u32 y = vm->sprite->startPixelInclusive.y;
-    u32 x = vm->sprite->startPixelInclusive.x;
+    manager->DrawTextToSprite(
+        vm->sprite->sourceFileIndex,
+        vm->sprite->startPixelInclusive.x,
+        vm->sprite->startPixelInclusive.y,
+        vm->sprite->textureWidth,
+        vm->sprite->textureHeight,
+        fontWidth,
+        vm->fontHeight,
+        textColor,
+        outlineType,
+        text,
+        vm->sprite->cols,
+        vm->sprite->rows);
 
-    manager->DrawTextToSprite(vm->sprite->sourceFileIndex, x, y, width, height,
-                              fontWidth, fontHeight, textColor, outlineType,
-                              local_54, scaleY, scaleX);
     vm->visible = 1;
 }
 
@@ -2755,46 +2776,49 @@ void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
     }
 }
 
+#pragma var_order(uvY, i, vertex, startuvX, uvX, fVar4, num)
 // FUNCTION: TH07 0x00455170
 ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
                                   i32 count)
 {
-    f32 local_18;
-    VertexTex1DiffuseXyzrwh *local_10;
-    i32 local_c;
-
+    f32 num;
+    f32 fVar4;
+    f32 uvX;
+    f32 startuvX;
+    VertexTex1DiffuseXyzrwh *vertex;
+    i32 i;
+    f32 uvY;
     if (count < 3)
     {
         return ZUN_ERROR;
     }
-    else
+
+    startuvX = vm->sprite->uvEnd.x + vm->uvScrollPos.x;
+    num = vm->sprite->uvEnd.x - vm->sprite->uvStart.x;
+    uvY = vm->sprite->uvStart.y + vm->uvScrollPos.y;
+    vertex = vertices;
+    fVar4 = num / (float)((count + 1) / 2 - 1);
+
+    for (i = 0, uvX = startuvX; i < count; i += 2, vertex += 2, uvX = uvX - fVar4)
     {
-        local_10 = vertices;
-        local_18 = vm->sprite->uvEnd.x + vm->uvScrollPos.x;
-        for (local_c = 0; local_c < count; local_c += 2)
-        {
-            local_10->textureUV.x = local_18;
-            local_10->textureUV.y = vm->sprite->uvStart.y + vm->uvScrollPos.y;
-            local_10->color = vm->color;
-            local_10->w = 1.0f;
-            local_10 = local_10 + 2;
-            local_18 = local_18 - vm->sprite->uvEnd.x -
-                       vm->sprite->uvStart.x / (f32)((count + 1) / 2 - 1);
-        }
-        local_10 = vertices + 1;
-        local_18 = vm->sprite->uvEnd.x + vm->uvScrollPos.x;
-        for (local_c = 1; local_c < count; local_c += 2)
-        {
-            local_10->textureUV.x = local_18;
-            local_10->textureUV.y = vm->sprite->uvEnd.y + vm->uvScrollPos.y;
-            local_10->color = vm->color;
-            local_10->w = 1.0f;
-            local_10 += 2;
-            local_18 = local_18 - vm->sprite->uvEnd.x -
-                       vm->sprite->uvStart.x / (f32)((count + 1) / 2 - 1);
-        }
-        return ZUN_SUCCESS;
+        vertex->textureUV.x = uvX;
+        vertex->textureUV.y = uvY;
+        vertex->color.color = vm->color.color;
+        vertex->w = 1.0f;
     }
+
+    uvY = vm->sprite->uvEnd.y + vm->uvScrollPos.y;
+    vertex = vertices + 1;
+
+    for (i = 1, uvX = startuvX; i < count; i += 2, vertex += 2, uvX = uvX - fVar4)
+    {
+        vertex->textureUV.x = uvX;
+        vertex->textureUV.y = uvY;
+        vertex->color.color = vm->color.color;
+        vertex->w = 1.0f;
+    }
+
+    return ZUN_SUCCESS;
 }
 
 // FUNCTION: TH07 0x004552d0

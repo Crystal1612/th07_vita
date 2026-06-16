@@ -91,9 +91,9 @@ address|name|type|size
 004b9e60|g_NumOfFramesInputsWereHeld|global|2
 004b9e64|g_LastFileSize|global|4
 004b9e68|g_UnusedPbg4ArchiveArray|global|320
-004b9fa8|g_PrimitivesToDrawNoVertexBuf|global|112
-004ba018|g_PrimitivesToDrawVertexBuf|global|96
-004ba078|g_PrimitivesToDrawUnknown|global|96
+004b9fa8|g_QuadVertices|global|112
+004ba018|g_QuadTemplate|global|96
+004ba078|g_Quad3DFallback|global|96
 004ba0d8|g_SoundPlayer|global|14796
 004bdad8|g_Player|global|753272
 00575950|g_Supervisor|global|720

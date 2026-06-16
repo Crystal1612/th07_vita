@@ -21,11 +21,11 @@ DX8_PATH = PROJ_DIR / "thirdparty" / "dx8"
 EXE_PATH = RESOURCE_DIR / "th07.exe"
 BUILD_PATH = BUILD_DIR / "th07.exe"
 
-VS_PATH = MSVC_PATH / "PROGRAM FILES" / "MICROSOFT VISUAL STUDIO .NET"
-VC_PATH = VS_PATH / "VC7"
-CL_PATH = VC_PATH / "BIN" / "CL.EXE"
-LINK_PATH = VC_PATH / "BIN" / "LINK.EXE"
-RC_PATH = VC_PATH / "BIN" / "RC.EXE"
+VS_PATH = MSVC_PATH / "Program Files" / "Microsoft Visual Studio .NET"
+VC_PATH = VS_PATH / "Vc7"
+CL_PATH = VC_PATH / "bin" / "cl.exe"
+LINK_PATH = VC_PATH / "bin" / "link.exe"
+RC_PATH = VC_PATH / "bin" / "rc.exe"
 
 SOURCES: List[Path] = list(
     map(
@@ -163,8 +163,8 @@ cflags = [
     "/GF",
     "/Zi",
     "/DNDEBUG",
-    f'/I"{conv_path(VC_PATH / "INCLUDE")}"',
-    f'/I"{conv_path(VC_PATH / "PLATFORMSDK" / "COMMON" / "Include")}"',
+    f'/I"{conv_path(VC_PATH / "include")}"',
+    f'/I"{conv_path(VC_PATH / "PlatformSDK" / "include")}"',
     f'/I"{conv_path(DX8_PATH / "include")}"',
 ]
 
@@ -172,8 +172,8 @@ if args.no_matching:
     cflags.append("/DNON_MATCHING")
 
 lflags = [
-    f'/LIBPATH:"{conv_path(VC_PATH / "LIB")}"',
-    f'/LIBPATH:"{conv_path(VC_PATH / "PLATFORMSDK" / "COMMON" / "lib")}"',
+    f'/LIBPATH:"{conv_path(VC_PATH / "lib")}"',
+    f'/LIBPATH:"{conv_path(VC_PATH / "PlatformSDK" / "lib")}"',
     f'/LIBPATH:"{conv_path(DX8_PATH / "lib")}"',
     "/LTCG",
     "/INCREMENTAL:NO",

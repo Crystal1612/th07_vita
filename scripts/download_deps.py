@@ -24,6 +24,15 @@ def conv_path(path: Path) -> str:
     return "Z:" + str(path.resolve())
 
 
+def conv_path_backslash(path: Path) -> str:
+    """Convert a Unix path to a Windows path, if needed, and convert forward
+    slashes to backslashes."""
+    if sys.platform == "win32":
+        return str(PureWindowsPath(path))
+
+    return "Z:" + str(path.resolve()).replace("/", "\\")
+
+
 def run_program(name: str, *args: str):
     env = os.environ.copy()
     if sys.platform == "win32":
@@ -33,42 +42,6 @@ def run_program(name: str, *args: str):
         env["WINEDEBUG"] = "fixme-all"
         cmd = ["wine", name] + list(args)
     return subprocess.check_call(cmd, env=env)
-
-
-# Oh My God Bruh
-def fixup_msiextract(path: Path):
-    # msiextract makes absolutely no attempt at resolving the mappings and renaming.
-    # this is done to extract the product name from the files (the first part of it)
-    # since we dont really care about the rest.
-    # do files first to avoid issues with renaming directories before files
-    for file in path.rglob("*"):
-        if not file.is_dir():
-            name = file.name
-            if ":" in name and "|" in name:
-                name = name.split("|")[0]
-                name = name.split(":")[0]
-                _ = file.rename(file.with_name(name))
-
-    dirs = [p for p in path.rglob("*") if p.is_dir()]
-
-    dirs.sort(key=lambda p: len(p.parts), reverse=True)
-    for dir in dirs:
-        name = dir.name
-        if ":" in name and "|" in name:
-            name = name.split("|")[0]
-            name = name.split(":")[0]
-            name = name.upper()
-            if not dir.with_name(name).exists():
-                _ = dir.rename(dir.with_name(name))
-        # this is done specifically for the folders in platformsdk.
-        # just get the part out that looks like a directory name
-        elif name.startswith(".:"):
-            name = name.split(":")[1]
-            name = name.upper()
-            if not dir.with_name(name).exists():
-                _ = dir.rename(dir.with_name(name))
-            else:
-                _ = shutil.copytree(dir, dir.with_name(name), dirs_exist_ok=True)
 
 
 def download(url: str, dest_path: Path):
@@ -100,79 +73,67 @@ def download_dx8(path: Path):
         zip.extractall(path)
 
 
-# this is awful
 def download_msvc(path: Path, vs_path: Path, vc_path: Path):
     if not path.exists():
         os.makedirs(path)
-    if (vc_path / "BIN" / "CL.EXE").exists():
+    if (vc_path / "bin" / "cl.exe").exists():
         return
     archive_path = path / "en_vs.net_pro_full.exe"
     if not os.path.exists(archive_path) or archive_path.stat().st_size != MSVC_SIZE:
         download(MSVC_URL, archive_path)
-    with ZipFile(archive_path, "r") as zip:
-        _ = zip.extractall(path)
-    if sys.platform == "win32":
+    with tempfile.TemporaryDirectory() as zipdir:
+        zipdir = Path(zipdir)
+        with ZipFile(archive_path, "r") as zip:
+            _ = zip.extractall(zipdir)
         with tempfile.TemporaryDirectory() as tempdir:
-            _ = subprocess.check_call(
-                [
-                    "msiexec",
-                    "/a",
-                    path / "VS_SETUP.MSI",
-                    "/qb",
-                    f"TARGETDIR={tempdir}",
-                ]
-            )
+            tempdir = Path(tempdir)
+            if sys.platform == "win32":
+                _ = subprocess.check_call(
+                    [
+                        "msiexec",
+                        "/a",
+                        zipdir / "VS_SETUP.MSI",
+                        "/qb",
+                        f"TARGETDIR={tempdir}",
+                    ]
+                )
+            else:
+                _ = subprocess.check_call(
+                    [
+                        "wine",
+                        "msiexec",
+                        "/a",
+                        conv_path_backslash(zipdir / "VS_SETUP.MSI"),
+                        "/qb",
+                        f"TARGETDIR={conv_path_backslash(tempdir)}",
+                    ]
+                )
             _ = shutil.copytree(
-                Path(tempdir) / "Program Files",
+                tempdir / "Program Files",
                 path / "Program Files",
                 dirs_exist_ok=True,
             )
-    else:
-        _ = subprocess.check_call(["msiextract", "-C", path, path / "VS_SETUP.MSI"])
-        fixup_msiextract(path)
-        # lets just assume you're on a case sensitive filesystem
-        _ = shutil.copytree(
-            path / "Program Files", path / "PROGRAM FILES", dirs_exist_ok=True
-        )
-        _ = shutil.rmtree(path / "Program Files")
 
-    # we dont really need anything that isnt already inside of program files
-    for file in path.iterdir():
-        if (
-            file.name.upper() == "PROGRAM FILES"
-            or file.name == "en_vs.net_pro_full.exe"
-        ):
-            continue
-        if file.is_file():
-            try:
-                os.remove(file)
-            except PermissionError:
-                pass
-        elif file.is_dir():
-            try:
-                shutil.rmtree(file)
-            except PermissionError:
-                pass
-    for file in (vc_path / "INCLUDE").iterdir():
+    for file in (vc_path / "include").iterdir():
         _ = shutil.move(file, file.with_name(file.name.lower()))
-    for file in (vc_path / "PLATFORMSDK" / "COMMON" / "Include").iterdir():
+    for file in (vc_path / "PlatformSDK" / "Include").iterdir():
         _ = shutil.move(file, file.with_name(file.name.lower()))
     # cl dll dependencies
-    _ = (vs_path / "COMMON7" / "IDE" / "MSPDB70.DLL").rename(
-        vc_path / "BIN" / "MSPDB70.DLL"
+    _ = (vs_path / "Common7" / "IDE" / "mspdb70.dll").rename(
+        vc_path / "bin" / "mspdb70.dll"
     )
-    _ = (vs_path / "COMMON7" / "IDE" / "MSOBJ10.DLL").rename(
-        vc_path / "BIN" / "MSOBJ10.DLL"
+    _ = (vs_path / "Common7" / "IDE" / "msobj10.dll").rename(
+        vc_path / "bin" / "msobj10.dll"
     )
-    _ = (vs_path / "COMMON7" / "PACKAGES" / "DEBUGGER" / "MSVCR70.DLL").rename(
-        vc_path / "BIN" / "MSVCR70.DLL"
+    _ = (vs_path / "Common7" / "Packages" / "Debugger" / "msvcr70.dll").rename(
+        vc_path / "bin" / "msvcr70.dll"
     )
 
 
 # provides pragma var_order
 def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path):
-    c1xx_path = vc_path / "BIN" / "C1XX.DLL"
-    orig_path = vc_path / "BIN" / "C1XXOrig.dll"
+    c1xx_path = vc_path / "bin" / "c1xx.dll"
+    orig_path = vc_path / "bin" / "c1xxorig.dll"
 
     if orig_path.exists() and c1xx_path.exists():
         return
@@ -182,13 +143,13 @@ def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path):
         _ = shutil.copy(c1xx_path, orig_path)
     _ = run_program(
         str(cl_path),
-        f'/I"{vc_path / "INCLUDE"}"',
-        f'/I"{vc_path / "PLATFORMSDK" / "COMMON" / "Include"}"',
+        f'/I"{vc_path / "include"}"',
+        f'/I"{vc_path / "PlatformSDK" / "Include"}"',
         "/LD",
         conv_path(msvc_path / "hackery.cpp"),
         "/link",
-        f"/LIBPATH:{vc_path / 'LIB'}",
-        f"/LIBPATH:{vc_path / 'PLATFORMSDK' / 'COMMON' / 'lib'}",
-        f"/OUT:{msvc_path / 'C1XX.DLL'}",
+        f"/LIBPATH:{vc_path / 'lib'}",
+        f"/LIBPATH:{vc_path / 'PlatformSDK' / 'lib'}",
+        f"/OUT:{msvc_path / 'c1xx.dll'}",
     )
-    _ = (msvc_path / "C1XX.DLL").replace(c1xx_path)
+    _ = (msvc_path / "c1xx.dll").replace(c1xx_path)

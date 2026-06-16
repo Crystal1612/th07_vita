@@ -25,7 +25,7 @@ struct VertexTex1DiffuseXyz
     D3DXVECTOR2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1DiffuseXyz) == 0x18);
-extern VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
+extern VertexTex1DiffuseXyz g_Quad3DFallback[4];
 
 struct VertexTex1Xyzrwh
 {
@@ -34,7 +34,7 @@ struct VertexTex1Xyzrwh
     D3DXVECTOR2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1Xyzrwh) == 0x18);
-extern VertexTex1Xyzrwh g_PrimitivesToDrawVertexBuf[4];
+extern VertexTex1Xyzrwh g_QuadTemplate[4];
 
 struct VertexTex1DiffuseXyzrwh
 {
@@ -46,7 +46,7 @@ struct VertexTex1DiffuseXyzrwh
     D3DXVECTOR2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1DiffuseXyzrwh) == 0x1c);
-extern VertexTex1DiffuseXyzrwh g_PrimitivesToDrawNoVertexBuf[4];
+extern VertexTex1DiffuseXyzrwh g_QuadVertices[4];
 
 struct RenderVertexInfo
 {
