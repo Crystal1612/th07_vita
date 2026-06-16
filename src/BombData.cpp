@@ -172,7 +172,7 @@ void BombData::BombReimuACalc(Player *player)
         }
         subInfo->angle = utils::AddNormalizeAngle(angle, 0.0f);
         subInfo->counter = 0;
-        player->bombDamageBoxes[i].payload = 0;
+        player->bombDamageBoxes[i].damageAccumulator = 0;
         vm = subInfo->vms;
         for (j = 0; j < 4; j++, vm++)
         {
@@ -366,7 +366,7 @@ void BombData::BombReimuACalcFocus(Player *player)
                 AngleToVector(&subInfo->bombRegionVelocities, tmpFloat2,
                               subInfo->accel);
 
-                player->bombDamageBoxes[i].payload = 0;
+                player->bombDamageBoxes[i].damageAccumulator = 0;
                 vm = subInfo->vms;
                 for (j = 0; j < 4; j++, vm++)
                 {
@@ -426,7 +426,7 @@ void BombData::BombReimuACalcFocus(Player *player)
                 player->bombDamageBoxes[i].lifetime = 8;
                 player->SpawnBombEffect(&subInfo->bombRegionPositions, 128.0f,
                                         0.0f, 0, ITEM_POINT_BULLET);
-                if (player->bombDamageBoxes[i].payload >= 100 ||
+                if (player->bombDamageBoxes[i].damageAccumulator >= 100 ||
                     bombInfo->bombTimer >= bombInfo->bombDuration - 30)
                 {
                     g_EffectManager.SpawnParticles(6, &subInfo->bombRegionPositions,
@@ -867,7 +867,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
             player->bombInfo.subInfo[i].bombRegionAcceleration.z = 0.0f;
             g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB_MARISA_A_FOCUS, 0);
             BombEffects::RegisterChain(1, 0x78, 4, 1, 0);
-            player->bombDamageBoxes[i].payload = 0;
+            player->bombDamageBoxes[i].damageAccumulator = 0;
         }
     }
     subInfo = player->bombInfo.subInfo;
@@ -896,7 +896,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
         }
         player->SpawnBombEffect(&subInfo->bombRegionPositions, 96.0f, 0.0f, 0,
                                 ITEM_POINT_BULLET);
-        if (player->bombDamageBoxes[i].payload < 80)
+        if (player->bombDamageBoxes[i].damageAccumulator < 80)
         {
             player->bombDamageBoxes[i].size.x = 128.0f;
             player->bombDamageBoxes[i].size.y = 128.0f;
@@ -1244,7 +1244,7 @@ void BombData::BombSakuyaACalc(Player *player)
                     subInfo->bombRegionPositions =
                         player->bombStartPos + subInfo->bombRegionVelocities;
                     subInfo->bombRegionVelocities.z = 0.0f;
-                    player->bombDamageBoxes[i].payload = 0;
+                    player->bombDamageBoxes[i].damageAccumulator = 0;
                     spawnsRemaining--;
                 }
                 continue;
@@ -1257,7 +1257,7 @@ void BombData::BombSakuyaACalc(Player *player)
                 cosf(subInfo->angle) * subInfo->speed;
             subInfo->bombRegionVelocities.y =
                 sinf(subInfo->angle) * subInfo->speed;
-            if (player->bombDamageBoxes[i].payload < 30)
+            if (player->bombDamageBoxes[i].damageAccumulator < 30)
             {
                 subInfo->bombRegionPositions +=
                     subInfo->bombRegionVelocities *
@@ -1269,10 +1269,10 @@ void BombData::BombSakuyaACalc(Player *player)
                 player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
                 player->bombDamageBoxes[i].lifetime = 10;
             }
-            else if (player->bombDamageBoxes[i].payload < 999)
+            else if (player->bombDamageBoxes[i].damageAccumulator < 999)
             {
                 g_AnmManager->ExecuteAnmIdx(subInfo->vms, 0x460);
-                player->bombDamageBoxes[i].payload = 999;
+                player->bombDamageBoxes[i].damageAccumulator = 999;
             }
             if (g_GameManager.IsInBounds(subInfo->bombRegionPositions.x,
                                          subInfo->bombRegionPositions.y, 64.0f,
@@ -1384,7 +1384,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
                 player->positionCenter + subInfo->bombRegionVelocities;
             subInfo->timer = 0;
             subInfo->bombRegionVelocities.z = 0.0f;
-            player->bombDamageBoxes[i].payload = 0;
+            player->bombDamageBoxes[i].damageAccumulator = 0;
         }
         g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB_REIMARI, 0);
         BombEffects::RegisterChain(1, 0x78, 4, 1, 0);
@@ -1426,7 +1426,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
             subInfo->bombRegionVelocities.x = 0.0f;
             subInfo->bombRegionVelocities.y = 0.0f;
         }
-        if (player->bombDamageBoxes[i].payload == 0)
+        if (player->bombDamageBoxes[i].damageAccumulator == 0)
         {
             subInfo->bombRegionPositions +=
                 subInfo->bombRegionVelocities *
@@ -1439,10 +1439,10 @@ void BombData::BombSakuyaACalcFocus(Player *player)
             player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
             player->bombDamageBoxes[i].lifetime = 22;
         }
-        else if (player->bombDamageBoxes[i].payload < 999)
+        else if (player->bombDamageBoxes[i].damageAccumulator < 999)
         {
             g_AnmManager->ExecuteAnmIdx(subInfo->vms, 0x460);
-            player->bombDamageBoxes[i].payload = 999;
+            player->bombDamageBoxes[i].damageAccumulator = 999;
             g_EffectManager.SpawnParticles(
                 0, &player->bombInfo.subInfo[i].bombRegionPositions, 1,
                 0xffff80ff);

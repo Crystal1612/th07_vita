@@ -256,20 +256,20 @@ LAB_0040578a:
                 if (arg->timersMax[0] != 0)
                 {
                     UpdateScriptAndCamera(arg, 0, &arg->camPos, &arg->camPosStart,
-                                          &arg->camPosEnd, &arg->camPosBezier2,
-                                          &arg->camPosBezier1);
+                                          &arg->camPosEnd, &arg->camPosTangentStart,
+                                          &arg->camPosTangentEnd);
                 }
                 if (arg->timersMax[1] != 0)
                 {
                     UpdateScriptAndCamera(arg, 1, &arg->camLookAt, &arg->camLookAtStart,
-                                          &arg->camLookAtEnd, &arg->camLookAtBezier2,
-                                          &arg->camLookAtBezier1);
+                                          &arg->camLookAtEnd, &arg->camLookAtTangentStart,
+                                          &arg->camLookAtTangentEnd);
                 }
                 if (arg->timersMax[2] != 0)
                 {
                     UpdateScriptAndCamera(arg, 2, &arg->camUp, &arg->camUpStart,
-                                          &arg->camUpEnd, &arg->camUpBezier2,
-                                          &arg->camUpBezier1);
+                                          &arg->camUpEnd, &arg->camUpTangentStart,
+                                          &arg->camUpTangentEnd);
                 }
                 if (arg->timersMax[3] != 0)
                 {
@@ -446,10 +446,10 @@ LAB_0040578a:
             arg->camPosEnd = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x10:
-            (arg->camPosBezier2) = *(D3DXVECTOR3 *)local_8->args;
+            (arg->camPosTangentStart) = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x11:
-            (arg->camPosBezier1) = *(D3DXVECTOR3 *)local_8->args;
+            (arg->camPosTangentEnd) = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x12:
             arg->timersMax[0] = local_8->args[0].i;
@@ -463,10 +463,10 @@ LAB_0040578a:
             arg->camLookAtEnd = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x15:
-            arg->camLookAtBezier2 = *(D3DXVECTOR3 *)local_8->args;
+            arg->camLookAtTangentStart = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x16:
-            arg->camLookAtBezier1 = *(D3DXVECTOR3 *)local_8->args;
+            arg->camLookAtTangentEnd = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x17:
             arg->timersMax[1] = local_8->args[0].i;
@@ -480,10 +480,10 @@ LAB_0040578a:
             arg->camUpEnd = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x1a:
-            arg->camUpBezier2 = *(D3DXVECTOR3 *)local_8->args;
+            arg->camUpTangentStart = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x1b:
-            arg->camUpBezier1 = *(D3DXVECTOR3 *)local_8->args;
+            arg->camUpTangentEnd = *(D3DXVECTOR3 *)local_8->args;
             break;
         case 0x1c:
             arg->timersMax[2] = local_8->args[0].i;

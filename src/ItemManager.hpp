@@ -49,7 +49,7 @@ struct Item
     ZunTimer timer;
     i8 itemType;
     i8 isInUse;
-    i8 isArrowSprite;
+    i8 isOnscreen;
     i8 state;
     i8 autoCollect;
     // pad 3

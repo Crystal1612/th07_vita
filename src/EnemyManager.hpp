@@ -70,7 +70,7 @@ struct Enemy
     D3DXVECTOR3 position;
     D3DXVECTOR3 axisSpeed;
     D3DXVECTOR3 prevPos;
-    D3DXVECTOR3 finalPos;
+    D3DXVECTOR3 deltaPos;
     D3DXVECTOR3 hitboxSize;
     D3DXVECTOR3 grazeSize;
     f32 angle;

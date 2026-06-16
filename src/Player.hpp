@@ -54,7 +54,10 @@ struct BombProjectile
     D3DXVECTOR3 pos;
     D3DXVECTOR3 size;
     i32 lifetime;
-    i32 payload;
+    union {
+        i32 itemType;
+        i32 damageAccumulator;
+    };
 };
 C_ASSERT(sizeof(BombProjectile) == 0x20);
 
@@ -159,9 +162,9 @@ struct Player
     void Respawn();
     void ScoreGraze(D3DXVECTOR3 *param_1);
     BombProjectile *SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
-                                    i32 lifetime, i32 payload);
+                                    i32 lifetime, i32 itemType);
     BombProjectile *SpawnBombProjectile(D3DXVECTOR3 *centerPosition, f32 posZ,
-                                        f32 size, i32 payload);
+                                        f32 size, i32 itemType);
     static void SpawnBullets(Player *player, u32 timer);
     void StartFireBulletTimer();
 

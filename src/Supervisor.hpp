@@ -116,6 +116,11 @@ struct Supervisor
     static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
                                                void *param_2);
 
+    i32 VsyncEnabled()
+    {
+        return this->vsyncEnabled;
+    }
+
     HINSTANCE hInstance;
     IDirect3D8 *d3dIface;
     LPDIRECT3DDEVICE8 d3dDevice;

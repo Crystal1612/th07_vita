@@ -14,48 +14,16 @@
 
 // GLOBAL: TH07 0x0049ecf8
 i32 g_FullPowerScoreBonus[30] = {10, 20, 30, 40, 50, 60, 70, 80,
-                                  90, 100, 200, 300, 400, 500, 600, 700,
-                                  800, 900, 1000, 2000, 3000, 4000, 5000,
-                                  6000, 7000, 8000, 9000, 10000, 11000, 12000};
+                                 90, 100, 200, 300, 400, 500, 600, 700,
+                                 800, 900, 1000, 2000, 3000, 4000, 5000,
+                                 6000, 7000, 8000, 9000, 10000, 11000, 12000};
 
 // GLOBAL: TH07 0x0049ed74
 i32 g_PowerLevels[9] = {8, 16, 32, 48, 64, 80, 96, 128, 999};
 
 // GLOBAL: TH07 0x0049efa0
-u8 g_ItemDropTable[32] = {
-    0,
-    0,
-    1,
-    0,
-    1,
-    0,
-    0,
-    7,
-    1,
-    1,
-    0,
-    0,
-    7,
-    1,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0,
-    1,
-    0,
-    7,
-    1,
-    1,
-    1,
-    0,
-    2,
-};
+u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
+                          1, 0, 1, 0, 1, 0, 1, 0, 7, 1, 1, 1, 0, 2};
 
 // GLOBAL: TH07 0x00575c70
 ItemManager g_ItemManager;
@@ -161,7 +129,7 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
         item->sprite.color.color = 0xffffffff;
         item->sprite.zWriteDisable = 1;
         item->autoCollect = 0;
-        item->isArrowSprite = 1;
+        item->isOnscreen = 1;
         break;
     }
 
@@ -648,10 +616,10 @@ void ItemManager::OnDraw()
         if (item->currentPosition.y < -8.0f)
         {
             item->sprite.pos.y = 8.0f + g_GameManager.arcadeRegionTopLeftPos.y;
-            if (item->isArrowSprite != 0)
+            if (item->isOnscreen)
             {
                 g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 0x2b6);
-                item->isArrowSprite = 0;
+                item->isOnscreen = 0;
                 item->sprite.zWriteDisable = 1;
             }
             local_8 = 255 - (i32)((8.0f - item->currentPosition.y) * 255.0f / 128.0f);
@@ -664,10 +632,10 @@ void ItemManager::OnDraw()
         }
         else
         {
-            if (item->isArrowSprite == 0)
+            if (!item->isOnscreen)
             {
                 g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 0x2ac);
-                item->isArrowSprite = 1;
+                item->isOnscreen = 1;
                 item->sprite.color.color = 0xffffffff;
                 item->sprite.zWriteDisable = 1;
             }

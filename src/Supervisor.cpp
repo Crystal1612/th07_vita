@@ -1089,62 +1089,60 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         g_GameErrorContext.Log("16bit は取り込めない\r\n");
         break;
     case D3DFMT_X8R8G8B8:
-        local_1c = (BITMAPINFO *)ZunMemory::Alloc(sizeof(BITMAPINFO));
+        local_1c = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
         if (local_1c == NULL)
         {
             // STRING: TH07 0x00496f60
             g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
+            break;
         }
-        else
-        {
-            memset(local_1c, 0, sizeof(BITMAPINFO));
-            local_24 = 1920;
-            local_18 = malloc(local_24 * 480);
-            if (local_18 == NULL)
-            {
-                g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
-            }
-            else
-            {
-                local_14.bfSize += local_24 * 0x1e0;
-                local_1c->bmiHeader.biBitCount = 0x18;
-                local_1c->bmiHeader.biSize = 0x28;
-                local_1c->bmiHeader.biWidth = 640;
-                local_1c->bmiHeader.biHeight = 480;
-                local_1c->bmiHeader.biPlanes = 1;
-                local_1c->bmiHeader.biCompression = 0;
-                backBuffer->LockRect(&local_40, NULL, 0);
-                bytesPerRow = 0;
-                for (y = 479; -1 < y; y--, bytesPerRow++)
-                {
-                    local_2c = (u8 *)((u8 *)local_18 + local_24 * bytesPerRow);
-                    local_28 = (u8 *)((u8 *)local_40.pBits + local_40.Pitch * y);
-                    for (x = 0; x < 640; x++)
-                    {
-                        *local_2c = *local_28;
-                        local_28++;
-                        local_2c++;
-                        *local_2c = *local_28;
-                        local_28++;
-                        local_2c++;
-                        *local_2c = *local_28;
-                        local_28 += 2;
-                        local_2c++;
-                    }
-                }
-                backBuffer->UnlockRect();
-                hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, 0x80, NULL);
-                if (hFile == INVALID_HANDLE_VALUE)
-                {
-                    break;
-                }
 
-                WriteFile(hFile, &local_14, 0xe, &local_44, NULL);
-                WriteFile(hFile, local_1c, 0x28, &local_44, NULL);
-                WriteFile(hFile, local_18, local_24 * 0x1e0, &local_44, NULL);
-                CloseHandle(hFile);
+        memset(local_1c, 0, sizeof(BITMAPINFO));
+        local_24 = 1920;
+        local_18 = malloc(local_24 * 480);
+        if (local_18 == NULL)
+        {
+            g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
+            break;
+        }
+
+        local_14.bfSize += local_24 * 0x1e0;
+        local_1c->bmiHeader.biBitCount = 0x18;
+        local_1c->bmiHeader.biSize = 0x28;
+        local_1c->bmiHeader.biWidth = 640;
+        local_1c->bmiHeader.biHeight = 480;
+        local_1c->bmiHeader.biPlanes = 1;
+        local_1c->bmiHeader.biCompression = 0;
+        backBuffer->LockRect(&local_40, NULL, 0);
+        bytesPerRow = 0;
+        for (y = 479; -1 < y; y--, bytesPerRow++)
+        {
+            local_2c = (u8 *)((u8 *)local_18 + local_24 * bytesPerRow);
+            local_28 = (u8 *)((u8 *)local_40.pBits + local_40.Pitch * y);
+            for (x = 0; x < 640; x++)
+            {
+                *local_2c = *local_28;
+                local_28++;
+                local_2c++;
+                *local_2c = *local_28;
+                local_28++;
+                local_2c++;
+                *local_2c = *local_28;
+                local_28 += 2;
+                local_2c++;
             }
         }
+        backBuffer->UnlockRect();
+        hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, 0x80, NULL);
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
+            break;
+        }
+
+        WriteFile(hFile, &local_14, 0xe, &local_44, NULL);
+        WriteFile(hFile, local_1c, 0x28, &local_44, NULL);
+        WriteFile(hFile, local_18, local_24 * 0x1e0, &local_44, NULL);
+        CloseHandle(hFile);
         break;
     default:
         // STRING: TH07 0x00496f48
@@ -1246,9 +1244,9 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             g_GameErrorContext.Log("コンフィグデータが異常でしたので再初期化しました\r\n");
             goto init;
         }
+        g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
-    g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
-    g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
+    g_Supervisor.cfg.opts |= 1;
     if ((this->cfg.opts >> 1 & 1) != 0)
     {
         // STRING: TH07 0x00496e64

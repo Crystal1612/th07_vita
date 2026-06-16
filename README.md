@@ -13,8 +13,9 @@ This project requires the original th07.exe 1.00b executable for extracting the 
 ### Dependencies
 
 * uv
-* msitools (for msiextract) (Linux only)
+* ninja
 * wine (Linux only)
+    * Note: extracting the MSVC msi is completely broken on older versions of wine. If you face an issue with extracting, try using the latest devel version of wine.
 
 Run the python script in the root directory of the repo with uv:
 
@@ -23,6 +24,12 @@ uv run scripts/build.py
 ```
 
 The resulting build can be found at `build/th07.exe`.
+
+This executable _will_ crash after some time (specifically after 3999 Supervisor cycles). It'll fail the integrity check due to the executable not (yet?) being completely byte accurate (including checksum) to the original. In that case, you can try building a nonmatching build instead, which will disable this integrity check:
+
+```
+uv run scripts/build.py --no-matching
+```
 
 If you don't have the original executable, you can still build the program without the icon.
 

@@ -939,8 +939,8 @@ i32 Player::CheckCollisionWithEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
                     (fVar6 <= pDVar2->y * 0.5f + this->bombDamageBoxes[i].pos.y))
                 {
                     local_34 += this->bombDamageBoxes[i].lifetime;
-                    this->bombDamageBoxes[i].payload =
-                        (this->bombDamageBoxes[i].payload +
+                    this->bombDamageBoxes[i].damageAccumulator =
+                        (this->bombDamageBoxes[i].damageAccumulator +
                          this->bombDamageBoxes[i].lifetime);
                     this->bombParticleTime = this->bombParticleTime + 1;
                     if ((this->bombParticleTime % 4) == 0)
@@ -996,7 +996,7 @@ i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
                   bombTopLeft.y > bulletBottomRight.y ||
                   bombBottomRight.y < bulletTopLeft.y))
             {
-                this->itemType = bombProjectile->payload;
+                this->itemType = bombProjectile->itemType;
                 return 2;
             }
         }
@@ -1007,7 +1007,7 @@ i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
             if (bombX * bombX + bombY * bombY <
                 bombProjectile->size.y * bombProjectile->size.y)
             {
-                this->itemType = bombProjectile->payload;
+                this->itemType = bombProjectile->itemType;
                 return 2;
             }
         }
@@ -2062,7 +2062,7 @@ void Player::BreakBorderNaturally()
 #pragma var_order(i, bomb)
 // FUNCTION: TH07 0x00441800
 BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
-                                            f32 posZ, f32 size, i32 payload)
+                                            f32 posZ, f32 size, i32 itemType)
 {
     BombProjectile *bomb;
     i32 i;
@@ -2080,14 +2080,14 @@ BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
     bomb->pos.z = posZ;
     bomb->size.x = size;
     bomb->lifetime = 0;
-    bomb->payload = payload;
+    bomb->itemType = itemType;
     return bomb;
 }
 
 #pragma var_order(local_8, bomb)
 // FUNCTION: TH07 0x004418b0
 BombProjectile *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
-                                        i32 lifetime, i32 payload)
+                                        i32 lifetime, i32 itemType)
 {
     BombProjectile *bomb;
     i32 i;
@@ -2105,7 +2105,7 @@ BombProjectile *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
     bomb->size.y = sizeY;
     bomb->size.z = sizeZ;
     bomb->lifetime = lifetime;
-    bomb->payload = payload;
+    bomb->itemType = itemType;
     return bomb;
 }
 

@@ -51,7 +51,7 @@ ChainElem g_EnemyManagerDrawChain2;
 // FUNCTION: TH07 0x0041e920
 void Enemy::Move()
 {
-    this->finalPos = this->position - this->prevPos;
+    this->deltaPos = this->position - this->prevPos;
     this->prevPos = this->position;
     if (!this->mirror)
     {

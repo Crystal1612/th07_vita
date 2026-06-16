@@ -212,12 +212,12 @@ i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
         return enemy->moveInterpStartPos.y;
     case VAR_MOVE_INTERP_ORIGIN_Z:
         return enemy->moveInterpStartPos.z;
-    case VAR_FINAL_POS_X:
-        return enemy->finalPos.x;
-    case VAR_FINAL_POS_Y:
-        return enemy->finalPos.y;
-    case VAR_FINAL_POS_Z:
-        return enemy->finalPos.z;
+    case VAR_DELTA_POS_X:
+        return enemy->deltaPos.x;
+    case VAR_DELTA_POS_Y:
+        return enemy->deltaPos.y;
+    case VAR_DELTA_POS_Z:
+        return enemy->deltaPos.z;
     case VAR_BOSS_LIFE_THRESHOLD1:
         return enemy->lifeCallbackThreshold[0];
     case VAR_BOSS_LIFE_THRESHOLD2:
@@ -433,12 +433,12 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
         return enemy->moveInterp.y;
     case VAR_MOVE_INTERP_TARGET_Z:
         return enemy->moveInterp.z;
-    case VAR_FINAL_POS_X:
-        return enemy->finalPos.x;
-    case VAR_FINAL_POS_Y:
-        return enemy->finalPos.y;
-    case VAR_FINAL_POS_Z:
-        return enemy->finalPos.z;
+    case VAR_DELTA_POS_X:
+        return enemy->deltaPos.x;
+    case VAR_DELTA_POS_Y:
+        return enemy->deltaPos.y;
+    case VAR_DELTA_POS_Z:
+        return enemy->deltaPos.z;
     case VAR_BOSS_LIFE_THRESHOLD1:
         return (f32)enemy->lifeCallbackThreshold[0];
     case VAR_BOSS_LIFE_THRESHOLD2:

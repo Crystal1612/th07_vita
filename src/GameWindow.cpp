@@ -43,63 +43,59 @@ LARGE_INTEGER g_LastPerfCounter;
 LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
                                          LPARAM lParam)
 {
-    if (uMsg < 0x1d)
+    switch (uMsg)
     {
-        if (uMsg == WM_ACTIVATEAPP)
+    case WM_ERASEBKGND:
+        return 1;
+    case MM_MOM_DONE:
+        if (g_Supervisor.midiOutput != NULL)
         {
-            g_GameWindow.isAppActive = wParam;
-            g_GameWindow.isAppInactive = (i32)(wParam == 0);
+            g_Supervisor.midiOutput->UnprepareHeader((LPMIDIHDR)lParam);
+        }
+        break;
+    case WM_ACTIVATEAPP:
+        g_GameWindow.isAppActive = wParam;
+        if (g_GameWindow.isAppActive)
+        {
+            g_GameWindow.isAppInactive = 0;
         }
         else
         {
-            if (uMsg == WM_CLOSE)
-            {
-                g_GameWindow.isAppClosing = 1;
-                return 1;
-            }
-            if (uMsg == WM_ERASEBKGND)
-            {
-                return 1;
-            }
+            g_GameWindow.isAppInactive = 1;
         }
-    }
-    else
-    {
-        if (uMsg == WM_SETCURSOR)
+        break;
+    case WM_SETCURSOR:
+        if (!g_Supervisor.cfg.windowed)
         {
-            if (g_Supervisor.cfg.windowed == 0)
-            {
-                if (g_GameWindow.isAppInactive == 0)
-                {
-                    ShowCursor(0);
-                    SetCursor(NULL);
-                }
-                else
-                {
-                    SetCursor(LoadCursorA(NULL, IDC_ARROW));
-                    ShowCursor(1);
-                }
-            }
-            else
+            if (g_GameWindow.isAppInactive)
             {
                 SetCursor(LoadCursorA(NULL, IDC_ARROW));
                 ShowCursor(1);
             }
-            return 1;
+            else
+            {
+                ShowCursor(0);
+                SetCursor(NULL);
+            }
         }
-        if ((uMsg == 609) && (g_Supervisor.midiOutput != NULL))
+        else
         {
-            g_Supervisor.midiOutput->UnprepareHeader((LPMIDIHDR)lParam);
+            SetCursor(LoadCursorA(NULL, IDC_ARROW));
+            ShowCursor(1);
         }
+        return 1;
+    case WM_CLOSE:
+        g_GameWindow.isAppClosing = 1;
+        return 1;
     }
     return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 }
 
-#pragma var_order(i, local_10c)
+#pragma var_order(i, snapshotPath)
 // FUNCTION: TH07 0x004345c0
 void GameWindow::Present()
 {
-    char local_10c[252];
+    char snapshotPath[252];
     i32 i;
 
     if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
@@ -117,15 +113,15 @@ void GameWindow::Present()
         for (i = 0; i < 1000; i++)
         {
             // STRING: TH07 0x00497c08
-            sprintf(local_10c, "snapshot/th%.3d.bmp", i);
-            if (FileSystem::CheckFileExists(local_10c) == 0)
+            sprintf(snapshotPath, "snapshot/th%.3d.bmp", i);
+            if (FileSystem::CheckFileExists(snapshotPath) == 0)
             {
                 break;
             }
         }
         if (i < 1000)
         {
-            g_Supervisor.SnapshotScreen(local_10c);
+            g_Supervisor.SnapshotScreen(snapshotPath);
         }
     }
     if (g_Supervisor.renderSkipFrames != 0)
@@ -134,126 +130,133 @@ void GameWindow::Present()
     }
 }
 
+#pragma var_order(chainRes, perfCounter, perfDiff, curTime, timeDiff)
 // FUNCTION: TH07 0x004346e0
 RenderResult GameWindow::Render()
 {
-    DWORD curTimeReg;
-    f64 local_2c;
-    f64 local_1c;
-    LARGE_INTEGER local_10;
-    i32 local_8;
-    f64 slowDown;
+    f64 timeDiff;
+    f64 curTime;
+    f64 perfDiff;
+    LARGE_INTEGER perfCounter;
+    i32 chainRes;
 
-    if (this->isAppActive != 0)
+    if (this->isAppActive == 0)
+    {
+        return RENDER_RESULT_KEEP_RUNNING;
+    }
+
+    if (this->curFrame == 0)
+    {
+    begin_loop:
+        if ((i32)g_Supervisor.cfg.frameskipConfig <= (i32)this->curFrame)
+        {
+            g_Supervisor.d3dDevice->BeginScene();
+            g_AnmManager->ResetVertexBuffer();
+            g_Supervisor.fogEnabled = 0xff;
+            g_Supervisor.DisableFog();
+            g_Chain.RunDrawChain();
+            g_AnmManager->Flush();
+            g_Supervisor.d3dDevice->SetTexture(0, NULL);
+            g_Supervisor.d3dDevice->EndScene();
+        }
+
+        g_AnmManager->Flush();
+        g_Supervisor.viewport.X = 0;
+        g_Supervisor.viewport.Y = 0;
+        g_Supervisor.viewport.Width = 640;
+        g_Supervisor.viewport.Height = 480;
+        g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
+
+        chainRes = g_Chain.RunCalcChain();
+        g_SoundPlayer.ProcessQueues();
+
+        if (chainRes == 0)
+        {
+            return RENDER_RESULT_EXIT_SUCCESS;
+        }
+        if (chainRes == -1)
+        {
+            return RENDER_RESULT_EXIT_ERROR;
+        }
+
+        this->curFrame++;
+    }
+
+LAB_00434820:
+    if (g_Supervisor.cfg.windowed != 0 || g_Supervisor.VsyncEnabled())
     {
         if (this->curFrame != 0)
         {
-            goto LAB_00434820;
-        }
-    LAB_00434708:
-        do
-        {
-            while (true)
-            {
-                if ((i32)g_Supervisor.cfg.frameskipConfig <= (i32)this->curFrame)
-                {
-                    g_Supervisor.d3dDevice->BeginScene();
-                    g_AnmManager->ResetVertexBuffer();
-                    g_Supervisor.fogEnabled = 0xff;
-                    g_Supervisor.DisableFog();
-                    g_Chain.RunDrawChain();
-                    g_AnmManager->Flush();
-                    g_Supervisor.d3dDevice->SetTexture(0, NULL);
-                    g_Supervisor.d3dDevice->EndScene();
-                }
-                g_AnmManager->Flush();
-                g_Supervisor.viewport.X = 0;
-                g_Supervisor.viewport.Y = 0;
-                g_Supervisor.viewport.Width = 640;
-                g_Supervisor.viewport.Height = 480;
-                g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-                local_8 = g_Chain.RunCalcChain();
-                g_SoundPlayer.ProcessQueues();
-                if (local_8 == 0)
-                {
-                    return RENDER_RESULT_EXIT_SUCCESS;
-                }
-                if (local_8 == -1)
-                {
-                    return RENDER_RESULT_EXIT_ERROR;
-                }
-                this->curFrame = this->curFrame + 1;
-            LAB_00434820:
-                if (((g_Supervisor.cfg.windowed != 0) ||
-                     (g_Supervisor.vsyncEnabled != 0)) &&
-                    (this->curFrame != 0))
-                {
-                    break;
-                }
-            LAB_004349e2:
-                if (g_Supervisor.cfg.windowed != 0)
-                {
-                    return RENDER_RESULT_KEEP_RUNNING;
-                }
-                if (g_Supervisor.vsyncEnabled != 0)
-                {
-                    return RENDER_RESULT_KEEP_RUNNING;
-                }
-                if ((i32)g_Supervisor.cfg.frameskipConfig < (i32)this->curFrame)
-                {
-                    goto LAB_00434a18;
-                }
-                Present();
-            }
             if (g_GameWindow.lpFrequency.LowPart != 0)
             {
-                QueryPerformanceCounter(&local_10);
-                local_1c = (f64)(local_10.LowPart - g_LastPerfCounter.LowPart) /
-                           (f64)g_GameWindow.lpFrequency.LowPart;
-                if (local_1c < 0.0)
+                QueryPerformanceCounter(&perfCounter);
+                perfDiff = (f64)(perfCounter.LowPart - g_LastPerfCounter.LowPart) / (f64)g_GameWindow.lpFrequency.LowPart;
+
+                if (perfDiff < 0.0)
                 {
-                    g_LastPerfCounter.LowPart = local_10.LowPart;
-                    g_LastPerfCounter.HighPart = local_10.HighPart;
+                    g_LastPerfCounter.LowPart = perfCounter.LowPart;
+                    g_LastPerfCounter.HighPart = perfCounter.HighPart;
                 }
-                if ((local_1c < 1.0 / 60.0) && (g_GameWindow.usesRelativePath == false))
+
+                if (perfDiff >= 1.0 / 60.0 || g_GameWindow.usesRelativePath != 0)
                 {
-                    goto LAB_004349e2;
+                    while (perfDiff >= 1.0 / 60.0)
+                    {
+                        g_LastPerfCounter.LowPart += g_GameWindow.lpFrequency.LowPart / 60;
+                        perfDiff -= 1.0 / 60.0;
+                    }
+                    if ((i32)g_Supervisor.cfg.frameskipConfig < (i32)this->curFrame)
+                    {
+                        goto LAB_00434a18;
+                    }
+                    goto begin_loop;
                 }
-                while (1.0 / 60.0 <= local_1c)
-                {
-                    g_LastPerfCounter.LowPart += g_GameWindow.lpFrequency.LowPart / 60;
-                    local_1c -= 1.0 / 60.0;
-                }
-                if ((i32)g_Supervisor.cfg.frameskipConfig < (i32)this->curFrame)
-                {
-                    break;
-                }
-                goto LAB_00434708;
             }
-            timeBeginPeriod(1);
-            curTimeReg = timeGetTime();
-            slowDown = (f64)curTimeReg;
-            if (slowDown < g_LastFrameTime)
+            else
             {
-                g_LastFrameTime = slowDown;
+                timeBeginPeriod(1);
+                curTime = (f64)timeGetTime();
+
+                if (curTime < g_LastFrameTime)
+                {
+                    g_LastFrameTime = curTime;
+                }
+
+                timeDiff = fabs(curTime - g_LastFrameTime);
+                timeEndPeriod(1);
+
+                if (timeDiff >= 50.0 / 3.0 || g_GameWindow.usesRelativePath != 0)
+                {
+                    while (timeDiff >= 50.0 / 3.0)
+                    {
+                        g_LastFrameTime += 50.0 / 3.0;
+                        timeDiff -= 50.0 / 3.0;
+                    }
+                    if ((i32)g_Supervisor.cfg.frameskipConfig < (i32)this->curFrame)
+                    {
+                        goto LAB_00434a18;
+                    }
+                    goto begin_loop;
+                }
             }
-            local_2c = fabs(slowDown - g_LastFrameTime);
-            timeEndPeriod(1);
-            if ((local_2c < 50.0 / 3.0) && (g_GameWindow.usesRelativePath == false))
-            {
-                goto LAB_004349e2;
-            }
-            while (50.0 / 3.0 <= local_2c)
-            {
-                g_LastFrameTime += 50.0 / 3.0;
-                local_2c -= 50.0 / 3.0;
-            }
-        } while ((i32)this->curFrame <= (i32)g_Supervisor.cfg.frameskipConfig);
+        }
+    }
+
+LAB_004349e2:
+    if (!g_Supervisor.cfg.windowed && !g_Supervisor.VsyncEnabled())
+    {
+        if ((i32)g_Supervisor.cfg.frameskipConfig >= (i32)this->curFrame)
+        {
+            Present();
+            goto begin_loop;
+        }
+
     LAB_00434a18:
         Present();
         this->curFrame = 0;
-        g_FrameCount += 1;
+        g_FrameCount++;
     }
+
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
@@ -318,26 +321,29 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     return false;
 }
 
+#pragma var_order(retryWithoutRefreshRate, usingD3dHal, displayMode, presentParams, halfCameraDistance, \
+                  halfHeight, halfWidth, aspectRatio, fov, capsBuffer, pUp,                             \
+                  pAt, pEye)
 // FUNCTION: TH07 0x00434bd0
 i32 GameWindow::InitD3dRendering()
 {
-    bool bVar1;
     D3DXVECTOR3 pEye;
     D3DXVECTOR3 pAt;
     D3DXVECTOR3 pUp;
-    char local_2064[8192];
+    char capsBuffer[8192];
     f32 fov;
     f32 aspectRatio;
     f32 halfWidth;
     f32 halfHeight;
     f32 halfCameraDistance;
     D3DPRESENT_PARAMETERS presentParams;
-    D3DDISPLAYMODE display_mode;
+    D3DDISPLAYMODE displayMode;
     bool usingD3dHal;
+    i32 retryWithoutRefreshRate;
 
     usingD3dHal = true;
     memset(&presentParams, 0, sizeof(D3DPRESENT_PARAMETERS));
-    g_Supervisor.d3dIface->GetAdapterDisplayMode(0, &display_mode);
+    g_Supervisor.d3dIface->GetAdapterDisplayMode(0, &displayMode);
     if (g_Supervisor.cfg.windowed == 0)
     {
         if ((g_Supervisor.cfg.opts >> 2 & 1) == 1)
@@ -391,7 +397,7 @@ i32 GameWindow::InitD3dRendering()
     }
     else
     {
-        presentParams.BackBufferFormat = display_mode.Format;
+        presentParams.BackBufferFormat = displayMode.Format;
         presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
         presentParams.Windowed = 1;
     }
@@ -400,143 +406,152 @@ i32 GameWindow::InitD3dRendering()
     presentParams.EnableAutoDepthStencil = 1;
     presentParams.AutoDepthStencilFormat = D3DFMT_D16;
     presentParams.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-    g_Supervisor.flags = g_Supervisor.flags | 2;
+    g_Supervisor.flags |= 2;
     g_Supervisor.lockableBackBuffer = 1;
-    bVar1 = false;
-    while (true)
+    retryWithoutRefreshRate = 0;
+    for (;;)
     {
-        if ((g_Supervisor.cfg.opts >> 9 & 1) == 0)
+        if ((g_Supervisor.cfg.opts >> 9 & 1) != 0)
         {
-            if (SUCCEEDED(g_Supervisor.d3dIface->CreateDevice(
-                    0, D3DDEVTYPE_HAL, g_GameWindow.window,
-                    D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentParams,
-                    &g_Supervisor.d3dDevice)))
-            {
-                // STRING: TH07 0x00497998
-                g_GameErrorContext.Log("T&L HAL で動作しま～す\r\n");
-                g_Supervisor.flags = g_Supervisor.flags | 1;
-                goto LAB_00434f4e;
-            }
-            if (bVar1)
+            goto fallback_to_software;
+        }
+        if (FAILED(g_Supervisor.d3dIface->CreateDevice(
+                0, D3DDEVTYPE_HAL, g_GameWindow.window,
+                D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentParams,
+                &g_Supervisor.d3dDevice)))
+        {
+            if (retryWithoutRefreshRate)
             {
                 // STRING: TH07 0x00497afc
                 g_GameErrorContext.Log("T&L HAL は使用できないようです\r\n");
             }
             if (FAILED(g_Supervisor.d3dIface->CreateDevice(
-                    0, D3DDEVTYPE_HAL, g_GameWindow.window, 0x20, &presentParams,
+                    0, D3DDEVTYPE_HAL, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
                     &g_Supervisor.d3dDevice)))
             {
-                if (bVar1)
+                if (retryWithoutRefreshRate)
                 {
                     // STRING: TH07 0x00497adc
                     g_GameErrorContext.Log("HAL も使用できないようです\r\n");
                 }
-                goto LAB_00434dff;
-            }
-            // STRING: TH07 0x004979b4
-            g_GameErrorContext.Log("HAL で動作します\r\n");
-        LAB_00434f2d:
-            g_Supervisor.flags = g_Supervisor.flags & 0xfffffffe;
-        LAB_00434f4e:
-            g_Supervisor.presentParameters = presentParams;
-            halfWidth = 320.0f;
-            halfHeight = 240.0f;
-            aspectRatio = 1.3333334f;
-            fov = 0.5235988f;
-            halfCameraDistance = tanf(fov / 2.0f);
-            halfCameraDistance = halfHeight / halfCameraDistance;
-            pUp.x = 0.0f;
-            pUp.y = 1.0f;
-            pUp.z = 0.0f;
-            pAt.x = halfWidth;
-            pAt.y = -halfHeight;
-            pAt.z = 0.0f;
-            pEye.x = halfWidth;
-            pEye.y = -halfHeight;
-            pEye.z = -halfCameraDistance;
-            D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix, &pEye, &pAt, &pUp);
-            D3DXMatrixPerspectiveFovLH(&g_Supervisor.projectionMatrix, fov,
-                                       aspectRatio, 100.0f, 10000.0f);
-
-            g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW,
-                                                 &g_Supervisor.viewMatrix);
-            g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
-                                                 &g_Supervisor.projectionMatrix);
-            g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
-            g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
-            if (((g_Supervisor.cfg.opts & 1) == 0) &&
-                ((g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0))
-            {
-                // STRING: TH07 0x00497948
-                g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
-                g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
-            }
-            if (g_Supervisor.d3dCaps.MaxTextureWidth < 0x101)
-            {
-                // STRING: TH07 0x004978f8
-                g_GameErrorContext.Log("512 以上のテクスチャをサポートしていません。殆どの絵がボケて表示されます。\r\n");
-            }
-            FormatD3DCapabilities(&g_Supervisor.d3dCaps, local_2064);
-            g_GameErrorContext.Log(local_2064);
-            if (((g_Supervisor.cfg.opts >> 2 & 1) == 0) && (usingD3dHal))
-            {
-                if (g_Supervisor.d3dIface->CheckDeviceFormat(
-                        0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
-                        D3DRTYPE_TEXTURE, D3DFMT_A8R8G8B8) == 0)
+            fallback_to_software:
+                if (FAILED(g_Supervisor.d3dIface->CreateDevice(
+                        0, D3DDEVTYPE_REF, g_GameWindow.window,
+                        D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
+                        &g_Supervisor.d3dDevice)))
                 {
-                    g_Supervisor.flags |= 4;
+                    if (g_Supervisor.vsyncEnabled == 0)
+                    {
+                        // STRING: TH07 0x00497ab4
+                        g_GameErrorContext.Log("リフレッシュレートが変更できません\r\n");
+                        presentParams.FullScreen_RefreshRateInHz = 0;
+                        g_Supervisor.lockableBackBuffer = 0;
+                        retryWithoutRefreshRate = 1;
+                        continue;
+                    }
+
+                    if (presentParams.FullScreen_PresentationInterval == D3DPRESENT_INTERVAL_IMMEDIATE)
+                    {
+                        // STRING: TH07 0x00497a7c
+                        g_GameErrorContext.Log("非同期更新も行えません。一番汚いモードに変更します\r\n");
+                        // STRING: TH07 0x00497a3c
+                        g_GameErrorContext.Fatal("*** リフレッシュレートを60Hzに変更することを推奨します ***\r\n");
+                        presentParams.FullScreen_PresentationInterval = 1;
+                        presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
+                        continue;
+                    }
+                    else
+                    {
+                        // STRING: TH07 0x00497a04
+                        g_GameErrorContext.Fatal("Direct3D の初期化に失敗、これではゲームは出来ません\r\n");
+                        SAFE_RELEASE(g_Supervisor.d3dIface);
+                        return 1;
+                    }
                 }
                 else
                 {
-                    g_Supervisor.flags &= 0xfffffffb;
-                    g_Supervisor.cfg.opts |= 4;
-                    // STRING: TH07 0x004978b0
-                    g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
+                    // STRING: TH07 0x004979c8
+                    g_GameErrorContext.Log("REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
+                    g_Supervisor.flags &= 0xfffffffe;
+                    usingD3dHal = false;
                 }
             }
-            ResetRenderState();
-            ScreenEffect::SetViewport(0xff000000);
-            g_Supervisor.lastFrameTime = 0;
-            g_GameWindow.isAppClosing = 0;
-            return 0;
-        }
-    LAB_00434dff:
-        if (SUCCEEDED(g_Supervisor.d3dIface->CreateDevice(
-                0, D3DDEVTYPE_REF, g_GameWindow.window,
-                D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
-                &g_Supervisor.d3dDevice)))
-        {
-            // STRING: TH07 0x004979c8
-            g_GameErrorContext.Log("REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
-            usingD3dHal = false;
-            goto LAB_00434f2d;
-        }
-        if (g_Supervisor.vsyncEnabled == 0)
-        {
-            // STRING: TH07 0x00497ab4
-            g_GameErrorContext.Log("リフレッシュレートが変更できません\r\n");
-            presentParams.FullScreen_RefreshRateInHz = 0;
-            g_Supervisor.lockableBackBuffer = 0;
-            bVar1 = true;
+            else
+            {
+                // STRING: TH07 0x004979b4
+                g_GameErrorContext.Log("HAL で動作します\r\n");
+                g_Supervisor.flags &= 0xfffffffe;
+            }
         }
         else
         {
-            if (presentParams.FullScreen_PresentationInterval !=
-                D3DPRESENT_INTERVAL_IMMEDIATE)
-            {
-                // STRING: TH07 0x00497a04
-                g_GameErrorContext.Fatal("Direct3D の初期化に失敗、これではゲームは出来ません\r\n");
-                SAFE_RELEASE(g_Supervisor.d3dIface);
-                return 1;
-            }
-            // STRING: TH07 0x00497a7c
-            g_GameErrorContext.Log("非同期更新も行えません。一番汚いモードに変更します\r\n");
-            // STRING: TH07 0x00497a3c
-            g_GameErrorContext.Fatal("*** リフレッシュレートを60Hzに変更することを推奨します ***\r\n");
-            presentParams.FullScreen_PresentationInterval = 1;
-            presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
+            // STRING: TH07 0x00497998
+            g_GameErrorContext.Log("T&L HAL で動作しま～す\r\n");
+            g_Supervisor.flags |= 1;
+        }
+        break;
+    }
+
+    g_Supervisor.presentParameters = presentParams;
+    halfWidth = 320.0f;
+    halfHeight = 240.0f;
+    aspectRatio = 1.3333334f;
+    fov = 0.5235988f;
+    halfCameraDistance = halfHeight / tanf(fov / 2.0f);
+    pUp.x = 0.0f;
+    pUp.y = 1.0f;
+    pUp.z = 0.0f;
+    pAt.x = halfWidth;
+    pAt.y = -halfHeight;
+    pAt.z = 0.0f;
+    pEye.x = halfWidth;
+    pEye.y = -halfHeight;
+    pEye.z = -halfCameraDistance;
+    D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix, &pEye, &pAt, &pUp);
+    D3DXMatrixPerspectiveFovLH(&g_Supervisor.projectionMatrix, fov,
+                               aspectRatio, 100.0f, 10000.0f);
+
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW,
+                                         &g_Supervisor.viewMatrix);
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
+                                         &g_Supervisor.projectionMatrix);
+    g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
+    g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
+    if (((g_Supervisor.cfg.opts & 1) == 0) &&
+        ((g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0))
+    {
+        // STRING: TH07 0x00497948
+        g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
+        g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
+    }
+    if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
+    {
+        // STRING: TH07 0x004978f8
+        g_GameErrorContext.Log("512 以上のテクスチャをサポートしていません。殆どの絵がボケて表示されます。\r\n");
+    }
+    FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
+    g_GameErrorContext.Log(capsBuffer);
+    if (((g_Supervisor.cfg.opts >> 2 & 1) == 0) && (usingD3dHal))
+    {
+        if (g_Supervisor.d3dIface->CheckDeviceFormat(
+                0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
+                D3DRTYPE_TEXTURE, D3DFMT_A8R8G8B8) == 0)
+        {
+            g_Supervisor.flags |= 4;
+        }
+        else
+        {
+            g_Supervisor.flags &= 0xfffffffb;
+            g_Supervisor.cfg.opts |= 4;
+            // STRING: TH07 0x004978b0
+            g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
         }
     }
+    ResetRenderState();
+    ScreenEffect::SetViewport(0xff000000);
+    g_GameWindow.isAppClosing = 0;
+    g_Supervisor.lastFrameTime = 0;
+    return 0;
 }
 
 // FUNCTION: TH07 0x004351c0
@@ -677,7 +692,7 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
     strPos += sprintf(strPos, "　-- テクスチャ能力 ---------------------------\r\n");
     // STRING: TH07 0x004973e0
     strPos += sprintf(strPos, "　最大テクスチャサイズ : (%d, %d)\r\n",
-                    caps->MaxTextureWidth, caps->MaxTextureHeight);
+                      caps->MaxTextureWidth, caps->MaxTextureHeight);
     // STRING: TH07 0x004973c8
     strPos = FormatCapability("　α付きテクスチャ : ", caps->TextureCaps,
                               D3DPTEXTURECAPS_ALPHA, strPos);
@@ -855,18 +870,18 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, local_c, idAttachTo)
+#pragma var_order(processId, param, idAttachTo)
 // FUNCTION: TH07 0x00435e30
 void GameWindow::SetWindowActive(HWND window)
 {
     DWORD idAttachTo;
-    void *local_c;
-    DWORD local_8;
+    void *param;
+    DWORD processId;
 
     idAttachTo = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
-    local_8 = GetWindowThreadProcessId(window, NULL);
-    AttachThreadInput(local_8, idAttachTo, 1);
-    SystemParametersInfoA(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &local_c, 0);
+    processId = GetWindowThreadProcessId(window, NULL);
+    AttachThreadInput(processId, idAttachTo, 1);
+    SystemParametersInfoA(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &param, 0);
     SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, 0);
 #ifdef NON_MATCHING
     // since the game's input is completely broken on wine when using
@@ -876,48 +891,45 @@ void GameWindow::SetWindowActive(HWND window)
 #else
     SetActiveWindow(window);
 #endif
-    SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, &local_c, 0);
-    AttachThreadInput(local_8, idAttachTo, 0);
+    SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, &param, 0);
+    AttachThreadInput(processId, idAttachTo, 0);
 }
 
+#pragma var_order(filename, i, dataCursor, checksum, dataBase)
 // FUNCTION: TH07 0x00435ec0
 i32 GameWindow::ChecksumExecutable()
 {
-    u8 *dataBase;
-    i32 checksum;
-    u8 *dataCursor;
-    CHAR filename[264];
+    u32 *dataBase;
+    u32 checksum;
+    u32 *dataCursor;
+    u32 i;
+    char filename[MAX_PATH + 1];
 
-    if (GetModuleFileNameA(NULL, filename, 0x105) == 0)
-    {
-        checksum = -1;
-    }
-    else
+    if (GetModuleFileNameA(NULL, filename, 0x105))
     {
         checksum = 0;
-        dataBase = FileSystem::OpenFile(filename, 1);
-        if (dataBase == NULL)
+        dataBase = dataCursor = (u32 *)FileSystem::OpenFile(filename, 1);
+        if (dataCursor == NULL)
         {
-            checksum = -1;
+            return -1;
         }
-        else
+
+        for (i = 0; i < (g_LastFileSize / 4) - 1; i++, dataCursor++)
         {
-            dataCursor = dataBase;
-            for (u32 i = 0; i < (g_LastFileSize >> 2) - 1; i++)
-            {
-                checksum = checksum + *(i32 *)dataCursor;
-                dataCursor = dataCursor + 4;
-            }
-            // STRING: TH07 0x004972fc
-            DebugPrint("main sum %d\r\n", checksum);
-            free(dataBase);
-            g_Supervisor.exeChecksum = checksum;
-            g_Supervisor.exeSize = g_LastFileSize;
+            checksum += *dataCursor;
         }
+        // STRING: TH07 0x004972fc
+        DebugPrint("main sum %d\r\n", checksum);
+        free(dataBase);
+        g_Supervisor.exeChecksum = checksum;
+        g_Supervisor.exeSize = g_LastFileSize;
+        return checksum;
     }
-    return checksum;
+
+    return -1;
 }
 
+#pragma var_order(hr, ret, psl, ppf, wPath, wfd)
 // FUNCTION: TH07 0x00435fc0
 i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
                           i32 maxPathLen)
@@ -927,43 +939,41 @@ i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
     IPersistFile *ppf;
     IShellLinkA *psl;
     i32 ret;
-    HRESULT hres;
+    HRESULT hr;
 
     if (dstPath == NULL)
     {
-        ret = 0;
+        return 0;
     }
-    else
+
+    ret = 0;
+    CoInitialize(NULL);
+    if (SUCCEEDED(hr = CoCreateInstance(CLSID_ShellLink, NULL,
+                                        CLSCTX_INPROC_SERVER, IID_IShellLink,
+                                        (void **)&psl)))
     {
-        ret = 0;
-        CoInitialize(NULL);
-        hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
-                                IID_IShellLink, (void **)&psl);
-        if (SUCCEEDED(hres))
+        if (SUCCEEDED(hr = psl->QueryInterface(IID_IPersistFile,
+                                               (void **)&ppf)))
         {
-            hres = psl->QueryInterface(IID_IPersistFile, (void **)&ppf);
-            if (SUCCEEDED(hres))
+            wPath = new WCHAR[maxPathLen];
+            if (SUCCEEDED(hr))
             {
-                wPath = (LPWSTR)malloc(maxPathLen * sizeof(WCHAR));
-                MultiByteToWideChar(CP_ACP, 0, shortcutPath, -1, wPath, maxPathLen);
-                if (SUCCEEDED(hres))
+                MultiByteToWideChar(CP_ACP, 0, shortcutPath, -1, wPath,
+                                    maxPathLen);
+                if (SUCCEEDED(hr = ppf->Load(wPath, STGM_READ)))
                 {
-                    hres = ppf->Load(wPath, STGM_READ);
-                    if (SUCCEEDED(hres))
+                    if (SUCCEEDED(hr = psl->GetPath(dstPath, maxPathLen, &wfd,
+                                                    0)))
                     {
-                        hres = psl->GetPath(dstPath, maxPathLen, &wfd, 0);
-                        if (SUCCEEDED(hres))
-                        {
-                            ret = 1;
-                        }
+                        ret = 1;
                     }
                 }
-                free(wPath);
-                ppf->Release();
             }
-            psl->Release();
+            delete wPath;
+            ppf->Release();
         }
-        CoUninitialize();
+        psl->Release();
     }
+    CoUninitialize();
     return ret;
 }
