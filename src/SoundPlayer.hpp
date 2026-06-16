@@ -98,7 +98,7 @@ struct SoundPlayer
     LPDIRECTSOUNDBUFFER initSoundBuffer;
     HWND gameWindow;
     CSoundManager *manager;
-    DWORD backgroundMusicThreadId;
+    DWORD backgroundMusicThreadId; // ZUN name: m_dwNotifyThreadID
     HANDLE backgroundMusicThreadHandle;
     u32 unused_61c;
     i32 soundQueue[5];

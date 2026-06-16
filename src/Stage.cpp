@@ -14,7 +14,7 @@
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f588
-StageAnms g_AnmStageFiles[9] = {
+StageAnms g_EnemyAnmStageFiles[9] = {
     {"dummy", "dummy"},
     // STRING: TH07 0x00497ffc
     {"data/stg1enm.anm", NULL},
@@ -377,13 +377,13 @@ LAB_0040578a:
         case 4:
             goto switchD_004057f2_caseD_4;
         case 5:
-            if (arg->pendingCameraShake != 0)
+            if (arg->cameraTeleported != 0)
             {
                 local_24.z = local_8->args[2].f - arg->camPosEnd.z;
                 local_24.y = local_8->args[1].f - arg->camPosEnd.y;
                 local_24.x = local_8->args[0].f - arg->camPosEnd.x;
                 EffectManager::DoSomethingWithEffects(&local_24);
-                arg->pendingCameraShake = 0;
+                arg->cameraTeleported = 0;
             }
             arg->camPosStart = arg->camPosEnd;
             arg->camPosEnd = *(D3DXVECTOR3 *)local_8->args;
@@ -516,7 +516,7 @@ switchD_004057f2_caseD_4:
     arg->instructionIndex = local_8->args[0].i;
     arg->scriptTime = local_8->args[1].i;
     arg->timersMax[0] = 0;
-    arg->pendingCameraShake = 1;
+    arg->cameraTeleported = 1;
     goto LAB_0040578a;
 }
 

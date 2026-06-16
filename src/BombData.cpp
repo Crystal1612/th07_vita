@@ -172,7 +172,7 @@ void BombData::BombReimuACalc(Player *player)
         }
         subInfo->angle = utils::AddNormalizeAngle(angle, 0.0f);
         subInfo->counter = 0;
-        player->bombProjectiles[i].payload = 0;
+        player->bombDamageBoxes[i].payload = 0;
         vm = subInfo->vms;
         for (j = 0; j < 4; j++, vm++)
         {
@@ -205,11 +205,11 @@ void BombData::BombReimuACalc(Player *player)
                 subInfo->vms[1].pendingInterrupt = 1;
                 subInfo->vms[2].pendingInterrupt = 1;
                 subInfo->vms[3].pendingInterrupt = 1;
-                player->bombProjectiles[i].pos =
+                player->bombDamageBoxes[i].pos =
                     subInfo->bombRegionPositions;
-                player->bombProjectiles[i].size.x = 256.0f;
-                player->bombProjectiles[i].size.y = 256.0f;
-                player->bombProjectiles[i].lifetime = 400;
+                player->bombDamageBoxes[i].size.x = 256.0f;
+                player->bombDamageBoxes[i].size.y = 256.0f;
+                player->bombDamageBoxes[i].lifetime = 400;
                 player->SpawnBombEffect(&subInfo->bombRegionPositions, 64.0f,
                                         4.266667f, 0x1e, ITEM_POINT_BULLET);
                 subInfo->bombRegionVelocities.x = 0.0f;
@@ -220,22 +220,22 @@ void BombData::BombReimuACalc(Player *player)
             }
             if (bombInfo->bombTimer.HasTicked())
             {
-                player->bombProjectiles[i].size.x = 48.0f;
-                player->bombProjectiles[i].size.y = 48.0f;
-                player->bombProjectiles[i].pos =
+                player->bombDamageBoxes[i].size.x = 48.0f;
+                player->bombDamageBoxes[i].size.y = 48.0f;
+                player->bombDamageBoxes[i].pos =
                     subInfo->bombRegionPositions;
-                player->bombProjectiles[i].lifetime = 8;
+                player->bombDamageBoxes[i].lifetime = 8;
                 player->SpawnBombEffect(&subInfo->bombRegionPositions, 128.0f,
                                         0.0f, 0, ITEM_POINT_BULLET);
             }
         }
         else if (subInfo->state != 0 && bombInfo->bombTimer.HasTicked())
         {
-            player->bombProjectiles[i].pos =
+            player->bombDamageBoxes[i].pos =
                 bombInfo->subInfo[i].bombRegionPositions;
-            player->bombProjectiles[i].size.x = 256.0f;
-            player->bombProjectiles[i].size.y = 256.0f;
-            player->bombProjectiles[i].lifetime = 2;
+            player->bombDamageBoxes[i].size.x = 256.0f;
+            player->bombDamageBoxes[i].size.y = 256.0f;
+            player->bombDamageBoxes[i].lifetime = 2;
             subInfo->counter++;
             if (subInfo->counter >= 30)
             {
@@ -366,7 +366,7 @@ void BombData::BombReimuACalcFocus(Player *player)
                 AngleToVector(&subInfo->bombRegionVelocities, tmpFloat2,
                               subInfo->accel);
 
-                player->bombProjectiles[i].payload = 0;
+                player->bombDamageBoxes[i].payload = 0;
                 vm = subInfo->vms;
                 for (j = 0; j < 4; j++, vm++)
                 {
@@ -420,13 +420,13 @@ void BombData::BombReimuACalcFocus(Player *player)
                 subInfo->bombRegionVelocities.y =
                     (tmpFloat3 * subInfo->accel) / tmpFloat1;
 
-                player->bombProjectiles[i].size.x = 48.0f;
-                player->bombProjectiles[i].size.y = 48.0f;
-                player->bombProjectiles[i].pos = subInfo->bombRegionPositions;
-                player->bombProjectiles[i].lifetime = 8;
+                player->bombDamageBoxes[i].size.x = 48.0f;
+                player->bombDamageBoxes[i].size.y = 48.0f;
+                player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
+                player->bombDamageBoxes[i].lifetime = 8;
                 player->SpawnBombEffect(&subInfo->bombRegionPositions, 128.0f,
                                         0.0f, 0, ITEM_POINT_BULLET);
-                if (player->bombProjectiles[i].payload >= 100 ||
+                if (player->bombDamageBoxes[i].payload >= 100 ||
                     bombInfo->bombTimer >= bombInfo->bombDuration - 30)
                 {
                     g_EffectManager.SpawnParticles(6, &subInfo->bombRegionPositions,
@@ -438,9 +438,9 @@ void BombData::BombReimuACalcFocus(Player *player)
                     subInfo->vms[1].pendingInterrupt = 1;
                     subInfo->vms[2].pendingInterrupt = 1;
                     subInfo->vms[3].pendingInterrupt = 1;
-                    player->bombProjectiles[i].size.x = 256.0f;
-                    player->bombProjectiles[i].size.y = 256.0f;
-                    player->bombProjectiles[i].lifetime = 400;
+                    player->bombDamageBoxes[i].size.x = 256.0f;
+                    player->bombDamageBoxes[i].size.y = 256.0f;
+                    player->bombDamageBoxes[i].lifetime = 400;
                     player->SpawnBombEffect(&subInfo->bombRegionPositions, 32.0f,
                                             6.6666665f, 0xf, ITEM_POINT_BULLET);
 
@@ -587,14 +587,14 @@ void BombData::BombReimuBCalc(Player *player)
                     (projectiles[i]->pos).y =
                         player->bombInfo.subInfo[i].bombRegionPositions.y +
                         player->bombInfo.subInfo[i].vms[0].offset.y;
-                    player->bombProjectiles[i].size.x =
+                    player->bombDamageBoxes[i].size.x =
                         (projectiles[i]->pos).z;
-                    player->bombProjectiles[i].size.y =
+                    player->bombDamageBoxes[i].size.y =
                         (projectiles[i]->size).x;
-                    player->bombProjectiles[i].pos =
+                    player->bombDamageBoxes[i].pos =
                         player->bombInfo.subInfo[i].bombRegionPositions +
                         player->bombInfo.subInfo[i].vms->offset;
-                    player->bombProjectiles[i].lifetime = 0x10;
+                    player->bombDamageBoxes[i].lifetime = 0x10;
                 }
             }
         }
@@ -670,12 +670,12 @@ void BombData::BombReimuBCalcFocus(Player *player)
         g_AnmManager->ExecuteScript(&player->bombInfo.subInfo[0].vms[1]);
         g_AnmManager->ExecuteScript(&player->bombInfo.subInfo[0].vms[2]);
 
-        player->bombProjectiles[0].size.x = 256.0f;
-        player->bombProjectiles[0].size.y = 256.0f;
-        player->bombProjectiles[0].pos =
+        player->bombDamageBoxes[0].size.x = 256.0f;
+        player->bombDamageBoxes[0].size.y = 256.0f;
+        player->bombDamageBoxes[0].pos =
             player->bombStartPos +
             player->bombInfo.subInfo[0].vms[0].offset;
-        player->bombProjectiles[0].lifetime = 0x12;
+        player->bombDamageBoxes[0].lifetime = 0x12;
     }
     player->playerState = PLAYER_STATE_INVULNERABLE;
     player->bombInfo.bombTimer++;
@@ -753,11 +753,11 @@ void BombData::BombMarisaACalc(Player *player)
                 player->SpawnBombEffect(
                     &player->bombInfo.subInfo[i].bombRegionPositions, 96.0f, 0.0f, 0,
                     ITEM_POINT_BULLET);
-                player->bombProjectiles[i].size.x = 128.0f;
-                player->bombProjectiles[i].size.y = 128.0f;
-                player->bombProjectiles[i].pos =
+                player->bombDamageBoxes[i].size.x = 128.0f;
+                player->bombDamageBoxes[i].size.y = 128.0f;
+                player->bombDamageBoxes[i].pos =
                     player->bombInfo.subInfo[i].bombRegionPositions;
-                player->bombProjectiles[i].lifetime = 8;
+                player->bombDamageBoxes[i].lifetime = 8;
             }
             g_AnmManager->ExecuteScript(&player->bombInfo.subInfo[i].vms[0]);
         }
@@ -867,7 +867,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
             player->bombInfo.subInfo[i].bombRegionAcceleration.z = 0.0f;
             g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB_MARISA_A_FOCUS, 0);
             BombEffects::RegisterChain(1, 0x78, 4, 1, 0);
-            player->bombProjectiles[i].payload = 0;
+            player->bombDamageBoxes[i].payload = 0;
         }
     }
     subInfo = player->bombInfo.subInfo;
@@ -896,12 +896,12 @@ void BombData::BombMarisaACalcFocus(Player *player)
         }
         player->SpawnBombEffect(&subInfo->bombRegionPositions, 96.0f, 0.0f, 0,
                                 ITEM_POINT_BULLET);
-        if (player->bombProjectiles[i].payload < 80)
+        if (player->bombDamageBoxes[i].payload < 80)
         {
-            player->bombProjectiles[i].size.x = 128.0f;
-            player->bombProjectiles[i].size.y = 128.0f;
-            player->bombProjectiles[i].pos = subInfo->bombRegionPositions;
-            player->bombProjectiles[i].lifetime = 0xc;
+            player->bombDamageBoxes[i].size.x = 128.0f;
+            player->bombDamageBoxes[i].size.y = 128.0f;
+            player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
+            player->bombDamageBoxes[i].lifetime = 0xc;
         }
         g_AnmManager->ExecuteScript(subInfo->vms);
     }
@@ -997,7 +997,7 @@ void BombData::BombMarisaBCalc(Player *player)
     else
     {
         subInfo = player->bombInfo.subInfo;
-        projectile = player->bombProjectiles;
+        projectile = player->bombDamageBoxes;
         for (i = 0; i < 3; i++, subInfo++)
         {
             if (player->bombStartPos.x < 192.0f)
@@ -1135,12 +1135,12 @@ void BombData::BombMarisaBCalcFocus(Player *player)
         {
             if (player->bombInfo.bombTimer.GetCurrent() % 4 != 0)
             {
-                player->bombProjectiles[0].size.x = 384.0f;
-                player->bombProjectiles[0].size.y = player->positionCenter.y;
-                player->bombProjectiles[0].pos.x = 192.0f;
-                player->bombProjectiles[0].pos.y = player->positionCenter.y / 2.0f;
-                player->bombProjectiles[0].lifetime = 0x17;
-                player->SpawnBombProjectile(&player->bombProjectiles[0].pos, 384.0f,
+                player->bombDamageBoxes[0].size.x = 384.0f;
+                player->bombDamageBoxes[0].size.y = player->positionCenter.y;
+                player->bombDamageBoxes[0].pos.x = 192.0f;
+                player->bombDamageBoxes[0].pos.y = player->positionCenter.y / 2.0f;
+                player->bombDamageBoxes[0].lifetime = 0x17;
+                player->SpawnBombProjectile(&player->bombDamageBoxes[0].pos, 384.0f,
                                             player->positionCenter.y, 6);
             }
         }
@@ -1244,7 +1244,7 @@ void BombData::BombSakuyaACalc(Player *player)
                     subInfo->bombRegionPositions =
                         player->bombStartPos + subInfo->bombRegionVelocities;
                     subInfo->bombRegionVelocities.z = 0.0f;
-                    player->bombProjectiles[i].payload = 0;
+                    player->bombDamageBoxes[i].payload = 0;
                     spawnsRemaining--;
                 }
                 continue;
@@ -1257,22 +1257,22 @@ void BombData::BombSakuyaACalc(Player *player)
                 cosf(subInfo->angle) * subInfo->speed;
             subInfo->bombRegionVelocities.y =
                 sinf(subInfo->angle) * subInfo->speed;
-            if (player->bombProjectiles[i].payload < 30)
+            if (player->bombDamageBoxes[i].payload < 30)
             {
                 subInfo->bombRegionPositions +=
                     subInfo->bombRegionVelocities *
                     g_Supervisor.effectiveFramerateMultiplier;
                 player->SpawnBombEffect(&subInfo->bombRegionPositions, 32.0f, 0.0f,
                                         0, ITEM_POINT_BULLET);
-                player->bombProjectiles[i].size.x = 24.0f;
-                player->bombProjectiles[i].size.y = 24.0f;
-                player->bombProjectiles[i].pos = subInfo->bombRegionPositions;
-                player->bombProjectiles[i].lifetime = 10;
+                player->bombDamageBoxes[i].size.x = 24.0f;
+                player->bombDamageBoxes[i].size.y = 24.0f;
+                player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
+                player->bombDamageBoxes[i].lifetime = 10;
             }
-            else if (player->bombProjectiles[i].payload < 999)
+            else if (player->bombDamageBoxes[i].payload < 999)
             {
                 g_AnmManager->ExecuteAnmIdx(subInfo->vms, 0x460);
-                player->bombProjectiles[i].payload = 999;
+                player->bombDamageBoxes[i].payload = 999;
             }
             if (g_GameManager.IsInBounds(subInfo->bombRegionPositions.x,
                                          subInfo->bombRegionPositions.y, 64.0f,
@@ -1384,7 +1384,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
                 player->positionCenter + subInfo->bombRegionVelocities;
             subInfo->timer = 0;
             subInfo->bombRegionVelocities.z = 0.0f;
-            player->bombProjectiles[i].payload = 0;
+            player->bombDamageBoxes[i].payload = 0;
         }
         g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB_REIMARI, 0);
         BombEffects::RegisterChain(1, 0x78, 4, 1, 0);
@@ -1426,7 +1426,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
             subInfo->bombRegionVelocities.x = 0.0f;
             subInfo->bombRegionVelocities.y = 0.0f;
         }
-        if (player->bombProjectiles[i].payload == 0)
+        if (player->bombDamageBoxes[i].payload == 0)
         {
             subInfo->bombRegionPositions +=
                 subInfo->bombRegionVelocities *
@@ -1434,15 +1434,15 @@ void BombData::BombSakuyaACalcFocus(Player *player)
             player->SpawnBombEffect(
                 &player->bombInfo.subInfo[i].bombRegionPositions, 32.0f,
                 0.0f, 0, ITEM_POINT_BULLET);
-            player->bombProjectiles[i].size.x = 24.0f;
-            player->bombProjectiles[i].size.y = 24.0f;
-            player->bombProjectiles[i].pos = subInfo->bombRegionPositions;
-            player->bombProjectiles[i].lifetime = 22;
+            player->bombDamageBoxes[i].size.x = 24.0f;
+            player->bombDamageBoxes[i].size.y = 24.0f;
+            player->bombDamageBoxes[i].pos = subInfo->bombRegionPositions;
+            player->bombDamageBoxes[i].lifetime = 22;
         }
-        else if (player->bombProjectiles[i].payload < 999)
+        else if (player->bombDamageBoxes[i].payload < 999)
         {
             g_AnmManager->ExecuteAnmIdx(subInfo->vms, 0x460);
-            player->bombProjectiles[i].payload = 999;
+            player->bombDamageBoxes[i].payload = 999;
             g_EffectManager.SpawnParticles(
                 0, &player->bombInfo.subInfo[i].bombRegionPositions, 1,
                 0xffff80ff);
@@ -1548,11 +1548,11 @@ void BombData::BombSakuyaBCalc(Player *player)
     {
         if (player->bombInfo.bombTimer.current % 4 == 0)
         {
-            player->bombProjectiles[0].pos.x = 192.0f;
-            player->bombProjectiles[0].pos.y = 224.0f;
-            player->bombProjectiles[0].size.x = 352.0f;
-            player->bombProjectiles[0].size.y = 416.0f;
-            player->bombProjectiles[0].lifetime = 3;
+            player->bombDamageBoxes[0].pos.x = 192.0f;
+            player->bombDamageBoxes[0].pos.y = 224.0f;
+            player->bombDamageBoxes[0].size.x = 352.0f;
+            player->bombDamageBoxes[0].size.y = 416.0f;
+            player->bombDamageBoxes[0].lifetime = 3;
         }
     }
 
@@ -1621,10 +1621,10 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
         player->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
         player->SpawnBombEffect(&player->positionCenter, 800.0f, 0.0f, 0,
                                 ITEM_POINT_BULLET);
-        player->bombHitboxes[0].pos.x = 192.0f;
-        player->bombHitboxes[0].pos.y = 224.0f;
-        player->bombHitboxes[0].pos.z = 448.0f;
-        player->bombHitboxes[0].size.x = 512.0f;
+        player->bombClearBoxes[0].pos.x = 192.0f;
+        player->bombClearBoxes[0].pos.y = 224.0f;
+        player->bombClearBoxes[0].pos.z = 448.0f;
+        player->bombClearBoxes[0].size.x = 512.0f;
         return;
     }
 
@@ -1662,13 +1662,13 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     }
     player->SpawnBombEffect(&player->bombInfo.subInfo[0].bombRegionPositions,
                             96.0f, 0.0f, 0, ITEM_POINT_BULLET);
-    player->bombProjectiles[0].pos.x =
+    player->bombDamageBoxes[0].pos.x =
         player->bombInfo.subInfo[0].bombRegionPositions.x;
-    player->bombProjectiles[0].pos.y =
+    player->bombDamageBoxes[0].pos.y =
         player->bombInfo.subInfo[0].bombRegionPositions.y;
-    player->bombProjectiles[0].size.x = 160.0f;
-    player->bombProjectiles[0].size.y = 160.0f;
-    player->bombProjectiles[0].lifetime = 1;
+    player->bombDamageBoxes[0].size.x = 160.0f;
+    player->bombDamageBoxes[0].size.y = 160.0f;
+    player->bombDamageBoxes[0].lifetime = 1;
     if (player->GetBombTimer()->HasTickedAndIsEq(40))
     {
         BombEffects::RegisterChain(1, 60, 1, 7, 0);

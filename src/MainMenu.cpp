@@ -247,7 +247,7 @@ u32 MainMenu::OnUpdatePreInput()
     {
     case 0:
         if (this->prevGameState == STATE_PRE_INPUT &&
-            g_Supervisor.wantedState2 != 5)
+            g_Supervisor.prevState != 5)
         {
             g_Supervisor.PlayLoadedAudio(8);
         }
@@ -2607,7 +2607,7 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 5;
     }
-    if ((g_GameManager.isGameComplete == 0) &&
+    if ((g_GameManager.phantasmUnlocked == 0) &&
         (g_GameManager.HasUnlockedPhantomAndMaxClears() != 0))
     {
         frameCount = 0;
@@ -2663,10 +2663,10 @@ ZunResult MainMenu::ActualAddedCallback()
         }
         g_AnmManager->ReleaseSurface(0);
     }
-    g_GameManager.isGameComplete = g_GameManager.HasUnlockedPhantomAndMaxClears();
+    g_GameManager.phantasmUnlocked = g_GameManager.HasUnlockedPhantomAndMaxClears();
     this->gameState = STATE_PRE_INPUT;
     InitializeTimingVars(&g_Supervisor);
-    switch (g_Supervisor.wantedState2)
+    switch (g_Supervisor.prevState)
     {
     case 2:
     case 3:
@@ -2690,7 +2690,7 @@ ZunResult MainMenu::ActualAddedCallback()
         this->isPracticeMode = 1;
     }
     g_GameManager.practice = 0;
-    if (g_Supervisor.wantedState2 != 0)
+    if (g_Supervisor.prevState != 0)
     {
         GameManager::DrawLoadingSprite();
     }
@@ -2702,11 +2702,11 @@ ZunResult MainMenu::ActualAddedCallback()
 
     if (g_GameManager.demo == 0)
     {
-        if (g_Supervisor.wantedState2 != 5)
+        if (g_Supervisor.prevState != 5)
         {
             g_Supervisor.LoadAudio(8, "bgm/th07_01.mid");
         }
-        if (g_Supervisor.startupTimeForMenuMusic == 0)
+        if (g_Supervisor.lastTotalPlayTimeUpdate == 0)
         {
             BombEffects::RegisterChain(0, 0x46, 0xffffff, 0, 0);
         }

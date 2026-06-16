@@ -36,7 +36,7 @@ address|name|type|size
 0049ecc8|g_ShtUpdateFuncs|global|24
 0049ece0|g_ShtDrawFuncs|global|8
 0049ece8|g_ShtHitFuncs|global|16
-0049ecf8|g_CherryBonusFullPower|global|120
+0049ecf8|g_FullPowerScoreBonus|global|120
 0049ed74|g_PowerLevels|global|36
 0049ed98|g_FormatInfoArray|global|168
 0049ee40|g_ControllerMapping|global|18
@@ -60,12 +60,12 @@ address|name|type|size
 0049f4a8|g_OptionsStrings|global|36
 0049f4cc|g_MainMenuStrings|global|32
 0049f4ec|g_CharactersAndShotTypesStrings|global|24
-0049f504|g_DifficultyPointItemWeightsList|global|20
+0049f504|g_DifficultySpellcardWeightsList|global|20
 0049f518|g_DifficultyNameTable|global|24
 0049f530|g_ShooterTable|global|24
-0049f548|g_ShooterTable2|global|24
+0049f548|g_ShooterTableFocus|global|24
 0049f560|g_EclPaths|global|40
-0049f588|g_AnmStageFiles|global|72
+0049f588|g_EnemyAnmStageFiles|global|72
 0049f5d0|g_RankArray|global|72
 0049f618|g_SpellcardTimeColors|global|16
 0049f628|g_BadEndingPaths|global|12
@@ -76,7 +76,7 @@ address|name|type|size
 0049fbc4|lpTopLevelExceptionFilter_0049fbc4|global|4
 0049fbf0|g_Gui|global|148
 0049fc88|g_JoystickCaps|global|404
-0049fe1c|g_FocusButtonConflictState|global|2
+0049fe1c|g_AutoFocusTimer|global|2
 0049fe20|g_Rng|global|8
 0049fe28|g_TextBufferSurface|global|4
 0049fe30|g_LzssTree|global|98316
@@ -129,11 +129,11 @@ address|name|type|size
 0135dfac|g_AsciiManagerCalcChain|global|32
 0135dfcc|g_AsciiManagerOnDrawPopupsChain|global|32
 0135dfec|g_FpsUpdateCounter|global|4
-0135dff0|g_FpsCounterBuffer2|global|256
+0135dff0|g_ReplayFpsBuffer|global|256
 0135e0f0|g_FpsCounterBuffer|global|256
 0135e1f0|g_NumFramesSinceLastTime|global|4
 0135e1f4|g_Mutex|global|4
-0135e1f8|g_TickCountToEffectiveFramerate|global|4
+0135e1f8|g_FrameCount|global|4
 0135e200|g_LastFrameTime|global|8
 0135e208|g_LastPerfCounter|global|8
 0135e210|g_PerfCounter|global|8

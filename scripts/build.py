@@ -54,7 +54,7 @@ SOURCES: List[Path] = list(
             "main.cpp",
             "GameWindow.cpp",
             "MidiOutput.cpp",
-            "Supervisor.cpp",
+            "Supervisor.cpp", # ZUN name: mother.cpp
             "MusicRoom.cpp",
             "Player.cpp",
             "ReplayManager.cpp",

@@ -50,7 +50,7 @@ Supervisor g_Supervisor;
 u32 g_FpsUpdateCounter;
 
 // GLOBAL: TH07 0x0135dff0
-char g_FpsCounterBuffer2[256];
+char g_ReplayFpsBuffer[256];
 
 // GLOBAL: TH07 0x0135e0f0
 char g_FpsCounterBuffer[256];
@@ -201,7 +201,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     }
     if (arg->wantedState != arg->curState)
     {
-        arg->wantedState2 = arg->wantedState;
+        arg->prevState = arg->wantedState;
         // STRING: TH07 0x00497230
         Supervisor::DebugPrint2("scene %d -> %d\r\n", arg->wantedState,
                                 arg->curState);
@@ -700,8 +700,8 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     g_AnmManager->ReleaseSurface(0);
     arg->isInEnding = 0;
     arg->renderSkipFrames = 0;
-    arg->startupTimeForMenuMusic = timeGetTime();
-    g_Rng.SetSeed(arg->startupTimeForMenuMusic);
+    arg->lastTotalPlayTimeUpdate = timeGetTime();
+    g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
     arg->SetupDInput();
     if (arg->midiOutput == NULL)
     {
@@ -906,7 +906,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                     else
                     {
                         // STRING: TH07 0x00496f9c
-                        sprintf(g_FpsCounterBuffer2, "%2d", (i32)g_Supervisor.curFps);
+                        sprintf(g_ReplayFpsBuffer, "%2d", (i32)g_Supervisor.curFps);
                     }
                 }
             }
@@ -962,7 +962,7 @@ LAB_00439350:
             {
                 g_AsciiManager.color = 0xffffffd0;
             }
-            g_AsciiManager.AddString(&local_30, g_FpsCounterBuffer2);
+            g_AsciiManager.AddString(&local_30, g_ReplayFpsBuffer);
             g_AsciiManager.color = 0xffffffff;
         }
     }
@@ -1052,6 +1052,7 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
     }
 }
 
+// ZUN name: snapShotScreen
 #pragma var_order(local_14, local_18, local_1c, backBuffer, local_24,        \
                   local_28, local_2c, y, x, bytesPerRow, local_40, local_44, \
                   hFile)
@@ -1537,11 +1538,11 @@ void Supervisor::UpdateStartupTime()
     DWORD time;
 
     time = timeGetTime();
-    if (time < this->startupTimeForMenuMusic)
+    if (time < this->lastTotalPlayTimeUpdate)
     {
-        this->startupTimeForMenuMusic = 0;
+        this->lastTotalPlayTimeUpdate = 0;
     }
-    timeSinceStartup = time - this->startupTimeForMenuMusic;
+    timeSinceStartup = time - this->lastTotalPlayTimeUpdate;
     g_GameManager.plst.totalHours += timeSinceStartup / 3600000;
     timeSinceStartup %= 3600000;
     g_GameManager.plst.totalMinutes += timeSinceStartup / 60000;
@@ -1565,7 +1566,7 @@ void Supervisor::UpdateStartupTime()
         g_GameManager.plst.totalHours += g_GameManager.plst.totalMinutes / 60;
         g_GameManager.plst.totalMinutes %= 60;
     }
-    this->startupTimeForMenuMusic = time;
+    this->lastTotalPlayTimeUpdate = time;
 }
 
 #pragma var_order(time, timeSinceLastTime)

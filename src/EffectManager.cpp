@@ -668,14 +668,14 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
 
     effect = arg->effects;
     arg->activeEffectsCount = 0;
-    arg->specialEffectsPtrs[0] = &arg->specialEffects[0];
-    arg->specialEffectsPtrs[1] = &arg->specialEffects[1];
-    arg->specialEffectsPtrs[2] = &arg->specialEffects[2];
-    arg->specialEffectsPtrs[3] = &arg->specialEffects[3];
-    arg->specialEffects[0].next = NULL;
-    arg->specialEffects[1].next = NULL;
-    arg->specialEffects[2].next = NULL;
-    arg->specialEffects[3].next = NULL;
+    arg->effectLayerPtrs[0] = &arg->effectLayers[0];
+    arg->effectLayerPtrs[1] = &arg->effectLayers[1];
+    arg->effectLayerPtrs[2] = &arg->effectLayers[2];
+    arg->effectLayerPtrs[3] = &arg->effectLayers[3];
+    arg->effectLayers[0].next = NULL;
+    arg->effectLayers[1].next = NULL;
+    arg->effectLayers[2].next = NULL;
+    arg->effectLayers[3].next = NULL;
     for (i = 0; i < 0x198; i++, effect++)
     {
         if (effect->inUseFlag == 0)
@@ -700,26 +700,26 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
         effect->next = NULL;
         if ((effect->is2D == 1) || (effect->is2D == 3))
         {
-            arg->specialEffectsPtrs[1]->next = effect;
-            arg->specialEffectsPtrs[1] = effect;
+            arg->effectLayerPtrs[1]->next = effect;
+            arg->effectLayerPtrs[1] = effect;
         }
         else if (effect->is2D == 0)
         {
             if (effect->vm.blendMode != 0)
             {
-                arg->specialEffectsPtrs[3]->next = effect;
-                arg->specialEffectsPtrs[3] = effect;
+                arg->effectLayerPtrs[3]->next = effect;
+                arg->effectLayerPtrs[3] = effect;
             }
             else
             {
-                arg->specialEffectsPtrs[0]->next = effect;
-                arg->specialEffectsPtrs[0] = effect;
+                arg->effectLayerPtrs[0]->next = effect;
+                arg->effectLayerPtrs[0] = effect;
             }
         }
         else
         {
-            arg->specialEffectsPtrs[2]->next = effect;
-            arg->specialEffectsPtrs[2] = effect;
+            arg->effectLayerPtrs[2]->next = effect;
+            arg->effectLayerPtrs[2] = effect;
         }
     }
     arg->frameCounter = arg->frameCounter + 1;
@@ -739,7 +739,7 @@ u32 EffectManager::OnDraw(EffectManager *arg)
 {
     Effect *effect;
 
-    effect = arg->specialEffects[0].next;
+    effect = arg->effectLayers[0].next;
     while (effect != NULL)
     {
         effect->vm.pos = effect->pos1;
@@ -748,14 +748,14 @@ u32 EffectManager::OnDraw(EffectManager *arg)
         g_AnmManager->Draw(&effect->vm);
         effect = effect->next;
     }
-    effect = arg->specialEffects[2].next;
+    effect = arg->effectLayers[2].next;
     while (effect != NULL)
     {
         effect->vm.pos = effect->pos1;
         g_AnmManager->DrawBillboard(&effect->vm);
         effect = effect->next;
     }
-    effect = arg->specialEffects[3].next;
+    effect = arg->effectLayers[3].next;
     while (effect != NULL)
     {
         effect->vm.pos = effect->pos1;
@@ -779,7 +779,7 @@ i32 EffectManager::UpdateSpecialEffect()
     f32 a;
     Effect *effect;
 
-    effect = this->specialEffects[1].next;
+    effect = this->effectLayers[1].next;
     counter = 0;
 
     if (g_Supervisor.cfg.effectQuality == QUALITY_WORST)

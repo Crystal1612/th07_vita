@@ -155,7 +155,7 @@ struct Enemy
         {
             u8 disableMovement : 1;
             u8 customSpecialEffectPos : 1;
-            u8 bombInvulnerable : 1;
+            u8 invisibleOnBomb : 1;
             u8 freezeEclDuringBombs : 1;
         };
     };

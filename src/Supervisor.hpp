@@ -133,7 +133,7 @@ struct Supervisor
     i32 calcCount;
     i32 wantedState;
     i32 curState;
-    i32 wantedState2;
+    i32 prevState;
     i32 unused_160;
     i32 renderSkipFrames;
     i32 isInEnding;
@@ -147,7 +147,7 @@ struct Supervisor
     i16 curFps;
     i16 unused_18a;
     u32 flags;
-    DWORD startupTimeForMenuMusic;
+    DWORD lastTotalPlayTimeUpdate;
     DWORD currentTime;
     D3DCAPS8 d3dCaps;
     LARGE_INTEGER perfFrequency;

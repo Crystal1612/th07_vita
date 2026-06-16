@@ -13,7 +13,7 @@
 static JOYCAPSA g_JoystickCaps;
 
 // GLOBAL: TH07 0x0049fe1c
-static u16 g_FocusButtonConflictState;
+static u16 g_AutoFocusTimer;
 
 #define KEY_PRESSED(scancode, thButton) \
     ((keyboardState[scancode] & 0x80) != 0 ? thButton : 0)
@@ -101,25 +101,25 @@ u16 Controller::GetControllerInput(u16 buttons)
         {
             if (DVar1 != 0)
             {
-                if (g_FocusButtonConflictState < 20)
+                if (g_AutoFocusTimer < 20)
                 {
-                    g_FocusButtonConflictState++;
+                    g_AutoFocusTimer++;
                 }
-                if (g_FocusButtonConflictState >= 10)
+                if (g_AutoFocusTimer >= 10)
                 {
                     buttons |= TH_BUTTON_FOCUS;
                 }
             }
             else
             {
-                if (g_FocusButtonConflictState > 0xa)
+                if (g_AutoFocusTimer > 0xa)
                 {
-                    g_FocusButtonConflictState = g_FocusButtonConflictState - 10;
+                    g_AutoFocusTimer = g_AutoFocusTimer - 10;
                     buttons |= TH_BUTTON_FOCUS;
                 }
                 else
                 {
-                    g_FocusButtonConflictState = 0;
+                    g_AutoFocusTimer = 0;
                 }
             }
         }
@@ -207,25 +207,25 @@ u16 Controller::GetControllerInput(u16 buttons)
             {
                 if (DVar2 != 0)
                 {
-                    if (g_FocusButtonConflictState < 20)
+                    if (g_AutoFocusTimer < 20)
                     {
-                        g_FocusButtonConflictState++;
+                        g_AutoFocusTimer++;
                     }
-                    if (g_FocusButtonConflictState >= 10)
+                    if (g_AutoFocusTimer >= 10)
                     {
                         buttons |= TH_BUTTON_FOCUS;
                     }
                 }
                 else
                 {
-                    if (g_FocusButtonConflictState > 0xa)
+                    if (g_AutoFocusTimer > 0xa)
                     {
-                        g_FocusButtonConflictState -= 10;
+                        g_AutoFocusTimer -= 10;
                         buttons |= TH_BUTTON_FOCUS;
                     }
                     else
                     {
-                        g_FocusButtonConflictState = 0;
+                        g_AutoFocusTimer = 0;
                     }
                 }
             }

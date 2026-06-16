@@ -93,8 +93,8 @@ struct EffectManager
     f32 globalColorMultiplierB;
     f32 globalColorMultiplierA;
     Effect effects[409];
-    Effect specialEffects[4];
-    Effect *specialEffectsPtrs[4];
+    Effect effectLayers[4];
+    Effect *effectLayerPtrs[4];
     i32 frameCounter;
 };
 C_ASSERT(sizeof(EffectManager) == 0x496a8);

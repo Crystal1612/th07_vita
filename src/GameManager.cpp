@@ -29,6 +29,7 @@ i32 g_RankArray[6][3] = {
     {16, 15, 16},
 };
 
+// ZUN name: Stg
 // GLOBAL: TH07 0x00626270
 GameManager g_GameManager;
 
@@ -47,7 +48,7 @@ GameManager::GameManager()
     this->arcadeRegionSize.x = 384.0f;
     this->arcadeRegionSize.y = 448.0f;
     this->demoIdx = 2;
-    this->isGameComplete = 1;
+    this->phantasmUnlocked = 1;
 }
 
 // FUNCTION: TH07 0x0042d5cd
@@ -580,7 +581,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->ResetRegionsPos();
         arg->globals->currentPower = 0.0f;
         arg->RegenerateGameIntegrityCsum();
-        arg->activeFrameCounter = 0;
+        arg->playTimeAll = 0;
         arg->globals->guiScore = 0;
         arg->globals->score = 0;
         arg->globals->guiScoreDifference = 0;
@@ -792,8 +793,8 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     }
 
     if (EnemyManager::RegisterChain(
-            g_AnmStageFiles[arg->currentStage].stageName1,
-            g_AnmStageFiles[arg->currentStage].stageName2) != ZUN_SUCCESS)
+            g_EnemyAnmStageFiles[arg->currentStage].anmPath1,
+            g_EnemyAnmStageFiles[arg->currentStage].anmPath2) != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00497f4c
         g_GameErrorContext.Log("error : “G‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");

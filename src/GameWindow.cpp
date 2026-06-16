@@ -29,7 +29,7 @@ GameWindow g_GameWindow;
 HANDLE g_Mutex;
 
 // GLOBAL: TH07 0x0135e1f8
-i32 g_TickCountToEffectiveFramerate;
+i32 g_FrameCount;
 
 // GLOBAL: TH07 0x0135e200
 f64 g_LastFrameTime;
@@ -47,8 +47,8 @@ LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
     {
         if (uMsg == WM_ACTIVATEAPP)
         {
-            g_GameWindow.lastActiveAppValue = wParam;
-            g_GameWindow.isAppActive = (i32)(wParam == 0);
+            g_GameWindow.isAppActive = wParam;
+            g_GameWindow.isAppInactive = (i32)(wParam == 0);
         }
         else
         {
@@ -69,7 +69,7 @@ LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
         {
             if (g_Supervisor.cfg.windowed == 0)
             {
-                if (g_GameWindow.isAppActive == 0)
+                if (g_GameWindow.isAppInactive == 0)
                 {
                     ShowCursor(0);
                     SetCursor(NULL);
@@ -144,7 +144,7 @@ RenderResult GameWindow::Render()
     i32 local_8;
     f64 slowDown;
 
-    if (this->lastActiveAppValue != 0)
+    if (this->isAppActive != 0)
     {
         if (this->curFrame != 0)
         {
@@ -252,7 +252,7 @@ RenderResult GameWindow::Render()
     LAB_00434a18:
         Present();
         this->curFrame = 0;
-        g_TickCountToEffectiveFramerate += 1;
+        g_FrameCount += 1;
     }
     return RENDER_RESULT_KEEP_RUNNING;
 }
@@ -272,7 +272,7 @@ i32 GameWindow::InitD3dInterface()
 }
 
 // FUNCTION: TH07 0x00434a80
-i32 GameWindow::CreateGameWindow(HINSTANCE hInstance) // GameWindow.cpp:275
+i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
 {
     WNDCLASSA base_class;
     i32 width;
@@ -283,8 +283,8 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance) // GameWindow.cpp:275
     base_class.hCursor = LoadCursorA(NULL, IDC_ARROW);
     base_class.hInstance = hInstance;
     base_class.lpfnWndProc = WindowProc;
-    g_GameWindow.lastActiveAppValue = 1;
-    g_GameWindow.isAppActive = 0;
+    g_GameWindow.isAppActive = 1;
+    g_GameWindow.isAppInactive = 0;
     // STRING: TH07 0x00497bd0
     base_class.lpszClassName = "BASE";
     RegisterClassA(&base_class);

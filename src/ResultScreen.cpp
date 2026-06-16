@@ -53,7 +53,7 @@ const char *g_CharactersAndShotTypesStrings[6] = {
 };
 
 // GLOBAL: TH07 0x0049f504
-static const f32 g_DifficultyPointItemWeightsList[] = {1.0f, 1.5f, 1.5f, 2.0f, 2.5f};
+static const f32 g_DifficultySpellcardWeightsList[] = {1.0f, 1.5f, 1.5f, 2.0f, 2.5f};
 
 // GLOBAL: TH07 0x0049f518
 const char *g_DifficultyNameTable[6] = {
@@ -2098,10 +2098,10 @@ ZunResult ResultScreen::DrawFinalStats()
 
         // Please do not write code like this
         clearPercent = g_GameManager.difficulty < DIFF_EXTRA
-                           ? (f32)g_GameManager.activeFrameCounter / 180621.0f
+                           ? (f32)g_GameManager.playTimeAll / 180621.0f
                            : clearPercent = g_GameManager.difficulty == DIFF_EXTRA
-                                                ? (f32)g_GameManager.activeFrameCounter / 80000.0f
-                                                : (f32)g_GameManager.activeFrameCounter / 85000.0f;
+                                                ? (f32)g_GameManager.playTimeAll / 80000.0f
+                                                : (f32)g_GameManager.playTimeAll / 85000.0f;
 
         pos = vm->pos;
         pos.x += 210.0f;
@@ -2172,7 +2172,7 @@ ZunResult ResultScreen::DrawFinalStats()
         AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d",
                                     g_GameManager.globals->spellCardsCaptured);
         rankingProbably += (f32)g_GameManager.globals->spellCardsCaptured *
-                           g_DifficultyPointItemWeightsList[g_GameManager.difficulty];
+                           g_DifficultySpellcardWeightsList[g_GameManager.difficulty];
 
         slowdown =
             (g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f) * 2;
@@ -2763,7 +2763,7 @@ ZunResult ResultScreen::RegisterChain(u32 param_1)
 
     // STRING: TH07 0x0049635c
     Supervisor::DebugPrint2("Stg.PlayTimeAll = %d\r\n",
-                            g_GameManager.activeFrameCounter);
+                            g_GameManager.playTimeAll);
     if (param_1 == 1)
     {
         if (g_GameManager.practice == 0)

@@ -7,7 +7,7 @@
 #include "inttypes.hpp"
 
 extern const char *g_ShooterTable[6];
-extern const char *g_ShooterTable2[6];
+extern const char *g_ShooterTableFocus[6];
 
 typedef void (*BombCallback)(struct Player *);
 
@@ -33,14 +33,14 @@ typedef enum PlayerDirection
     MOVEMENT_DOWN_RIGHT = 8
 } PlayerDirection;
 
-typedef enum OrbState
+typedef enum OptionState
 {
-    ORB_HIDDEN = 0,
-    ORB_UNFOCUSED = 1,
-    ORB_FOCUSING = 2,
-    ORB_FOCUSED = 3,
-    ORB_UNFOCUSING = 4
-} OrbState;
+    OPTION_HIDDEN = 0,
+    OPTION_UNFOCUSED = 1,
+    OPTION_FOCUSING = 2,
+    OPTION_FOCUSED = 3,
+    OPTION_UNFOCUSING = 4
+} OptionState;
 
 typedef enum BorderState
 {
@@ -179,7 +179,7 @@ struct Player
     }
 
     AnmVm playerSprite;
-    AnmVm orbsSprite[3];
+    AnmVm optionsSprite[3];
     D3DXVECTOR3 positionCenter;
     D3DXVECTOR3 prevFramePos;
     D3DXVECTOR3 hitboxTopLeft;
@@ -191,12 +191,12 @@ struct Player
     D3DXVECTOR3 hitboxSize;
     D3DXVECTOR3 grazeSize;
     D3DXVECTOR3 grabItemSize;
-    D3DXVECTOR3 orbsPosition[2];
+    D3DXVECTOR3 optionsPosition[2];
     D3DXVECTOR2 velocity;
     i32 unused_9d4;
     Effect *focusEffect;
-    BombProjectile bombProjectiles[112];
-    BombProjectile bombHitboxes[96];
+    BombProjectile bombDamageBoxes[112];
+    BombProjectile bombClearBoxes[96];
     i32 isBombing;
     ShtEntry *shtEntries[4];
     f32 horizontalMovementSpeedMultiplierDuringBomb;
@@ -207,7 +207,7 @@ struct Player
     i32 itemType;
     i8 playerState;
     u8 initParam;
-    i8 orbState;
+    i8 optionState;
     i8 isFocus;
     u8 bombParticleTime;
     i8 hasBorder;
@@ -228,14 +228,14 @@ struct Player
     i32 unused_16a1c;
     PlayerBombInfo bombInfo;
     D3DXVECTOR3 bombStartPos;
-    f32 orbAngle;
+    f32 optionAngle;
     ChainElem *calcChain;
     ChainElem *drawChain1;
     ChainElem *drawChain2;
     Effect *effect;
     Effect *borderEffect;
     struct ShtData *shooterData;
-    struct ShtData *shooterData2;
+    struct ShtData *shooterDataFocus;
 };
 C_ASSERT(sizeof(Player) == 0xb7e78);
 extern Player g_Player;

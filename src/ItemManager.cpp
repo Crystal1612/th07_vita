@@ -13,7 +13,7 @@
 #include "d3dx8.h"
 
 // GLOBAL: TH07 0x0049ecf8
-i32 g_CherryBonusFullPower[30] = {10, 20, 30, 40, 50, 60, 70, 80,
+i32 g_FullPowerScoreBonus[30] = {10, 20, 30, 40, 50, 60, 70, 80,
                                   90, 100, 200, 300, 400, 500, 600, 700,
                                   800, 900, 1000, 2000, 3000, 4000, 5000,
                                   6000, 7000, 8000, 9000, 10000, 11000, 12000};
@@ -278,7 +278,7 @@ void ItemManager::OnUpdate()
                     {
                         g_GameManager.powerItemCountForScore = 30;
                     }
-                    itemScore = g_CherryBonusFullPower[g_GameManager.powerItemCountForScore];
+                    itemScore = g_FullPowerScoreBonus[g_GameManager.powerItemCountForScore];
                     g_GameManager.AddScore(itemScore);
                     g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, itemScore >= 12800 ? 0xffffff00 : 0xffffffff);
                 }

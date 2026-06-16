@@ -1828,7 +1828,7 @@ restart:
                 break;
             case 0x7e:
                 g_Gui.bossLifeMarkers = GET_INT_VALUE(enemy, 0);
-                g_GameManager.activeFrameCounter += 0x708;
+                g_GameManager.playTimeAll += 0x708;
                 break;
             case 0x5c:
                 if (0 < enemy->life)

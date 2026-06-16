@@ -254,8 +254,8 @@ struct GameManager
     i32 cherryMax;
     i32 cherry;
     i32 cherryPlus;
-    i32 isGameComplete;
-    i32 activeFrameCounter;
+    i32 phantasmUnlocked;
+    i32 playTimeAll; // ZUN name: PlayTimeAll
     u32 bulletLagTime;
     i32 maxRetries;
     Rank rank;

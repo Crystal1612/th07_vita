@@ -34,8 +34,8 @@ struct GameWindow
 
     HWND window;
     i32 isAppClosing;
-    i32 lastActiveAppValue;
     i32 isAppActive;
+    i32 isAppInactive;
     i8 curFrame;
     // pad 3
     LARGE_INTEGER lpFrequency;

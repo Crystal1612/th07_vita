@@ -69,7 +69,7 @@ const char *g_ShooterTable[6] = {
 };
 
 // GLOBAL: TH07 0x0049f548
-const char *g_ShooterTable2[6] = {
+const char *g_ShooterTableFocus[6] = {
     // STRING: TH07 0x00496b50
     "data/ply00as.sht",
     // STRING: TH07 0x00496b3c
@@ -97,7 +97,7 @@ void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
     }
     else
     {
-        bullet->pos = player->orbsPosition[shtEntry->option - 1];
+        bullet->pos = player->optionsPosition[shtEntry->option - 1];
     }
     bullet->pos.x += shtEntry->offset.x;
     bullet->pos.y += shtEntry->offset.y;
@@ -142,7 +142,7 @@ i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
     i16 sVar2 = shtEntry->fireOffset;
     if (player->timers[sVar2].bullet == NULL)
     {
-        if (player->orbState == ORB_UNFOCUSED)
+        if (player->optionState == OPTION_UNFOCUSED)
         {
             player->timers[sVar2].timer = shtEntry->fireInterval;
             player->timers[sVar2].bullet = bullet;
@@ -176,7 +176,7 @@ i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
     i16 sVar2 = shtEntry->fireOffset;
     if (player->timers[sVar2].bullet == NULL)
     {
-        if (player->orbState == ORB_FOCUSED)
+        if (player->optionState == OPTION_FOCUSED)
         {
             player->timers[sVar2].timer = 999;
             player->timers[sVar2].bullet = bullet;
@@ -247,7 +247,7 @@ i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
     if (fireTime % (i32)shtEntry->fireInterval == (i32)shtEntry->fireOffset)
     {
         DefaultFireBulletCallback(player, bullet, shtEntry);
-        angle = utils::AddNormalizeAngle(player->orbAngle,
+        angle = utils::AddNormalizeAngle(player->optionAngle,
                                          shtEntry->angle + 1.5707964f);
         speed = shtEntry->speed;
         AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, speed);
@@ -406,7 +406,7 @@ i32 ShtData::UpdateOrbLaser(Player *player, PlayerBullet *bullet)
     {
         bullet->vm.pendingInterrupt = 1;
     }
-    bullet->pos = player->orbsPosition[bullet->optionId - 1];
+    bullet->pos = player->optionsPosition[bullet->optionId - 1];
     bullet->pos.x += bullet->offset.x;
     bullet->pos.z = 0.44f;
     if (player->playerState == PLAYER_STATE_DEAD)
@@ -454,9 +454,9 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
     {
         if (bullet->posHistory[i].x >= -900.0f)
         {
-            player->bombProjectiles[i + 0x60].pos = bullet->posHistory[i];
-            player->bombProjectiles[i + 0x60].lifetime = 1;
-            player->bombProjectiles[i + 0x60].size = bullet->hitboxSize;
+            player->bombDamageBoxes[i + 0x60].pos = bullet->posHistory[i];
+            player->bombDamageBoxes[i + 0x60].lifetime = 1;
+            player->bombDamageBoxes[i + 0x60].size = bullet->hitboxSize;
         }
     }
     for (i = 15; 0 < i; i--)
@@ -609,7 +609,7 @@ void Player::SpawnBullets(Player *player, u32 timer)
     }
     else
     {
-        pSVar1 = player->shooterData2;
+        pSVar1 = player->shooterDataFocus;
     }
     local_24 = &pSVar1->levels;
     for (local_c = local_24;
@@ -660,12 +660,12 @@ void Player::UpdateShots()
 {
     PlayerBullet *bullet;
 
-    if ((this->orbState != ORB_FOCUSED) && (this->timers[2].bullet != NULL))
+    if ((this->optionState != OPTION_FOCUSED) && (this->timers[2].bullet != NULL))
     {
         (this->timers[2].bullet)->bulletState = 0;
         this->timers[2].bullet = NULL;
     }
-    if (this->orbState != ORB_UNFOCUSED)
+    if (this->optionState != OPTION_UNFOCUSED)
     {
         if (this->timers[0].bullet != NULL)
         {
@@ -928,20 +928,20 @@ i32 Player::CheckCollisionWithEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
         }
         for (i = 0; i < 0x70; i++)
         {
-            fVar3 = this->bombProjectiles[i].size.x;
+            fVar3 = this->bombDamageBoxes[i].size.x;
             if (fVar3 < 0.0f == (fVar3 == 0.0f))
             {
-                pDVar1 = &this->bombProjectiles[i].size;
-                pDVar2 = &this->bombProjectiles[i].size;
-                if ((((this->bombProjectiles[i].pos.x - pDVar1->x * 0.5f <= fVar7) &&
-                      (fVar5 <= pDVar2->x * 0.5f + this->bombProjectiles[i].pos.x)) &&
-                     (this->bombProjectiles[i].pos.y - pDVar1->y * 0.5f <= fVar8)) &&
-                    (fVar6 <= pDVar2->y * 0.5f + this->bombProjectiles[i].pos.y))
+                pDVar1 = &this->bombDamageBoxes[i].size;
+                pDVar2 = &this->bombDamageBoxes[i].size;
+                if ((((this->bombDamageBoxes[i].pos.x - pDVar1->x * 0.5f <= fVar7) &&
+                      (fVar5 <= pDVar2->x * 0.5f + this->bombDamageBoxes[i].pos.x)) &&
+                     (this->bombDamageBoxes[i].pos.y - pDVar1->y * 0.5f <= fVar8)) &&
+                    (fVar6 <= pDVar2->y * 0.5f + this->bombDamageBoxes[i].pos.y))
                 {
-                    local_34 += this->bombProjectiles[i].lifetime;
-                    this->bombProjectiles[i].payload =
-                        (this->bombProjectiles[i].payload +
-                         this->bombProjectiles[i].lifetime);
+                    local_34 += this->bombDamageBoxes[i].lifetime;
+                    this->bombDamageBoxes[i].payload =
+                        (this->bombDamageBoxes[i].payload +
+                         this->bombDamageBoxes[i].lifetime);
                     this->bombParticleTime = this->bombParticleTime + 1;
                     if ((this->bombParticleTime % 4) == 0)
                     {
@@ -978,7 +978,7 @@ i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
     f32 bombY;
     f32 bombX;
 
-    bombProjectile = this->bombHitboxes;
+    bombProjectile = this->bombClearBoxes;
     bulletTopLeft.x = center->x - size->x / 2.0f;
     bulletTopLeft.y = center->y - size->y / 2.0f;
     bulletBottomRight.x = center->x + size->x / 2.0f;
@@ -1435,29 +1435,29 @@ void Player::HandlePlayerInputs()
     this->grazeBottomRight = this->positionCenter + this->grazeSize;
     this->grabItemTopLeft = this->positionCenter - this->grabItemSize;
     this->grabItemBottomRight = this->positionCenter + this->grabItemSize;
-    this->orbsPosition[0] = this->positionCenter;
-    this->orbsPosition[1] = this->positionCenter;
+    this->optionsPosition[0] = this->positionCenter;
+    this->optionsPosition[1] = this->positionCenter;
     local_14 = 0.0f;
     local_18 = 0.0f;
     if (g_GameManager.character != CHAR_SAKUYA || g_GameManager.shotType != 1)
     {
-        switch (this->orbState)
+        switch (this->optionState)
         {
-        case ORB_HIDDEN:
+        case OPTION_HIDDEN:
             this->focusMovementTimer.InitializeForPopup();
             break;
-        case ORB_UNFOCUSED:
+        case OPTION_UNFOCUSED:
             local_18 = 24.0f;
             this->focusMovementTimer.InitializeForPopup();
             if (this->isFocus != 0)
             {
-                this->orbState = ORB_FOCUSING;
+                this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
                     0x18, &this->positionCenter, 2, 1, 0xffffffff);
                 break;
             }
             break;
-        case ORB_FOCUSING:
+        case OPTION_FOCUSING:
             this->focusMovementTimer++;
             fVar1 = ((f32)this->focusMovementTimer.current +
                      this->focusMovementTimer.subFrame) /
@@ -1466,13 +1466,13 @@ void Player::HandlePlayerInputs()
             local_18 = fVar1 * fVar1 * -16.0f + 24.0f;
             if (this->focusMovementTimer >= 8)
             {
-                this->orbState = ORB_FOCUSED;
+                this->optionState = OPTION_FOCUSED;
             }
             if (this->isFocus != 0)
             {
                 break;
             }
-            this->orbState = ORB_UNFOCUSING;
+            this->optionState = OPTION_UNFOCUSING;
             this->focusMovementTimer = 8 - this->focusMovementTimer.current;
             if (this->focusEffect != NULL)
             {
@@ -1487,24 +1487,24 @@ void Player::HandlePlayerInputs()
             local_18 = (1.0f - fVar1 * fVar1) * -16.0f + 24.0f;
             if (this->focusMovementTimer >= 8)
             {
-                this->orbState = ORB_UNFOCUSED;
+                this->optionState = OPTION_UNFOCUSED;
             }
             if (this->isFocus == 0)
             {
                 break;
             }
-            this->orbState = ORB_FOCUSING;
+            this->optionState = OPTION_FOCUSING;
             this->focusMovementTimer = 8 - this->focusMovementTimer.current;
             this->focusEffect = g_EffectManager.SpawnEffect(
                 0x18, &this->positionCenter, 2, 1, 0xffffffff);
             break;
-        case ORB_FOCUSED:
+        case OPTION_FOCUSED:
             local_18 = 8.0f;
             local_14 = -32.0f;
             this->focusMovementTimer.InitializeForPopup();
             if (this->isFocus == 0)
             {
-                this->orbState = ORB_UNFOCUSING;
+                this->optionState = OPTION_UNFOCUSING;
                 if (this->focusEffect == NULL)
                 {
                     goto switchD_0043f936_caseD_4;
@@ -1513,42 +1513,42 @@ void Player::HandlePlayerInputs()
                 goto switchD_0043f936_caseD_4;
             }
             break;
-        case ORB_UNFOCUSING:
+        case OPTION_UNFOCUSING:
             goto switchD_0043f936_caseD_4;
         }
-        this->orbsPosition[0].x -= local_18;
-        this->orbsPosition[1].x += local_18;
-        this->orbsPosition[0].y += local_14;
-        this->orbsPosition[1].y += local_14;
+        this->optionsPosition[0].x -= local_18;
+        this->optionsPosition[1].x += local_18;
+        this->optionsPosition[0].y += local_14;
+        this->optionsPosition[1].y += local_14;
     }
     else
     {
-        switch (this->orbState)
+        switch (this->optionState)
         {
-        case ORB_HIDDEN:
+        case OPTION_HIDDEN:
             this->focusMovementTimer.InitializeForPopup();
             break;
-        case ORB_UNFOCUSED:
-            local_18 = cosf(this->orbAngle + 1.5707964f) * 24.0f;
-            local_14 = sinf(this->orbAngle + 1.5707964f) * 24.0f;
+        case OPTION_UNFOCUSED:
+            local_18 = cosf(this->optionAngle + 1.5707964f) * 24.0f;
+            local_14 = sinf(this->optionAngle + 1.5707964f) * 24.0f;
             this->focusMovementTimer.InitializeForPopup();
             if (this->isFocus != 0)
             {
-                this->orbState = ORB_FOCUSING;
+                this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
                     0x18, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_ORB_FOCUSING;
             }
-            this->orbsPosition[0].x -= local_18;
-            this->orbsPosition[1].x += local_18;
-            this->orbsPosition[0].y -= local_14;
-            this->orbsPosition[1].y += local_14;
+            this->optionsPosition[0].x -= local_18;
+            this->optionsPosition[1].x += local_18;
+            this->optionsPosition[0].y -= local_14;
+            this->optionsPosition[1].y += local_14;
             break;
         CASE_ORB_FOCUSING:
-        case ORB_FOCUSING:
+        case OPTION_FOCUSING:
             if (this->isFocus == 0)
             {
-                this->orbState = ORB_UNFOCUSING;
+                this->optionState = OPTION_UNFOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.current;
                 if (this->focusEffect != NULL)
                 {
@@ -1560,26 +1560,26 @@ void Player::HandlePlayerInputs()
             fVar1 = ((f32)this->focusMovementTimer.current +
                      this->focusMovementTimer.subFrame) /
                     8.0f;
-            fVar2 = cosf(this->orbAngle + 1.5707964f) * 24.0f;
-            fVar3 = sinf(this->orbAngle + 1.5707964f) * 24.0f;
-            this->orbsPosition[1].x +=
-                (cosf(this->orbAngle + 0.22439948f) * 24.0f - fVar2) * fVar1 + fVar2;
-            this->orbsPosition[1].y +=
-                (sinf(this->orbAngle + 0.22439948f) * 24.0f - fVar3) * fVar1 + fVar3;
+            fVar2 = cosf(this->optionAngle + 1.5707964f) * 24.0f;
+            fVar3 = sinf(this->optionAngle + 1.5707964f) * 24.0f;
+            this->optionsPosition[1].x +=
+                (cosf(this->optionAngle + 0.22439948f) * 24.0f - fVar2) * fVar1 + fVar2;
+            this->optionsPosition[1].y +=
+                (sinf(this->optionAngle + 0.22439948f) * 24.0f - fVar3) * fVar1 + fVar3;
             if (this->focusMovementTimer >= 8)
             {
-                this->orbState = ORB_FOCUSED;
+                this->optionState = OPTION_FOCUSED;
             }
-            this->orbsPosition[0].x +=
-                (cosf(this->orbAngle - 0.22439948f) * 24.0f + fVar2) * fVar1 - fVar2;
-            this->orbsPosition[0].y +=
-                (sinf(this->orbAngle - 0.22439948f) * 24.0f + fVar3) * fVar1 - fVar3;
+            this->optionsPosition[0].x +=
+                (cosf(this->optionAngle - 0.22439948f) * 24.0f + fVar2) * fVar1 - fVar2;
+            this->optionsPosition[0].y +=
+                (sinf(this->optionAngle - 0.22439948f) * 24.0f + fVar3) * fVar1 - fVar3;
             break;
-        case ORB_FOCUSED:
+        case OPTION_FOCUSED:
             this->focusMovementTimer.InitializeForPopup();
             if (this->isFocus == 0)
             {
-                this->orbState = ORB_UNFOCUSING;
+                this->optionState = OPTION_UNFOCUSING;
                 if (this->focusEffect == NULL)
                 {
                     goto CASE_ORB_UNFOCUSING;
@@ -1587,40 +1587,40 @@ void Player::HandlePlayerInputs()
                 this->focusEffect->vm.pendingInterrupt = 1;
                 goto CASE_ORB_UNFOCUSING;
             }
-            this->orbsPosition[1].x += cosf(this->orbAngle + 0.22439948f) * 24.0f;
-            this->orbsPosition[1].y += sinf(this->orbAngle + 0.22439948f) * 24.0f;
-            this->orbsPosition[0].x += cosf(this->orbAngle - 0.22439948f) * 24.0f;
-            this->orbsPosition[0].y += sinf(this->orbAngle - 0.22439948f) * 24.0f;
+            this->optionsPosition[1].x += cosf(this->optionAngle + 0.22439948f) * 24.0f;
+            this->optionsPosition[1].y += sinf(this->optionAngle + 0.22439948f) * 24.0f;
+            this->optionsPosition[0].x += cosf(this->optionAngle - 0.22439948f) * 24.0f;
+            this->optionsPosition[0].y += sinf(this->optionAngle - 0.22439948f) * 24.0f;
             break;
         CASE_ORB_UNFOCUSING:
-        case ORB_UNFOCUSING:
+        case OPTION_UNFOCUSING:
             if (this->isFocus == 0)
             {
                 this->focusMovementTimer++;
                 fVar1 = 1.0f - ((f32)this->focusMovementTimer.current +
                                 this->focusMovementTimer.subFrame) /
                                    8.0f;
-                fVar2 = cosf(this->orbAngle + 1.5707964f) * 24.0f;
-                fVar3 = sinf(this->orbAngle + 1.5707964f) * 24.0f;
-                this->orbsPosition[1].x +=
-                    (cosf(this->orbAngle + 0.22439948f) * 24.0f - fVar2) * fVar1 +
+                fVar2 = cosf(this->optionAngle + 1.5707964f) * 24.0f;
+                fVar3 = sinf(this->optionAngle + 1.5707964f) * 24.0f;
+                this->optionsPosition[1].x +=
+                    (cosf(this->optionAngle + 0.22439948f) * 24.0f - fVar2) * fVar1 +
                     fVar2;
-                this->orbsPosition[1].y +=
-                    (sinf(this->orbAngle + 0.22439948f) * 24.0f - fVar3) * fVar1 +
+                this->optionsPosition[1].y +=
+                    (sinf(this->optionAngle + 0.22439948f) * 24.0f - fVar3) * fVar1 +
                     fVar3;
                 if (this->focusMovementTimer >= 8)
                 {
-                    this->orbState = ORB_UNFOCUSED;
+                    this->optionState = OPTION_UNFOCUSED;
                 }
-                this->orbsPosition[0].x +=
-                    ((cosf(this->orbAngle - 0.22439948f) * 24.0f + fVar2) * fVar1 -
+                this->optionsPosition[0].x +=
+                    ((cosf(this->optionAngle - 0.22439948f) * 24.0f + fVar2) * fVar1 -
                      fVar2);
-                this->orbsPosition[0].y +=
-                    ((sinf(this->orbAngle - 0.22439948f) * 24.0f + fVar3) * fVar1 -
+                this->optionsPosition[0].y +=
+                    ((sinf(this->optionAngle - 0.22439948f) * 24.0f + fVar3) * fVar1 -
                      fVar3);
                 goto switchD_0043fe16_default;
             }
-            this->orbState = ORB_FOCUSING;
+            this->optionState = OPTION_FOCUSING;
             this->focusMovementTimer = 8 - this->focusMovementTimer.current;
             this->focusEffect = g_EffectManager.SpawnEffect(
                 0x18, &this->positionCenter, 2, 1, 0xffffffff);
@@ -1639,25 +1639,25 @@ switchD_0043fe16_default:
             if (this->velocity.x != 0.0f)
             {
                 f32 angleDelta = ((-(this->velocity.x / 4.0f) * ZUN_PI) / 5.0f) / 10.0f;
-                this->orbAngle -= angleDelta;
-                if (this->orbAngle < -2.1991148f)
+                this->optionAngle -= angleDelta;
+                if (this->optionAngle < -2.1991148f)
                 {
-                    this->orbAngle = -2.1991148f;
+                    this->optionAngle = -2.1991148f;
                 }
-                else if (this->orbAngle > -0.9424778f)
+                else if (this->optionAngle > -0.9424778f)
                 {
-                    this->orbAngle = -0.9424778f;
+                    this->optionAngle = -0.9424778f;
                 }
             }
             else
             {
-                if (fabsf(this->orbAngle - -1.5707964f) <= 0.03141593f)
+                if (fabsf(this->optionAngle - -1.5707964f) <= 0.03141593f)
                 {
-                    this->orbAngle = -1.5707964f;
+                    this->optionAngle = -1.5707964f;
                 }
                 else
                 {
-                    if (-1.5707964f <= this->orbAngle)
+                    if (-1.5707964f <= this->optionAngle)
                     {
                         local_218 =
                             g_Supervisor.effectiveFramerateMultiplier * -0.06283186f;
@@ -1666,7 +1666,7 @@ switchD_0043fe16_default:
                     {
                         local_218 = g_Supervisor.effectiveFramerateMultiplier * 0.06283186f;
                     }
-                    this->orbAngle = local_218 + this->orbAngle;
+                    this->optionAngle = local_218 + this->optionAngle;
                 }
             }
         }
@@ -1678,9 +1678,9 @@ void Player::UpdateBombProjectiles()
 {
     for (i32 i = 0; i < 0x70; i++)
     {
-        this->bombProjectiles[i].size.x = 0.0f;
+        this->bombDamageBoxes[i].size.x = 0.0f;
     }
-    BombProjectile *local_c = this->bombHitboxes;
+    BombProjectile *local_c = this->bombClearBoxes;
     for (i32 i = 0; i < 0x60; i++)
     {
         if (local_c->lifetime < 1)
@@ -2067,7 +2067,7 @@ BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
     BombProjectile *bomb;
     i32 i;
 
-    bomb = this->bombHitboxes;
+    bomb = this->bombClearBoxes;
     for (i = 0; i < 0x5f; i++, bomb++)
     {
         if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
@@ -2092,7 +2092,7 @@ BombProjectile *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
     BombProjectile *bomb;
     i32 i;
 
-    bomb = this->bombHitboxes;
+    bomb = this->bombClearBoxes;
     for (i = 0; i < 0x5f; i++, bomb++)
     {
         if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
@@ -2280,10 +2280,10 @@ WHY:
         arg->HandlePlayerInputs();
     }
     g_AnmManager->ExecuteScript(&arg->playerSprite);
-    if (arg->orbState != ORB_HIDDEN)
+    if (arg->optionState != OPTION_HIDDEN)
     {
-        g_AnmManager->ExecuteScript(&arg->orbsSprite[0]);
-        g_AnmManager->ExecuteScript(&arg->orbsSprite[1]);
+        g_AnmManager->ExecuteScript(&arg->optionsSprite[0]);
+        g_AnmManager->ExecuteScript(&arg->optionsSprite[1]);
     }
     arg->UpdateShots();
     arg->UpdateFireBulletTimer();
@@ -2316,23 +2316,23 @@ u32 Player::OnDrawHighPrio(Player *arg)
             g_GameManager.arcadeRegionTopLeftPos.y + arg->positionCenter.y;
         arg->playerSprite.pos.z = 0.0f;
         g_AnmManager->DrawNoRotation(&arg->playerSprite);
-        if ((arg->orbState != ORB_HIDDEN) &&
+        if ((arg->optionState != OPTION_HIDDEN) &&
             ((arg->playerState == PLAYER_STATE_ALIVE ||
               (arg->playerState == PLAYER_STATE_BORDER)) ||
              (arg->playerState == PLAYER_STATE_INVULNERABLE)))
         {
-            arg->orbsSprite[0].pos.x =
-                g_GameManager.arcadeRegionTopLeftPos.x + arg->orbsPosition[0].x;
-            arg->orbsSprite[0].pos.y =
-                g_GameManager.arcadeRegionTopLeftPos.y + arg->orbsPosition[0].y;
-            arg->orbsSprite[0].pos.z = 0.0f;
-            arg->orbsSprite[1].pos.x =
-                g_GameManager.arcadeRegionTopLeftPos.x + arg->orbsPosition[1].x;
-            arg->orbsSprite[1].pos.y =
-                g_GameManager.arcadeRegionTopLeftPos.y + arg->orbsPosition[1].y;
-            arg->orbsSprite[1].pos.z = 0.0f;
-            g_AnmManager->Draw(&arg->orbsSprite[0]);
-            g_AnmManager->Draw(&arg->orbsSprite[1]);
+            arg->optionsSprite[0].pos.x =
+                g_GameManager.arcadeRegionTopLeftPos.x + arg->optionsPosition[0].x;
+            arg->optionsSprite[0].pos.y =
+                g_GameManager.arcadeRegionTopLeftPos.y + arg->optionsPosition[0].y;
+            arg->optionsSprite[0].pos.z = 0.0f;
+            arg->optionsSprite[1].pos.x =
+                g_GameManager.arcadeRegionTopLeftPos.x + arg->optionsPosition[1].x;
+            arg->optionsSprite[1].pos.y =
+                g_GameManager.arcadeRegionTopLeftPos.y + arg->optionsPosition[1].y;
+            arg->optionsSprite[1].pos.z = 0.0f;
+            g_AnmManager->Draw(&arg->optionsSprite[0]);
+            g_AnmManager->Draw(&arg->optionsSprite[1]);
         }
     }
     if (arg->playerState == PLAYER_STATE_BORDER &&
@@ -2410,8 +2410,8 @@ ZunResult Player::AddedCallback(Player *arg)
     }
 
     if (ShtData::LoadShtData(
-            &arg->shooterData2,
-            g_ShooterTable2[g_GameManager.shotTypeAndCharacter]) !=
+            &arg->shooterDataFocus,
+            g_ShooterTableFocus[g_GameManager.shotTypeAndCharacter]) !=
         ZUN_SUCCESS)
     {
         return ZUN_ERROR;
@@ -2451,11 +2451,11 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
     arg->positionCenter.z = 0.49f;
-    arg->orbsPosition[0].z = 0.49f;
-    arg->orbsPosition[1].z = 0.49f;
+    arg->optionsPosition[0].z = 0.49f;
+    arg->optionsPosition[1].z = 0.49f;
     for (i = 0; i < 0x80; i++)
     {
-        arg->bombProjectiles[i].size.x = 0.0f;
+        arg->bombDamageBoxes[i].size.x = 0.0f;
     }
     arg->hitboxSize.y = g_Player.shooterData->hitboxRadius / 2.0f;
     arg->hitboxSize.x = arg->hitboxSize.y;
@@ -2469,9 +2469,9 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->playerDirection = MOVEMENT_NONE;
     arg->playerState = PLAYER_STATE_SPAWNING;
     arg->invulnerabilityTimer = 120;
-    arg->orbState = ORB_UNFOCUSED;
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->orbsSprite[0], 0x480);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->orbsSprite[1], 0x481);
+    arg->optionState = OPTION_UNFOCUSED;
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[0], 0x480);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[1], 0x481);
     bullet = arg->bullets;
     for (i = 0; i < 0x60; i++, bullet++)
     {
@@ -2486,7 +2486,7 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->bombInfo.drawFocus =
         g_BombData[g_GameManager.shotTypeAndCharacter].drawFocus;
     arg->bombInfo.isInUse = 0;
-    arg->orbAngle = -1.5707964f;
+    arg->optionAngle = -1.5707964f;
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->respawnTimer = g_Player.shooterData->initialRespawnTimer;
@@ -2521,7 +2521,7 @@ ZunResult Player::DeletedCallback(Player *arg)
         g_AsciiManager.GetBossMarker(2)->pendingInterrupt = 99;
     }
     SAFE_FREE(g_Player.shooterData);
-    SAFE_FREE(g_Player.shooterData2);
+    SAFE_FREE(g_Player.shooterDataFocus);
     return ZUN_SUCCESS;
 }
 

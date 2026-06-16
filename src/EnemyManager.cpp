@@ -739,7 +739,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             g_GameManager.IncreaseSubrank(100);
         }
-        g_GameManager.activeFrameCounter++;
+        g_GameManager.playTimeAll++;
     }
     for (i = 0; i < 4; i++)
     {
@@ -859,7 +859,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         collisionOut = 0;
         playedDamageSound = 0;
-        if (!enemy->hasNoCollision && !enemy->bombInvulnerable)
+        if (!enemy->hasNoCollision && !enemy->invisibleOnBomb)
         {
             if (enemy->canDie &&
                 (enemy->hasContactHitbox &&
@@ -1297,7 +1297,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
             }
             enemy->primaryVm.pos = enemy->position + enemy->primaryVm.offset;
             enemy->primaryVm.pos.z = 0.29f;
-            if ((enemy->trailFlags & 0x10) == 0 && !enemy->bombInvulnerable)
+            if ((enemy->trailFlags & 0x10) == 0 && !enemy->invisibleOnBomb)
             {
                 enemy->primaryVm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
                 enemy->primaryVm.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;

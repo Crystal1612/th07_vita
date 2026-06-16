@@ -8,10 +8,10 @@
 
 struct StageAnms
 {
-    const char *stageName1;
-    const char *stageName2;
+    const char *anmPath1;
+    const char *anmPath2;
 };
-extern StageAnms g_AnmStageFiles[9];
+extern StageAnms g_EnemyAnmStageFiles[9];
 
 struct StdRawHeader
 {
@@ -163,7 +163,7 @@ struct Stage
     i32 positionInterpTimeMax;
     D3DXVECTOR3 positionEnd;
     i32 positionInterpMode;
-    u8 pendingCameraShake;
+    u8 cameraTeleported;
     // pad 3
     ZunColor color2;
     i32 isDarkening;
