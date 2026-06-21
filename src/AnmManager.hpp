@@ -216,6 +216,12 @@ struct AnmManager
         this->color.color = color;
     }
 
+    void SetColorWithMulEnabled(D3DCOLOR color)
+    {
+        this->colorMulEnabled = 1;
+        this->color.color = color;
+    }
+
     void SetAnmIdxAndExecuteScript(AnmVm *vm, i32 anmIdx)
     {
         vm->anmFileIdx = anmIdx;
@@ -332,6 +338,17 @@ struct AnmManager
     AnmLoadedSprite *GetSprite(i32 spriteIdx)
     {
         return &this->sprites[spriteIdx];
+    }
+
+    static void SetCameraModeStatic(AnmManager *mgr, i32 cameraMode)
+    {
+        mgr->currentCameraMode = cameraMode;
+    }
+
+    void DrawAndFlush(AnmVm *vm)
+    {
+        Draw(vm);
+        Flush();
     }
 
     ZunColor color;

@@ -93,6 +93,26 @@ struct PlayerBombInfo
 
 struct PlayerBullet
 {
+    f32 *GetPosX()
+    {
+        return &this->pos.x;
+    }
+
+    f32 *GetPosY()
+    {
+        return &this->pos.y;
+    }
+
+    f32 *GetVmPosX()
+    {
+        return &this->vm.pos.x;
+    }
+
+    f32 *GetVmPosY()
+    {
+        return &this->vm.pos.y;
+    }
+
     AnmVm vm;
     D3DXVECTOR3 pos;
     D3DXVECTOR3 posHistory[16];

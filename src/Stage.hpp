@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnmManager.hpp"
 #include "AnmVm.hpp"
 #include "ScreenEffect.hpp"
 #include "ZunResult.hpp"
@@ -39,7 +40,7 @@ struct StdRawObject
 {
     u16 id;
     i8 zLevel;
-    u8 flags;
+    i8 flags;
     D3DXVECTOR3 pos;
     D3DXVECTOR3 size;
     StdRawQuadBasic firstQuad;
@@ -55,8 +56,8 @@ struct StdRawInstance
 struct StdRawInstr
 {
     i32 frame;
-    u16 opcode;
-    u16 size;
+    i16 opcode;
+    i16 size;
     AnyArg args[3];
 };
 
@@ -64,6 +65,16 @@ struct StageCameraSky
 {
     f32 nearPlane;
     f32 farPlane;
+};
+
+struct StageCamera
+{
+    D3DXVECTOR3 pos;
+    D3DXVECTOR3 lookAt;
+    D3DXVECTOR3 up;
+    D3DXVECTOR3 lookAtDir;
+    D3DXVECTOR3 right;
+    f32 fov;
 };
 
 struct Stage
@@ -91,6 +102,15 @@ struct Stage
                                       D3DXVECTOR3 *param_3, D3DXVECTOR3 *param_4,
                                       D3DXVECTOR3 *param_5, D3DXVECTOR3 *param_6,
                                       D3DXVECTOR3 *param_7);
+
+    static u8 ClampColorChannel(u32 src)
+    {
+        if (src >= 256)
+        {
+            src = 255;
+        }
+        return src;
+    }
 
     AnmVm *quadVms;
     AnmVm vm1;
@@ -126,43 +146,18 @@ struct Stage
     i32 spellcardVmsIdx;
     AnmVm spellcardVms[33];
     i32 scriptWaitTime;
-    D3DXVECTOR3 camPosEnd;
-    D3DXVECTOR3 camLookAtEnd;
-    D3DXVECTOR3 camUpEnd;
-    D3DXVECTOR3 camLookAtDirEnd;
-    D3DXVECTOR3 camRightEnd;
-    f32 fovEnd;
-    D3DXVECTOR3 camPosStart;
-    D3DXVECTOR3 camLookAtStart;
-    D3DXVECTOR3 camUpStart;
-    D3DXVECTOR3 camLookAtDirStart;
-    D3DXVECTOR3 camRightStart;
-    f32 fovStart;
-    D3DXVECTOR3 camPosTangentEnd;
-    D3DXVECTOR3 camLookAtTangentEnd;
-    D3DXVECTOR3 camUpTangentEnd;
-    D3DXVECTOR3 camLookAtDirTangentEnd;
-    D3DXVECTOR3 camRightTangentEnd;
-    f32 fovTangentEnd;
-    D3DXVECTOR3 camPosTangentStart;
-    D3DXVECTOR3 camLookAtTangentStart;
-    D3DXVECTOR3 camUpTangentStart;
-    D3DXVECTOR3 camLookAtDirTangentStart;
-    D3DXVECTOR3 camRightTangentStart;
-    f32 fovTangentStart;
-    D3DXVECTOR3 camPos;
-    D3DXVECTOR3 camLookAt;
-    D3DXVECTOR3 camUp;
-    D3DXVECTOR3 camLookAtDir;
-    D3DXVECTOR3 camRight;
-    f32 fov;
+    StageCamera camEnd;
+    StageCamera camStart;
+    StageCamera camTangentEnd;
+    StageCamera camTangentStart;
+    StageCamera cam;
     i32 timersMax[4];
     ZunTimer timers[4];
     i32 interpModes[4];
     D3DXVECTOR3 positionStart;
-    i32 positionInterpTimeMax;
-    D3DXVECTOR3 positionEnd;
-    i32 positionInterpMode;
+    i32 positionInterpEndTime;
+    D3DXVECTOR3 positionInterpInitial;
+    i32 positionInterpStartTime;
     u8 cameraTeleported;
     // pad 3
     ZunColor color2;

@@ -1294,7 +1294,7 @@ void AsciiManager::DrawPopups()
             this->cherryBorderActive.pos = this->cherryGauge.pos;
             this->cherryBorderActive.pos.x += 24.0f;
             this->cherryBorderActive.pos.y += 8.0f;
-            this->cherryBorderActive.color = this->cherryGauge.color;
+            this->cherryBorderActive.color.color = this->cherryGauge.color.color;
             g_AnmManager->DrawNoRotation(&this->cherryBorderActive);
         }
     }

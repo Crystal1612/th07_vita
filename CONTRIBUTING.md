@@ -1113,6 +1113,57 @@ Now, if you run reccmp again on the function:
 
 It'll appear 100% matching.
 
+The `var_order` pragma is not only usable atop functions, it can be used in any scope where a variable is declared inside. For example:
+
+```c++
+#pragma var_order(fovDiff, t)
+if (arg->timersMax[camIdx] != 0)
+{
+    f32 t;
+    f32 fovDiff;
+
+    if (arg->timers[camIdx] < arg->timersMax[camIdx])
+    {
+        arg->timers[camIdx]++;
+        t = arg->timers[camIdx].AsFloat() /
+                        (f32)arg->timersMax[camIdx];
+    }
+    else
+    {
+        arg->timers[camIdx] = arg->timersMax[camIdx];
+        t = 1.0f;
+        arg->timersMax[camIdx] = 0;
+    }
+    switch (arg->interpModes[camIdx])
+    {
+    case 1:
+        t = 1.0f - t;
+        t = 1.0f - t * t;
+        break;
+    case 2:
+        t = 1.0f - t;
+        t = 1.0f - t * t * t;
+        break;
+    case 3:
+        t = 1.0f - t;
+        t = 1.0f - t * t * t * t;
+        break;
+    case 4:
+        t = t * t;
+        break;
+    case 5:
+        t = t * t * t;
+        break;
+    case 6:
+        t = t * t * t * t;
+    }
+    fovDiff = arg->camEnd.fov - arg->camStart.fov;
+    arg->cam.fov = fovDiff * t + arg->camStart.fov;
+}
+```
+
+Doing this will reorder the variables inside of that scope.
+
 # Renaming
 
 Most of the functions have poorly named variables that definitely require some renaming. Take for instance, this function in `Pbg4Archive::ReadDecompressEntry`.

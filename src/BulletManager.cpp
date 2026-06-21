@@ -101,6 +101,7 @@ void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
     }
 }
 
+#pragma var_order(bulletSpeed, i, bullet, bulletAngle, unused)
 // FUNCTION: TH07 0x00423730
 i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
                                      i32 y, f32 angle)
@@ -721,11 +722,10 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
 // FUNCTION: TH07 0x004250d0
 void Bullet::UpdateBulletBurstSpeed()
 {
-    if (this->commandStates[0].timer < 0x11)
+    if (this->commandStates[0].timer <= 16)
     {
         AngleToVector(&this->velocity, this->angle,
-                      ((5.0f - (((f32)this->commandStates[0].timer.current +
-                                 this->commandStates[0].timer.subFrame) *
+                      ((5.0f - ((this->commandStates[0].timer.AsFloat()) *
                                 5.0f) /
                                    16.0f) +
                        this->speed) *
@@ -741,31 +741,19 @@ void Bullet::UpdateBulletBurstSpeed()
 // FUNCTION: TH07 0x004251a0
 void Bullet::UpdateBulletTargetVelocity()
 {
-    if (this->commandStates[1].timer < this->commandStates[1].duration)
+    if (this->commandStates[1].timer >= this->commandStates[1].duration)
     {
-        (this->velocity).x = g_Supervisor.effectiveFramerateMultiplier *
-                                 this->commandStates[1].vec3.x +
-                             (this->velocity).x;
-        (this->velocity).y = g_Supervisor.effectiveFramerateMultiplier *
-                                 this->commandStates[1].vec3.y +
-                             (this->velocity).y;
-        (this->velocity).z = g_Supervisor.effectiveFramerateMultiplier *
-                                 this->commandStates[1].vec3.z +
-                             (this->velocity).z;
-        if (fabsf((this->velocity).x) <= 0.0001f)
-        {
-            if (fabsf((this->velocity).y) <= 0.0001f)
-            {
-                goto LAB_004252d1;
-            }
-        }
-        this->angle = atan2f((this->velocity).y, (this->velocity).x);
+        this->exFlags = this->exFlags & 0xffffffef;
     }
     else
     {
-        this->exFlags = this->exFlags & 0xffef;
+        this->velocity += this->commandStates[1].vec3 *
+                          g_Supervisor.effectiveFramerateMultiplier;
+        if (fabsf(this->velocity.x) > 0.0001f || fabsf(this->velocity.y) > 0.0001f)
+        {
+            this->angle = atan2f(this->velocity.y, this->velocity.x);
+        }
     }
-LAB_004252d1:
     this->commandStates[1].timer++;
 }
 
@@ -779,13 +767,12 @@ void Bullet::UpdateBulletTargetAngle()
     else
     {
         this->angle = utils::AddNormalizeAngle(
-            this->angle, g_Supervisor.effectiveFramerateMultiplier *
-                             this->commandStates[2].angle);
-        this->speed = g_Supervisor.effectiveFramerateMultiplier *
-                          this->commandStates[2].speed +
-                      this->speed;
+            this->angle, this->commandStates[2].angle *
+                             g_Supervisor.effectiveFramerateMultiplier);
+        this->speed += this->commandStates[2].speed *
+                       g_Supervisor.effectiveFramerateMultiplier;
         AngleToVector(&this->velocity, this->angle,
-                      g_Supervisor.effectiveFramerateMultiplier * this->speed);
+                      this->speed * g_Supervisor.effectiveFramerateMultiplier);
     }
     this->commandStates[2].timer++;
 }
@@ -795,28 +782,27 @@ void Bullet::UpdateBulletDirChangeAndResume()
 {
     f32 local_8;
 
-    if (this->commandStates[3].timer < this->commandStates[3].duration)
+    if (this->commandStates[3].timer >= this->commandStates[3].duration)
     {
-        local_8 = this->speed - (((f32)this->commandStates[3].timer.current +
-                                  this->commandStates[3].timer.subFrame) *
-                                 this->speed) /
-                                    (f32)this->commandStates[3].duration;
-    }
-    else
-    {
-        if (-1 < this->soundIdx)
+        if (this->soundIdx >= 0)
         {
             g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
         }
-        this->commandStates[3].minTimes += 1;
-        if (this->commandStates[3].maxTimes <= this->commandStates[3].minTimes)
+        this->commandStates[3].minTimes++;
+        if (this->commandStates[3].minTimes >= this->commandStates[3].maxTimes)
         {
-            this->exFlags = this->exFlags & 0xffbf;
+            this->exFlags = this->exFlags & 0xffffffbf;
         }
-        this->angle = this->angle + this->commandStates[3].angle;
+        this->angle += this->commandStates[3].angle;
         this->speed = this->commandStates[3].speed;
         local_8 = this->speed;
         this->commandStates[3].timer = 0;
+    }
+    else
+    {
+        local_8 = this->speed - (this->commandStates[3].timer.AsFloat() *
+                                 this->speed) /
+                                    (f32)this->commandStates[3].duration;
     }
     AngleToVector(&this->velocity, this->angle,
                   local_8 * g_Supervisor.effectiveFramerateMultiplier);
@@ -828,28 +814,27 @@ void Bullet::UpdateBulletDirChangeAbsoluteAndResume()
 {
     f32 local_8;
 
-    if (this->commandStates[3].timer < this->commandStates[3].duration)
+    if (this->commandStates[3].timer >= this->commandStates[3].duration)
     {
-        local_8 = this->speed - (((f32)this->commandStates[3].timer.current +
-                                  this->commandStates[3].timer.subFrame) *
-                                 this->speed) /
-                                    (f32)this->commandStates[3].duration;
-    }
-    else
-    {
-        if (-1 < this->soundIdx)
+        if (this->soundIdx >= 0)
         {
             g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
         }
-        this->commandStates[3].minTimes += 1;
-        if (this->commandStates[3].maxTimes <= this->commandStates[3].minTimes)
+        this->commandStates[3].minTimes++;
+        if (this->commandStates[3].minTimes >= this->commandStates[3].maxTimes)
         {
-            this->exFlags = this->exFlags & 0xfeff;
+            this->exFlags = this->exFlags & 0xfffffeff;
         }
         this->angle = this->commandStates[3].angle;
         this->speed = this->commandStates[3].speed;
         local_8 = this->speed;
         this->commandStates[3].timer = 0;
+    }
+    else
+    {
+        local_8 = this->speed - (this->commandStates[3].timer.AsFloat() *
+                                 this->speed) /
+                                    (f32)this->commandStates[3].duration;
     }
     AngleToVector(&this->velocity, this->angle,
                   local_8 * g_Supervisor.effectiveFramerateMultiplier);
@@ -861,29 +846,28 @@ void Bullet::UpdateBulletDirChangeAimAtPlayer()
 {
     f32 local_8;
 
-    if (this->commandStates[3].timer < this->commandStates[3].duration)
+    if (this->commandStates[3].timer >= this->commandStates[3].duration)
     {
-        local_8 = this->speed - (((f32)this->commandStates[3].timer.current +
-                                  this->commandStates[3].timer.subFrame) *
-                                 this->speed) /
-                                    (f32)this->commandStates[3].duration;
-    }
-    else
-    {
-        if (-1 < this->soundIdx)
+        if (this->soundIdx >= 0)
         {
             g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
         }
-        this->commandStates[3].minTimes = this->commandStates[3].minTimes + 1;
-        if (this->commandStates[3].maxTimes <= this->commandStates[3].minTimes)
+        this->commandStates[3].minTimes++;
+        if (this->commandStates[3].minTimes >= this->commandStates[3].maxTimes)
         {
-            this->exFlags = this->exFlags & 0xff7f;
+            this->exFlags = this->exFlags & 0xffffff7f;
         }
         this->angle = utils::AddNormalizeAngle(g_Player.AngleToPlayer(&this->pos),
                                                this->commandStates[3].angle);
         this->speed = this->commandStates[3].speed;
         local_8 = this->speed;
         this->commandStates[3].timer = 0;
+    }
+    else
+    {
+        local_8 = this->speed - (this->commandStates[3].timer.AsFloat() *
+                                 this->speed) /
+                                    (f32)this->commandStates[3].duration;
     }
     AngleToVector(&this->velocity, this->angle,
                   local_8 * g_Supervisor.effectiveFramerateMultiplier);
@@ -893,32 +877,35 @@ void Bullet::UpdateBulletDirChangeAimAtPlayer()
 // FUNCTION: TH07 0x004258a0
 void Bullet::UpdateBulletBounce()
 {
-    if (g_GameManager.IsInBounds((this->pos).x, (this->pos).y,
-                                 (this->sprites.spriteBullet.sprite)->widthPx,
-                                 (this->sprites.spriteBullet.sprite)->heightPx) ==
+    f32 speed;
+
+    if (g_GameManager.IsInBounds(this->pos.x, this->pos.y,
+                                 this->sprites.spriteBullet.sprite->widthPx,
+                                 this->sprites.spriteBullet.sprite->heightPx) ==
         0)
     {
-        if (-1 < this->soundIdx)
+        if (this->soundIdx >= 0)
         {
             g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
         }
-        if (((this->pos).x < 0.0f) || (384.0f <= (this->pos).x))
+        if (this->pos.x < 0.0f || this->pos.x >= 384.0f)
         {
             this->angle = -this->angle - ZUN_PI;
             this->angle = utils::AddNormalizeAngle(this->angle, 0.0f);
         }
-        if (((this->pos).y < 0.0f) ||
-            (448.0f <= (this->pos).y && ((this->exFlags & 0x400U) != 0)))
+        if (this->pos.y < 0.0f ||
+            (this->pos.y >= 448.0f && (this->exFlags & 0x400U) != 0))
         {
             this->angle = -this->angle;
         }
         this->speed = this->commandStates[4].speed;
+        speed = this->speed;
         AngleToVector(&this->velocity, this->angle,
-                      this->speed * g_Supervisor.effectiveFramerateMultiplier);
-        this->commandStates[4].duration = this->commandStates[4].duration + 1;
-        if (this->commandStates[4].maxTimes <= this->commandStates[4].duration)
+                      speed * g_Supervisor.effectiveFramerateMultiplier);
+        this->commandStates[4].duration++;
+        if (this->commandStates[4].duration >= this->commandStates[4].maxTimes)
         {
-            this->exFlags = this->exFlags & 0xf3ff;
+            this->exFlags = this->exFlags & 0xfffff3ff;
         }
     }
 }
@@ -1008,10 +995,10 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
 
             if (bullet->spawnDelay == 0)
             {
-                if (g_GameManager.IsInBounds(
+                if (!g_GameManager.IsInBounds(
                         bullet->pos.x, bullet->pos.y,
                         bullet->sprites.spriteBullet.sprite->widthPx,
-                        bullet->sprites.spriteBullet.sprite->heightPx) == 0)
+                        bullet->sprites.spriteBullet.sprite->heightPx))
                 {
                     if ((bullet->exFlags & 0xdc0) != 0)
                     {
@@ -1021,7 +1008,6 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                             bullet->Initialize();
                             goto bullet_loop_continue;
                         }
-                        goto do_collision;
                     }
                     else
                     {
@@ -1031,8 +1017,8 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                             goto bullet_loop_continue;
                         }
                         bullet->outOfBoundsTime--;
-                        goto do_collision;
                     }
+                    goto do_collision;
                 }
                 bullet->outOfBoundsTime = 0;
                 goto do_collision;
@@ -1045,9 +1031,8 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                 if (local_8 == 1)
                 {
                     bullet->grazed = 1;
-                    goto do_sprite_anim;
                 }
-                if (local_8 == 2)
+                else if (local_8 == 2)
                 {
                     if ((bullet->moreFlags & 0x1000) == 0)
                     {
@@ -1263,7 +1248,9 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
 // FUNCTION: TH07 0x00426b00
 void Bullet::Draw()
 {
-    AnmVm *vm = &this->sprites.spriteBullet;
+    AnmVm *vm;
+
+    vm = &this->sprites.spriteBullet;
     switch (this->state)
     {
     case BULLET_SPAWNING_FAST:
@@ -1277,14 +1264,15 @@ void Bullet::Draw()
         break;
     case BULLET_DESPAWN:
         vm = &this->sprites.spriteSpawnEffectDonut;
+        break;
     }
     vm->pos.x = g_GameManager.arcadeRegionTopLeftPos.x + this->pos.x;
     vm->pos.y = g_GameManager.arcadeRegionTopLeftPos.y + this->pos.y;
     vm->pos.z = 0.05f;
     vm->color.color = (vm->color.color & 0xff000000) | 0xffffff;
-    if (vm->autoRotate != 0)
+    if (vm->autoRotate)
     {
-        vm->rotation.z = utils::AddNormalizeAngle(this->angle + 1.5707964f, 0.0f);
+        vm->SetRotationZ(utils::AddNormalizeAngle(1.5707964f + this->angle, 0.0f));
         vm->updateRotation = 1;
     }
     g_AnmManager->Draw(vm);

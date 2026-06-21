@@ -971,7 +971,7 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 param2)
     {
         color.color =
             vm->useColor2 != 0 ? vm->color2.color : vm->color.color;
-        if (this->colorMulEnabled != 0)
+        if (this->colorMulEnabled)
         {
             r = (u32)color.bytes.r * this->color.bytes.r >> 7;
             if (r >= 256)
@@ -1288,7 +1288,7 @@ ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
         return ZUN_ERROR;
     }
 
-    D3DXVec3Project(&local_6c, &g_Stage.camRight, &g_Supervisor.viewport,
+    D3DXVec3Project(&local_6c, &g_Stage.cam.right, &g_Supervisor.viewport,
                     &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix,
                     &matrix);
 

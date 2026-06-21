@@ -42,21 +42,20 @@ u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
 {
     if (arg->duration != 0)
     {
-        arg->alpha =
-            (f32)(u32)(255.0f -
-                       (((f32)arg->timer.current + arg->timer.subFrame) * 255.0f) /
-                           (f32)arg->duration);
+        arg->alpha = (255.0f - (arg->timer.AsFloat() * 255.0f) /
+                                   (f32)arg->duration);
         if (arg->alpha < 0)
         {
             arg->alpha = 0.0f;
         }
     }
-    bool bVar1 = arg->timer < arg->duration;
-    if (bVar1)
+    if (arg->timer >= arg->duration)
     {
-        arg->timer++;
+        return 0;
     }
-    return bVar1;
+
+    arg->timer++;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044a650
@@ -169,7 +168,7 @@ u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
     g_Supervisor.viewport.Height = 0x1e0;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     ScreenEffect::DrawSquare(&rect, arg->alpha << 0x18 | arg->args[0]);
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044ae90
@@ -177,20 +176,19 @@ u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
 {
     if (arg->duration != 0)
     {
-        arg->alpha =
-            (u32)((((f32)arg->timer.current + arg->timer.subFrame) * 255.0f) /
-                  (f32)arg->duration);
+        arg->alpha = (arg->timer.AsFloat() * 255.0f) / (f32)arg->duration;
         if (arg->alpha < 0)
         {
             arg->alpha = 0.0f;
         }
     }
-    bool bVar1 = arg->timer < arg->duration;
-    if (bVar1)
+    if (arg->timer >= arg->duration)
     {
-        arg->timer++;
+        return 0;
     }
-    return bVar1;
+
+    arg->timer++;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044af30
@@ -203,7 +201,7 @@ u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
     rect.right = 416.0f;
     rect.bottom = 464.0f;
     ScreenEffect::DrawSquare(&rect, arg->alpha << 0x18 | arg->args[0]);
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044af80
@@ -213,7 +211,7 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
     {
         arg->alpha =
             (f32)((u32)((arg->args[1] >> 0x18) -
-                        (u32)(((f32)arg->timer.current + arg->timer.subFrame) *
+                        (u32)(arg->timer.AsFloat() *
                               (f32)(arg->args[1] >> 0x18)) /
                             (f32)arg->duration));
         if (arg->alpha < 0)
@@ -227,12 +225,12 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
         arg->args[0] = arg->args[0] - 1;
         if ((i32)arg->args[0] < 1)
         {
-            return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+            return 0;
         }
         arg->timer = 0;
     }
     arg->timer++;
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044b090
@@ -246,7 +244,7 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
     rect.bottom = 464.0f;
     ScreenEffect::DrawSquare(&rect,
                              arg->alpha << 0x18 | (arg->args[1] & 0xffffff));
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044b0e0
@@ -254,22 +252,22 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
 {
     if (g_GameManager.isTimeStopped != 0)
     {
-        return CHAIN_CALLBACK_RESULT_CONTINUE;
+        return 1;
     }
 
     if (g_GameManager.framesThisStage <= 1)
     {
-        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+        return 0;
     }
 
     arg->timer++;
-    if (arg->duration >= arg->timer.current)
+    if (arg->timer >= arg->duration)
     {
-        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+        return 0;
     }
 
     f32 fVar1 = (f32)(i32)arg->args[0] +
-                (((f32)arg->timer.current + arg->timer.subFrame) *
+                (arg->timer.AsFloat() *
                  (f32)(i32)(arg->args[1] - arg->args[0])) /
                     (f32)arg->duration;
     switch (g_Rng.GetRandomU32InRange(3))
@@ -294,7 +292,7 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
     case 2:
         g_AnmManager->offset.y = -fVar1;
     }
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0044b280

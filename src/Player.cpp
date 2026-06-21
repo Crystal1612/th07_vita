@@ -99,8 +99,8 @@ void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
     {
         bullet->pos = player->optionsPosition[shtEntry->option - 1];
     }
-    bullet->pos.x += shtEntry->offset.x;
-    bullet->pos.y += shtEntry->offset.y;
+    *bullet->GetPosX() += shtEntry->offset.x;
+    *bullet->GetPosY() += shtEntry->offset.y;
     bullet->pos.z = 0.495f;
     bullet->hitboxSize.x = shtEntry->hitboxSize.x;
     bullet->hitboxSize.y = shtEntry->hitboxSize.y;
@@ -112,128 +112,120 @@ void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
     bullet->timer = 0;
     bullet->bulletState2 = shtEntry->bulletState2;
     bullet->damage = shtEntry->damage;
-    if (-1 < shtEntry->soundIdx)
+    if (shtEntry->soundIdx >= 0)
     {
-        g_SoundPlayer.PlaySoundByIdx((SoundIdx)shtEntry->soundIdx, 0);
+        g_SoundPlayer.PlaySoundByIdx(shtEntry->soundIdx, 0);
     }
-    bullet->vm.anmFileIdx = shtEntry->anmFileIdx;
-    g_AnmManager->SetAndExecuteScript(
-        &bullet->vm, g_AnmManager->scripts[shtEntry->anmFileIdx]);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&bullet->vm, shtEntry->anmFileIdx);
 }
 
 // FUNCTION: TH07 0x0043bdc0
 i32 ShtData::FireBulletDefault(Player *player, PlayerBullet *bullet,
                                i32 fireTime, ShtEntry *shtEntry)
 {
-    bool bVar1;
-
-    bVar1 = fireTime % (i32)shtEntry->fireInterval == (i32)shtEntry->fireOffset;
-    if (bVar1)
+    if (fireTime % shtEntry->fireInterval == shtEntry->fireOffset)
     {
         DefaultFireBulletCallback(player, bullet, shtEntry);
+        return 1;
     }
-    return bVar1;
+    return 0;
 }
 
 // FUNCTION: TH07 0x0043be10
 i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
                                     i32 fireTime, ShtEntry *shtEntry)
 {
-    i16 sVar2 = shtEntry->fireOffset;
-    if (player->timers[sVar2].bullet == NULL)
+    i32 fireOffset = shtEntry->fireOffset;
+
+    if (player->timers[fireOffset].bullet != NULL)
     {
-        if (player->optionState == OPTION_UNFOCUSED)
+        if (player->shtEntries[fireOffset] != shtEntry)
         {
-            player->timers[sVar2].timer = shtEntry->fireInterval;
-            player->timers[sVar2].bullet = bullet;
-            bullet->timerIdx = sVar2;
-            bullet->optionId = (i16)shtEntry->option;
-            bullet->offset = shtEntry->offset;
-            DefaultFireBulletCallback(player, bullet, shtEntry);
-            player->shtEntries[sVar2] = shtEntry;
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        if (player->shtEntries[sVar2] != shtEntry)
-        {
-            ((player->timers[sVar2].bullet)->vm).pendingInterrupt = 1;
-            player->timers[sVar2].bullet = NULL;
+            player->timers[fireOffset].bullet->vm.pendingInterrupt = 1;
+            player->timers[fireOffset].bullet = NULL;
         }
         return 0;
     }
+
+    if (player->optionState != OPTION_UNFOCUSED)
+    {
+        return 0;
+    }
+
+    player->timers[fireOffset].timer = shtEntry->fireInterval;
+    player->timers[fireOffset].bullet = bullet;
+    bullet->timerIdx = fireOffset;
+    bullet->optionId = (i16)shtEntry->option;
+    bullet->offset.x = shtEntry->offset.x;
+    bullet->offset.y = shtEntry->offset.y;
+    DefaultFireBulletCallback(player, bullet, shtEntry);
+    player->shtEntries[fireOffset] = shtEntry;
+    return 1;
 }
 
 // FUNCTION: TH07 0x0043bf50
 i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
                                   i32 fireTime, ShtEntry *shtEntry)
 {
-    i16 sVar2 = shtEntry->fireOffset;
-    if (player->timers[sVar2].bullet == NULL)
+    i32 fireOffset = shtEntry->fireOffset;
+
+    if (player->timers[fireOffset].bullet != NULL)
     {
-        if (player->optionState == OPTION_FOCUSED)
+        if (player->shtEntries[fireOffset] != shtEntry)
         {
-            player->timers[sVar2].timer = 999;
-            player->timers[sVar2].bullet = bullet;
-            bullet->timerIdx = sVar2;
-            bullet->optionId = (i16)shtEntry->option;
-            bullet->offset = shtEntry->offset;
-            bullet->trailLength = shtEntry->fireInterval;
-            DefaultFireBulletCallback(player, bullet, shtEntry);
-            for (i32 i = 0xf; -1 < i; i--)
-            {
-                bullet->posHistory[i].x = -999.0f;
-            }
-            bullet->pos.x = -999.0f;
-            player->shtEntries[sVar2] = shtEntry;
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        if (player->shtEntries[sVar2] != shtEntry)
-        {
-            ((player->timers[sVar2].bullet)->vm).pendingInterrupt = 1;
-            player->timers[sVar2].bullet = NULL;
+            player->timers[fireOffset].bullet->vm.pendingInterrupt = 1;
+            player->timers[fireOffset].bullet = NULL;
         }
         return 0;
     }
+
+    if (player->optionState != OPTION_FOCUSED)
+    {
+        return 0;
+    }
+
+    player->timers[fireOffset].timer = 999;
+    player->timers[fireOffset].bullet = bullet;
+    bullet->timerIdx = fireOffset;
+    bullet->optionId = (i16)shtEntry->option;
+    bullet->offset.x = shtEntry->offset.x;
+    bullet->offset.y = shtEntry->offset.y;
+    bullet->trailLength = shtEntry->fireInterval;
+    DefaultFireBulletCallback(player, bullet, shtEntry);
+    for (i32 i = 15; i >= 0; i--)
+    {
+        bullet->posHistory[i].x = -999.0f;
+    }
+    bullet->pos.x = -999.0f;
+    player->shtEntries[fireOffset] = shtEntry;
+    return 1;
 }
 
+#pragma var_order(speed, angle)
 // FUNCTION: TH07 0x0043c0d0
 i32 ShtData::FireHomingBullet(Player *player, PlayerBullet *bullet,
                               i32 fireTime, ShtEntry *shtEntry)
 {
-    f32 fVar2;
+    f32 angle;
+    f32 speed;
 
-    if (fireTime % (i32)shtEntry->fireInterval == (i32)shtEntry->fireOffset)
+    if (fireTime % shtEntry->fireInterval == shtEntry->fireOffset)
     {
         DefaultFireBulletCallback(player, bullet, shtEntry);
-        if (-100.0f < (player->sakuyaTargetPosition).x)
+        if (player->sakuyaTargetPosition.x > -100.0f)
         {
-            fVar2 = utils::AddNormalizeAngle(
-                atan2f((player->sakuyaTargetPosition).y - bullet->pos.y,
-                       (player->sakuyaTargetPosition).x - bullet->pos.x),
+            angle = utils::AddNormalizeAngle(
+                atan2f(player->sakuyaTargetPosition.y - bullet->pos.y,
+                       player->sakuyaTargetPosition.x - bullet->pos.x),
                 shtEntry->angle + 1.5707964f);
-            AngleToVector((D3DXVECTOR3 *)&bullet->velocity, fVar2,
-                          shtEntry->speed * 1.5f);
-            bullet->angle = fVar2;
+            speed = shtEntry->speed * 1.5f;
+            AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, speed);
+            bullet->angle = angle;
         }
         return 1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 #pragma var_order(speed, angle)
@@ -244,7 +236,7 @@ i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
     f32 angle;
     f32 speed;
 
-    if (fireTime % (i32)shtEntry->fireInterval == (i32)shtEntry->fireOffset)
+    if (fireTime % shtEntry->fireInterval == shtEntry->fireOffset)
     {
         DefaultFireBulletCallback(player, bullet, shtEntry);
         angle = utils::AddNormalizeAngle(player->optionAngle,
@@ -253,55 +245,88 @@ i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
         AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, speed);
         bullet->angle = angle;
 
-        return true;
+        return 1;
     }
-    return false;
+
+    return 0;
 }
 
-// FUNCTION: TH07 0x0043c250
+#pragma var_order(fVar2, fVar1, local_c)
 i32 ShtData::UpdateHomingBullet(Player *player, PlayerBullet *bullet)
 {
+    f32 local_c;
     f32 fVar1;
     f32 fVar2;
-    f32 fVar3;
-    f32 local_2c;
-    f32 local_10;
 
     if (bullet->bulletState == 1)
     {
-        if ((((player->positionOfLastEnemyHit).x <= -100.0f) ||
-             (0x27 < bullet->timer.current)) ||
-            (bullet->timer == bullet->timer.previous))
+        if (player->positionOfLastEnemyHit.x > -100.0f &&
+            bullet->timer.GetCurrent() < 40 &&
+            bullet->timer.HasTicked())
+        {
+            fVar1 = player->positionOfLastEnemyHit.x - bullet->pos.x;
+            fVar2 = player->positionOfLastEnemyHit.y - bullet->pos.y;
+            local_c = sqrtf(fVar1 * fVar1 + fVar2 * fVar2) / (bullet->speed / 4.0f);
+
+            if (local_c < 1.0f)
+            {
+                local_c = 1.0f;
+            }
+
+            fVar1 = fVar1 / local_c + bullet->velocity.x;
+            fVar2 = fVar2 / local_c + bullet->velocity.y;
+            local_c = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
+
+            bullet->speed = local_c > 10.0f ? 10.0f : local_c;
+
+            if (bullet->speed < 1.0f)
+            {
+                bullet->speed = 1.0f;
+            }
+
+            bullet->velocity.x = (fVar1 * bullet->speed) / local_c;
+            bullet->velocity.y = (fVar2 * bullet->speed) / local_c;
+        }
+        else
         {
             if (bullet->speed < 10.0f)
             {
                 bullet->speed = bullet->speed + 0.33333334f;
                 fVar1 = bullet->velocity.x;
                 fVar2 = bullet->velocity.y;
-                fVar3 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
-                bullet->velocity.x = (fVar1 * bullet->speed) / fVar3;
-                bullet->velocity.y = (fVar2 * bullet->speed) / fVar3;
+                local_c = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
+                bullet->velocity.x = (fVar1 * bullet->speed) / local_c;
+                bullet->velocity.y = (fVar2 * bullet->speed) / local_c;
             }
         }
-        else
+    }
+    return 0;
+}
+
+#pragma var_order(fVar2, fVar1, fVar3)
+i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
+{
+    f32 fVar3;
+    f32 fVar1;
+    f32 fVar2;
+
+    if (bullet->bulletState == 1)
+    {
+        if (player->positionOfLastEnemyHit.x > -100.0f &&
+            bullet->timer.GetCurrent() < 40 &&
+            bullet->timer.HasTicked())
         {
-            fVar1 = (player->positionOfLastEnemyHit).x - bullet->pos.x;
-            fVar2 = (player->positionOfLastEnemyHit).y - bullet->pos.y;
-            local_10 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
-            local_10 = local_10 / (bullet->speed / 4.0f);
-            if (local_10 < 1.0f)
+            fVar1 = player->positionOfLastEnemyHit.x - bullet->pos.x;
+            fVar2 = player->positionOfLastEnemyHit.y - bullet->pos.y;
+            fVar3 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2) / (bullet->speed / 4.0f);
+            if (fVar3 < 1.0f)
             {
-                local_10 = 1.0f;
+                fVar3 = 1.0f;
             }
-            fVar1 = fVar1 / local_10 + bullet->velocity.x;
-            fVar2 = fVar2 / local_10 + bullet->velocity.y;
+            fVar1 = fVar1 / fVar3 + bullet->velocity.x;
+            fVar2 = fVar2 / fVar3 + bullet->velocity.y;
             fVar3 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
-            local_2c = fVar3;
-            if (10.0f < fVar3)
-            {
-                local_2c = 10.0f;
-            }
-            bullet->speed = local_2c;
+            bullet->speed = fVar3 > 18.0f ? 18.0f : fVar3;
             if (bullet->speed < 1.0f)
             {
                 bullet->speed = 1.0f;
@@ -309,24 +334,7 @@ i32 ShtData::UpdateHomingBullet(Player *player, PlayerBullet *bullet)
             bullet->velocity.x = (fVar1 * bullet->speed) / fVar3;
             bullet->velocity.y = (fVar2 * bullet->speed) / fVar3;
         }
-    }
-    return 0;
-}
-
-// FUNCTION: TH07 0x0043c480
-i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
-{
-    f32 fVar1;
-    f32 fVar2;
-    f32 fVar3;
-    f32 local_2c;
-    f32 local_10;
-
-    if (bullet->bulletState == 1)
-    {
-        if ((((player->positionOfLastEnemyHit).x <= -100.0f) ||
-             (0x27 < bullet->timer.current)) ||
-            (bullet->timer == bullet->timer.previous))
+        else
         {
             if (bullet->speed < 18.0f)
             {
@@ -337,32 +345,6 @@ i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
                 bullet->velocity.x = (fVar1 * bullet->speed) / fVar3;
                 bullet->velocity.y = (fVar2 * bullet->speed) / fVar3;
             }
-        }
-        else
-        {
-            fVar1 = (player->positionOfLastEnemyHit).x - bullet->pos.x;
-            fVar2 = (player->positionOfLastEnemyHit).y - bullet->pos.y;
-            local_10 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
-            local_10 = local_10 / (bullet->speed / 4.0f);
-            if (local_10 < 1.0f)
-            {
-                local_10 = 1.0f;
-            }
-            fVar1 = fVar1 / local_10 + bullet->velocity.x;
-            fVar2 = fVar2 / local_10 + bullet->velocity.y;
-            fVar3 = sqrtf(fVar1 * fVar1 + fVar2 * fVar2);
-            local_2c = fVar3;
-            if (18.0f < fVar3)
-            {
-                local_2c = 18.0f;
-            }
-            bullet->speed = local_2c;
-            if (bullet->speed < 1.0f)
-            {
-                bullet->speed = 1.0f;
-            }
-            bullet->velocity.x = (fVar1 * bullet->speed) / fVar3;
-            bullet->velocity.y = (fVar2 * bullet->speed) / fVar3;
         }
     }
     return 0;
@@ -483,20 +465,26 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
 // FUNCTION: TH07 0x0043ccb0
 i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
 {
-    u8 origAlpha;
-    i32 local_c;
+    i32 i;
+    i32 origAlpha;
 
     origAlpha = bullet->vm.color.bytes.a;
-    for (local_c = 0; (local_c < bullet->trailLength &&
-                       (bullet->posHistory[local_c].x != -999.0f));
-         local_c++)
+    for (i = 0; i < bullet->trailLength; i++)
     {
-        bullet->vm.pos = bullet->posHistory[local_c];
-        bullet->vm.color.bytes.a =
-            origAlpha -
-            (char)((i32)((u32)origAlpha * local_c) / (i32)bullet->trailLength);
-        bullet->vm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
-        bullet->vm.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
+        if (bullet->posHistory[i].x == -999.0f)
+        {
+            break;
+        }
+
+        bullet->vm.pos.x = bullet->posHistory[i].x;
+        bullet->vm.pos.y = bullet->posHistory[i].y;
+        bullet->vm.pos.z = bullet->posHistory[i].z;
+
+        bullet->vm.color.bytes.a = origAlpha - (origAlpha * i) / bullet->trailLength;
+
+        *bullet->GetVmPosX() += g_GameManager.arcadeRegionTopLeftPos.x;
+        *bullet->GetVmPosY() += g_GameManager.arcadeRegionTopLeftPos.y;
+
         g_AnmManager->Draw(&bullet->vm);
     }
     bullet->vm.color.bytes.a = origAlpha;
@@ -2564,30 +2552,30 @@ void Player::CutChain()
 // FUNCTION: TH07 0x00442b70
 ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
 {
-    ShtEntry *local_c;
+    ShtEntry *entry;
+    i32 i;
 
     *data = (ShtData *)FileSystem::OpenFile(shtPath, 0);
     if (*data == NULL)
     {
         return ZUN_ERROR;
     }
-    else
+
+    for (i = 0; i < (i32)(u32)(*data)->entryCount; i++)
     {
-        for (i32 i = 0; i < (i32)(u32)(*data)->entryCount; i++)
+        (&(*data)->levels)[i].entry =
+            (ShtEntry *)((i32)(&(*data)->levels)[i].entry + (i32)(*data));
+
+        entry = (&(*data)->levels)[i].entry;
+        while (entry->fireInterval >= 0)
         {
-            (&(*data)->levels)[i].entry =
-                (ShtEntry *)((u8 *)&(*data)->numLevels +
-                             (i32)(&(*data)->levels)[i].entry);
-            for (local_c = (&(*data)->levels)[i].entry; -1 < local_c->fireInterval;
-                 local_c = local_c + 1)
-            {
-                local_c->fireCallback = g_ShtFireFuncs[(i32)local_c->fireCallback];
-                local_c->updateCallback =
-                    g_ShtUpdateFuncs[(i32)local_c->updateCallback];
-                local_c->drawCallback = g_ShtDrawFuncs[(i32)local_c->drawCallback];
-                local_c->hitCallback = g_ShtHitFuncs[(i32)local_c->hitCallback];
-            }
+            entry->fireCallback = g_ShtFireFuncs[(i32)entry->fireCallback];
+            entry->updateCallback =
+                g_ShtUpdateFuncs[(i32)entry->updateCallback];
+            entry->drawCallback = g_ShtDrawFuncs[(i32)entry->drawCallback];
+            entry->hitCallback = g_ShtHitFuncs[(i32)entry->hitCallback];
+            entry++;
         }
-        return ZUN_SUCCESS;
     }
+    return ZUN_SUCCESS;
 }
