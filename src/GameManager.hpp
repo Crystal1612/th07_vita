@@ -129,7 +129,7 @@ struct GameManager
     // FUNCTION: TH07 0x0043b750
     void CheckGameIntegrityOnDeath(i32 amount)
     {
-        if (CheckGameIntegrity() != 0)
+        if (CheckGameIntegrity())
         {
             NUKE_SUPERVISOR();
         }
@@ -140,7 +140,7 @@ struct GameManager
     // FUNCTION: TH07 0x0043b7a0
     void AddBombsUsed(i32 amount)
     {
-        if (CheckGameIntegrity() != 0)
+        if (CheckGameIntegrity())
         {
             NUKE_SUPERVISOR();
         }

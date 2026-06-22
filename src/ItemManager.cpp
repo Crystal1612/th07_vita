@@ -48,7 +48,7 @@ void AngleToVector(D3DXVECTOR3 *out, f32 angle, f32 speed)
 // FUNCTION: TH07 0x004325e0
 void GameManager::AddCurrentPower(i32 amount)
 {
-    if (CheckGameIntegrity() != 0)
+    if (CheckGameIntegrity())
     {
         NUKE_SUPERVISOR();
     }

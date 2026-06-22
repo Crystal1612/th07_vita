@@ -696,7 +696,7 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
                 g_Player.AngleToPlayer(&laserShooter->position) + laser->angle;
         }
         laser->flags = laserShooter->flags;
-        laser->timer.InitializeForPopup();
+        laser->timer = 0;
         laser->startOffset = laserShooter->startOffset;
         laser->endOffset = laserShooter->endOffset;
         laser->startLength = laserShooter->startLength;
@@ -952,7 +952,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         {
         switch_break:
             bullet->state = BULLET_NORMAL;
-            bullet->timer1.InitializeForPopup();
+            bullet->timer1 = 0;
         case BULLET_NORMAL:
             bullet->RunCommands();
             if (bullet->exFlags != 0)
@@ -1181,7 +1181,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             {
                 break;
             }
-            laser->timer.InitializeForPopup();
+            laser->timer = 0;
             laser->state++;
             laser->targetWidth = laser->width;
         case 1:
@@ -1190,7 +1190,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             {
                 break;
             }
-            laser->timer.InitializeForPopup();
+            laser->timer = 0;
             laser->state++;
             if (laser->endTime == 0)
             {

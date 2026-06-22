@@ -722,9 +722,9 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
             arg->effectLayerPtrs[2] = effect;
         }
     }
-    arg->frameCounter = arg->frameCounter + 1;
-    if ((arg->frameCounter % 300 == 100) &&
-        (g_GameManager.CheckGameIntegrity() != 0))
+    arg->frameCounter++;
+    if (arg->frameCounter % 300 == 100 &&
+        g_GameManager.CheckGameIntegrity())
     {
         return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
     }

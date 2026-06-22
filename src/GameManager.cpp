@@ -54,7 +54,7 @@ GameManager::GameManager()
 // FUNCTION: TH07 0x0042d5cd
 void GameManager::AddLivesRemaining(i32 amount)
 {
-    if (CheckGameIntegrity() != 0)
+    if (CheckGameIntegrity())
     {
         NUKE_SUPERVISOR();
     }
@@ -65,7 +65,7 @@ void GameManager::AddLivesRemaining(i32 amount)
 // FUNCTION: TH07 0x0042d612
 void GameManager::AddBombsRemaining(i32 amount)
 {
-    if (CheckGameIntegrity() != 0)
+    if (CheckGameIntegrity())
     {
         NUKE_SUPERVISOR();
     }

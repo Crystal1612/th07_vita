@@ -884,11 +884,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->lastDamage = 0;
             if (enemy->canDie && enemy->isHittable)
             {
-                damage = g_Player.CheckCollisionWithEnemy(
+                damage = g_Player.CalcDamageToEnemy(
                     &enemy->position, &enemy->hitboxSize, &collisionOut);
                 if (enemy->grazeSize.x > 0.0f)
                 {
-                    grazeDamage = g_Player.CheckCollisionWithEnemy(
+                    grazeDamage = g_Player.CalcDamageToEnemy(
                         &enemy->position, &enemy->grazeSize, &collisionOut);
                     if (collisionOut == 0)
                     {
@@ -1207,8 +1207,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
     }
 
-    if ((arg->timelineTime.current % 200 == 0) &&
-        (g_GameManager.CheckGameIntegrity() != 0))
+    if (arg->timelineTime.current % 200 == 0 &&
+        g_GameManager.CheckGameIntegrity())
     {
         return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
     }

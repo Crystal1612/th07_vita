@@ -21,13 +21,6 @@ struct ZunTimer
         this->subFrame = 0.0f;
     }
 
-    void InitializeForPopup()
-    {
-        this->current = 0;
-        this->subFrame = 0.0f;
-        this->previous = -999;
-    }
-
     void Tick()
     {
         this->previous = this->current;

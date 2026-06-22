@@ -56,7 +56,7 @@ struct BombProjectile
     i32 lifetime;
     union {
         i32 itemType;
-        i32 damageAccumulator;
+        i32 damage;
     };
 };
 C_ASSERT(sizeof(BombProjectile) == 0x20);
@@ -79,11 +79,21 @@ struct PlayerBombSubInfo
 
 struct PlayerBombInfo
 {
+    static void SubtractCherryDrain(i32 cherryDrain)
+    {
+        if (g_GameManager.cherry - g_GameManager.globals->cherryStart >= cherryDrain)
+        {
+            g_GameManager.cherry -= cherryDrain;
+        } else {
+            g_GameManager.cherry = g_GameManager.globals->cherryStart;
+        }
+    }
+
     i32 isInUse;
     i32 isFocus;
     i32 bombDuration;
-    i32 bombCherryDrain;
-    struct ZunTimer bombTimer;
+    i32 cherryDrain;
+    ZunTimer bombTimer;
     BombCallback bombCalc;
     BombCallback draw;
     BombCallback bombFocusCalc;
@@ -157,7 +167,7 @@ struct Player
     i32 UpdateDeath();
     void UpdateState();
     void UpdateShots();
-    void UpdateFireBulletTimer();
+    i32 UpdateFireBulletTimer();
     void UpdateUI();
 
     void DrawBullets();
@@ -173,12 +183,12 @@ struct Player
     i32 CalcLaserHitbox(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
                         D3DXVECTOR3 *param_3, f32 param_4, i32 canGraze);
     i32 CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
-    i32 CheckCollisionWithEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
+    i32 CalcDamageToEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
                                 i32 *param_3);
     i32 CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
 
     void Die();
-    void HandlePlayerInputs();
+    i32 HandlePlayerInputs();
     void Respawn();
     void ScoreGraze(D3DXVECTOR3 *param_1);
     BombProjectile *SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
@@ -199,6 +209,29 @@ struct Player
     {
         ZunTimer *timer = &this->bombInfo.bombTimer;
         return timer;
+    }
+
+    static void SetVecCorners(D3DXVECTOR3 *topLeft, D3DXVECTOR3 *bottomRight, D3DXVECTOR3 *center, D3DXVECTOR3 *size)
+    {
+        topLeft->x = center->x - size->x * 0.5f;
+        topLeft->y = center->y - size->y * 0.5f;
+        bottomRight->x = center->x + size->x * 0.5f;
+        bottomRight->y = center->y + size->y * 0.5f;
+    }
+
+    f32 *GetPosCenterX()
+    {
+        return &this->positionCenter.x;
+    }
+
+    f32 *GetPosCenterY()
+    {
+        return &this->positionCenter.y;
+    }
+
+    void SetFocusEffect(Effect *effect)
+    {
+        this->focusEffect = effect;
     }
 
     AnmVm playerSprite;

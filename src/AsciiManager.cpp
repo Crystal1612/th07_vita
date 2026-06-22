@@ -415,7 +415,7 @@ void AsciiManager::CreatePopup1(D3DXVECTOR3 *position, i32 value,
     }
     popup->characterCount = (u8)characterCount;
     popup->color = color;
-    popup->timer.InitializeForPopup();
+    popup->timer = 0;
     popup->position = *position;
     popup->position.x += g_GameManager.arcadeRegionTopLeftPos.x;
     popup->position.y += g_GameManager.arcadeRegionTopLeftPos.y;
@@ -454,7 +454,7 @@ void AsciiManager::CreatePopup2(D3DXVECTOR3 *position, i32 value,
     }
     popup->characterCount = (u8)characterCount;
     popup->color = color;
-    popup->timer.InitializeForPopup();
+    popup->timer = 0;
     popup->position = *position;
     popup->position.x += g_GameManager.arcadeRegionTopLeftPos.x;
     popup->position.y += g_GameManager.arcadeRegionTopLeftPos.y;

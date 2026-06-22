@@ -498,9 +498,9 @@ LAB_004061aa: {
         g_AnmManager->ExecuteScript(&arg->vm2);
     }
     arg->stageFrameCounter++;
-    if (arg->stageFrameCounter % 500 == 0xfa)
+    if (arg->stageFrameCounter % 500 == 250)
     {
-        if (g_GameManager.CheckGameIntegrity() != 0)
+        if (g_GameManager.CheckGameIntegrity())
         {
             return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
         }
