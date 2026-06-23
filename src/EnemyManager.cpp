@@ -253,7 +253,7 @@ void Enemy::UpdateEffects()
     for (i32 i = 0; i < this->effectsNum; i++)
     {
         effect = this->effects[i];
-        if (effect == NULL)
+        if (!effect)
         {
             continue;
         }
@@ -274,7 +274,7 @@ void Enemy::ResetEffectArray()
 {
     for (i32 i = 0; i < this->effectsNum; i++)
     {
-        if (this->effects[i] == NULL)
+        if (!this->effects[i])
         {
             continue;
         }
@@ -440,7 +440,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                               g_GameManager.character * 10);
                 break;
             case 9:
-                if (g_Gui.MsgWait() != 0)
+                if (g_Gui.MsgWait())
                 {
                     timeline->timelineTime--;
                     goto stop;
@@ -455,7 +455,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                 g_GameManager.RegenerateGameIntegrityCsum();
                 break;
             case 0xc:
-                if (g_EnemyManager.bosses[timeline->timelineInstr->arg0] != NULL &&
+                if (g_EnemyManager.bosses[timeline->timelineInstr->arg0] &&
                     g_EnemyManager.bosses[timeline->timelineInstr->arg0]->active)
                 {
                     timeline->timelineTime--;
@@ -579,7 +579,7 @@ i32 Enemy::HandleTimerCallback()
         {
             g_EnemyManager.spellcardInfo.captureScore = 0;
             g_EnemyManager.spellcardInfo.isCapturing = 0;
-            if (g_EnemyManager.spellcardInfo.isActive != 0)
+            if (g_EnemyManager.spellcardInfo.isActive)
             {
                 g_EnemyManager.spellcardInfo.isActive++;
             }
@@ -747,7 +747,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     }
     for (i = 0; i < g_EclManager.eclFile->timelineCount; i++)
     {
-        if (arg->timelines[i].timelineInstr == NULL)
+        if (!arg->timelines[i].timelineInstr)
         {
             arg->timelines[i].timelineInstr = g_EclManager.eclFile->GetTimeline(i);
         }
@@ -764,7 +764,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         arg->enemyCountReal++;
         if (enemy->freezeEclDuringBombs &&
-            (g_Player.bombInfo.isInUse != 0 ||
+            (g_Player.bombInfo.isInUse ||
              g_Player.playerState != PLAYER_STATE_ALIVE))
         {
             enemy->timer--;
@@ -782,7 +782,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             enemy->Move();
             enemy->ClampPos();
-            if (enemy->specialEffect != NULL && !enemy->customSpecialEffectPos)
+            if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
                 enemy->specialEffect->pos1 = enemy->specialEffect->pos1 + (enemy->position - enemy->specialEffect->pos1) / 16.0f;
             }
@@ -802,7 +802,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->enemyHistory[0].axisSpeed = enemy->axisSpeed;
             enemy->enemyHistory[0].angle = enemy->angle;
         }
-        if (enemy->primaryVm.sprite == NULL)
+        if (!enemy->primaryVm.sprite)
         {
             enemy->hasNoCollision = 1;
         }
@@ -837,12 +837,12 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->Despawn();
             continue;
         }
-        if (enemy->HandleLifeCallback() != 0)
+        if (enemy->HandleLifeCallback())
         {
             continue;
         }
         if (enemy->timerCallbackThreshold >= 0 &&
-            enemy->HandleTimerCallback() != 0)
+            enemy->HandleTimerCallback())
         {
             continue;
         }
@@ -852,7 +852,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         for (j = 0; j < 2; j++)
         {
             if (enemy->vms[j].anmFileIdx >= 0 &&
-                g_AnmManager->ExecuteScript(enemy->vms + j) != 0)
+                g_AnmManager->ExecuteScript(enemy->vms + j))
             {
                 enemy->vms[j].anmFileIdx = -1;
             }
@@ -897,10 +897,10 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 if (damage > 0)
                 {
-                    if ((enemy->isBoss || g_Player.isFocus == 0) &&
+                    if ((enemy->isBoss || !g_Player.isFocus) &&
                         g_Player.bombInfo.isInUse == 0)
                     {
-                        if (enemy->isBoss && g_Player.isFocus == 0)
+                        if (enemy->isBoss && !g_Player.isFocus)
                         {
                             cherryGain = (damage / (10 - stageFactor / 3)) * 10;
                         }
@@ -951,7 +951,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     g_GameManager.AddScore((damage / 5) * 10);
                     if (enemy->canBeDamaged)
                     {
-                        if (arg->spellcardInfo.isActive != 0)
+                        if (arg->spellcardInfo.isActive)
                         {
                             if (collisionOut == 0)
                             {
@@ -964,7 +964,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                                     damage = 1;
                                 }
                             }
-                            else if (arg->spellcardInfo.usedBomb != 0)
+                            else if (arg->spellcardInfo.usedBomb)
                             {
                                 if (damage > 2)
                                 {
@@ -1024,7 +1024,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         g_Player.targetingEnemy = 1;
                     }
                 }
-                if (g_Player.targetingEnemy == 0)
+                if (!g_Player.targetingEnemy)
                 {
                     if (g_Player.positionOfLastEnemyHit.y < enemy->position.y)
                     {
@@ -1192,7 +1192,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             }
         }
         enemy->UpdateEffects();
-        if (g_GameManager.isTimeStopped == 0)
+        if (!g_GameManager.isTimeStopped)
         {
             enemy->timer++;
         }
@@ -1268,7 +1268,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
     for (i = first; i < last; i++)
     {
         enemy = arg->enemyHead[i];
-        while (enemy != NULL)
+        while (enemy)
         {
             vm = &enemy->vms[0];
             for (j = 0; j < 1; j++, vm++)
@@ -1308,7 +1308,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
             {
                 if (vm->anmFileIdx >= 0)
                 {
-                    if (vm->autoRotate != 0)
+                    if (vm->autoRotate)
                     {
                         vm->SetRotationZ(-enemy->angle);
                         vm->updateRotation = 1;
@@ -1470,13 +1470,13 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
     Enemy *enemy;
 
     enemy = &arg->enemies[0];
-    if ((arg->stgEnmAnmFilename != NULL) &&
+    if ((arg->stgEnmAnmFilename) &&
         (g_AnmManager->LoadAnms(0xf, arg->stgEnmAnmFilename, 0x900) !=
          ZUN_SUCCESS))
     {
         return ZUN_ERROR;
     }
-    if ((arg->stgEnm2AnmFilename != NULL) &&
+    if ((arg->stgEnm2AnmFilename) &&
         (g_AnmManager->LoadAnms(0x10, arg->stgEnm2AnmFilename, 0x900) !=
          ZUN_SUCCESS))
     {
@@ -1522,7 +1522,7 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerCalcChain.deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     g_EnemyManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, 10) != 0)
+    if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, 10))
     {
         return ZUN_ERROR;
     }
@@ -1627,7 +1627,7 @@ i32 EnemyManager::HasActiveBoss()
 {
     for (i32 i = 0; i < 8; ++i)
     {
-        if (this->bosses[i] != NULL)
+        if (this->bosses[i])
         {
             return 1;
         }

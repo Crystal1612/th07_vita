@@ -54,7 +54,7 @@ u32 Ending::OnUpdate(Ending *arg)
             g_AnmManager->ExecuteScript(&arg->sprites[i]);
         }
 
-        if (arg->hasSeenEnding != 0 && IS_PRESSED_RAW(TH_BUTTON_SKIP) &&
+        if (arg->hasSeenEnding && IS_PRESSED_RAW(TH_BUTTON_SKIP) &&
             framesSkipPressed < 4)
         {
             framesSkipPressed++;
@@ -197,7 +197,7 @@ ZunResult Ending::ParseEndFile()
         else
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU) ||
-                (this->hasSeenEnding != 0 &&
+                (this->hasSeenEnding &&
                  IS_PRESSED_RAW(TH_BUTTON_SKIP)))
             {
                 this->timer3 = 0;
@@ -226,7 +226,7 @@ ZunResult Ending::ParseEndFile()
         else
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU) ||
-                (this->hasSeenEnding != 0 &&
+                (this->hasSeenEnding &&
                  IS_PRESSED_RAW(TH_BUTTON_SKIP)))
             {
                 this->timer2 = 0;
@@ -275,9 +275,9 @@ ZunResult Ending::ParseEndFile()
                 }
                 local_58 = 0;
                 lineDisplayed = 0;
-                for (execOuter = 0; execOuter < 6; execOuter += 1)
+                for (execOuter = 0; execOuter < 6; execOuter++)
                 {
-                    for (execInner = 0; execInner < 4; execInner += 1)
+                    for (execInner = 0; execInner < 4; execInner++)
                     {
                         if (g_GameManager.clrd[execOuter]
                                     .difficultyClearedWithRetries[execInner] == 99 ||
@@ -290,7 +290,7 @@ ZunResult Ending::ParseEndFile()
                     }
                 }
             case 'R':
-                for (j = 0; j < 16; j += 1)
+                for (j = 0; j < 16; j++)
                 {
                     this->sprites[j].anmFileIdx = 0;
                 }
@@ -435,7 +435,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
 
     endFileDat = this->endFileData;
     this->endFileData = (char *)FileSystem::OpenFile(endFilePath, 0);
-    if (this->endFileData == NULL)
+    if (!this->endFileData)
     {
         // STRING: TH07 0x004985d8
         g_GameErrorContext.Log("error : エンディングファイルが読み込めない、ファイルが破壊されています\r\n");
@@ -446,7 +446,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     this->line2Delay = 8;
     this->timer2 = 0;
     this->timer1 = 0;
-    if (endFileDat != NULL)
+    if (endFileDat)
     {
         free(endFileDat);
     }
@@ -537,7 +537,7 @@ ZunResult Ending::RegisterChain()
     ending->calcChain->arg = ending;
     ending->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     ending->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-    if (g_Chain.AddToCalcChain(ending->calcChain, 4) != 0)
+    if (g_Chain.AddToCalcChain(ending->calcChain, 4))
     {
         return ZUN_ERROR;
     }

@@ -137,7 +137,7 @@ i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
 {
     i32 fireOffset = shtEntry->fireOffset;
 
-    if (player->timers[fireOffset].bullet != NULL)
+    if (player->timers[fireOffset].bullet)
     {
         if (player->shtEntries[fireOffset] != shtEntry)
         {
@@ -169,7 +169,7 @@ i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
 {
     i32 fireOffset = shtEntry->fireOffset;
 
-    if (player->timers[fireOffset].bullet != NULL)
+    if (player->timers[fireOffset].bullet)
     {
         if (player->shtEntries[fireOffset] != shtEntry)
         {
@@ -607,7 +607,7 @@ void Player::SpawnBullets(Player *player, u32 timer)
         }
 
     loop_with_goto_for_some_reason:
-        if (entry->fireCallback != NULL)
+        if (entry->fireCallback)
         {
             ret = entry->fireCallback(player, bullet, timer, entry);
         }
@@ -643,19 +643,19 @@ void Player::UpdateShots()
     PlayerBullet *bullet;
     i32 i;
 
-    if (this->optionState != OPTION_FOCUSED && this->timers[2].bullet != NULL)
+    if (this->optionState != OPTION_FOCUSED && this->timers[2].bullet)
     {
         this->timers[2].bullet->bulletState = 0;
         this->timers[2].bullet = NULL;
     }
     if (this->optionState != OPTION_UNFOCUSED)
     {
-        if (this->timers[0].bullet != NULL)
+        if (this->timers[0].bullet)
         {
             this->timers[0].bullet->vm.pendingInterrupt = 1;
             this->timers[0].bullet = NULL;
         }
-        if (this->timers[1].bullet != NULL)
+        if (this->timers[1].bullet)
         {
             this->timers[1].bullet->vm.pendingInterrupt = 1;
             this->timers[1].bullet = NULL;
@@ -665,7 +665,7 @@ void Player::UpdateShots()
     {
         for (i = 0; i < 3; i++)
         {
-            if (this->timers[i].bullet != NULL)
+            if (this->timers[i].bullet)
             {
                 this->timers[i].bullet->bulletState = 0;
                 this->timers[i].bullet = NULL;
@@ -674,7 +674,7 @@ void Player::UpdateShots()
     }
     for (i = 0; i < 3; i++)
     {
-        if (this->timers[i].bullet == NULL)
+        if (!this->timers[i].bullet)
         {
             continue;
         }
@@ -701,7 +701,7 @@ void Player::UpdateShots()
             continue;
         }
 
-        if (bullet->updateCallback != NULL &&
+        if (bullet->updateCallback &&
             bullet->updateCallback(this, bullet))
         {
             bullet->bulletState = 0;
@@ -752,7 +752,7 @@ void Player::DrawBullets()
         bullet->vm.pos.y = g_GameManager.arcadeRegionTopLeftPos.y + bullet->pos.y;
         bullet->vm.pos.z = 0.4f;
         g_AnmManager->Draw(&bullet->vm);
-        if (bullet->drawCallback != NULL)
+        if (bullet->drawCallback)
         {
             bullet->drawCallback(this, bullet);
         }
@@ -845,7 +845,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
     enemyBottomRight.y = center->y + size->y * 0.5f;
 
     bullet = this->bullets;
-    if (param_3 != NULL)
+    if (param_3)
     {
         *param_3 = 0;
     }
@@ -874,7 +874,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
                 continue;
             }
         }
-        if (bullet->hitCallback != NULL &&
+        if (bullet->hitCallback &&
             bullet->hitCallback(this, bullet, center))
         {
             continue;
@@ -936,7 +936,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
                 g_EffectManager.SpawnParticles(5, center, 1, 0xffffffff);
             }
         }
-        if (this->bombInfo.isInUse && param_3 != NULL)
+        if (this->bombInfo.isInUse && param_3)
         {
             *param_3 = 1;
         }
@@ -1457,7 +1457,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_UNFOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
-                if (this->focusEffect != NULL)
+                if (this->focusEffect)
                 {
                     this->focusEffect->vm.SetPendingInterrupt(1);
                 }
@@ -1471,7 +1471,7 @@ i32 Player::HandlePlayerInputs()
             if (!this->isFocus)
             {
                 this->optionState = OPTION_UNFOCUSING;
-                if (this->focusEffect != NULL)
+                if (this->focusEffect)
                 {
                     this->focusEffect->vm.SetPendingInterrupt(1);
                 }
@@ -1533,7 +1533,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_UNFOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
-                if (this->focusEffect != NULL)
+                if (this->focusEffect)
                 {
                     this->focusEffect->vm.SetPendingInterrupt(1);
                 }
@@ -1565,7 +1565,7 @@ i32 Player::HandlePlayerInputs()
             if (!this->isFocus)
             {
                 this->optionState = OPTION_UNFOCUSING;
-                if (this->focusEffect != NULL)
+                if (this->focusEffect)
                 {
                     this->focusEffect->vm.SetPendingInterrupt(1);
                 }
@@ -1910,19 +1910,19 @@ void Player::UpdateState()
 
     if (this->bulletGracePeriod != 0)
     {
-        this->bulletGracePeriod = this->bulletGracePeriod - 1;
+        this->bulletGracePeriod--;
         g_BulletManager.RemoveAllBullets(0);
     }
     if (this->playerState == PLAYER_STATE_INVULNERABLE)
     {
-        if (this->effect != NULL)
+        if (this->effect)
         {
             this->effect->pos1 = this->positionCenter;
         }
         this->invulnerabilityTimer--;
         if (this->invulnerabilityTimer.GetCurrent() <= 0)
         {
-            if (this->effect != NULL)
+            if (this->effect)
             {
                 this->effect->inUseFlag = 0;
                 this->effect = NULL;
@@ -1945,7 +1945,7 @@ void Player::UpdateState()
     }
     else if (this->playerState == PLAYER_STATE_BORDER)
     {
-        if (this->borderEffect != NULL)
+        if (this->borderEffect)
         {
             this->borderEffect->pos1 = this->positionCenter;
         }
@@ -2026,7 +2026,7 @@ void Player::BreakBorderNaturally()
     this->invulnerabilityTimer = 40;
     this->borderInvulnerabilityTime = 0x28;
     this->hasBorder = BORDER_NONE;
-    if (this->borderEffect != NULL)
+    if (this->borderEffect)
     {
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
@@ -2114,11 +2114,11 @@ void Player::ActivateBorder()
         this->borderTimer = this->invulnerabilityTimer;
         this->hasBorder = BORDER_ACTIVE;
         this->playerState = PLAYER_STATE_BORDER;
-        if (this->borderEffect != NULL)
+        if (this->borderEffect)
         {
             this->borderEffect->inUseFlag = 0;
         }
-        if (this->effect != NULL)
+        if (this->effect)
         {
             this->effect->inUseFlag = 0;
             this->effect = NULL;
@@ -2151,7 +2151,7 @@ void Player::BreakBorder(u32 unused)
     i32 i;
     Effect *effect;
 
-    if (this->borderEffect != NULL)
+    if (this->borderEffect)
     {
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
@@ -2542,7 +2542,7 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
     i32 i;
 
     *data = (ShtData *)FileSystem::OpenFile(shtPath, 0);
-    if (*data == NULL)
+    if (!*data)
     {
         return ZUN_ERROR;
     }

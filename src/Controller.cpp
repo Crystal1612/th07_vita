@@ -26,7 +26,7 @@ u16 Controller::GetJoystickCaps()
 
     joyinfo.dwSize = 0x34;
     joyinfo.dwFlags = 0xff;
-    if (joyGetPosEx(0, &joyinfo) != 0)
+    if (joyGetPosEx(0, &joyinfo))
     {
         // STRING: TH07 0x00497d9c
         g_GameErrorContext.Log("使えるパッドが存在しないようです、残念\r\n");
@@ -84,12 +84,12 @@ u16 Controller::GetControllerInput(u16 buttons)
     u32 distance;
     JOYINFOEX pji;
 
-    if (g_Supervisor.controller == NULL)
+    if (!g_Supervisor.controller)
     {
         memset(&pji, 0, sizeof(JOYINFOEX));
         pji.dwSize = 0x34;
         pji.dwFlags = 0xff;
-        if (joyGetPosEx(0, &pji) != 0)
+        if (joyGetPosEx(0, &pji))
         {
             return buttons;
         }
@@ -97,7 +97,7 @@ u16 Controller::GetControllerInput(u16 buttons)
         DVar1 = SetButtonFromControllerInputs(
             &buttons, g_Supervisor.cfg.controllerMapping.shootButton,
             TH_BUTTON_SHOOT, pji.dwButtons);
-        if (g_Supervisor.cfg.shotSlow != 0)
+        if (g_Supervisor.cfg.shotSlow)
         {
             if (DVar1 != 0)
             {
@@ -203,7 +203,7 @@ u16 Controller::GetControllerInput(u16 buttons)
             DVar2 = SetButtonFromDirectInputJoystate(
                 &buttons, g_Supervisor.cfg.controllerMapping.shootButton, 1,
                 js.rgbButtons);
-            if (g_Supervisor.cfg.shotSlow != 0)
+            if (g_Supervisor.cfg.shotSlow)
             {
                 if (DVar2 != 0)
                 {
@@ -279,18 +279,18 @@ u8 *Controller::GetControllerState()
     JOYINFOEX joyinfoex;
 
     memset(g_ControllerData, 0, sizeof(g_ControllerData));
-    if (g_Supervisor.controller == NULL)
+    if (!g_Supervisor.controller)
     {
         memset(&joyinfoex, 0, sizeof(JOYINFOEX));
         joyinfoex.dwSize = 0x34;
         joyinfoex.dwFlags = 0xff;
-        if (joyGetPosEx(0, &joyinfoex) != 0)
+        if (joyGetPosEx(0, &joyinfoex))
         {
             return g_ControllerData;
         }
 
         for (joyButtonBit = joyinfoex.dwButtons, joyButtonIndex = 0;
-             joyButtonIndex < 32; joyButtonIndex += 1, joyButtonBit >>= 1)
+             joyButtonIndex < 32; joyButtonIndex++, joyButtonBit >>= 1)
         {
             if ((joyButtonBit & 1) != 0)
             {
@@ -342,7 +342,7 @@ u16 Controller::GetInput()
 
     u16 buttons = 0;
 
-    if (g_Supervisor.keyboard == NULL)
+    if (!g_Supervisor.keyboard)
     {
         GetKeyboardState(keyboardState);
 

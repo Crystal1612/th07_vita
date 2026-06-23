@@ -49,7 +49,7 @@ i32 MusicRoom::ProcessInput()
     unusedListingOffset = this->listingOffset;
     if (WAS_PRESSED_RAW(TH_BUTTON_UP))
     {
-        this->cursor = this->cursor - 1;
+        this->cursor--;
         if (this->cursor < 0)
         {
             this->cursor = this->numDescriptors - 1;
@@ -156,7 +156,7 @@ recheck:
         }
         goto recheck;
     case 1:
-        if (arg->ProcessInput() != 0)
+        if (arg->ProcessInput())
         {
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
@@ -407,7 +407,7 @@ ZunResult MusicRoom::RegisterChain()
     musicRoom->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     musicRoom->calcChain->deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
-    if (g_Chain.AddToCalcChain(musicRoom->calcChain, 3) != 0)
+    if (g_Chain.AddToCalcChain(musicRoom->calcChain, 3))
     {
         return ZUN_ERROR;
     }

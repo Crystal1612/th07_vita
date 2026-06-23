@@ -132,7 +132,7 @@ So, judging from this line from our recompiled binary, we can pretty safely conc
 ```c++
 // FUNCTION: TH07 0x0040e4f0
 void EclManager::Unload() {
-  if (this->eclFile != NULL) {
+  if (this->eclFile) {
     EclRawHeader *file = this->eclFile;
     free(file);
   }
@@ -168,7 +168,7 @@ This means that you can also have this
 // FUNCTION: TH07 0x0040e4f0
 void EclManager::Unload()
 {
-    if (this->eclFile != NULL)
+    if (this->eclFile)
     {
         ZunMemory::Free(this->eclFile);
     }
@@ -527,7 +527,7 @@ This is probably meant to be a goto label. It's very likely that Ghidra, the dec
 ```c++
 if (D3DXLoadSurfaceFromFileInMemory(
           surface, NULL, NULL, data, g_LastFileSize, NULL, 1, 0,
-          (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]) != 0)
+          (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx])
     goto err;
 
 err:
@@ -543,7 +543,7 @@ After applying this same pattern to all of the conditions, you get this much mor
 ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path) {
   IDirect3DSurface8 *surface;
 
-  if (this->surfaces[surfaceIdx] != NULL) {
+  if (this->surfaces[surfaceIdx]) {
     ReleaseSurface(surfaceIdx);
   }
   u8 *data = FileSystem::OpenFile(path, 0);
@@ -559,7 +559,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path) {
 
   if (D3DXLoadSurfaceFromFileInMemory(
           surface, NULL, NULL, data, g_LastFileSize, NULL, 1, 0,
-          (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]) != 0)
+          (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx])
     goto err;
 
   if (g_Supervisor.d3dDevice->CreateRenderTarget(
@@ -1201,7 +1201,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf) {
     goto err;
 
   pbVar5 = Lzss::Decompress(local_14, dwBytes, buf, dstLen);
-  if (local_14 != NULL) {
+  if (local_14) {
     GlobalFree(local_14);
     local_14 = NULL;
   }
@@ -1210,7 +1210,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf) {
 err:
   // STRING: TH07 0x004950b8
   DebugPrint("info : %s error\r\n", this->filename);
-  if (local_14 != NULL) {
+  if (local_14) {
     GlobalFree(local_14);
     local_14 = NULL;
   }
@@ -1286,7 +1286,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf) {
     goto err;
 
   dstBuf = Lzss::Decompress(srcBuf, dwBytes, buf, dstLen);
-  if (srcBuf != NULL) {
+  if (srcBuf) {
     GlobalFree(srcBuf);
     srcBuf = NULL;
   }
@@ -1294,7 +1294,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf) {
 err:
   // STRING: TH07 0x004950b8
   DebugPrint("info : %s error\r\n", this->filename);
-  if (srcBuf != NULL) {
+  if (srcBuf) {
     GlobalFree(srcBuf);
     srcBuf = NULL;
   }

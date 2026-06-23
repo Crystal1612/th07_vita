@@ -92,7 +92,7 @@ TextHelper::~TextHelper()
 // FUNCTION: TH07 0x00431a5c
 bool TextHelper::ReleaseBuffer()
 {
-    if (this->hdc != NULL)
+    if (this->hdc)
     {
         SelectObject((HDC)this->hdc, this->gdiobj);
         DeleteDC((HDC)this->hdc);
@@ -158,7 +158,7 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
     ReleaseBuffer();
     memset(&bitmapInfo, 0, sizeof(ThBitmapInfo));
     formatInfo = GetFormatInfo(format);
-    if (formatInfo == NULL)
+    if (!formatInfo)
     {
         return false;
     }
@@ -179,7 +179,7 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
     }
     bitmapObj = CreateDIBSection(NULL, (BITMAPINFO *)&bitmapInfo, 0,
                                  (void **)&bitmapData, NULL, 0);
-    if (bitmapObj == NULL)
+    if (!bitmapObj)
     {
         return false;
     }
@@ -340,7 +340,7 @@ bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
     rectToLock.top = 0;
     rectToLock.right = this->GetWidth();
     rectToLock.bottom = this->GetHeight();
-    if (surface->LockRect(&lockedRect, &rectToLock, 0) != 0)
+    if (surface->LockRect(&lockedRect, &rectToLock, 0))
     {
         return false;
     }

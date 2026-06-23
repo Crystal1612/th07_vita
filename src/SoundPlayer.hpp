@@ -84,7 +84,7 @@ struct SoundPlayer
 
     void FadeOut(f32 duration)
     {
-        if (this->backgroundMusic != NULL)
+        if (this->backgroundMusic)
         {
             this->backgroundMusic->FadeOut(duration);
         }

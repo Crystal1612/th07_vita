@@ -70,7 +70,7 @@ ZunResult EclManager::Load(const char *path)
     i32 i;
 
     this->eclFile = (EclRawHeader *)FileSystem::OpenFile(path, 0);
-    if (this->eclFile == NULL)
+    if (!this->eclFile)
     {
         // STRING: TH07 0x00498700
         g_GameErrorContext.Log("敵データの読み込みに失敗しました、データが壊れてるか失われています\r\n");
@@ -94,7 +94,7 @@ ZunResult EclManager::Load(const char *path)
 // FUNCTION: TH07 0x0040e4f0
 void EclManager::Unload()
 {
-    if (this->eclFile != NULL)
+    if (this->eclFile)
     {
         ZunMemory::Free(this->eclFile);
     }
@@ -704,7 +704,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     enemy->specialEffect->vm.scaleInterpFinal.y = 0.125;
     enemy->specialEffect->pos1 = enemy->position;
     enemy->customSpecialEffectPos = 0;
-    if (g_GameManager.replay == 0)
+    if (!g_GameManager.replay)
     {
         catk = &g_GameManager.catk[g_EnemyManager.spellcardInfo.spellcardIdx];
         nameCsum = 0;
@@ -761,7 +761,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
     Catk *catk;
     i32 score;
 
-    if (g_EnemyManager.spellcardInfo.isActive != 0)
+    if (g_EnemyManager.spellcardInfo.isActive)
     {
         g_Gui.EndEnemySpellcard();
         if (g_EnemyManager.spellcardInfo.isActive == 1)
@@ -773,14 +773,14 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
                 g_GameManager.AddScore(score);
                 g_Gui.ShowBonusScore(score);
             }
-            if (g_EnemyManager.spellcardInfo.isCapturing != 0)
+            if (g_EnemyManager.spellcardInfo.isCapturing)
             {
                 catk = &g_GameManager.catk[g_EnemyManager.spellcardInfo.spellcardIdx];
                 score = g_EnemyManager.spellcardInfo.captureScore +
                         g_EnemyManager.spellcardInfo.grazeBonusScore;
                 g_Gui.ShowSpellcardBonus(score);
                 g_GameManager.AddScore(score);
-                if (g_GameManager.replay == 0)
+                if (!g_GameManager.replay)
                 {
                     nameCsum = 0;
                     i = strlen(catk->name);
@@ -836,7 +836,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
         g_EnemyManager.spellcardInfo.isActive = 0;
         for (j = 0; j < 8; j++)
         {
-            if (g_EnemyManager.bosses[j] != NULL &&
+            if (g_EnemyManager.bosses[j] &&
                 g_EnemyManager.bosses[j]->specialEffect != NULL)
             {
                 g_EnemyManager.bosses[j]->specialEffect->inUseFlag = 0;
@@ -1069,7 +1069,7 @@ restart:
                 local_18 = enemy->currentContext.interps;
                 for (local_14 = 0; local_14 < 8; local_14++, local_18++)
                 {
-                    if ((local_18->fn == NULL) ||
+                    if (!(local_18->fn) ||
                         (local_18->args[7].f == instr->args[0].f))
                     {
                         (local_18->timer) = 0;
@@ -1184,7 +1184,7 @@ restart:
                     DebugPrint("error : no Stack Ret\r\n");
                 }
                 enemy->stackDepth--;
-                if (enemy->currentContext.isPeriodicSub != 0)
+                if (enemy->currentContext.isPeriodicSub)
                 {
                     enemy->savedEclContextArgs = enemy->currentContext.eclContextArgs;
                     enemy->currentContext.isPeriodicSub = 0;
@@ -1283,7 +1283,7 @@ restart:
                     local_20->speed1 = GET_FLOAT_VALUE_D(enemy, 3, 4);
                     local_20->angle2 = GET_FLOAT_VALUE_D(enemy, 6, 7);
                     local_20->speed2 = GET_FLOAT_VALUE_D(enemy, 4, 5);
-                    if (g_EnemyManager.spellcardInfo.isActive == 0)
+                    if (!g_EnemyManager.spellcardInfo.isActive)
                     {
                         iVar13 = enemy->bulletRankAmount1Low;
                         iVar19 = ((i32)enemy->bulletRankAmount1High - iVar13) *
@@ -1458,8 +1458,8 @@ restart:
                 break;
             case 0x58:
                 local_8 = GET_INT_VALUE(enemy, 0);
-                if ((enemy->lasers[local_8] == NULL) ||
-                    (enemy->lasers[local_8]->inUse == 0))
+                if (!(enemy->lasers[local_8]) ||
+                    (!enemy->lasers[local_8]->inUse))
                 {
                     enemy->currentContext.compareRegister = 1;
                 }
@@ -1470,8 +1470,8 @@ restart:
                 break;
             case 0x59:
                 local_8 = GET_INT_VALUE(enemy, 0);
-                if (((enemy->lasers[local_8] != NULL) &&
-                     (enemy->lasers[local_8]->inUse != 0)) &&
+                if (((enemy->lasers[local_8]) &&
+                     (enemy->lasers[local_8]->inUse)) &&
                     (enemy->lasers[local_8]->state < 2))
                 {
                     enemy->lasers[local_8]->state = 2;
@@ -1481,7 +1481,7 @@ restart:
                 }
                 break;
             case 0x86:
-                for (local_30 = 0; local_30 < 0x20; local_30 += 1)
+                for (local_30 = 0; local_30 < 0x20; local_30++)
                 {
                     enemy->lasers[local_30] = NULL;
                 }
@@ -1698,7 +1698,7 @@ restart:
                 enemy->life = enemy->maxLife = GET_INT_VALUE(enemy, 0);
                 if ((enemy->bossId == 0) && enemy->isBoss)
                 {
-                    for (local_3c = 0; local_3c < 8; local_3c += 1)
+                    for (local_3c = 0; local_3c < 8; local_3c++)
                     {
                         g_Gui.bossHealthEased[local_3c] = 0.0f;
                         g_Gui.bossHealth[local_3c] = 0.0f;
@@ -1772,7 +1772,7 @@ restart:
                 break;
             case 0x77:
                 local_50 = GET_INT_VALUE(enemy, 0);
-                for (local_54 = 0; local_54 < local_50; local_54 += 1)
+                for (local_54 = 0; local_54 < local_50; local_54++)
                 {
                     local_60 = enemy->position;
                     local_60.x = (g_Rng.GetRandomFloatInRange(128.0f) - 64.0f) + local_60.x;
@@ -1790,7 +1790,7 @@ restart:
                 break;
             case 0x9a:
                 local_64 = GET_INT_VALUE(enemy, 0);
-                for (local_68 = 0; local_68 < local_64; local_68 += 1)
+                for (local_68 = 0; local_68 < local_64; local_68++)
                 {
                     local_74 = enemy->position;
                     local_74.x = (g_Rng.GetRandomFloatInRange(128.0f) - 64.0f) + local_74.x;
@@ -2167,7 +2167,7 @@ restart:
                 enemy->anmExFlags = uVar6;
             }
         }
-        if (enemy->currentContext.func != NULL)
+        if (enemy->currentContext.func)
         {
             enemy->currentContext.func(enemy, enemy->currentContext.eclExInstr);
         }
@@ -2176,9 +2176,9 @@ restart:
         fVar8 = enemy->position.x;
         fVar28 = enemy->position.y;
         fVar3 = enemy->position.z;
-        for (local_f0 = 0; local_f0 < 8; local_f0 += 1)
+        for (local_f0 = 0; local_f0 < 8; local_f0++)
         {
-            if (local_fc->fn != NULL)
+            if (local_fc->fn)
             {
                 local_fc->timer++;
                 if (local_fc->args[0].i <= local_fc->timer.current)
@@ -2228,7 +2228,7 @@ restart:
                     bVar7 = true;
                 }
             }
-            local_fc = local_fc + 1;
+            local_fc++;
         }
         if (bVar7)
         {
@@ -2243,8 +2243,8 @@ restart:
     enemy->currentContext.curInstr = instr;
     enemy->currentContext.time++;
     if ((enemy->isBoss && (enemy->bossId == 0)) &&
-        (g_EnemyManager.spellcardInfo.isActive != 0 &&
-         (g_EnemyManager.spellcardInfo.isCapturing != 0)))
+        (g_EnemyManager.spellcardInfo.isActive &&
+         (g_EnemyManager.spellcardInfo.isCapturing)))
     {
         if (!enemy->isSurvivalSpellcard)
         {
@@ -2268,7 +2268,7 @@ restart:
     }
     if (enemy->isBoss && (6 < g_GameManager.currentStage))
     {
-        if ((g_Player.bombInfo.isInUse == 0) ||
+        if (!(g_Player.bombInfo.isInUse) ||
             (g_EnemyManager.spellcardInfo.isActive == 0 ||
              ((i32)g_EnemyManager.spellcardInfo.spellcardIdx < 0x76)))
         {

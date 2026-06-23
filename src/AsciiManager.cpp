@@ -65,34 +65,34 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     i32 i;
     AsciiManagerPopup *curPopup;
 
-    if ((g_GameManager.isInRetryMenu == 0) && (g_GameManager.isInPauseMenu == 0))
+    if (!(g_GameManager.isInRetryMenu) && (!g_GameManager.isInPauseMenu))
     {
         curPopup = arg->popups;
         for (i = 0; i < 0x2d3; i++, curPopup++)
         {
-            if (curPopup->inUse == 0)
+            if (!curPopup->inUse)
             {
                 continue;
             }
 
             curPopup->position.y -= 0.5f * g_Supervisor.effectiveFramerateMultiplier;
             curPopup->timer++;
-            if ((curPopup->timer > 60) != 0)
+            if (curPopup->timer > 60)
             {
                 curPopup->inUse = 0;
             }
         }
     }
-    else if (g_GameManager.isInRetryMenu != 0)
+    else if (g_GameManager.isInRetryMenu)
     {
         arg->retryMenu.OnUpdate();
     }
-    if (g_GameManager.isInPauseMenu != 0)
+    if (g_GameManager.isInPauseMenu)
     {
         arg->pauseMenu.OnUpdate();
     }
     arg->UpdateScripts();
-    if (g_GameManager.demo != 0)
+    if (g_GameManager.demo)
     {
         if (arg->vm.anmFileIdx == 0)
         {
@@ -210,7 +210,7 @@ ZunResult AsciiManager::RegisterChain()
         (ChainLifecycleCallback)DeletedCallback;
     g_AsciiManagerCalcChain.arg = mgr;
 
-    if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, 1) != 0)
+    if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, 1))
     {
         return ZUN_ERROR;
     }
@@ -333,7 +333,7 @@ void AsciiManager::DrawStrings()
             }
             else
             {
-                if (string->isSelected == 0)
+                if (!string->isSelected)
                 {
                     this->vm0.sprite = &g_AnmManager->sprites[(u8)*text - 1];
                     this->vm0.color.color = string->color;
@@ -472,7 +472,7 @@ i32 RetryMenu::OnUpdate()
         this->curState = 4;
         for (i = 0; i < 10; i++)
         {
-            if (this->menuSprites[i].visible != 0)
+            if (this->menuSprites[i].visible)
             {
                 this->menuSprites[i].pendingInterrupt = 2;
             }
@@ -487,14 +487,14 @@ i32 RetryMenu::OnUpdate()
         this->curState = 9;
         for (i = 0; i < 10; i++)
         {
-            if (this->menuSprites[i].visible != 0)
+            if (this->menuSprites[i].visible)
             {
                 this->menuSprites[i].pendingInterrupt = 2;
             }
         }
         this->numFrames = 0;
     }
-    if ((g_GameManager.replay == 0) &&
+    if (!(g_GameManager.replay) &&
         WAS_PRESSED_RAW(TH_BUTTON_RESET) &&
         this->curState != 9)
     {
@@ -502,7 +502,7 @@ i32 RetryMenu::OnUpdate()
         this->curState = 10;
         for (i = 0; i < 10; i++)
         {
-            if (this->menuSprites[i].visible != 0)
+            if (this->menuSprites[i].visible)
             {
                 this->menuSprites[i].pendingInterrupt = 2;
             }
@@ -522,7 +522,7 @@ i32 RetryMenu::OnUpdate()
         }
         g_AnmManager->SetActiveSprite(this->menuSprites + 7,
                                       g_GameManager.difficulty + 0x10d);
-        if (g_GameManager.practice == 0)
+        if (!g_GameManager.practice)
         {
             this->menuSprites[8].SetInvisible();
         }
@@ -530,7 +530,7 @@ i32 RetryMenu::OnUpdate()
         {
             this->menuSprites[9].SetInvisible();
         }
-        if (g_GameManager.replay != 0)
+        if (g_GameManager.replay)
         {
             this->menuSprites[3].currentInstruction = NULL;
         }
@@ -541,7 +541,7 @@ i32 RetryMenu::OnUpdate()
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, 0x724);
             if (g_AnmManager->CreateScreenshotTexture(this->menuBackground.sprite->startPixelInclusive.x,
                                                       this->menuBackground.sprite->startPixelInclusive.y,
-                                                      this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx) != 0)
+                                                      this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
             {
                 this->curState = 0;
                 return 0;
@@ -559,7 +559,7 @@ i32 RetryMenu::OnUpdate()
         this->menuSprites[2].offset = this->menuSprites[3].offset;
         if (this->numFrames >= 4)
         {
-            if (g_GameManager.replay == 0)
+            if (!g_GameManager.replay)
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_UP))
                 {
@@ -604,7 +604,7 @@ i32 RetryMenu::OnUpdate()
                 this->curState = 1;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
-            if (g_GameManager.replay != 0)
+            if (g_GameManager.replay)
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
                 {
@@ -813,7 +813,7 @@ void RetryMenu::OnDraw()
 {
     u32 i;
 
-    if (g_GameManager.isInRetryMenu != 0)
+    if (g_GameManager.isInRetryMenu)
     {
         g_AnmManager->Flush();
         g_Supervisor.viewport.X = (u32)(g_GameManager.arcadeRegionTopLeftPos.x);
@@ -829,7 +829,7 @@ void RetryMenu::OnDraw()
         }
         for (i = 0; i < 10; i++)
         {
-            if (this->menuSprites[i].visible != 0)
+            if (this->menuSprites[i].visible)
             {
                 g_AnmManager->DrawNoRotation(this->menuSprites + i);
             }
@@ -842,14 +842,14 @@ i32 PauseMenu::OnUpdate()
 {
     i32 i;
 
-    if (g_GameManager.practice != 0)
+    if (g_GameManager.practice)
     {
         g_GameManager.isInPauseMenu = 0;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         g_Supervisor.curState = 6;
         return 1;
     }
-    if (g_GameManager.replay != 0)
+    if (g_GameManager.replay)
     {
         g_GameManager.isInPauseMenu = 0;
         g_Supervisor.curState = 7;
@@ -885,7 +885,7 @@ i32 PauseMenu::OnUpdate()
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, 0x724);
                 if (g_AnmManager->CreateScreenshotTexture(this->menuBackground.sprite->startPixelInclusive.x,
                                                           this->menuBackground.sprite->startPixelInclusive.y,
-                                                          this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx) != 0)
+                                                          this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
                 {
                     this->curState = 0;
                     return 0;
@@ -1041,7 +1041,7 @@ void PauseMenu::OnDraw()
 {
     i32 i;
 
-    if (g_GameManager.isInPauseMenu != 0)
+    if (g_GameManager.isInPauseMenu)
     {
         g_AnmManager->Flush();
         g_Supervisor.viewport.X = g_GameManager.arcadeRegionTopLeftPos.x;
@@ -1060,7 +1060,7 @@ void PauseMenu::OnDraw()
         }
         for (i = 0; i < 5; i++)
         {
-            if (this->menuSprites[i].visible != 0)
+            if (this->menuSprites[i].visible)
             {
                 g_AnmManager->DrawNoRotation(&this->menuSprites[i]);
             }

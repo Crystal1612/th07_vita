@@ -19,26 +19,26 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
     i32 entryIdx;
 
     entryIdx = -1;
-    if (isExternalResource == 0)
+    if (!isExternalResource)
     {
         filename = strrchr(filepath, '\\');
-        if (filename == NULL)
+        if (!filename)
         {
             filename = filepath;
         }
         else
         {
-            filename = filename + 1;
+            filename++;
         }
 
         filename = strrchr(filename, '/');
-        if (filename == NULL)
+        if (!filename)
         {
             filename = filepath;
         }
         else
         {
-            filename = filename + 1;
+            filename++;
         }
         fsize = g_Pbg4Archive.GetEntrySize(filename);
         g_LastFileSize = fsize;
@@ -54,7 +54,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
             // STRING: TH07 0x00497d24
             DebugPrint("%s Decode ... \r\n", filename);
             buf = (u8 *)ZunMemory::Alloc(fsize);
-            if (buf == NULL)
+            if (!buf)
             {
                 return NULL;
             }
@@ -75,7 +75,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
 
     fsize = GetFileSize(hFile, NULL);
     buf = (u8 *)ZunMemory::Alloc(fsize);
-    if (buf == NULL)
+    if (!buf)
     {
         CloseHandle(hFile);
         return NULL;

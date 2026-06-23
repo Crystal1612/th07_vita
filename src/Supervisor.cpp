@@ -72,7 +72,7 @@ void Supervisor::CheckTiming()
     f64 timeDiff;
     f64 perfDiff;
 
-    if (this->checkTiming == 0)
+    if (!this->checkTiming)
     {
         return;
     }
@@ -166,11 +166,11 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     g_AnmManager->offset.y = 0.0f;
     g_AnmManager->offset.x = 0.0f;
     g_Supervisor.fogEnabled = 0xff;
-    if (g_SoundPlayer.backgroundMusic != NULL)
+    if (g_SoundPlayer.backgroundMusic)
     {
         g_SoundPlayer.backgroundMusic->UpdateFadeOut();
     }
-    if (g_GameManager.slowModeSlowActive == 0)
+    if (!g_GameManager.slowModeSlowActive)
     {
         g_LastFrameRawInput = g_CurFrameRawInput;
         g_CurFrameRawInput = Controller::GetInput();
@@ -280,13 +280,13 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                 break;
             case 10:
                 GameManager::CutChain();
-                if ((g_GameManager.practice == 0) && (g_GameManager.difficulty < 4))
+                if ((!g_GameManager.practice) && (g_GameManager.difficulty < 4))
                 {
                     g_GameManager.currentStage = 0;
                 }
                 else
                 {
-                    g_GameManager.currentStage -= 1;
+                    g_GameManager.currentStage--;
                 }
                 ReplayManager::SaveReplay(NULL, NULL);
                 if (GameManager::RegisterChain() != ZUN_SUCCESS)
@@ -298,7 +298,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
             case 11:
                 g_Supervisor.curState = 3;
                 GameManager::CutChain();
-                g_GameManager.currentStage -= 1;
+                g_GameManager.currentStage--;
                 if (GameManager::RegisterChain() != ZUN_SUCCESS)
                 {
                     return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
@@ -415,7 +415,7 @@ i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
                                                 void *param_2)
 {
     HRESULT hr;
-    if (g_Supervisor.controller == NULL)
+    if (!g_Supervisor.controller)
     {
         hr = g_Supervisor.directInput->CreateDevice(param_1->guidInstance,
                                                     &g_Supervisor.controller, NULL);
@@ -506,7 +506,7 @@ ZunResult Supervisor::SetupDInput()
                     // STRING: TH07 0x0049717c
                     g_GameErrorContext.Log("DirectInput は正常に初期化されました\r\n");
                     this->directInput->EnumDevices(4, EnumGameControllersCb, NULL, 1);
-                    if (this->controller != NULL)
+                    if (this->controller)
                     {
                         this->controller->SetDataFormat(&c_dfDIJoystick2);
                         this->controller->SetCooperativeLevel(this->hwndGameWindow, 10);
@@ -535,7 +535,7 @@ ZunResult Supervisor::LoadGameData()
         sprintf(verFile, "th07_%.4x%c.ver", 256, 98);
         g_Supervisor.version = (char *)FileSystem::OpenFile(verFile, 0);
         g_Supervisor.versionTableSize = g_LastFileSize;
-        if (g_Supervisor.version == NULL)
+        if (!g_Supervisor.version)
         {
             // STRING: TH07 0x00497118
             g_GameErrorContext.Fatal("error : データのバージョンが違います\r\n");
@@ -674,9 +674,9 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     // STRING: TH07 0x00497038
     g_AnmManager->LoadSurface(0, "data/title/th07logo.jpg");
     g_Supervisor.isInEnding = 1;
-    if (g_Supervisor.vsyncEnabled == 0)
+    if (!g_Supervisor.vsyncEnabled)
     {
-        if (CheckVSync() != 0)
+        if (CheckVSync())
         {
             g_AnmManager->ReleaseSurface(0);
             return (ZunResult)-2;
@@ -703,11 +703,11 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     arg->lastTotalPlayTimeUpdate = timeGetTime();
     g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
     arg->SetupDInput();
-    if (arg->midiOutput == NULL)
+    if (!arg->midiOutput)
     {
         arg->midiOutput = new MidiOutput;
     }
-    if (arg->midiOutput != NULL)
+    if (arg->midiOutput)
     {
         // STRING: TH07 0x00497028
         arg->midiOutput->ReadFileData(0x1e, "bgm/init.mid");
@@ -729,7 +729,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     g_AnmManager->SetupVertexBuffer();
     TextHelper::CreateTextBuffer();
     // STRING: TH07 0x00496fe0
-    if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt") != 0)
+    if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt"))
     {
         // STRING: TH07 0x00496fb8
         g_GameErrorContext.Log("error : BGM の初期化に失敗しました\r\n");
@@ -764,7 +764,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     ResultScreen::ParsePlst(scoreDat, &g_GameManager.plst);
     ResultScreen::ReleaseScoreDat(scoreDat);
     g_Supervisor.midiTimer = new DummyMidiTimer;
-    if (g_Supervisor.midiTimer != NULL)
+    if (g_Supervisor.midiTimer)
     {
         g_Supervisor.midiTimer->StartTimerDefault();
     }
@@ -780,7 +780,7 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     AsciiManager::CutChain();
     // STRING: TH07 0x004980d0
     g_SoundPlayer.PushCommand(AUDIO_SHUTDOWN, 0, "dummy");
-    if (arg->midiOutput != NULL)
+    if (arg->midiOutput)
     {
         arg->midiOutput->StopPlayback();
         delete arg->midiOutput;
@@ -788,12 +788,12 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     }
     ReplayManager::SaveReplay(NULL, NULL);
     TextHelper::ReleaseTextBuffer();
-    if (arg->keyboard != NULL)
+    if (arg->keyboard)
     {
         arg->keyboard->Unacquire();
     }
     SAFE_RELEASE(arg->keyboard);
-    if (arg->controller != NULL)
+    if (arg->controller)
     {
         arg->controller->Unacquire();
     }
@@ -802,7 +802,7 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     SAFE_DELETE(g_GameManager.globals);
     SAFE_DELETE(g_GameManager.defaultCfg);
     g_Pbg4Archive.Release();
-    if (g_Supervisor.midiTimer != NULL)
+    if (g_Supervisor.midiTimer)
     {
         StopMidiTimer(g_Supervisor.midiTimer);
         delete g_Supervisor.midiTimer;
@@ -826,7 +826,7 @@ ZunResult Supervisor::RegisterChain()
     chain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     chain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     res = g_Chain.AddToCalcChain(chain, 0);
-    if (res != 0)
+    if (res)
     {
         return res;
     }
@@ -849,7 +849,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
     f32 elapsedTimeInSecs;
     f32 fps;
 
-    if (g_GameManager.slowModeSlowActive == 0)
+    if (!g_GameManager.slowModeSlowActive)
     {
         g_NumFramesSinceLastTime =
             g_NumFramesSinceLastTime + 1 + (u32)g_Supervisor.cfg.frameskipConfig;
@@ -874,7 +874,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                 g_NumFramesSinceLastTime = 0;
                 // STRING: TH07 0x00496fa0
                 sprintf(g_FpsCounterBuffer, "%.02ffps", (f64)fps);
-                if ((g_GameManager.notInMenu != 0) && (param_1 != 0))
+                if ((g_GameManager.notInMenu) && (param_1 != 0))
                 {
                     targetFps = 60.0f;
                     g_Supervisor.fpsAccumulator = g_Supervisor.fpsAccumulator + targetFps;
@@ -899,7 +899,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                             g_Supervisor.framerateMultiplier + targetFps * 0.5f;
                     }
 
-                    if (g_GameManager.replay == 0)
+                    if (!g_GameManager.replay)
                     {
                         g_Supervisor.curFps = (fps + 0.5f);
                     }
@@ -932,7 +932,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                  (f32)g_Supervisor.perfFrequency.LowPart);
             g_PerformanceCounter.LowPart = local_18.LowPart;
             g_PerformanceCounter.HighPart = local_18.HighPart;
-            g_FpsUpdateCounter = g_FpsUpdateCounter + 1;
+            g_FpsUpdateCounter++;
             if (g_FpsUpdateCounter % 8 == 0)
             {
                 g_Supervisor.CheckTiming();
@@ -942,19 +942,19 @@ void Supervisor::DrawFpsCounter(i32 param_1)
     }
 
 LAB_00439350:
-    if ((g_Supervisor.isInEnding == 0) && (param_1 != 0))
+    if (!(g_Supervisor.isInEnding) && (param_1 != 0))
     {
         local_24.x = 512.0f;
         local_24.y = 464.0f;
         local_24.z = 0.0f;
         g_AsciiManager.AddString(&local_24, g_FpsCounterBuffer);
-        if ((g_GameManager.replay != 0) &&
-            (g_GameManager.notInMenu != 0))
+        if ((g_GameManager.replay) &&
+            (g_GameManager.notInMenu))
         {
             local_30.x = 384.0f;
             local_30.y = 448.0f;
             local_30.z = 0.0f;
-            if (g_Supervisor.isFpsBad != 0)
+            if (g_Supervisor.isFpsBad)
             {
                 g_AsciiManager.color = 0xffff4040;
             }
@@ -973,7 +973,7 @@ void ZunTimer::Increment(i32 value)
 {
     if ((g_Supervisor.flags >> 5 & 1) != 0)
     {
-        ++this->current;
+        this->current++;
         this->subFrame = 0.0f;
         this->previous = -999;
     }
@@ -1006,7 +1006,7 @@ void ZunTimer::Decrement(i32 value)
 {
     if ((g_Supervisor.flags >> 5 & 1) != 0)
     {
-        --this->current;
+        this->current--;
         this->subFrame = 0.0f;
         this->previous = -999;
     }
@@ -1027,7 +1027,7 @@ void ZunTimer::Decrement(i32 value)
                              (f32)value * g_Supervisor.effectiveFramerateMultiplier;
             while (this->subFrame < 0.0f)
             {
-                this->current = this->current - 1;
+                this->current--;
                 this->subFrame = this->subFrame + 1.0f;
             }
         }
@@ -1090,7 +1090,7 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         break;
     case D3DFMT_X8R8G8B8:
         local_1c = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
-        if (local_1c == NULL)
+        if (!local_1c)
         {
             // STRING: TH07 0x00496f60
             g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
@@ -1100,7 +1100,7 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         memset(local_1c, 0, sizeof(BITMAPINFO));
         local_24 = 1920;
         local_18 = malloc(local_24 * 480);
-        if (local_18 == NULL)
+        if (!local_18)
         {
             g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
             break;
@@ -1169,7 +1169,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
 
     memset(&g_Supervisor.cfg, 0, sizeof(GameConfiguration));
     configFile = (u32 *)FileSystem::OpenFile((char *)configFilename, 1);
-    if (configFile == NULL)
+    if (!configFile)
     {
         // STRING: TH07 0x00496f14
         g_GameErrorContext.Log("コンフィグデータが見つからないので初期化しました\r\n");
@@ -1289,7 +1289,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         // STRING: TH07 0x00496d6c
         g_GameErrorContext.Log("テクスチャの色合成を抑制しますn");
     }
-    if (this->cfg.windowed != 0)
+    if (this->cfg.windowed)
     {
         // STRING: TH07 0x00496d4c
         g_GameErrorContext.Log("ウィンドウモードで起動します\r\n");
@@ -1321,7 +1321,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.vsyncEnabled = 1;
     }
     if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg,
-                                    sizeof(GameConfiguration)) != 0)
+                                    sizeof(GameConfiguration)))
     {
         // STRING: TH07 0x00496c78
         g_GameErrorContext.Fatal("ファイルが書き出せません %s\r\n", configFilename);
@@ -1342,7 +1342,7 @@ i32 Supervisor::LoadAudio(i32 idx, const char *path)
 
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->ReadFileData(idx, path);
         }
@@ -1368,7 +1368,7 @@ ZunResult Supervisor::PlayLoadedAudio(i32 idx)
 {
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->PlayLoaded(idx);
         }
@@ -1394,7 +1394,7 @@ ZunResult Supervisor::PlayAudio(const char *path)
 
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->Play(path);
         }
@@ -1423,7 +1423,7 @@ ZunResult Supervisor::StopAudio()
 {
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->StopPlayback();
         }
@@ -1456,7 +1456,7 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
 
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->SetFadeOut(1000.0f * musicFadeFrames);
         }
@@ -1492,7 +1492,7 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
 i32 Supervisor::CanSaveReplay()
 {
     return g_GameManager.defaultCfg != NULL &&
-           g_GameManager.defaultCfg->slowMode != 0;
+           g_GameManager.defaultCfg->slowMode;
 }
 
 // FUNCTION: TH07 0x0043a1bd
@@ -1512,7 +1512,7 @@ HRESULT Supervisor::EnableFog()
 HRESULT Supervisor::DisableFog()
 {
     g_AnmManager->Flush();
-    if (this->fogEnabled != 0)
+    if (this->fogEnabled)
     {
         this->fogEnabled = 0;
         return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, 0);
@@ -1620,7 +1620,7 @@ ZunResult Supervisor::CheckIntegrity(const char *version, i32 exeSize,
     i32 local_c;
     char *local_8;
 
-    if (this->version == NULL)
+    if (!this->version)
     {
         return ZUN_SUCCESS;
     }

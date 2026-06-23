@@ -169,7 +169,7 @@ i32 EffectManager::UpdateOrbitEffect(Effect *effect)
 
     effect->pos1 = local_10 + effect->emitterPosition;
 
-    if ((char)effect->isFadingOut != 0)
+    if ((char)effect->isFadingOut)
     {
         effect->fadeOutTime++;
         if (effect->fadeOutTime >= 16)
@@ -211,7 +211,7 @@ i32 EffectManager::UpdateGather60Frames(Effect *effect)
 // FUNCTION: TH07 0x0041abe0
 i32 EffectManager::UpdateAttachToPlayer(Effect *effect)
 {
-    if ((i32)(effect->vm.currentInstruction == NULL))
+    if ((i32)(!effect->vm.currentInstruction))
     {
         return false;
     }
@@ -517,7 +517,7 @@ Effect *EffectManager::SpawnParticles(i32 effectId, D3DXVECTOR3 *pos,
         {
             this->nextIndex = 0;
         }
-        if (effect->inUseFlag != 0)
+        if (effect->inUseFlag)
         {
             if (this->nextIndex == 0)
             {
@@ -542,8 +542,8 @@ Effect *EffectManager::SpawnParticles(i32 effectId, D3DXVECTOR3 *pos,
         effect->isFadingOut = 0;
         effect->fadeOutTime = 0;
         effect->custom = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-        if ((g_EffectMapping[effectId].initCallback != NULL) &&
-            (g_EffectMapping[effectId].initCallback(effect) != 0))
+        if ((g_EffectMapping[effectId].initCallback) &&
+            (g_EffectMapping[effectId].initCallback(effect)))
         {
             effect->inUseFlag = 0;
         }
@@ -583,7 +583,7 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, D3DXVECTOR3 *pos,
         {
             this->nextIndex = 0;
         }
-        if (effect->inUseFlag != 0)
+        if (effect->inUseFlag)
         {
             if (this->nextIndex == 0)
             {
@@ -607,8 +607,8 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, D3DXVECTOR3 *pos,
         effect->isFadingOut = 0;
         effect->fadeOutTime = 0;
         effect->custom = *velocity;
-        if ((g_EffectMapping[effectId].initCallback != NULL) &&
-            (g_EffectMapping[effectId].initCallback(effect) != 0))
+        if ((g_EffectMapping[effectId].initCallback) &&
+            (g_EffectMapping[effectId].initCallback(effect)))
         {
             effect->inUseFlag = 0;
         }
@@ -649,9 +649,9 @@ Effect *EffectManager::SpawnEffect(i32 effectId, D3DXVECTOR3 *pos, i32 param_3,
     effect->isFadingOut = 0;
     effect->fadeOutTime = 0;
     effect->custom = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-    if (g_EffectMapping[effectId].initCallback != NULL)
+    if (g_EffectMapping[effectId].initCallback)
     {
-        if (g_EffectMapping[effectId].initCallback(effect) != 0)
+        if (g_EffectMapping[effectId].initCallback(effect))
         {
             effect->inUseFlag = 0;
         }
@@ -678,19 +678,19 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
     arg->effectLayers[3].next = NULL;
     for (i = 0; i < 0x198; i++, effect++)
     {
-        if (effect->inUseFlag == 0)
+        if (!effect->inUseFlag)
         {
             continue;
         }
 
         arg->activeEffectsCount++;
-        if (effect->callback != NULL && effect->callback(effect) != 1)
+        if (effect->callback && effect->callback(effect) != 1)
         {
             effect->inUseFlag = 0;
             continue;
         }
 
-        if (g_AnmManager->ExecuteScript(&effect->vm) != 0)
+        if (g_AnmManager->ExecuteScript(&effect->vm))
         {
             effect->inUseFlag = 0;
             continue;
@@ -703,7 +703,7 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
             arg->effectLayerPtrs[1]->next = effect;
             arg->effectLayerPtrs[1] = effect;
         }
-        else if (effect->is2D == 0)
+        else if (!effect->is2D)
         {
             if (effect->vm.blendMode != 0)
             {
@@ -740,7 +740,7 @@ u32 EffectManager::OnDraw(EffectManager *arg)
     Effect *effect;
 
     effect = arg->effectLayers[0].next;
-    while (effect != NULL)
+    while (effect)
     {
         effect->vm.pos = effect->pos1;
         effect->vm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
@@ -749,14 +749,14 @@ u32 EffectManager::OnDraw(EffectManager *arg)
         effect = effect->next;
     }
     effect = arg->effectLayers[2].next;
-    while (effect != NULL)
+    while (effect)
     {
         effect->vm.pos = effect->pos1;
         g_AnmManager->DrawBillboard(&effect->vm);
         effect = effect->next;
     }
     effect = arg->effectLayers[3].next;
-    while (effect != NULL)
+    while (effect)
     {
         effect->vm.pos = effect->pos1;
         effect->vm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
@@ -787,7 +787,7 @@ i32 EffectManager::UpdateSpecialEffect()
         return 1;
     }
 
-    while (effect != NULL)
+    while (effect)
     {
         counter++;
         if (g_Supervisor.cfg.effectQuality == QUALITY_MEDIUM)
@@ -948,7 +948,7 @@ ZunResult EffectManager::RegisterChain()
     g_EffectManagerCalcChain.deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     g_EffectManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, 0xb) != 0)
+    if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, 0xb))
     {
         return ZUN_ERROR;
     }

@@ -159,7 +159,7 @@ u32 Stage::OnUpdate(Stage *arg)
     D3DXVECTOR3 pos;
     StdRawInstr *curInstr;
 
-    if (arg->stdData == NULL)
+    if (!arg->stdData)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
@@ -225,7 +225,7 @@ loop_begin:
             arg->skyFogInterpTimer = 0;
             break;
         case 5:
-            if (arg->cameraTeleported != 0)
+            if (arg->cameraTeleported)
             {
                 D3DXVECTOR3 diff = *(D3DXVECTOR3 *)curInstr->args - arg->camEnd.pos;
                 EffectManager::DoSomethingWithEffects(&diff);
@@ -513,7 +513,7 @@ void Stage::SmoothBlendColor(ZunColor param_1)
 {
     ZunColor color;
 
-    if (this->color2.bytes.a == 0)
+    if (!this->color2.bytes.a)
     {
         this->color2 = param_1;
     }
@@ -551,7 +551,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
         g_Supervisor.DisableFog();
     }
     g_AnmManager->Flush();
-    if (arg->clearBackground != 0)
+    if (arg->clearBackground)
     {
         viewport.X = 0x20;
         viewport.Y = 0x10;
@@ -682,7 +682,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     g_Supervisor.SetRenderState(D3DRS_FOGSTART, *(DWORD *)&fog);
     fog = 2000.0f;
     g_Supervisor.SetRenderState(D3DRS_FOGEND, *(DWORD *)&fog);
-    if (arg->isDarkening == 0)
+    if (!arg->isDarkening)
     {
         g_AnmManager->SetColor(0x80808080);
     }
@@ -823,7 +823,7 @@ ZunResult Stage::RegisterChain(i32 stage)
     g_StageCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
     g_StageCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_StageCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_StageCalcChain, 7) != 0)
+    if (g_Chain.AddToCalcChain(&g_StageCalcChain, 7))
     {
         return ZUN_ERROR;
     }
@@ -859,7 +859,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     i32 vmIdx;
 
     this->stdData = (StdRawHeader *)FileSystem::OpenFile(stdPath, 0);
-    if (this->stdData == NULL)
+    if (!this->stdData)
     {
         // STRING: TH07 0x0049888c
         g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\r\n");
@@ -926,7 +926,7 @@ ZunResult Stage::UpdateObjects()
                     g_AnmManager->ExecuteScript(vm);
                     break;
                 }
-                if (vm->currentInstruction != NULL)
+                if (vm->currentInstruction)
                 {
                     vmCount++;
                 }

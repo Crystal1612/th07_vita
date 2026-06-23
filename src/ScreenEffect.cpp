@@ -23,7 +23,7 @@ void ScreenEffect::Clear(D3DCOLOR color)
 // FUNCTION: TH07 0x0044a520
 void ScreenEffect::SetViewport(D3DCOLOR color)
 {
-    if (g_AnmManager != NULL)
+    if (g_AnmManager)
     {
         g_AnmManager->Flush();
     }
@@ -250,7 +250,7 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
 // FUNCTION: TH07 0x0044b0e0
 u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
 {
-    if (g_GameManager.isTimeStopped != 0)
+    if (g_GameManager.isTimeStopped)
     {
         return 1;
     }
@@ -322,7 +322,7 @@ BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
     ChainElem *local_c = NULL;
 
     BombEffects *bombEffects = new BombEffects;
-    if (bombEffects == NULL)
+    if (!bombEffects)
     {
         return NULL;
     }
@@ -357,12 +357,12 @@ BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
     bombEffects->args[0] = arg1;
     bombEffects->args[1] = arg2;
     bombEffects->args[2] = arg3;
-    if (g_Chain.AddToCalcChain(local_8, 0xf) != 0)
+    if (g_Chain.AddToCalcChain(local_8, 0xf))
     {
         return NULL;
     }
 
-    if (local_c != NULL)
+    if (local_c)
     {
         local_c->arg = bombEffects;
         g_Chain.AddToDrawChain(local_c, 0x11);

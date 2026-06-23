@@ -197,7 +197,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     g_Supervisor.viewport.MinZ = 0.0f;
     g_Supervisor.viewport.MaxZ = 1.0f;
     g_AnmManager->SetCameraMode(0xff);
-    if (g_GameManager.replay != 0 &&
+    if (g_GameManager.replay &&
         g_GameManager.replayStage == 1 &&
         g_Gui.HasCurrentMsgIdx() == 0)
     {
@@ -210,7 +210,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             return CHAIN_CALLBACK_RESULT_BREAK;
         }
     }
-    if (arg->demo != 0)
+    if (arg->demo)
     {
         if (WAS_PRESSED_RAW(TH_BUTTON_ANY))
         {
@@ -250,7 +250,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    arg->notInMenu = (arg->isInPauseMenu == 0) && (arg->isInRetryMenu == 0);
+    arg->notInMenu = (!arg->isInPauseMenu) && (!arg->isInRetryMenu);
     for (i = 0; i < 2; i++)
     {
         if ((arg->globals->rngFloat1[i] < 6543.0f) ||
@@ -268,7 +268,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     }
     g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.fogColor.color, 1.0f, 0);
     if (((arg->isInRetryMenu == 1) || (arg->isInRetryMenu == 2)) ||
-        (arg->isInPauseMenu != 0))
+        (arg->isInPauseMenu))
     {
         return CHAIN_CALLBACK_RESULT_BREAK;
     }
@@ -339,7 +339,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    if ((g_GameManager.defaultCfg)->slowMode != 0)
+    if ((g_GameManager.defaultCfg)->slowMode)
     {
         g_GameManager.slowModeSlowActive = 0;
         arg->bulletLagTime = arg->bulletLagTime + 1;
@@ -362,7 +362,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
 // FUNCTION: TH07 0x0042e1d4
 u32 GameManager::OnDraw(GameManager *arg)
 {
-    if (arg->isInRetryMenu != 0)
+    if (arg->isInRetryMenu)
     {
         arg->isInRetryMenu = 2;
     }
@@ -488,7 +488,7 @@ ZunResult ResultScreen::ParseScores()
         }
     }
     scoreDat = OpenScore("score.dat");
-    if (scoreDat == NULL)
+    if (!scoreDat)
     {
         // STRING: TH07 0x00498090
         g_GameErrorContext.Log("error : スコアファイルの読み取りに失敗しました\r\n");
@@ -501,7 +501,7 @@ ZunResult ResultScreen::ParseScores()
     ParseCatk(scoreDat, g_GameManager.catk);
     ParseClrd(scoreDat, g_GameManager.clrd);
     ParsePscr(scoreDat, &g_GameManager.pscr[0][0][0]);
-    if (g_GameManager.practice != 0)
+    if (g_GameManager.practice)
     {
         g_GameManager.globals->highScore =
             g_GameManager
@@ -562,7 +562,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         {
             arg->defaultCfg->lifeCount = 2;
         }
-        if (g_GameManager.practice != 0)
+        if (g_GameManager.practice)
         {
             arg->defaultCfg->lifeCount = 8;
         }
@@ -571,7 +571,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\r\n");
             return ZUN_ERROR;
         }
-        if (g_GameManager.replay == 0)
+        if (!g_GameManager.replay)
         {
             g_GameManager.globals->livesRemaining = (f32)arg->defaultCfg->lifeCount;
             g_GameManager.RegenerateGameIntegrityCsum();
@@ -609,7 +609,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals->bombsUsed = 0.0f;
         arg->RegenerateGameIntegrityCsum();
         arg->globals->spellCardsCaptured = 0;
-        if (g_GameManager.practice == 0)
+        if (!g_GameManager.practice)
         {
             switch (arg->difficulty)
             {
@@ -675,9 +675,9 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                 break;
             }
         }
-        if (g_GameManager.replay == 0)
+        if (!g_GameManager.replay)
         {
-            if (arg->defaultCfg->slowMode == 0)
+            if (!arg->defaultCfg->slowMode)
             {
                 IncrementCappedAgain(
                     &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
@@ -703,7 +703,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     IncrementCappedAgain(&g_GameManager.plst.playDataTotals.clearCount,
                                          999999);
                 }
-                if (g_GameManager.practice != 0)
+                if (g_GameManager.practice)
                 {
                     IncrementCappedAgain(
                         &((Plst *)(g_GameManager.pscr + 6))
@@ -736,7 +736,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->globals->grazeInStage = 0;
     arg->isInRetryMenu = 0;
     arg->currentStage = arg->currentStage + 1;
-    if (g_GameManager.replay == 0)
+    if (!g_GameManager.replay)
     {
         shotTypeAndChar = g_GameManager.shotTypeAndCharacter;
         if ((arg->globals->numRetries == 0) &&
@@ -757,7 +757,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                 arg->currentStage - 1;
         }
     }
-    if (arg->practice != 0)
+    if (arg->practice)
     {
         switch (arg->currentStage)
         {
@@ -769,7 +769,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             break;
         }
     }
-    if (g_GameManager.replay != 0)
+    if (g_GameManager.replay)
     {
         arg->InitializeRank();
         ReplayManager::RegisterChain(1, g_GameManager.replayFilename);
@@ -822,7 +822,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         return ZUN_ERROR;
     }
 
-    if (g_GameManager.replay == 0)
+    if (!g_GameManager.replay)
     {
         // STRING: TH07 0x00497e1c
         ReplayManager::RegisterChain(0, "replay/th7_00.rpy");
@@ -838,7 +838,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         g_Supervisor.StopAudio();
         g_Supervisor.LoadAudio(2, "bgm/th07_13b.mid");
     }
-    while (g_SoundPlayer.ProcessQueues() != 0)
+    while (g_SoundPlayer.ProcessQueues())
         ;
     arg->isInPauseMenu = 0;
     arg->notInMenu = 1;
@@ -864,11 +864,11 @@ ZunResult GameManager::DeletedCallback(GameManager *arg)
 {
     g_Supervisor.StopAudio();
     if ((g_Supervisor.cfg.musicMode == MUSIC_MIDI) &&
-        (g_Supervisor.midiOutput != NULL))
+        (g_Supervisor.midiOutput))
     {
         g_Supervisor.midiOutput->PlayLoaded(0x1e);
     }
-    while (g_SoundPlayer.ProcessQueues() != 0)
+    while (g_SoundPlayer.ProcessQueues())
         ;
     Stage::CutChain();
     BulletManager::CutChain();
@@ -878,7 +878,7 @@ ZunResult GameManager::DeletedCallback(GameManager *arg)
     EffectManager::CutChain();
     Gui::CutChain();
     ReplayManager::StopRecording();
-    if (g_GameManager.replay == 0)
+    if (!g_GameManager.replay)
     {
         g_Supervisor.UpdateTime();
     }
@@ -903,7 +903,7 @@ ZunResult GameManager::RegisterChain()
         (ChainLifecycleCallback)DeletedCallback;
     g_GameManagerCalcChain.arg = mgr;
     mgr->framesThisStage = 0;
-    if (g_Chain.AddToCalcChain(&g_GameManagerCalcChain, 2) != 0)
+    if (g_Chain.AddToCalcChain(&g_GameManagerCalcChain, 2))
     {
         return ZUN_ERROR;
     }
@@ -934,7 +934,7 @@ void GameManager::IncreaseSubrank(i32 amount)
     this->subrank += amount;
     while (100 <= this->subrank)
     {
-        ++this->rank.rank;
+        this->rank.rank++;
         this->subrank -= 100;
     }
     if (this->rank.rank > this->rank.maxRank)
@@ -949,7 +949,7 @@ void GameManager::DecreaseSubrank(i32 amount)
     this->subrank -= amount;
     while (this->subrank < 0)
     {
-        this->rank.rank -= 1;
+        this->rank.rank--;
         this->subrank += 100;
     }
     if (this->rank.rank < this->rank.minRank)
@@ -1037,7 +1037,7 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
     {
         if (this->catk[i].numSuccessesPerShot[6] > 0)
         {
-            local_8 += 1;
+            local_8++;
         }
     }
     if ((local_8 >= 60) &&

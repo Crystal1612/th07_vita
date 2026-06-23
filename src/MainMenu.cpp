@@ -229,7 +229,7 @@ u32 MainMenu::OnUpdate(MainMenu *arg)
         result = arg->OnUpdateSelectPracticeStage();
     }
     g_AnmManager->ExecuteScripts(arg->vmHead, arg->vmCount);
-    if (arg->cursorVm != NULL)
+    if (arg->cursorVm)
     {
         g_AnmManager->ExecuteScript(arg->cursorVm);
     }
@@ -280,7 +280,7 @@ u32 MainMenu::OnUpdatePreInput()
         this->selected = -1;
         this->menuSubState = 1;
         this->demoFramesCount = 0;
-        if (g_GameManager.replay != 0)
+        if (g_GameManager.replay)
         {
             this->prevGameState = this->gameState;
             this->gameState = STATE_SELECT_REPLAY;
@@ -293,7 +293,7 @@ u32 MainMenu::OnUpdatePreInput()
             g_GameManager.SetReplay(0);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
-        if (this->isPracticeMode != 0)
+        if (this->isPracticeMode)
         {
             this->prevGameState = this->gameState;
             this->gameState = STATE_PRACTICE_SELECT_DIFFICULTY;
@@ -343,7 +343,7 @@ u32 MainMenu::OnUpdatePreInput()
                 g_GameManager.replayFilename, 0);
             this->currentReplay =
                 ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
-            if (this->currentReplay == NULL)
+            if (!this->currentReplay)
             {
                 Supervisor::DebugPrint2("error : Demo Play is not ready\r\n");
                 this->demoFramesCount = 0;
@@ -420,7 +420,7 @@ u32 MainMenu::OnUpdatePreInput()
                 this->cursorVm->SetPendingInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case 1:
-                if (g_GameManager.HasReachedMaxClearsAllShotTypes() != 0)
+                if (g_GameManager.HasReachedMaxClearsAllShotTypes())
                 {
                     g_GameManager.practice = 0;
                     this->cursor = g_Supervisor.cfg.defaultDifficulty == 5;
@@ -556,7 +556,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
         break;
     }
 
-    if (MoveCursorVertical(9) != 0)
+    if (MoveCursorVertical(9))
     {
         for (i = 0; i < 9; i++)
         {
@@ -655,7 +655,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             }
             break;
         case 1:
-            if (g_Supervisor.cfg.colorMode16bit == 0)
+            if (!g_Supervisor.cfg.colorMode16bit)
             {
                 g_Supervisor.cfg.colorMode16bit = 1;
             }
@@ -687,7 +687,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             g_Supervisor.PlayLoadedAudio(8);
             break;
         case 3:
-            if (g_Supervisor.cfg.playSounds == 0)
+            if (!g_Supervisor.cfg.playSounds)
             {
                 g_Supervisor.cfg.playSounds = 1;
             }
@@ -697,7 +697,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             }
             break;
         case 4:
-            if (g_Supervisor.cfg.windowed == 0)
+            if (!g_Supervisor.cfg.windowed)
             {
                 g_Supervisor.cfg.windowed = 1;
             }
@@ -707,7 +707,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             }
             break;
         case 5:
-            if (g_Supervisor.cfg.slowMode == 0)
+            if (!g_Supervisor.cfg.slowMode)
             {
                 g_Supervisor.cfg.slowMode = 1;
             }
@@ -967,7 +967,7 @@ u32 MainMenu::OnUpdateKeyConfig()
                                             g_KeyConfigStrings[i]);
         }
     case 1:
-        if (MoveCursorVertical(0xc) != 0)
+        if (MoveCursorVertical(0xc))
         {
             for (i = 0; i < 0xc; i++)
             {
@@ -1217,7 +1217,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             this->inputDelayTimer = 0;
             this->cursorVm = NULL;
         }
-        if (this->isPracticeMode != 0)
+        if (this->isPracticeMode)
         {
             SetGameState(STATE_PRACTICE_SELECT_CHARACTER);
             this->cursor = 0;
@@ -1231,10 +1231,10 @@ u32 MainMenu::OnUpdateSelectDifficulty()
     case 1:
         numDifficulties = this->gameState != STATE_EXTRA_SELECT_DIFFICULTY
                               ? 4
-                              : (g_GameManager.HasUnlockedPhantomAndMaxClears() != 0
+                              : (g_GameManager.HasUnlockedPhantomAndMaxClears()
                                      ? 2
                                      : 1);
-        if (MoveCursorVertical(numDifficulties) != 0)
+        if (MoveCursorVertical(numDifficulties))
         {
             if (this->gameState != STATE_EXTRA_SELECT_DIFFICULTY)
             {
@@ -1275,7 +1275,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             g_SoundPlayer.ProcessQueues();
             if (this->gameState != STATE_EXTRA_SELECT_DIFFICULTY)
             {
-                if (g_GameManager.practice == 0)
+                if (!g_GameManager.practice)
                 {
                     SetGameState(STATE_NORMAL_SELECT_CHARACTER);
                 }
@@ -1316,7 +1316,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             SetGameState(STATE_PRE_INPUT);
             if (oldGameState != STATE_EXTRA_SELECT_DIFFICULTY)
             {
-                if (g_GameManager.practice == 0)
+                if (!g_GameManager.practice)
                 {
                     this->cursor = 0;
                 }
@@ -1488,7 +1488,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
         }
-        if (this->isPracticeMode != 0)
+        if (this->isPracticeMode)
         {
             SetGameState(STATE_PRACTICE_SELECT_SHOTTYPE);
             this->cursor = 0;
@@ -1587,7 +1587,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             g_SoundPlayer.ProcessQueues();
             if (this->gameState != STATE_EXTRA_SELECT_CHARACTER)
             {
-                if (g_GameManager.practice == 0)
+                if (!g_GameManager.practice)
                 {
                     SetGameState(STATE_NORMAL_SELECT_SHOTTYPE);
                 }
@@ -1610,7 +1610,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             g_GameManager.character = this->cursor;
             if (this->gameState != STATE_EXTRA_SELECT_CHARACTER)
             {
-                if (g_GameManager.practice == 0)
+                if (!g_GameManager.practice)
                 {
                     SetGameState(STATE_NORMAL_SELECT_DIFFICULTY);
                 }
@@ -1739,7 +1739,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
         }
-        if (this->isPracticeMode != 0)
+        if (this->isPracticeMode)
         {
             SetGameState(STATE_SELECT_PRACTICE_STAGE);
             this->isPracticeMode = 0;
@@ -1752,7 +1752,7 @@ u32 MainMenu::OnUpdateSelectShotType()
         }
         break;
     case 1:
-        if (MoveCursorVertical(2) != 0)
+        if (MoveCursorVertical(2))
         {
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
@@ -1811,7 +1811,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             g_GameManager.shotType = this->cursor;
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             g_SoundPlayer.ProcessQueues();
-            if (g_GameManager.practice == 0)
+            if (!g_GameManager.practice)
             {
                 g_GameManager.difficulty = g_Supervisor.cfg.defaultDifficulty;
                 if (g_GameManager.difficulty < DIFF_EXTRA)
@@ -1825,7 +1825,7 @@ u32 MainMenu::OnUpdateSelectShotType()
                 g_Supervisor.curState = 2;
                 g_GameManager.SetReplay(0);
                 g_Supervisor.StopAudio();
-                while (g_SoundPlayer.ProcessQueues() != 0)
+                while (g_SoundPlayer.ProcessQueues())
                     ;
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
@@ -1839,7 +1839,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             g_GameManager.shotType = this->cursor;
             if (this->gameState != STATE_EXTRA_SELECT_SHOTTYPE)
             {
-                if (g_GameManager.practice == 0)
+                if (!g_GameManager.practice)
                 {
                     SetGameState(STATE_NORMAL_SELECT_CHARACTER);
                 }
@@ -1957,7 +1957,7 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
             i32 idk = 0;
             g_GameManager.replay = idk;
             g_Supervisor.StopAudio();
-            while (g_SoundPlayer.ProcessQueues() != 0)
+            while (g_SoundPlayer.ProcessQueues())
                 ;
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
@@ -2025,20 +2025,20 @@ u32 MainMenu::OnUpdateSelectReplay()
                 // STRING: TH07 0x004967bc
                 sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
                 local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(local_54, 1);
-                if (local_14 == NULL)
+                if (!local_14)
                 {
                     continue;
                 }
 
                 local_14 =
                     ReplayManager::ValidateReplayData(local_14, g_LastFileSize);
-                if (local_14 != NULL)
+                if (local_14)
                 {
                     this->replays[local_10] = *local_14;
                     strcpy(this->replayFilenames[local_10], local_54);
                     // STRING: TH07 0x00496460
                     sprintf(this->replayLabels[local_10], "No.%.2d", i + 1);
-                    local_10 += 1;
+                    local_10++;
                     free(local_14);
                 }
             }
@@ -2053,7 +2053,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 {
                     local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(
                         local_194.cFileName, 1);
-                    if (local_14 == NULL)
+                    if (!local_14)
                     {
                         continue;
                     }
@@ -2061,7 +2061,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                     {
                         local_14 =
                             ReplayManager::ValidateReplayData(local_14, g_LastFileSize);
-                        if (local_14 != NULL)
+                        if (local_14)
                         {
                             this->replays[local_10] = *local_14;
                             // STRING: TH07 0x00495658
@@ -2070,7 +2070,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                             // STRING: TH07 0x00495650
                             sprintf(this->replayLabels[local_10], "User ");
                             free(local_14);
-                            local_10 += 1;
+                            local_10++;
                         }
                         if (FindNextFileA(local_c, &local_194) == 0)
                         {
@@ -2176,7 +2176,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                        .head.stageReplayData[this->cursor]
                        .data == NULL)
             {
-                this->cursor = this->cursor - 1;
+                this->cursor--;
                 if (this->cursor < 0)
                 {
                     this->cursor = 6;
@@ -2245,7 +2245,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_Supervisor.curState = 2;
             g_GameManager.replayStage = (u8)this->cursor;
             g_Supervisor.StopAudio();
-            while (g_SoundPlayer.ProcessQueues() != 0)
+            while (g_SoundPlayer.ProcessQueues())
                 ;
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
@@ -2353,7 +2353,7 @@ i32 MainMenu::DrawReplayMenu()
                     g_AsciiManager.color = 0x60808080;
                 }
             }
-            if (this->currentReplay->head.stageReplayData[i].data != NULL)
+            if (this->currentReplay->head.stageReplayData[i].data)
             {
                 if ((i < 6) || (this->currentReplay->data.difficulty <= 4))
                 {
@@ -2461,7 +2461,7 @@ i32 MainMenu::MoveCursorVertical(i32 max)
     }
     if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_UP))
     {
-        this->cursor -= 1;
+        this->cursor--;
         g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
         if (this->cursor < 0)
         {
@@ -2475,7 +2475,7 @@ i32 MainMenu::MoveCursorVertical(i32 max)
     }
     if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
     {
-        this->cursor += 1;
+        this->cursor++;
         g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
         if (this->cursor < 0)
         {
@@ -2557,7 +2557,7 @@ u32 MainMenu::OnDraw(MainMenu *arg)
             local_c->pos = savedPos;
         }
     }
-    if (arg->cursorVm != NULL)
+    if (arg->cursorVm)
     {
         g_AnmManager->DrawNoRotation(arg->cursorVm);
     }
@@ -2581,12 +2581,12 @@ ZunResult MainMenu::ActualAddedCallback()
     SAFE_DELETE(g_GameManager.globals);
     g_GameManager.globals = new ZunGlobals;
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
-    if (g_GameManager.replay != 0)
+    if (g_GameManager.replay)
     {
         g_GameManager.shotTypeAndCharacter = SHOT_REIMU_A;
         g_GameManager.character = g_GameManager.shotTypeAndCharacter;
     }
-    if (g_GameManager.demo != 0)
+    if (g_GameManager.demo)
     {
         g_GameManager.replay = 0;
     }
@@ -2607,8 +2607,8 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 5;
     }
-    if ((g_GameManager.phantasmUnlocked == 0) &&
-        (g_GameManager.HasUnlockedPhantomAndMaxClears() != 0))
+    if (!(g_GameManager.phantasmUnlocked) &&
+        (g_GameManager.HasUnlockedPhantomAndMaxClears()))
     {
         frameCount = 0;
         // STRING: TH07 0x004954bc
@@ -2684,13 +2684,13 @@ ZunResult MainMenu::ActualAddedCallback()
         break;
     }
     this->isPracticeMode = 0;
-    if (g_GameManager.practice != 0)
+    if (g_GameManager.practice)
     {
         this->cursor = 2;
         this->isPracticeMode = 1;
     }
     g_GameManager.practice = 0;
-    if (g_Supervisor.prevState != 0)
+    if (g_Supervisor.prevState)
     {
         GameManager::DrawLoadingSprite();
     }
@@ -2700,7 +2700,7 @@ ZunResult MainMenu::ActualAddedCallback()
         return ZUN_ERROR;
     }
 
-    if (g_GameManager.demo == 0)
+    if (!g_GameManager.demo)
     {
         if (g_Supervisor.prevState != 5)
         {
@@ -2779,7 +2779,7 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     mgr->calcChain->deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
-    if (g_Chain.AddToCalcChain(mgr->calcChain, 3) != 0)
+    if (g_Chain.AddToCalcChain(mgr->calcChain, 3))
     {
         return ZUN_ERROR;
     }

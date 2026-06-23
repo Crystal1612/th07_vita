@@ -79,7 +79,7 @@ void EnemyEclInstr::ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr)
             continue;
         }
 
-        if (bullet->sprites.spriteBullet.sprite != NULL && bullet->state2 == 0)
+        if (bullet->sprites.spriteBullet.sprite && bullet->state2 == 0)
         {
             if (instr->args[1].i == 1 && (bullet->spriteOffset != 8))
             {
@@ -160,7 +160,7 @@ void EnemyEclInstr::ExInsTurnBulletsIntoOtherBullets(Enemy *enemy,
             continue;
         }
 
-        if (bullet->sprites.spriteBullet.sprite != NULL &&
+        if (bullet->sprites.spriteBullet.sprite &&
             bullet->spriteOffset == 2)
         {
             distance = sqrtf((enemy->position.x - bullet->pos.x) *
@@ -260,7 +260,7 @@ void EnemyEclInstr::ExInsSplitBulletsOrShootBackwards(Enemy *enemy,
             continue;
         }
 
-        if (bullet->sprites.spriteBullet.sprite != NULL &&
+        if (bullet->sprites.spriteBullet.sprite &&
             ((instr->args[1].i == 0 && bullet->spriteOffset == 6) ||
              (instr->args[1].i == 1 && bullet->spriteOffset == 0xf) ||
              (instr->args[1].i == 2 && (bullet->spriteOffset == 2))))
@@ -385,7 +385,7 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
     laser = g_BulletManager.lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -411,9 +411,9 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
                     continue;
                 }
 
-                if (bullet->sprites.spriteBullet.sprite != NULL &&
+                if (bullet->sprites.spriteBullet.sprite &&
                     IsPointInRotatedRect(&bullet->pos, &center, &size,
-                                         &laser->pos, sine, cosine) != 0)
+                                         &laser->pos, sine, cosine))
                 {
                     if (bullet->state2 > 0)
                     {
@@ -475,7 +475,7 @@ void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy,
     laser = g_BulletManager.lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -503,10 +503,10 @@ void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy,
                     continue;
                 }
 
-                if (bullet->sprites.spriteBullet.sprite != NULL &&
+                if (bullet->sprites.spriteBullet.sprite &&
                     bullet->state2 != i + 1 && bullet->state2 >= 0 &&
                     IsPointInRotatedRect(&bullet->pos, &center, &size,
-                                         &laser->pos, sine, cosine) != 0)
+                                         &laser->pos, sine, cosine))
                 {
                     if (g_GameManager.difficulty < 2)
                     {

@@ -35,7 +35,7 @@ bool Pbg4Archive::Load(const char *filename)
 
     this->fileAbstraction = new Pbg4File();
 
-    if (this->fileAbstraction == NULL)
+    if (!this->fileAbstraction)
     {
         return false;
     }
@@ -43,7 +43,7 @@ bool Pbg4Archive::Load(const char *filename)
     if (OpenArchive(filename))
     {
         this->filename = CopyFileName(filename);
-        if (this->filename != NULL)
+        if (this->filename)
         {
             return true;
         }
@@ -59,7 +59,7 @@ void Pbg4Archive::Release()
 {
     // STRING: TH07 0x004950cc
     DebugPrint("info : %s close arcfile\r\n", this->filename);
-    if (this->filename != NULL)
+    if (this->filename)
     {
         GlobalFree(this->filename);
         this->filename = NULL;
@@ -80,13 +80,13 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     u8 *srcBuf;
 
     srcBuf = NULL;
-    if (this->fileAbstraction == NULL)
+    if (!this->fileAbstraction)
     {
         return NULL;
     }
 
     entry = FindEntry(filename);
-    if (entry == NULL)
+    if (!entry)
     {
         goto err;
     }
@@ -99,7 +99,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     dwBytes = entry[1].dataOffset - entry->dataOffset;
     dstLen = entry->decompressedSize;
     srcBuf = (u8 *)GlobalAlloc(0, dwBytes);
-    if (srcBuf == NULL)
+    if (!srcBuf)
     {
         goto err;
     }
@@ -114,7 +114,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     }
 
     dstBuf = Lzss::Decompress(srcBuf, dwBytes, buf, dstLen);
-    if (srcBuf != NULL)
+    if (srcBuf)
     {
         GlobalFree(srcBuf);
         srcBuf = NULL;
@@ -123,7 +123,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
 err:
     // STRING: TH07 0x004950b8
     DebugPrint("info : %s error\r\n", this->filename);
-    if (srcBuf != NULL)
+    if (srcBuf)
     {
         GlobalFree(srcBuf);
         srcBuf = NULL;
@@ -136,7 +136,7 @@ u32 Pbg4Archive::GetEntrySize(const char *filename)
 {
     Pbg4Entry *entry = FindEntry(filename);
 
-    if (entry != NULL)
+    if (entry)
     {
         return entry->decompressedSize;
     }
@@ -146,7 +146,7 @@ u32 Pbg4Archive::GetEntrySize(const char *filename)
 // FUNCTION: TH07 0x0045fae0
 Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
 {
-    if (this->entries == NULL)
+    if (!this->entries)
     {
         return NULL;
     }
@@ -176,7 +176,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     compressedData = NULL;
     decompressedData = NULL;
-    if (this->fileAbstraction == NULL)
+    if (!this->fileAbstraction)
     {
         return false;
     }
@@ -223,7 +223,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     this->fileAbstraction->Seek(headerSize, g_SeekModes[0]);
     compressedData = (u8 *)GlobalAlloc(0, fileSize);
-    if (compressedData == NULL)
+    if (!compressedData)
     {
         goto err;
     }
@@ -235,36 +235,36 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     decompressedData =
         Lzss::Decompress(compressedData, fileSize, NULL, decompressedSize);
-    if (decompressedData == NULL)
+    if (!decompressedData)
     {
         goto err;
     }
 
     this->entries =
         AllocEntries(decompressedData, this->numOfEntries, headerSize);
-    if (this->entries == NULL)
+    if (!this->entries)
     {
         goto err;
     }
 
-    if (compressedData != NULL)
+    if (compressedData)
     {
         GlobalFree(compressedData);
         compressedData = NULL;
     }
-    if (decompressedData != NULL)
+    if (decompressedData)
     {
         GlobalFree(decompressedData);
         decompressedData = NULL;
     }
     return true;
 err:
-    if (compressedData != NULL)
+    if (compressedData)
     {
         GlobalFree(compressedData);
         compressedData = NULL;
     }
-    if (decompressedData != NULL)
+    if (decompressedData)
     {
         GlobalFree(decompressedData);
         decompressedData = NULL;
@@ -287,7 +287,7 @@ Pbg4Entry *Pbg4Archive::AllocEntries(void *param_1, i32 count, u32 dataOffset)
 
     entries = new Pbg4Entry[count + 1];
 
-    if (entries == NULL)
+    if (!entries)
     {
         goto err;
     }
@@ -325,7 +325,7 @@ char *Pbg4Archive::CopyFileName(const char *filename)
     char *pcVar2;
 
     pcVar2 = (char *)GlobalAlloc(0, strlen(filename) + 1);
-    if (pcVar2 != NULL)
+    if (pcVar2)
     {
         strcpy(pcVar2, filename);
     }

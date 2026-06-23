@@ -258,7 +258,7 @@ struct AnmManager
 
     i32 ShouldDraw(AnmVm *vm)
     {
-        if (vm->sprite == NULL)
+        if (!vm->sprite)
         {
             return false;
         }

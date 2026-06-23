@@ -162,7 +162,7 @@ struct AnmVm : AnmVmBase
 
     static void AssignVm(AnmVm *out, AnmVm *vm)
     {
-        if (out->anmFileIdx != vm->anmFileIdx || vm->currentInstruction != NULL)
+        if (out->anmFileIdx != vm->anmFileIdx || vm->currentInstruction)
         {
             *out = *vm;
         }

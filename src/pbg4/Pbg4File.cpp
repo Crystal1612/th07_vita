@@ -186,7 +186,7 @@ HGLOBAL Pbg4File::ReadRemaining(u32 max)
     }
 
     hMem = GlobalAlloc(0x40, DVar2);
-    if (hMem == NULL)
+    if (!hMem)
     {
         return NULL;
     }
@@ -199,7 +199,7 @@ HGLOBAL Pbg4File::ReadRemaining(u32 max)
 
     if (this->Read(hMem, DVar2) == 0)
     {
-        if (hMem != NULL)
+        if (hMem)
         {
             GlobalFree(hMem);
             hMem = NULL;
@@ -222,7 +222,7 @@ void Pbg4File::GetFullPath(char *out, const char *filename)
     {
         GetModuleFileNameA(NULL, out, 0x104);
         char *pcVar2 = strrchr(out, '\\');
-        if (pcVar2 == NULL)
+        if (!pcVar2)
         {
             strcpy(out, "");
         }

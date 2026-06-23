@@ -485,7 +485,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     laser = this->lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -556,7 +556,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
         g_AsciiManager.CreatePopup1(&bullet->pos, local_8,
                                     local_8 >= param_1 ? -256 : -1);
         local_c += local_8;
-        local_10 += 1;
+        local_10++;
         local_8 += 20;
         if (local_8 > param_1)
         {
@@ -567,7 +567,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     laser = this->lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -576,7 +576,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
             laser->state = 2;
             laser->timer = 0;
             laser->width = laser->targetWidth;
-            if (turnIntoItem != 0)
+            if (turnIntoItem)
             {
                 g_ItemManager.SpawnItem(&laser->pos, this->itemType, 1);
                 local_34 = laser->startOffset;
@@ -645,7 +645,7 @@ i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
     {
         for (y = 0; y < bulletProps->count1; y++)
         {
-            if (SpawnSingleBullet(bulletProps, y, x, angle) != 0)
+            if (SpawnSingleBullet(bulletProps, y, x, angle))
             {
                 goto stop;
             }
@@ -674,7 +674,7 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
 
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse != 0)
+        if (laser->inUse)
         {
             continue;
         }
@@ -926,7 +926,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
 
     local_14 = 0;
     bullet = arg->bullets;
-    if (g_GameManager.isTimeStopped != 0)
+    if (g_GameManager.isTimeStopped)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
@@ -1025,7 +1025,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             }
 
         do_collision:
-            if ((bullet->grazed == 0) && (bullet->timer2.GetCurrent() >= 16))
+            if (!(bullet->grazed) && (bullet->timer2.GetCurrent() >= 16))
             {
                 local_8 = g_Player.CheckGraze(&bullet->pos, &bullet->sprites.grazeSize);
                 if (local_8 == 1)
@@ -1057,7 +1057,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             }
 
         do_sprite_anim:
-            if (bullet->sprites.spriteBullet.currentInstruction != NULL)
+            if (bullet->sprites.spriteBullet.currentInstruction)
             {
                 g_AnmManager->ExecuteScript(&bullet->sprites.spriteBullet);
             }
@@ -1122,7 +1122,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
     laser = arg->lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -1292,7 +1292,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
     laser = arg->lasers;
     for (i = 0; i < 0x40; i++, laser++)
     {
-        if (laser->inUse == 0)
+        if (!laser->inUse)
         {
             continue;
         }
@@ -1333,7 +1333,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
     for (i = 0; i < 6; i++)
     {
         bullet = arg->bulletsPtrs[i];
-        while (bullet != NULL)
+        while (bullet)
         {
             bullet->Draw();
             bullet = bullet->next;
@@ -1481,7 +1481,7 @@ ZunResult BulletManager::RegisterChain(const char *etamaAnmPath)
     g_BulletManagerCalcChain.deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     g_BulletManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_BulletManagerCalcChain, 0xc) != 0)
+    if (g_Chain.AddToCalcChain(&g_BulletManagerCalcChain, 0xc))
     {
         return ZUN_ERROR;
     }

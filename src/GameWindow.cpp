@@ -48,7 +48,7 @@ LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
     case WM_ERASEBKGND:
         return 1;
     case MM_MOM_DONE:
-        if (g_Supervisor.midiOutput != NULL)
+        if (g_Supervisor.midiOutput)
         {
             g_Supervisor.midiOutput->UnprepareHeader((LPMIDIHDR)lParam);
         }
@@ -126,7 +126,7 @@ void GameWindow::Present()
     }
     if (g_Supervisor.renderSkipFrames != 0)
     {
-        g_Supervisor.renderSkipFrames = g_Supervisor.renderSkipFrames - 1;
+        g_Supervisor.renderSkipFrames--;
     }
 }
 
@@ -140,7 +140,7 @@ RenderResult GameWindow::Render()
     LARGE_INTEGER perfCounter;
     i32 chainRes;
 
-    if (this->isAppActive == 0)
+    if (!this->isAppActive)
     {
         return RENDER_RESULT_KEEP_RUNNING;
     }
@@ -170,7 +170,7 @@ RenderResult GameWindow::Render()
         chainRes = g_Chain.RunCalcChain();
         g_SoundPlayer.ProcessQueues();
 
-        if (chainRes == 0)
+        if (!chainRes)
         {
             return RENDER_RESULT_EXIT_SUCCESS;
         }
@@ -183,7 +183,7 @@ RenderResult GameWindow::Render()
     }
 
 LAB_00434820:
-    if (g_Supervisor.cfg.windowed != 0 || g_Supervisor.VsyncEnabled())
+    if (g_Supervisor.cfg.windowed || g_Supervisor.VsyncEnabled())
     {
         if (this->curFrame != 0)
         {
@@ -198,7 +198,7 @@ LAB_00434820:
                     g_LastPerfCounter.HighPart = perfCounter.HighPart;
                 }
 
-                if (perfDiff >= 1.0 / 60.0 || g_GameWindow.usesRelativePath != 0)
+                if (perfDiff >= 1.0 / 60.0 || g_GameWindow.usesRelativePath)
                 {
                     while (perfDiff >= 1.0 / 60.0)
                     {
@@ -225,7 +225,7 @@ LAB_00434820:
                 timeDiff = fabs(curTime - g_LastFrameTime);
                 timeEndPeriod(1);
 
-                if (timeDiff >= 50.0 / 3.0 || g_GameWindow.usesRelativePath != 0)
+                if (timeDiff >= 50.0 / 3.0 || g_GameWindow.usesRelativePath)
                 {
                     while (timeDiff >= 50.0 / 3.0)
                     {
@@ -264,7 +264,7 @@ LAB_004349e2:
 i32 GameWindow::InitD3dInterface()
 {
     g_Supervisor.d3dIface = Direct3DCreate8(0x78);
-    if (g_Supervisor.d3dIface == NULL)
+    if (!g_Supervisor.d3dIface)
     {
         // STRING: TH07 0x00497bd8
         g_GameErrorContext.Fatal("Direct3D オブジェクトは何故か作成出来なかった\r\n");
@@ -291,7 +291,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     // STRING: TH07 0x00497bd0
     base_class.lpszClassName = "BASE";
     RegisterClassA(&base_class);
-    if (g_Supervisor.cfg.windowed == 0)
+    if (!g_Supervisor.cfg.windowed)
     {
         width = 640;
         height = 480;
@@ -312,7 +312,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
             hInstance, NULL);
     }
     g_Supervisor.hwndGameWindow = g_GameWindow.window;
-    if (g_GameWindow.window == NULL)
+    if (!g_GameWindow.window)
     {
         return true;
     }
@@ -344,7 +344,7 @@ i32 GameWindow::InitD3dRendering()
     usingD3dHal = true;
     memset(&presentParams, 0, sizeof(D3DPRESENT_PARAMETERS));
     g_Supervisor.d3dIface->GetAdapterDisplayMode(0, &displayMode);
-    if (g_Supervisor.cfg.windowed == 0)
+    if (!g_Supervisor.cfg.windowed)
     {
         if ((g_Supervisor.cfg.opts >> 2 & 1) == 1)
         {
@@ -358,7 +358,7 @@ i32 GameWindow::InitD3dRendering()
             // STRING: TH07 0x00497b70
             g_GameErrorContext.Log("初回起動、画面を 32Bits で初期化しました\r\n");
         }
-        else if (g_Supervisor.cfg.colorMode16bit == 0)
+        else if (!g_Supervisor.cfg.colorMode16bit)
         {
             presentParams.BackBufferFormat = D3DFMT_X8R8G8B8;
         }
@@ -370,13 +370,13 @@ i32 GameWindow::InitD3dRendering()
         {
             g_Supervisor.vsyncEnabled = 1;
         }
-        if (g_Supervisor.vsyncEnabled == 0)
+        if (!g_Supervisor.vsyncEnabled)
         {
             presentParams.FullScreen_RefreshRateInHz = 60;
             presentParams.FullScreen_PresentationInterval = 1;
             // STRING: TH07 0x00497b44
             g_GameErrorContext.Log("リフレッシュレートを60Hzに変更を試みます\r\n");
-            if (g_Supervisor.cfg.frameskipConfig == 0)
+            if (!g_Supervisor.cfg.frameskipConfig)
             {
                 presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
             }
@@ -440,7 +440,7 @@ i32 GameWindow::InitD3dRendering()
                         D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
                         &g_Supervisor.d3dDevice)))
                 {
-                    if (g_Supervisor.vsyncEnabled == 0)
+                    if (!g_Supervisor.vsyncEnabled)
                     {
                         // STRING: TH07 0x00497ab4
                         g_GameErrorContext.Log("リフレッシュレートが変更できません\r\n");
@@ -802,7 +802,7 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, 3);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, 1);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, 1);
-    if (g_AnmManager != NULL)
+    if (g_AnmManager)
     {
         g_AnmManager->SetBlendMode(0xff);
         g_AnmManager->SetColorOp(0xff);
@@ -836,11 +836,11 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     GetModuleFileNameA(NULL, exePath, 0x105);
     GetConsoleTitleA(resolvedPath, 0x105);
     GetStartupInfoA(&startupInfo);
-    if (startupInfo.lpTitle != NULL)
+    if (startupInfo.lpTitle)
     {
         ext = strrchr(startupInfo.lpTitle, '.');
-        if ((FileSystem::CheckFileExists(startupInfo.lpTitle) != 0) &&
-            (ext != NULL))
+        if ((FileSystem::CheckFileExists(startupInfo.lpTitle)) &&
+            (ext))
         {
             // STRING: TH07 0x0049730c
             if (_stricmp(ext, ".lnk") == 0)
@@ -862,7 +862,7 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
             }
         }
     }
-    if (g_Mutex == NULL)
+    if (!g_Mutex)
     {
         return ZUN_ERROR;
     }
@@ -909,7 +909,7 @@ i32 GameWindow::ChecksumExecutable()
     {
         checksum = 0;
         dataBase = dataCursor = (u32 *)FileSystem::OpenFile(filename, 1);
-        if (dataCursor == NULL)
+        if (!dataCursor)
         {
             return -1;
         }
@@ -941,7 +941,7 @@ i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
     i32 ret;
     HRESULT hr;
 
-    if (dstPath == NULL)
+    if (!dstPath)
     {
         return 0;
     }

@@ -27,7 +27,7 @@ MidiDevice::~MidiDevice()
 // FUNCTION: TH07 0x00436160
 u32 MidiDevice::OpenDevice(i32 deviceID)
 {
-    if (this->handle != NULL)
+    if (this->handle)
     {
         if (this->deviceID != deviceID)
         {
@@ -47,7 +47,7 @@ u32 MidiDevice::OpenDevice(i32 deviceID)
 // FUNCTION: TH07 0x004361c0
 ZunResult MidiDevice::Close()
 {
-    if (this->handle == NULL)
+    if (!this->handle)
     {
         return ZUN_ERROR;
     }
@@ -61,7 +61,7 @@ ZunResult MidiDevice::Close()
 // FUNCTION: TH07 0x00436200
 i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
 {
-    if (this->handle == NULL)
+    if (!this->handle)
     {
         return 0;
     }
@@ -91,7 +91,7 @@ i32 MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
 {
     MidiShortMsg pkt;
 
-    if (this->handle == NULL)
+    if (!this->handle)
     {
         return false;
     }
@@ -121,7 +121,7 @@ u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
 {
     StopTimer();
     timeBeginPeriod(this->timeCaps.wPeriodMin);
-    if (cb != NULL)
+    if (cb)
     {
         this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, cb,
                                      data, TIME_PERIODIC);
@@ -233,7 +233,7 @@ ZunResult MidiOutput::ReadFileData(i32 fileIdx, const char *path)
     }
     ReleaseFileData(fileIdx);
     this->midiFileData[fileIdx] = FileSystem::OpenFile(path, 0);
-    if (this->midiFileData[fileIdx] == NULL)
+    if (!this->midiFileData[fileIdx])
     {
         // STRING: TH07 0x004972d0
         g_GameErrorContext.Log("error : MIDI File ‚ª“Ç‚Ýž‚ß‚È‚¢ %s \rv\r\n", path);
@@ -283,7 +283,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     ClearTracks();
     currentCursor = this->midiFileData[fileIdx];
     fileData = currentCursor;
-    if (currentCursor == NULL)
+    if (!currentCursor)
     {
         // STRING: TH07 0x00497290
         DebugPrint("error : ‚Ü‚¾MIDI‚ª“Ç‚Ýž‚Ü‚ê‚Ä‚¢‚È‚¢‚Ì‚ÉÄ¶‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚é\r\n");
@@ -357,7 +357,7 @@ void MidiOutput::LoadTracks()
 // FUNCTION: TH07 0x00436ad0
 ZunResult MidiOutput::Play()
 {
-    if (this->tracks == NULL)
+    if (!this->tracks)
     {
         return ZUN_ERROR;
     }
@@ -373,14 +373,14 @@ ZunResult MidiOutput::Play()
 // FUNCTION: TH07 0x00436b30
 ZunResult MidiOutput::StopPlayback()
 {
-    if (this->tracks == NULL)
+    if (!this->tracks)
     {
         return ZUN_ERROR;
     }
 
     for (i32 i = 0; i < 0x20; i++)
     {
-        if (this->midiHeaders[this->midiHeadersCursor] != NULL)
+        if (this->midiHeaders[this->midiHeadersCursor])
         {
             UnprepareHeader(this->midiHeaders[this->midiHeadersCursor]);
         }
@@ -396,13 +396,13 @@ ZunResult MidiOutput::UnprepareHeader(LPMIDIHDR pmh)
 {
     i32 i;
 
-    if (pmh == NULL)
+    if (!pmh)
     {
         // STRING: TH07 0x00497268
         DebugPrint("error :\r\n");
     }
 
-    if (this->midiOutDev.handle == NULL)
+    if (!this->midiOutDev.handle)
     {
         DebugPrint("error :\r\n");
     }
@@ -419,7 +419,7 @@ ZunResult MidiOutput::UnprepareHeader(LPMIDIHDR pmh)
 
 success:
     MMRESULT res = midiOutUnprepareHeader(this->midiOutDev.handle, pmh, 0x40);
-    if (res != 0)
+    if (res)
     {
         DebugPrint("error :\r\n");
     }
@@ -452,7 +452,7 @@ void MidiOutput::OnTimerElapsed()
 
     local_14 =
         this->field_0x130 + (this->volume * this->divisions * 1000) / this->tempo;
-    if (this->fadeOutFlag != 0)
+    if (this->fadeOutFlag)
     {
         if (this->fadeOutElapsedMs < this->fadeOutInterval)
         {
@@ -490,7 +490,7 @@ void MidiOutput::OnTimerElapsed()
         }
     }
 
-    this->volume += 1;
+    this->volume++;
     if (!trackLoaded)
     {
         LoadTracks();
@@ -534,7 +534,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
     case OPCODE_SYSTEM_EXCLUSIVE:
         if (opcode == OPCODE_SYSTEM_EXCLUSIVE)
         {
-            if (this->midiHeaders[this->midiHeadersCursor] != NULL)
+            if (this->midiHeaders[this->midiHeadersCursor])
             {
                 UnprepareHeader(this->midiHeaders[this->midiHeadersCursor]);
             }
@@ -551,7 +551,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
                 pmh->lpData[i + 1] = *track->curTrackDataCursor;
                 track->curTrackDataCursor++;
             }
-            if (this->midiOutDev.SendLongMsg(pmh) != 0)
+            if (this->midiOutDev.SendLongMsg(pmh))
             {
                 ZunMemory::Free(pmh->lpData);
                 ZunMemory::Free(pmh);
@@ -693,7 +693,7 @@ void MidiOutput::FadeOutSetVolume(i32 vol)
     i32 i;
     i32 arg1;
 
-    if (this->disableFadeOut != 0)
+    if (this->disableFadeOut)
     {
         return;
     }

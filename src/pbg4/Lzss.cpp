@@ -28,7 +28,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
     local_1d = 0x80;
     local_8 = 0;
     local_10 = (u8 *)GlobalAlloc(0, dstLen << 1);
-    if (local_10 == NULL)
+    if (!local_10)
     {
         return NULL;
     }
@@ -72,7 +72,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
             if (local_1d == 0)
             {
                 *local_10 = (u8)local_8;
-                local_10 = local_10 + 1;
+                local_10++;
                 local_8 = 0;
                 local_1d = 0x80;
             }
@@ -86,7 +86,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
                 if (local_1d == 0)
                 {
                     *local_10 = (u8)local_8;
-                    local_10 = local_10 + 1;
+                    local_10++;
                     local_8 = 0;
                     local_1d = 0x80;
                 }
@@ -98,7 +98,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
             if (local_1d == 0)
             {
                 *local_10 = (u8)local_8;
-                local_10 = local_10 + 1;
+                local_10++;
                 local_8 = 0;
                 local_1d = 0x80;
             }
@@ -112,7 +112,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
                 if (local_1d == 0)
                 {
                     *local_10 = (u8)local_8;
-                    local_10 = local_10 + 1;
+                    local_10++;
                     local_8 = 0;
                     local_1d = 0x80;
                 }
@@ -127,7 +127,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
                 if (local_1d == 0)
                 {
                     *local_10 = (u8)local_8;
-                    local_10 = local_10 + 1;
+                    local_10++;
                     local_8 = 0;
                     local_1d = 0x80;
                 }
@@ -147,7 +147,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
             }
             if (local_34 == -1)
             {
-                local_30 = local_30 - 1;
+                local_30--;
             }
             else
             {
@@ -164,7 +164,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
     if (local_1d == 0)
     {
         *local_10 = (u8)local_8;
-        local_10 = local_10 + 1;
+        local_10++;
         local_8 = 0;
         local_1d = 0x80;
     }
@@ -174,7 +174,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
         if (local_1d == 0)
         {
             *local_10 = (u8)local_8;
-            local_10 = local_10 + 1;
+            local_10++;
             local_8 = 0;
             local_1d = 0x80;
         }
@@ -199,7 +199,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
 
     local_15 = 0x80;
     bVar1 = 0;
-    if ((dst == NULL) && (dst = (u8 *)GlobalAlloc(0, dstLen), dst == NULL))
+    if (!(dst) && (dst = (u8 *)GlobalAlloc(0, dstLen), dst == NULL))
     {
         return NULL;
     }
@@ -216,7 +216,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
                 bVar1 = *local_1c;
                 if ((i32)local_1c - (i32)src < srcLen)
                 {
-                    local_1c = local_1c + 1;
+                    local_1c++;
                 }
                 else
                 {
@@ -242,7 +242,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
                     bVar1 = *local_1c;
                     if ((i32)local_1c - (i32)src < srcLen)
                     {
-                        local_1c = local_1c + 1;
+                        local_1c++;
                     }
                     else
                     {
@@ -261,7 +261,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
                 }
             }
             *local_c = (u8)local_20;
-            local_c = local_c + 1;
+            local_c++;
             g_LzssDictionary[local_38] = (u8)local_20;
             local_38 = local_38 + 1 & 0x1fff;
         }
@@ -274,7 +274,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
                 bVar1 = *local_1c;
                 if ((i32)local_1c - (i32)src < srcLen)
                 {
-                    local_1c = local_1c + 1;
+                    local_1c++;
                 }
                 else
                 {
@@ -305,7 +305,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
                 bVar1 = *local_1c;
                 if ((i32)local_1c - (i32)src < srcLen)
                 {
-                    local_1c = local_1c + 1;
+                    local_1c++;
                 }
                 else
                 {
@@ -328,7 +328,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
         {
             bVar3 = g_LzssDictionary[uVar2 + local_14 & 0x1fff];
             *local_c = bVar3;
-            local_c = local_c + 1;
+            local_c++;
             g_LzssDictionary[local_38] = bVar3;
             local_38 = local_38 + 1 & 0x1fff;
         }
@@ -337,7 +337,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
     {
         if ((local_15 == 0x80) && ((i32)local_1c - (i32)src < srcLen))
         {
-            local_1c = local_1c + 1;
+            local_1c++;
         }
         local_15 = local_15 >> 1;
         if (local_15 == 0)

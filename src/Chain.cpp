@@ -26,7 +26,7 @@ ChainElem::ChainElem()
 // FUNCTION: TH07 0x0042fb20
 ChainElem::~ChainElem()
 {
-    if (this->deletedCallback != NULL)
+    if (this->deletedCallback)
     {
         (*this->deletedCallback)(this->arg);
     }
@@ -50,7 +50,7 @@ ZunResult Chain::AddToCalcChain(ChainElem *elem, i32 priority)
 
     curElem = &this->calcChain;
     elem->priority = priority;
-    while (curElem->next != NULL)
+    while (curElem->next)
     {
         if (curElem->priority > priority)
         {
@@ -62,7 +62,7 @@ ZunResult Chain::AddToCalcChain(ChainElem *elem, i32 priority)
     {
         elem->next = curElem;
         elem->prev = curElem->prev;
-        if (elem->prev != NULL)
+        if (elem->prev)
         {
             elem->prev->next = elem;
         }
@@ -74,7 +74,7 @@ ZunResult Chain::AddToCalcChain(ChainElem *elem, i32 priority)
         elem->prev = curElem;
         curElem->next = elem;
     }
-    if (elem->addedCallback != NULL)
+    if (elem->addedCallback)
     {
         uVar1 = elem->addedCallback(elem->arg);
         elem->addedCallback = NULL;
@@ -93,7 +93,7 @@ ZunResult Chain::AddToDrawChain(ChainElem *elem, i32 priority)
 
     curElem = &this->drawChain;
     elem->priority = priority;
-    while (curElem->next != NULL)
+    while (curElem->next)
     {
         if (curElem->priority > priority)
         {
@@ -105,7 +105,7 @@ ZunResult Chain::AddToDrawChain(ChainElem *elem, i32 priority)
     {
         elem->next = curElem;
         elem->prev = curElem->prev;
-        if (elem->prev != NULL)
+        if (elem->prev)
         {
             elem->prev->next = elem;
         }
@@ -117,7 +117,7 @@ ZunResult Chain::AddToDrawChain(ChainElem *elem, i32 priority)
         elem->prev = curElem;
         curElem->next = elem;
     }
-    if (elem->addedCallback != NULL)
+    if (elem->addedCallback)
     {
         return elem->addedCallback(elem->arg);
     }
@@ -137,9 +137,9 @@ i32 Chain::RunCalcChain()
 restart_from_first_job:
     updateCount = 0;
     current = &this->calcChain;
-    while (current != NULL)
+    while (current)
     {
-        if (current->callback != NULL)
+        if (current->callback)
         {
         execute_again:
             switch (current->callback(current->arg))
@@ -163,7 +163,7 @@ restart_from_first_job:
             default:
                 break;
             }
-            updateCount += 1;
+            updateCount++;
         }
         current = current->next;
     }
@@ -179,9 +179,9 @@ i32 Chain::RunDrawChain()
 
     updateCount = 0;
     current = &this->drawChain;
-    while (current != NULL)
+    while (current)
     {
-        if (current->callback != NULL)
+        if (current->callback)
         {
         execute_again:
             switch (current->callback(current->arg))
@@ -203,7 +203,7 @@ i32 Chain::RunDrawChain()
             default:
                 break;
             }
-            updateCount += 1;
+            updateCount++;
         }
         current = current->next;
     }
@@ -222,7 +222,7 @@ void Chain::ReleaseSingleChain(ChainElem *root)
     tmp = new ChainElem;
     nextRootElem.next = tmp;
     curElem = root;
-    while (curElem != NULL)
+    while (curElem)
     {
         tmp->unkPtr = curElem;
         tmp->next = new ChainElem;
@@ -230,13 +230,13 @@ void Chain::ReleaseSingleChain(ChainElem *root)
         curElem = curElem->next;
     }
     curElem = &nextRootElem;
-    while (curElem != NULL)
+    while (curElem)
     {
         Cut(curElem->unkPtr);
         curElem = curElem->next;
     }
     tmp = nextRootElem.next;
-    while (tmp != NULL)
+    while (tmp)
     {
         tmp2 = tmp->next;
         delete tmp;
@@ -271,13 +271,13 @@ void Chain::Cut(ChainElem *toRemove)
 
     isDrawChain = FALSE;
 
-    if (toRemove == NULL)
+    if (!toRemove)
     {
         return;
     }
 
     curElem = &this->calcChain;
-    while (curElem != NULL)
+    while (curElem)
     {
         if (curElem == toRemove)
         {
@@ -287,7 +287,7 @@ void Chain::Cut(ChainElem *toRemove)
     }
     isDrawChain = TRUE;
     curElem = &this->drawChain;
-    while (curElem != NULL)
+    while (curElem)
     {
         if (curElem == toRemove)
         {
@@ -299,11 +299,11 @@ void Chain::Cut(ChainElem *toRemove)
     return;
 
 destroy_elem:
-    if (toRemove->prev != NULL)
+    if (toRemove->prev)
     {
         toRemove->callback = NULL;
         toRemove->prev->next = toRemove->next;
-        if (toRemove->next != NULL)
+        if (toRemove->next)
         {
             toRemove->next->prev = toRemove->prev;
         }
@@ -317,7 +317,7 @@ destroy_elem:
         }
         else
         {
-            if (toRemove->deletedCallback != NULL)
+            if (toRemove->deletedCallback)
             {
                 ChainLifecycleCallback deletedCallback = toRemove->deletedCallback;
                 toRemove->deletedCallback = NULL;

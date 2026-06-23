@@ -62,7 +62,7 @@ void BombData::DarkenViewport(Player *player)
 // FUNCTION: TH07 0x004084f0
 void BombData::SpawnBombInvulnEffect(Player *player)
 {
-    if (player->effect != NULL)
+    if (player->effect)
     {
         player->effect->inUseFlag = 0;
     }

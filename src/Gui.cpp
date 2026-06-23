@@ -40,7 +40,7 @@ ChainElem g_GuiDrawChain;
 i32 Gui::IsStageFinished()
 {
     return (this->impl->stageClearTextVm.activeSpriteIdx >= 0 &&
-            this->impl->stageClearTextVm.isStopped != 0);
+            this->impl->stageClearTextVm.isStopped);
 }
 
 // FUNCTION: TH07 0x00427b21
@@ -123,12 +123,12 @@ void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
 // FUNCTION: TH07 0x00427e7c
 u32 Gui::OnUpdate(Gui *arg)
 {
-    if (g_GameManager.isTimeStopped != 0)
+    if (g_GameManager.isTimeStopped)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
 
-    if (arg->impl->transitionToScoreScreen != 0)
+    if (arg->impl->transitionToScoreScreen)
     {
         g_Supervisor.curState = 3;
         arg->impl->transitionToScoreScreen = 0;
@@ -157,7 +157,7 @@ u32 Gui::OnDraw(Gui *arg)
 
     g_AnmManager->offset.y = 0.0f;
     g_AnmManager->offset.x = 0.0f;
-    if (arg->impl->finishedStage != 0)
+    if (arg->impl->finishedStage)
     {
         stringPos.x = 144.0f;
         stringPos.y = 128.0f;
@@ -189,8 +189,8 @@ u32 Gui::OnDraw(Gui *arg)
                                     arg->impl->clearCherryMax * 10);
         if (g_GameManager.currentStage >= 7 ||
             (g_GameManager.currentStage == 6 &&
-             g_GameManager.practice == 0 &&
-             (g_GameManager.replay == 0 ||
+             !g_GameManager.practice &&
+             (!g_GameManager.replay ||
               g_ReplayManager->data->head.stageReplayData[4].data != NULL)))
         {
             stringPos.y = stringPos.y + 16.0f;
@@ -239,7 +239,7 @@ u32 Gui::OnDraw(Gui *arg)
             break;
         }
         stringPos.y = stringPos.y + 16.0f;
-        if (g_GameManager.difficulty < 4 && g_GameManager.practice == 0)
+        if (g_GameManager.difficulty < 4 && !g_GameManager.practice)
         {
             switch (g_GameManager.defaultCfg->lifeCount)
             {
@@ -266,7 +266,7 @@ u32 Gui::OnDraw(Gui *arg)
     arg->DrawStageElements();
     arg->DrawGameScene();
     g_AsciiManager.isGui = 1;
-    if (arg->impl->bonusScore.isShown != 0)
+    if (arg->impl->bonusScore.isShown)
     {
         g_AsciiManager.color = 0xffffff80;
         AsciiManager::AddFormatText(&g_AsciiManager, &arg->impl->bonusScore.pos,
@@ -314,7 +314,7 @@ u32 Gui::OnDraw(Gui *arg)
         g_AsciiManager.fontSpacing = 0xe;
         break;
     }
-    if (arg->impl->spellCardBonus.isShown != 0)
+    if (arg->impl->spellCardBonus.isShown)
     {
         g_AsciiManager.color = 0xffff0000;
         arg->impl->spellCardBonus.pos.x = (384.0f - (strlen("Spell Card Bonus!") * 16.0f)) / 2.0f + 32.0f;
@@ -492,7 +492,7 @@ ZunResult Gui::ActualAddedCallback()
             g_AnmManager->screenshotDstHeight =
                 (this->impl->stageTransitionSnapshotVm.sprite)->heightPx;
         }
-        for (local_8 = 0; local_8 < 0xe; local_8 += 1)
+        for (local_8 = 0; local_8 < 0xe; local_8++)
         {
             for (local_c = 0; local_c < 0xc; local_c++)
             {
@@ -669,7 +669,7 @@ ZunResult Gui::ActualAddedCallback()
     }
     if (bVar1)
     {
-        for (local_10 = 0; local_10 < 0x21; local_10 += 1)
+        for (local_10 = 0; local_10 < 0x21; local_10++)
         {
             local_3c = (i16)local_10 + 0x600;
             pAVar9 = this->impl->vms0 + local_10;
@@ -748,7 +748,7 @@ ZunResult Gui::LoadMsg(const char *param_1)
 
     FreeMsgFile();
     this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(param_1, 0);
-    if (this->impl->msg.msgFile == NULL)
+    if (!this->impl->msg.msgFile)
     {
         // STRING: TH07 0x00498108
         g_GameErrorContext.Log("error : メッセージファイル %s が読み込めませんでした\r\n", param_1);
@@ -849,11 +849,11 @@ ZunResult GuiImpl::RunMsg()
         return ZUN_ERROR;
     }
 
-    if (this->msg.ignoreWaitCounter != 0)
+    if (this->msg.ignoreWaitCounter)
     {
-        this->msg.ignoreWaitCounter = this->msg.ignoreWaitCounter - 1;
+        this->msg.ignoreWaitCounter--;
     }
-    if (this->msg.dialogueSkippable != 0 && IS_PRESSED_GAME(TH_BUTTON_SKIP))
+    if (this->msg.dialogueSkippable && IS_PRESSED_GAME(TH_BUTTON_SKIP))
     {
         this->msg.timer = (u32)this->msg.curInstr->time;
     }
@@ -1048,7 +1048,7 @@ ZunResult GuiImpl::RunMsg()
         case MSG_NEXT_LEVEL:
             g_Supervisor.checkTiming = 0;
             g_GameManager.globals->guiScore = g_GameManager.globals->score;
-            if (g_GameManager.practice != 0)
+            if (g_GameManager.practice)
             {
                 g_GameManager.globals->guiScore = g_GameManager.globals->score;
                 g_Supervisor.curState = 6;
@@ -1057,7 +1057,7 @@ ZunResult GuiImpl::RunMsg()
             {
                 if (g_GameManager.currentStage < 6)
                 {
-                    if ((g_GameManager.replay == 0) ||
+                    if (!(g_GameManager.replay) ||
                         (g_ReplayManager->data->head
                              .stageReplayData[g_GameManager.currentStage]
                              .data != NULL))
@@ -1071,7 +1071,7 @@ ZunResult GuiImpl::RunMsg()
                         g_Supervisor.curState = 7;
                     }
                 }
-                else if (g_GameManager.replay == 0)
+                else if (!g_GameManager.replay)
                 {
                     if (g_GameManager.difficulty < 4)
                     {
@@ -1132,7 +1132,7 @@ SKIP_TIME_INCREMENT:
     g_AnmManager->ExecuteScript(this->msg.introLines);
     g_AnmManager->ExecuteScript(this->msg.introLines + 1);
     if (((i32)(this->msg.timer < 60) &&
-         (this->msg.dialogueSkippable != 0)) &&
+         (this->msg.dialogueSkippable)) &&
         IS_PRESSED_GAME(TH_BUTTON_SKIP))
     {
         this->msg.timer = 60;
@@ -1241,7 +1241,7 @@ ZunResult GuiImpl::DrawDialogue()
 // FUNCTION: TH07 0x0042ad29
 i32 Gui::MsgWait()
 {
-    if (this->impl == NULL)
+    if (!this->impl)
     {
         return 0;
     }
@@ -1257,7 +1257,7 @@ i32 Gui::MsgWait()
 // FUNCTION: TH07 0x0042ad66
 i32 Gui::HasCurrentMsgIdx()
 {
-    if (this->impl == NULL)
+    if (!this->impl)
     {
         return 0;
     }
@@ -1275,7 +1275,7 @@ void Gui::UpdateGui()
 
     if (this->impl->msg.currentMsgIdx < 0)
     {
-        if (this->bossPresent == 0)
+        if (!this->bossPresent)
         {
             if (this->impl->bossHealthBarState != 0)
             {
@@ -1292,7 +1292,7 @@ void Gui::UpdateGui()
                 {
                     this->bossHealthBarAlpha = this->bossHealthBarAlpha - 4;
                 }
-                if (this->impl->vms0[0xb].isStopped != 0)
+                if (this->impl->vms0[0xb].isStopped)
                 {
                     this->impl->bossHealthBarState = 0;
                     this->bossHealthBarEased = 0.0f;
@@ -1308,7 +1308,7 @@ void Gui::UpdateGui()
         }
         else
         {
-            if (this->impl->vms0[0xb].isStopped != 0)
+            if (this->impl->vms0[0xb].isStopped)
             {
                 this->impl->bossHealthBarState = 2;
             }
@@ -1357,7 +1357,7 @@ void Gui::UpdateGui()
     g_AnmManager->ExecuteScript(&this->impl->spellcardBonusIndicator);
     if (-1 < this->impl->stageClearTextVm.activeSpriteIdx)
     {
-        if (g_AnmManager->ExecuteScript(&this->impl->stageClearTextVm) != 0)
+        if (g_AnmManager->ExecuteScript(&this->impl->stageClearTextVm))
         {
             this->impl->stageClearTextVm.activeSpriteIdx = -1;
         }
@@ -1380,7 +1380,7 @@ void Gui::UpdateGui()
         }
         this->impl->activeTransitionQuads = local_8;
     }
-    if (this->impl->bonusScore.isShown != 0)
+    if (this->impl->bonusScore.isShown)
     {
         if (this->impl->bonusScore.timer < 0x1e)
         {
@@ -1401,7 +1401,7 @@ void Gui::UpdateGui()
         }
         this->impl->bonusScore.timer.NextTick();
     }
-    if (this->impl->fullPowerMode.isShown != 0)
+    if (this->impl->fullPowerMode.isShown)
     {
         if (this->impl->fullPowerMode.timer < 0x1e)
         {
@@ -1422,7 +1422,7 @@ void Gui::UpdateGui()
         }
         this->impl->fullPowerMode.timer.NextTick();
     }
-    if (this->impl->spellCardBonus.isShown != 0)
+    if (this->impl->spellCardBonus.isShown)
     {
         if (0x117 < this->impl->spellCardBonus.timer.current)
         {
@@ -1437,9 +1437,9 @@ void Gui::UpdateGui()
                    this->impl->clearPointItems * 5000 + this->impl->clearCherryMax;
         if ((6 < g_GameManager.currentStage) ||
             ((g_GameManager.currentStage == 6 &&
-              (g_GameManager.practice == 0)) &&
-             (g_GameManager.replay == 0 ||
-              (g_ReplayManager->data->head.stageReplayData[4].data != NULL))))
+              (!g_GameManager.practice)) &&
+             (!g_GameManager.replay ||
+              (g_ReplayManager->data->head.stageReplayData[4].data))))
         {
             local_10 = local_10 + g_GameManager.globals->livesRemaining * 2000000 +
                        g_GameManager.globals->bombsRemaining * 400000;
@@ -1523,7 +1523,7 @@ void Gui::DrawGameScene()
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     local_14 = this->impl->vms0 + 0xc;
     if ((((g_Supervisor.cfg.opts >> 0xc & 1) != 0) ||
-         (this->impl->vms0[0xc].currentInstruction != NULL)) ||
+         (this->impl->vms0[0xc].currentInstruction)) ||
         (g_Supervisor.renderSkipFrames != 0))
     {
         for (local_8 = 0.0f; local_8 < 464.0f; local_8 = local_8 + 32.0f)
@@ -1633,7 +1633,7 @@ void Gui::DrawGameScene()
             (local_14->pos).y = 96.0f;
             (local_14->pos).z = 0.46f;
             g_AnmManager->DrawNoRotation(local_14);
-            local_10 += 1;
+            local_10++;
             local_c = local_c + 16.0f;
         }
     }
@@ -1648,7 +1648,7 @@ void Gui::DrawGameScene()
             (local_14->pos).y = 112.0f;
             (local_14->pos).z = 0.46f;
             g_AnmManager->DrawNoRotation(local_14);
-            local_10 += 1;
+            local_10++;
             local_c = local_c + 16.0f;
         }
     }
@@ -1847,13 +1847,13 @@ void Gui::DrawStageElements()
     {
         g_AnmManager->Draw(this->impl->vms1 + i);
     }
-    if (this->impl->bombSpellcardPortrait.visible != 0)
+    if (this->impl->bombSpellcardPortrait.visible)
     {
         g_AnmManager->DrawNoRotation(&this->impl->bombSpellcardPortrait);
         g_AnmManager->DrawNoRotation(&this->impl->bombSpellcardDecorLeft);
         g_AnmManager->Draw(&this->impl->bombSpellcardDecorRight);
     }
-    if (this->impl->enemySpellcardPortrait.visible != 0)
+    if (this->impl->enemySpellcardPortrait.visible)
     {
         fVar1 = this->impl->enemySpellcardPortrait.pos.x;
         fVar2 = this->impl->enemySpellcardPortrait.pos.y;
@@ -1867,13 +1867,13 @@ void Gui::DrawStageElements()
         g_AnmManager->DrawNoRotation(&this->impl->enemySpellcardRelated1);
         g_AnmManager->Draw(&this->impl->enemySpellcardRelated2);
     }
-    if (this->impl->bombSpellcardName.visible != 0)
+    if (this->impl->bombSpellcardName.visible)
     {
         this->impl->bombSpellcardNameBg.pos = this->impl->bombSpellcardName.pos;
         g_AnmManager->DrawNoRotation(&this->impl->bombSpellcardNameBg);
         g_AnmManager->Draw(&this->impl->bombSpellcardName);
     }
-    if (this->impl->enemySpellcardName.visible != 0)
+    if (this->impl->enemySpellcardName.visible)
     {
         this->impl->enemySpellcardNameBg.pos = this->impl->enemySpellcardName.pos;
         g_AnmManager->DrawNoRotation(&this->impl->enemySpellcardNameBg);
@@ -1884,7 +1884,7 @@ void Gui::DrawStageElements()
         local_24 = 10000000;
         bVar6 = false;
         iVar8 = g_EnemyManager.spellcardInfo.spellcardIdx * 0x78;
-        if (g_EnemyManager.spellcardInfo.isCapturing == 0)
+        if (!g_EnemyManager.spellcardInfo.isCapturing)
         {
             local_18 = 0;
         }
@@ -1978,7 +1978,7 @@ void Gui::DrawStageElements()
                                       this->bossHealthBarAlpha << 0x18 | 0xffffff,
                                       this->bossHealthBarAlpha << 0x18 | 0x202060,
                                       this->bossHealthBarAlpha << 0x18 | 0x202060);
-        for (local_48 = 0; local_48 < 8; local_48 += 1)
+        for (local_48 = 0; local_48 < 8; local_48++)
         {
             if ((this->bossHealth[local_48] != 0.0f) &&
                 (this->bossHealthEased[local_48] < this->bossHealthBarEased))
@@ -2011,7 +2011,7 @@ void Gui::DrawStageElements()
         local_40.bottom = 23.0f;
         local_44 = this->bossLifeMarkers;
         local_54 = (this->bossLifeMarkers < 6) + 1;
-        for (local_48 = 0; local_48 < local_44; local_48 += 1)
+        for (local_48 = 0; local_48 < local_44; local_48++)
         {
             local_40.left = ((f32)local_48 * 26.0f) / (f32)local_44 + 35.0f;
             local_40.right = (((f32)(local_48 + 1) * 26.0f) / (f32)local_44 + 35.0f) -
@@ -2118,7 +2118,7 @@ ZunResult Gui::RegisterChain()
     g_GuiCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
     g_GuiCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_GuiCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_GuiCalcChain, 0xd) != 0)
+    if (g_Chain.AddToCalcChain(&g_GuiCalcChain, 0xd))
     {
         return ZUN_ERROR;
     }

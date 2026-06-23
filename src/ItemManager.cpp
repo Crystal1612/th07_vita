@@ -85,7 +85,7 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
     {
         this->nextIndex++;
 
-        if (item->isInUse != 0)
+        if (item->isInUse)
         {
             if (this->nextIndex >= 0x44c)
             {
@@ -162,7 +162,7 @@ void ItemManager::OnUpdate()
 
     for (i = 0; i < 1100; i++, item++)
     {
-        if (item->isInUse == 0)
+        if (!item->isInUse)
         {
             continue;
         }
@@ -471,7 +471,7 @@ void ItemManager::OnUpdate()
                                     ? 50000
                                     : 50000 - item->OffsetFromPoc() * 100;
                     itemScore -= itemScore % 10;
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, (item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect != 0) ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, (item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect) ? 0xffffff00 : 0xffffffff);
                     g_GameManager.AddScore(itemScore);
                 }
                 itemScore = 1000;
@@ -508,7 +508,7 @@ void ItemManager::OnUpdate()
         else
         {
             item->timer++;
-            if (item->sprite.currentInstruction != NULL)
+            if (item->sprite.currentInstruction)
             {
                 g_AnmManager->ExecuteScript(&item->sprite);
             }
@@ -533,7 +533,7 @@ void ItemManager::RemoveAllItems()
     item = this->items;
     for (i = 0; i < 0x44c; i++, item++)
     {
-        if (item->isInUse == 0)
+        if (!item->isInUse)
         {
             continue;
         }
@@ -606,7 +606,7 @@ void ItemManager::OnDraw()
     i32 local_8;
 
     item = this->listHead.next;
-    while (item != NULL)
+    while (item)
     {
         item->sprite.pos.x =
             g_GameManager.arcadeRegionTopLeftPos.x + item->currentPosition.x;

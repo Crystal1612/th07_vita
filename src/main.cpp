@@ -85,7 +85,7 @@ start:
     Controller::GetJoystickCaps();
     Controller::ResetKeyboard();
     g_AnmManager = new AnmManager();
-    if (g_Supervisor.cfg.windowed == 0)
+    if (!g_Supervisor.cfg.windowed)
     {
         WINNLSEnableIME(0, 0);
         ShowCursor(0);
@@ -102,9 +102,9 @@ start:
     }
     res = RENDER_RESULT_KEEP_RUNNING;
     g_GameWindow.curFrame = 0xe2;
-    while (g_GameWindow.isAppClosing == 0)
+    while (!g_GameWindow.isAppClosing)
     {
-        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE) != 0)
+        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessageA(&msg);
@@ -141,7 +141,7 @@ cleanup:
         ResultScreen::RegisterChain(2);
     }
     g_Chain.Release();
-    while (g_SoundPlayer.ProcessQueues() != 0)
+    while (g_SoundPlayer.ProcessQueues())
         ;
 
 stop:
@@ -149,13 +149,13 @@ stop:
     delete g_AnmManager;
     g_AnmManager = NULL;
 
-    if (g_Supervisor.d3dDevice != NULL)
+    if (g_Supervisor.d3dDevice)
     {
         g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     }
     SAFE_RELEASE(g_Supervisor.d3dDevice);
     SAFE_RELEASE(g_Supervisor.d3dIface);
-    if (g_GameWindow.window != NULL)
+    if (g_GameWindow.window)
     {
         ShowWindow(g_GameWindow.window, 0);
         MoveWindow(g_GameWindow.window, 0, 0, 0, 0, 0);
@@ -169,14 +169,14 @@ stop:
         *g_GameErrorContext.m_BufferEnd = NULL;
         // STRING: TH07 0x00497c28
         g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\r\n");
-        if (g_Supervisor.cfg.windowed == 0)
+        if (!g_Supervisor.cfg.windowed)
         {
             WINNLSEnableIME(0, 1);
         }
         i32 i = 0;
         while (i < 60)
         {
-            if (PeekMessageA(&msg, NULL, 0, 0, 1) != 0)
+            if (PeekMessageA(&msg, NULL, 0, 0, 1))
             {
                 TranslateMessage(&msg);
                 DispatchMessageA(&msg);

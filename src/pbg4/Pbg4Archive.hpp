@@ -14,7 +14,7 @@ struct Pbg4Entry
     // FUNCTION: TH07 0x0045f680
     ~Pbg4Entry()
     {
-        if (filename != NULL)
+        if (filename)
         {
             GlobalFree(filename);
             filename = NULL;

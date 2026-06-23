@@ -77,7 +77,7 @@ HRESULT CSoundManager::SetPrimaryBufferFormat(DWORD dwPrimaryChannels,
     HRESULT hr;
 
     LPDIRECTSOUNDBUFFER pDSBPrimary = NULL;
-    if (this->pDS == NULL)
+    if (!this->pDS)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -127,7 +127,7 @@ HRESULT CSoundManager::CreateStreaming(CStreamingSound **ppStreamingSound,
 {
     HRESULT hr;
 
-    if (this->pDS == NULL)
+    if (!this->pDS)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -139,7 +139,7 @@ HRESULT CSoundManager::CreateStreaming(CStreamingSound **ppStreamingSound,
 
     pWaveFile = new CWaveFile();
 
-    if (pWaveFile->Open(strWaveFileName, pzwf, WAVEFILE_READ) != 0)
+    if (pWaveFile->Open(strWaveFileName, pzwf, WAVEFILE_READ))
     {
         delete pWaveFile;
         return E_FAIL;
@@ -167,7 +167,7 @@ HRESULT CSoundManager::CreateStreaming(CStreamingSound **ppStreamingSound,
     }
 
     aPosNotify = new DSBPOSITIONNOTIFY[dwNotifyCount];
-    if (aPosNotify == NULL)
+    if (!aPosNotify)
     {
         return E_OUTOFMEMORY;
     }
@@ -214,7 +214,7 @@ HRESULT CSoundManager::CreateStreamingFromMemory(
 
     // STRING: TH07 0x0049548c
     DebugPrint("StreamingSound Create \r\n");
-    if (this->pDS == NULL)
+    if (!this->pDS)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -250,7 +250,7 @@ HRESULT CSoundManager::CreateStreamingFromMemory(
     }
 
     aPosNotify = new DSBPOSITIONNOTIFY[dwNotifyCount];
-    if (aPosNotify == NULL)
+    if (!aPosNotify)
     {
         return E_OUTOFMEMORY;
     }
@@ -349,7 +349,7 @@ HRESULT CStreamingSound::InitSoundBuffers()
         }
 
         pPosNotify = new DSBPOSITIONNOTIFY[16];
-        if (pPosNotify == NULL)
+        if (!pPosNotify)
         {
             return E_OUTOFMEMORY;
         }
@@ -402,7 +402,7 @@ HRESULT CSound::FillBufferWithSound(LPDIRECTSOUNDBUFFER pDSB,
     DWORD dwDSLockedBufferSize = 0;
     DWORD dwWavDataRead = 0;
 
-    if (pDSB == NULL)
+    if (!pDSB)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -476,7 +476,7 @@ HRESULT CSound::FillBufferWithSound(LPDIRECTSOUNDBUFFER pDSB,
 // FUNCTION: TH07 0x0045d5b0
 HRESULT CSound::RestoreBuffer(LPDIRECTSOUNDBUFFER pDSB, BOOL *pbWasRestored)
 {
-    if (pDSB == NULL)
+    if (!pDSB)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -524,7 +524,7 @@ HRESULT CSound::RestoreBuffer(LPDIRECTSOUNDBUFFER pDSB, BOOL *pbWasRestored)
 LPDIRECTSOUNDBUFFER CSound::GetFreeBuffer()
 {
     BOOL idk = 0;
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return NULL;
     }
@@ -532,7 +532,7 @@ LPDIRECTSOUNDBUFFER CSound::GetFreeBuffer()
     DWORD i;
     for (i = 0; i < this->m_dwNumBuffers; i++)
     {
-        if (this->m_apDSBuffer[i] != NULL)
+        if (this->m_apDSBuffer[i])
         {
             DWORD dwStatus = 0;
             this->m_apDSBuffer[i]->GetStatus(&dwStatus);
@@ -560,7 +560,7 @@ LPDIRECTSOUNDBUFFER CSound::GetFreeBuffer()
 // FUNCTION: TH07 0x0045d720
 LPDIRECTSOUNDBUFFER CSound::GetBuffer(DWORD dwIndex)
 {
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return NULL;
     }
@@ -580,13 +580,13 @@ HRESULT CSound::Play(DWORD dwPriority, DWORD dwFlags)
 {
     HRESULT hr;
 
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return CO_E_NOTINITIALIZED;
     }
 
     LPDIRECTSOUNDBUFFER pDSB = GetFreeBuffer();
-    if (pDSB == NULL)
+    if (!pDSB)
     {
         return E_FAIL;
     }
@@ -623,7 +623,7 @@ HRESULT CSound::Play(DWORD dwPriority, DWORD dwFlags)
 // FUNCTION: TH07 0x0045d860
 u32 CSound::Stop()
 {
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -646,7 +646,7 @@ u32 CSound::Stop()
 // FUNCTION: TH07 0x0045d910
 HRESULT CSound::Pause()
 {
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -664,7 +664,7 @@ HRESULT CSound::Pause()
 // FUNCTION: TH07 0x0045d960
 HRESULT CSound::Unpause()
 {
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -681,7 +681,7 @@ HRESULT CSound::Unpause()
 // FUNCTION: TH07 0x0045d9b0
 HRESULT CSound::Reset()
 {
-    if (this->m_apDSBuffer == NULL)
+    if (!this->m_apDSBuffer)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -727,7 +727,7 @@ CStreamingSound::~CStreamingSound()
 // FUNCTION: TH07 0x0045dad0
 HRESULT CStreamingSound::UpdateFadeOut()
 {
-    if (this->m_dwIsFadingOut != 0)
+    if (this->m_dwIsFadingOut)
     {
         if (--this->m_iCurFadeoutProgress <= 0)
         {
@@ -764,7 +764,7 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
     DWORD dwBytesWrittenToBuffer;
     DWORD dwReadSoFar;
 
-    if (this->m_apDSBuffer == NULL || this->m_pWaveFile == NULL)
+    if (!this->m_apDSBuffer || !this->m_pWaveFile)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -815,7 +815,7 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
         return hr;
     }
 
-    if (pDSLockedBuffer2 != NULL)
+    if (pDSLockedBuffer2)
     {
         return E_UNEXPECTED;
     }
@@ -922,7 +922,7 @@ HRESULT CStreamingSound::Reset()
 {
     HRESULT hr;
 
-    if (this->m_apDSBuffer[0] == NULL || this->m_pWaveFile == NULL)
+    if (!this->m_apDSBuffer[0] || !this->m_pWaveFile)
     {
         return CO_E_NOTINITIALIZED;
     }
@@ -985,7 +985,7 @@ HRESULT CWaveFile::Open(LPCSTR strFileName, ThBgmFormat *pzwf, DWORD dwFlags)
 
     if (this->m_dwFlags == WAVEFILE_READ)
     {
-        if (strFileName == NULL)
+        if (!strFileName)
         {
             return E_INVALIDARG;
         }
@@ -1015,7 +1015,7 @@ HRESULT CWaveFile::Open(LPCSTR strFileName, ThBgmFormat *pzwf, DWORD dwFlags)
 // FUNCTION: TH07 0x0045e130
 HRESULT CWaveFile::Reopen(ThBgmFormat *pzwf)
 {
-    if (this->m_bIsReadingFromMemory != 0)
+    if (this->m_bIsReadingFromMemory)
     {
         return E_FAIL;
     }
@@ -1086,7 +1086,7 @@ HRESULT CWaveFile::ResetFile(bool bLoop)
     }
     else
     {
-        if (this->m_hWaveFile == NULL)
+        if (!this->m_hWaveFile)
         {
             return CO_E_NOTINITIALIZED;
         }
@@ -1124,11 +1124,11 @@ HRESULT CWaveFile::Read(u8 *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead)
 
     if (this->m_bIsReadingFromMemory)
     {
-        if (this->m_pbDataCur == NULL)
+        if (!this->m_pbDataCur)
         {
             return CO_E_NOTINITIALIZED;
         }
-        if (pdwSizeRead != NULL)
+        if (pdwSizeRead)
         {
             *pdwSizeRead = 0;
         }
@@ -1143,7 +1143,7 @@ HRESULT CWaveFile::Read(u8 *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead)
         memcpy(pBuffer, this->m_pbDataCur, dwSizeToRead);
         this->m_pbDataCur += dwSizeToRead;
 
-        if (pdwSizeRead != NULL)
+        if (pdwSizeRead)
         {
             *pdwSizeRead = dwSizeToRead;
         }
@@ -1151,11 +1151,11 @@ HRESULT CWaveFile::Read(u8 *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead)
     }
     else
     {
-        if (this->m_hWaveFile == NULL)
+        if (!this->m_hWaveFile)
         {
             return CO_E_NOTINITIALIZED;
         }
-        if (pBuffer == NULL || pdwSizeRead == NULL)
+        if (!pBuffer || !pdwSizeRead)
         {
             return E_INVALIDARG;
         }
@@ -1168,7 +1168,7 @@ HRESULT CWaveFile::Read(u8 *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead)
         this->m_ck.cksize -= sizeToRead;
 
         ReadFile(this->m_hWaveFile, pBuffer, sizeToRead, &bytesRead, NULL);
-        if (pdwSizeRead != NULL)
+        if (pdwSizeRead)
         {
             *pdwSizeRead = bytesRead;
         }

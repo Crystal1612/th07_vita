@@ -164,7 +164,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
         }
     }
     srcData = FileSystem::OpenFile(texturePath, 1);
-    if (srcData == NULL)
+    if (!srcData)
     {
         return ZUN_ERROR;
     }
@@ -172,7 +172,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
     if (D3DXCreateTextureFromFileInMemoryEx(
             g_Supervisor.d3dDevice, srcData, g_LastFileSize, 0, 0, 0, 0,
             g_TextureFormatD3D8Mapping[formatIdx], D3DPOOL_MANAGED, 3, 0xffffffff,
-            colorKey, NULL, NULL, this->textures + textureIdx) != 0)
+            colorKey, NULL, NULL, this->textures + textureIdx))
     {
         free(srcData);
         return ZUN_ERROR;
@@ -223,7 +223,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     if (D3DXCreateTexture(g_Supervisor.d3dDevice, (i32)info->width,
                           (i32)info->height, 1, 0,
                           g_TextureFormatD3D8Mapping[formatIdx], D3DPOOL_MANAGED,
-                          this->textures + textureIdx) != 0)
+                          this->textures + textureIdx))
     {
         return ZUN_ERROR;
     }
@@ -284,7 +284,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
 
     textureSrc = NULL;
     data = FileSystem::OpenFile(texturePath, 0);
-    if (data == NULL)
+    if (!data)
     {
         return ZUN_ERROR;
     }
@@ -302,17 +302,17 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
     if (D3DXCreateTextureFromFileInMemoryEx(
             g_Supervisor.d3dDevice, data, g_LastFileSize, 0, 0, 0, 0,
             surfaceDesc.Format, D3DPOOL_SYSTEMMEM, 3, 0xffffffff, colorKey,
-            NULL, NULL, &textureSrc) != 0)
+            NULL, NULL, &textureSrc))
     {
         goto err;
     }
 
-    if (this->textures[textureIdx]->LockRect(0, &lockedRectDst, NULL, 0) != 0)
+    if (this->textures[textureIdx]->LockRect(0, &lockedRectDst, NULL, 0))
     {
         goto err;
     }
 
-    if (textureSrc->LockRect(0, &lockedRectSrc, NULL, 0x8000) != 0)
+    if (textureSrc->LockRect(0, &lockedRectSrc, NULL, 0x8000))
     {
         goto err;
     }
@@ -391,7 +391,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     entry = (AnmRawEntry *)FileSystem::OpenFile(path, 0);
     ownsMemory = 1;
     i32 startIdx = anmIdx;
-    if (entry == NULL)
+    if (!entry)
     {
         // STRING: TH07 0x00495c7c
         g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
@@ -405,7 +405,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
             this->anmFiles[startIdx].childCount = anmIdx - startIdx;
             return res;
         }
-        anmIdx = anmIdx + 1;
+        anmIdx++;
         if (entry->nextOffset == 0)
         {
             this->anmFiles[startIdx].childCount = anmIdx - startIdx;
@@ -433,7 +433,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     i32 local_8;
 
     local_8 = 0;
-    if (rawEntry == NULL)
+    if (!rawEntry)
     {
         g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
         return ZUN_ERROR;
@@ -454,7 +454,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     }
     data->textureIdx = textureIdx;
     data->ownsMemory = ownsMemory;
-    if (data->hasData == 0)
+    if (!data->hasData)
     {
         name = (char *)((u8 *)data + data->nameOffset);
         if (*name == '@')
@@ -566,7 +566,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         return;
     }
 
-    if (this->anmFiles[anmIdx].raw != NULL)
+    if (this->anmFiles[anmIdx].raw)
     {
         afterHdr = (this->anmFiles[anmIdx].raw)->spriteOffsets;
         spriteIdxOffset = this->anmFiles[anmIdx].spriteIndexOffset;
@@ -590,7 +590,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         }
         this->anmFiles[anmIdx].spriteIndexOffset = 0;
         ReleaseTexture(rawEntry->textureIdx);
-        if (rawEntry->ownsMemory != 0)
+        if (rawEntry->ownsMemory)
         {
             free(rawEntry);
         }
@@ -676,7 +676,7 @@ void AnmManager::SetAndExecuteScript(AnmVm *vm, AnmRawInstr *beginningOfScript)
 {
     i32 idk;
 
-    if (beginningOfScript == NULL)
+    if (!beginningOfScript)
     {
         memset(vm, 0, sizeof(AnmVm));
     }
@@ -711,7 +711,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
     if ((u32)this->currentBlendMode != vm->blendMode)
     {
         this->currentBlendMode = vm->blendMode;
-        if (this->currentBlendMode == 0)
+        if (!this->currentBlendMode)
         {
             g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
         }
@@ -799,7 +799,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
-        if (this->currentZWriteDisable == 0)
+        if (!this->currentZWriteDisable)
         {
             g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 1);
         }
@@ -812,7 +812,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
     {
         g_AnmManager->Flush();
         this->currentCameraMode = vm->cameraMode;
-        if (this->currentCameraMode == 0)
+        if (!this->currentCameraMode)
         {
             g_Stage.SetupCameraStageBackground();
             g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
@@ -832,7 +832,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
     if ((u32)this->currentBlendMode != vm->blendMode)
     {
         this->currentBlendMode = vm->blendMode;
-        if (this->currentBlendMode == 0)
+        if (!this->currentBlendMode)
         {
             g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 6);
         }
@@ -845,7 +845,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         ((u32)this->currentZWriteDisable != vm->zWriteDisable))
     {
         this->currentZWriteDisable = vm->zWriteDisable;
-        if (this->currentZWriteDisable == 0)
+        if (!this->currentZWriteDisable)
         {
             g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 1);
         }
@@ -854,7 +854,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
             g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
         }
     }
-    this->renderStateChangesThisFrame += 1;
+    this->renderStateChangesThisFrame++;
 }
 
 static const f32 g_ZeroPointFive = 0.5;
@@ -970,7 +970,7 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 param2)
     if ((param2 & 2) == 0)
     {
         color.color =
-            vm->useColor2 != 0 ? vm->color2.color : vm->color.color;
+            vm->useColor2 ? vm->color2.color : vm->color.color;
         if (this->colorMulEnabled)
         {
             r = (u32)color.bytes.r * this->color.bytes.r >> 7;
@@ -1022,7 +1022,7 @@ void AnmManager::ResetVertexBuffer()
 // FUNCTION: TH07 0x0044f5c0
 void AnmManager::Flush()
 {
-    if (this->spritesToDraw == 0)
+    if (!this->spritesToDraw)
     {
         return;
     }
@@ -1069,7 +1069,7 @@ ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
         return ZUN_ERROR;
     }
 
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1150,7 +1150,7 @@ ZunResult AnmManager::Draw(AnmVm *vm)
     {
         return ZUN_ERROR;
     }
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1207,7 +1207,7 @@ ZunResult AnmManager::DrawFacingCamera(AnmVm *vm)
     {
         return ZUN_ERROR;
     }
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1335,17 +1335,17 @@ ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
 // FUNCTION: TH07 0x00450130
 ZunResult AnmManager::DrawBillboard(AnmVm *vm)
 {
-    if (vm->visible == 0)
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->active == 0)
+    if (!vm->active)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1366,7 +1366,7 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     D3DXMATRIX rot;
 
     if (vm->skipTransform == 0 &&
-        (vm->updateScale != 0 || vm->updateRotation != 0))
+        (vm->updateScale || vm->updateRotation))
     {
         vm->worldTransformMatrix = vm->matrix;
         vm->worldTransformMatrix.m[0][0] *= vm->scale.x;
@@ -1436,17 +1436,17 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
 // FUNCTION: TH07 0x004504b0
 ZunResult AnmManager::DrawProjected(AnmVm *vm)
 {
-    if (vm->visible == 0)
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->active == 0)
+    if (!vm->active)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1463,17 +1463,17 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     D3DXMATRIX rot;
     D3DXMATRIX local_44;
 
-    if (vm->visible == 0)
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->active == 0)
+    if (!vm->active)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
@@ -1484,7 +1484,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     }
 
     if (vm->skipTransform == 0 &&
-        (vm->updateScale != 0 || vm->updateRotation != 0))
+        (vm->updateScale || vm->updateRotation))
     {
         vm->worldTransformMatrix = vm->matrix;
         vm->worldTransformMatrix.m[0][0] *= vm->scale.x;
@@ -1716,7 +1716,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
 #define GET_FLOAT_VALUE(argIdx) \
     (((instr->flags & (1 << argIdx)) != 0) ? vm->GetFloatVarValue(instr->args[argIdx].f) : instr->args[argIdx].f)
 
-    if (vm->currentInstruction == NULL)
+    if (!vm->currentInstruction)
     {
         return 1;
     }
@@ -1815,7 +1815,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->blendMode = instr->args[0].i;
             break;
         case ANM_SET_TRANSLATION:
-            if (vm->useOffset == 0)
+            if (!vm->useOffset)
             {
                 vm->pos =
                     D3DXVECTOR3(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
@@ -1835,7 +1835,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case ANM_POS_TIME_LINEAR:
             vm->interpModes[0] = 0;
         interp_pos:
-            if (vm->useOffset == 0)
+            if (!vm->useOffset)
             {
                 vm->posInterpInitial = vm->pos;
             }
@@ -1867,7 +1867,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case ANM_STOP_HIDE:
             vm->visible = 0;
         case ANM_STOP:
-            if (vm->pendingInterrupt == 0)
+            if (!vm->pendingInterrupt)
             {
                 vm->isStopped = 1;
                 vm->currentTimeInScript--;
@@ -1891,7 +1891,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->isStopped = 0;
             if (instr->opcode != ANM_INTERRUPT_LABEL)
             {
-                if (nextInstr == NULL)
+                if (!nextInstr)
                 {
                     vm->currentTimeInScript--;
                     goto stop;
@@ -1957,7 +1957,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->interpStartTimes[0] = 0;
             vm->interpEndTimes[0] = GET_INT_VALUE(0);
             vm->interpModes[0] = instr->args[1].b[0];
-            if (vm->useOffset == 0)
+            if (!vm->useOffset)
             {
                 vm->posInterpInitial = vm->pos;
             }
@@ -2247,7 +2247,7 @@ stop:
             switch (i)
             {
             case 0:
-                if (vm->useOffset == 0)
+                if (!vm->useOffset)
                 {
                     vm->pos.x = (vm->posInterpFinal.x - vm->posInterpInitial.x) * t + vm->posInterpInitial.x;
                     vm->pos.y = (vm->posInterpFinal.y - vm->posInterpInitial.y) * t + vm->posInterpInitial.y;
@@ -2338,7 +2338,7 @@ stop:
         vm->uvScrollPos.y += 1.0f;
     }
     vm->currentTimeInScript++;
-    this->scriptTicksThisFrame += 1;
+    this->scriptTicksThisFrame++;
     return 0;
 }
 
@@ -2461,12 +2461,12 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
 {
     IDirect3DSurface8 *surface;
 
-    if (this->surfaces[surfaceIdx] != NULL)
+    if (this->surfaces[surfaceIdx])
     {
         ReleaseSurface(surfaceIdx);
     }
     u8 *data = FileSystem::OpenFile(path, 0);
-    if (data == NULL)
+    if (!data)
     {
         // STRING: TH07 0x00495b30
         g_GameErrorContext.Fatal("%sが読み込めないです。\r\n", path);
@@ -2474,14 +2474,14 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
     }
     if (g_Supervisor.d3dDevice->CreateImageSurface(
             640, 1024, g_Supervisor.presentParameters.BackBufferFormat,
-            &surface) != 0)
+            &surface))
     {
         return ZUN_ERROR;
     }
 
     if (D3DXLoadSurfaceFromFileInMemory(
             surface, NULL, NULL, data, g_LastFileSize, NULL, 1, 0,
-            (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]) != 0)
+            (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]))
     {
         goto err;
     }
@@ -2490,13 +2490,13 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
             this->surfaceSourceInfo[surfaceIdx].width,
             this->surfaceSourceInfo[surfaceIdx].height,
             g_Supervisor.presentParameters.BackBufferFormat, D3DMULTISAMPLE_NONE,
-            1, this->surfaces + surfaceIdx) != 0)
+            1, this->surfaces + surfaceIdx))
     {
         if (g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
                 g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx) != 0)
+                this->surfaces + surfaceIdx))
         {
             goto err;
         }
@@ -2506,18 +2506,18 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
             this->surfaceSourceInfo[surfaceIdx].width,
             this->surfaceSourceInfo[surfaceIdx].height,
             g_Supervisor.presentParameters.BackBufferFormat,
-            this->surfacesBis + surfaceIdx) != 0)
+            this->surfacesBis + surfaceIdx))
     {
         goto err;
     }
 
     if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], 0, NULL, surface,
-                                   0, NULL, 1, 0) != 0)
+                                   0, NULL, 1, 0))
     {
         goto err;
     }
     if (D3DXLoadSurfaceFromSurface(this->surfacesBis[surfaceIdx], 0, NULL,
-                                   surface, 0, NULL, 1, 0) != 0)
+                                   surface, 0, NULL, 1, 0))
     {
         goto err;
     }
@@ -2543,36 +2543,36 @@ void AnmManager::ReleaseSurface(i32 surfaceIdx)
 void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
                                          i32 x, i32 y)
 {
-    if (this->surfacesBis[surfaceIdx] == NULL)
+    if (!this->surfacesBis[surfaceIdx])
     {
         return;
     }
     IDirect3DSurface8 *dstSurface;
     if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &dstSurface) != 0)
+                                              &dstSurface))
     {
         return;
     }
 
-    if (this->surfaces[surfaceIdx] == NULL)
+    if (!this->surfaces[surfaceIdx])
     {
         if (g_Supervisor.d3dDevice->CreateRenderTarget(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
                 g_Supervisor.presentParameters.BackBufferFormat,
-                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) != 0 &&
+                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) &&
             g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
                 g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx) != 0)
+                this->surfaces + surfaceIdx))
         {
             dstSurface->Release();
             return;
         }
         if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], NULL, NULL,
                                        this->surfacesBis[surfaceIdx], NULL, NULL,
-                                       1, 0) != 0)
+                                       1, 0))
         {
             dstSurface->Release();
             return;
@@ -2591,35 +2591,35 @@ void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
                                 i32 rectLeft, i32 rectTop, i32 width,
                                 i32 height)
 {
-    if (this->surfacesBis[surfaceIdx] == NULL)
+    if (!this->surfacesBis[surfaceIdx])
     {
         return;
     }
     IDirect3DSurface8 *local_20;
     if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &local_20) != 0)
+                                              &local_20))
     {
         return;
     }
-    if (this->surfaces[surfaceIdx] == NULL)
+    if (!this->surfaces[surfaceIdx])
     {
         if (g_Supervisor.d3dDevice->CreateRenderTarget(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
                 g_Supervisor.presentParameters.BackBufferFormat,
-                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) != 0 &&
+                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) &&
             g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
                 g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx) != 0)
+                this->surfaces + surfaceIdx))
         {
             local_20->Release();
             return;
         }
         if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], 0, NULL,
                                        this->surfacesBis[surfaceIdx], 0, NULL, 1,
-                                       0) != 0)
+                                       0))
         {
             local_20->Release();
             return;
@@ -2643,19 +2643,19 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
     IDirect3DSurface8 *dstSurface;
     RECT srcRect;
 
-    if (this->textures[textureId] == NULL)
+    if (!this->textures[textureId])
     {
         return;
     }
 
     Flush();
     if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &srcSurface) != 0)
+                                              &srcSurface))
     {
         return;
     }
 
-    if (this->textures[textureId]->GetSurfaceLevel(0, &dstSurface) != 0)
+    if (this->textures[textureId]->GetSurfaceLevel(0, &dstSurface))
     {
         srcSurface->Release();
         return;
@@ -2670,7 +2670,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
     dstRect.right = dstLeft + dstWidth;
     dstRect.bottom = dstTop + dstHeight;
     if (D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, srcSurface, 0,
-                                   &srcRect, 0xffffffff, 0) != 0)
+                                   &srcRect, 0xffffffff, 0))
     {
         dstSurface->Release();
         srcSurface->Release();
@@ -2686,30 +2686,30 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
 // FUNCTION: TH07 0x00454f30
 void AnmManager::CopyTexture(i32 param1, i32 param2, RECT *param3, RECT *param4)
 {
-    if (this->textures[param1] == NULL)
+    if (!this->textures[param1])
     {
         return;
     }
-    if (this->textures[param2] == NULL)
+    if (!this->textures[param2])
     {
         return;
     }
 
     this->Flush();
     IDirect3DSurface8 *local_8, *local_c;
-    if (this->textures[param1]->GetSurfaceLevel(0, &local_8) != 0)
+    if (this->textures[param1]->GetSurfaceLevel(0, &local_8))
     {
         return;
     }
 
-    if (this->textures[param2]->GetSurfaceLevel(0, &local_c) != 0)
+    if (this->textures[param2]->GetSurfaceLevel(0, &local_c))
     {
         local_8->Release();
         return;
     }
 
     if (D3DXLoadSurfaceFromSurface(local_8, 0, param3, local_c, 0, param4,
-                                   0xffffffff, 0) != 0)
+                                   0xffffffff, 0))
     {
         local_8->Release();
         local_c->Release();
@@ -2728,7 +2728,7 @@ void AnmManager::SetInterruptActiveVms(AnmVm *vm, i32 vmCount, i16 interrupt)
 
     while (vmCount != 0)
     {
-        if (vm->sprite == NULL)
+        if (!vm->sprite)
         {
             bVar1 = false;
         }
@@ -2744,8 +2744,8 @@ void AnmManager::SetInterruptActiveVms(AnmVm *vm, i32 vmCount, i16 interrupt)
         {
             vm->pendingInterrupt = interrupt;
         }
-        ++vm;
-        --vmCount;
+        vm++;
+        vmCount--;
     }
 }
 
@@ -2758,8 +2758,8 @@ void AnmManager::ExecuteScripts(AnmVm *startVm, i32 count)
         {
             g_AnmManager->ExecuteScript(startVm);
         }
-        startVm += 1;
-        --count;
+        startVm++;
+        count--;
     }
 }
 
@@ -2770,9 +2770,9 @@ void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
     {
         g_AnmManager->ExecuteAnmIdx(vm, idx);
         vm->baseSpriteIdx = vm->activeSpriteIdx;
-        ++idx;
-        ++vm;
-        --vmCount;
+        idx++;
+        vm++;
+        vmCount--;
     }
 }
 
@@ -2826,17 +2826,17 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
                                         VertexTex1DiffuseXyzrwh *vertices,
                                         i32 param3)
 {
-    if (vm->visible == 0)
+    if (!vm->visible)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->active == 0)
+    if (!vm->active)
     {
         return ZUN_ERROR;
     }
 
-    if (vm->color.bytes.a == 0)
+    if (!vm->color.bytes.a)
     {
         return ZUN_ERROR;
     }
