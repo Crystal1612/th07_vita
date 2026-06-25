@@ -170,7 +170,7 @@ void ItemManager::OnUpdate()
         this->activeItemCount++;
         if (item->state == 2)
         {
-            if (60 < item->timer)
+            if (item->timer < 60)
             {
                 itemTimerSecs = item->timer.AsFloat() / 60.0f;
                 item->currentPosition = itemTimerSecs * item->targetPosition +
@@ -178,13 +178,10 @@ void ItemManager::OnUpdate()
                                             (1.0f - itemTimerSecs);
                 goto check_collision;
             }
-            else
+            else if (item->timer == 60)
             {
-                if (item->timer == 60)
-                {
-                    item->startPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-                    item->state = 0;
-                }
+                item->startPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                item->state = 0;
             }
         }
         else

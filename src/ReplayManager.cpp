@@ -430,7 +430,10 @@ ZunResult ReplayManager::DeletedCallback(ReplayManager *arg)
     {
         ZunMemory::Free(arg->unused_40);
     }
+
     delete g_ReplayManager;
+
+    // ZUN bloat: This is doing the exact same thing twice
     g_ReplayManager = NULL;
     g_ReplayManager = NULL;
     return ZUN_SUCCESS;

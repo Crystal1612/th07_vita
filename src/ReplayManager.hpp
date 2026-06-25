@@ -105,6 +105,11 @@ struct ReplayManager
     static ReplayHeaderAndData *ValidateReplayData(ReplayHeaderAndData *data,
                                                    i32 size);
 
+    i32 StageReplayExists(i32 stage)
+    {
+        return this->data->head.stageReplayData[stage].data != NULL;
+    }
+
     i32 frameId;
     ReplayHeaderAndData *data;
     i32 stageReplayDataSize[7];

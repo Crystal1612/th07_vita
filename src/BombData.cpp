@@ -147,7 +147,7 @@ void BombData::BombReimuACalc(Player *player)
         player->SpawnBombEffect(&player->positionCenter, 32.0f, 8.0f, 0x10,
                                 ITEM_POINT_BULLET);
 
-        // what a strange way to access player->bombStartPos
+        // ZUN landmine: What a strange way to access player->bombStartPos
         *(D3DXVECTOR3 *)(bombInfo + 1) = player->positionCenter;
         ComputeBombCherryDrain(player, 4000, 0.2f);
     }
@@ -444,7 +444,7 @@ void BombData::BombReimuACalcFocus(Player *player)
                     player->SpawnBombEffect(&subInfo->bombRegionPositions, 32.0f,
                                             6.6666665f, 0xf, ITEM_POINT_BULLET);
 
-                    // Wat
+                    // ZUN bloat: This does absolutely nothing
                     subInfo->bombRegionVelocities / 8.0f;
 
                     g_SoundPlayer.PlaySoundByIdx(SOUND_ENEMY_SPELLCARD_END, 0);

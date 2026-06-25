@@ -992,7 +992,7 @@ i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
         }
         else
         {
-            continue; // this is completely pointless
+            continue; // ZUN bloat: this is completely pointless
         }
     }
     return 0;

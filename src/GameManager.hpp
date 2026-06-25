@@ -43,7 +43,7 @@ struct ZunGlobals
     i32 extendsFromPointItems;
     i32 nextNeededPointItemsForExtend;
     i32 rng1[7];
-    f32 deaths; // why the fuck are these stored as floats
+    f32 deaths; // ZUN quirk: Why the fuck are these stored as floats
     f32 rngFloat1[2];
     f32 livesRemaining;
     f32 rngFloat2[2];

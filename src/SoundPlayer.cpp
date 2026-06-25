@@ -81,7 +81,7 @@ SoundPlayer g_SoundPlayer;
 SoundPlayer::SoundPlayer()
 {
     memset(this, 0, sizeof(SoundPlayer));
-    for (i32 i = 0; i < 0x80; ++i)
+    for (i32 i = 0; i < 0x80; i++)
     {
         this->unusedSoundVolRelated[i] = -1;
     }

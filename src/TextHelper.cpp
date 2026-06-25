@@ -201,8 +201,9 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
 // FUNCTION: TH07 0x00431cec
 FormatInfo *TextHelper::GetFormatInfo(D3DFORMAT format)
 {
-    for (i32 i = 0; g_FormatInfoArray[i].format != -1 &&
-                    g_FormatInfoArray[i].format != format;
+    i32 i;
+    for (i = 0; g_FormatInfoArray[i].format != -1 &&
+                g_FormatInfoArray[i].format != format;
          i++)
     {
     }

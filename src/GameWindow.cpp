@@ -182,7 +182,6 @@ RenderResult GameWindow::Render()
         this->curFrame++;
     }
 
-LAB_00434820:
     if (g_Supervisor.cfg.windowed || g_Supervisor.VsyncEnabled())
     {
         if (this->curFrame != 0)
@@ -242,7 +241,6 @@ LAB_00434820:
         }
     }
 
-LAB_004349e2:
     if (!g_Supervisor.cfg.windowed && !g_Supervisor.VsyncEnabled())
     {
         if ((i32)g_Supervisor.cfg.frameskipConfig >= (i32)this->curFrame)

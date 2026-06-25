@@ -2750,7 +2750,7 @@ ZunResult MainMenu::Release()
 ZunResult MainMenu::DeletedCallback(MainMenu *arg)
 {
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
-    for (i32 i = 0x20; i <= 0x29; ++i)
+    for (i32 i = 0x20; i <= 0x29; i++)
     {
         g_AnmManager->ReleaseAnm(i);
     }
@@ -2770,7 +2770,7 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
 {
     MainMenu *mgr = new MainMenu;
 
-    // memset it twice just for good measure i guess
+    // ZUN bloat: memset it twice just to be nice
     memset(mgr, 0, sizeof(MainMenu));
 
     g_GameManager.isInRetryMenu = 0;

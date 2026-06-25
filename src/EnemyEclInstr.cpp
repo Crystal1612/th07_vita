@@ -1064,7 +1064,7 @@ void EnemyEclInstr::ExInsSpawnBulletsWithDirChange2(Enemy *enemy,
                 bulletProps.speed1 = 0.8f;
             }
 
-            // What
+            // ZUN bloat: What
             if (timerMod3 != 0)
             {
                 bulletProps.count1 = 1;

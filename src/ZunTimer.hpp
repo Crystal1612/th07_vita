@@ -84,11 +84,6 @@ struct ZunTimer
         return this->current >= value;
     }
 
-    friend i32 operator<(i32 value, ZunTimer& timer)
-    {
-        return timer.current < value;
-    }
-
     void operator++(int)
     {
         this->Tick();
@@ -97,6 +92,11 @@ struct ZunTimer
     void operator--(int)
     {
         this->Decrement(1);
+    }
+
+    i32 operator++()
+    {
+        return this->NextTick();
     }
 
     i32 HasTicked()

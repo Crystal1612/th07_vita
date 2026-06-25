@@ -391,7 +391,7 @@ i32 Lzss::InsertNode(i32 node, i32 *matchPosition)
     i32 matchLength = 0;
     for (;;)
     {
-        for (i = 0; i < 0x12; ++i)
+        for (i = 0; i < 0x12; i++)
         {
             delta = (u32)g_LzssDictionary[node + i & 0x1fff] -
                     (u32)g_LzssDictionary[testNode + i & 0x1fff];

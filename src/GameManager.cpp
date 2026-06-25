@@ -388,6 +388,8 @@ void GameManager::DrawLoadingSprite()
     spritePos.z = 0.0f;
     memcpy(&spriteVm.pos, spritePos, sizeof(D3DXVECTOR3));
     g_Supervisor.d3dDevice->BeginScene();
+
+    // ZUN bloat: This is doing the exact same thing twice
     ScreenEffect::DrawSquare(&rect, 0xa0000000);
     g_AnmManager->DrawNoRotation(&spriteVm);
     g_AnmManager->Flush();

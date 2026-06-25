@@ -1173,7 +1173,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 g_Gui.SetBossHealthBar((f32)enemy->life / (f32)enemy->maxLife);
             }
 
-            // this is always true
+            // ZUN bug: This is always true
             // ZUN probably meant to check bossId instead
             if (enemy->isBoss < 4)
             {
@@ -1625,7 +1625,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
 // FUNCTION: TH07 0x004232a0
 i32 EnemyManager::HasActiveBoss()
 {
-    for (i32 i = 0; i < 8; ++i)
+    for (i32 i = 0; i < 8; i++)
     {
         if (this->bosses[i])
         {

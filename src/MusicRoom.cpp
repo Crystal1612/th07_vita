@@ -401,7 +401,7 @@ ZunResult MusicRoom::RegisterChain()
     MusicRoom *musicRoom = &g_MusicRoom;
 
     memset(musicRoom, 0,
-           sizeof(MusicRoom)); // memset it twice because why not?
+           sizeof(MusicRoom)); // ZUN bloat: memset it twice because why not?
     musicRoom->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
     musicRoom->calcChain->arg = musicRoom;
     musicRoom->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;

@@ -1,8 +1,6 @@
 #include "Controller.hpp"
 
 #include <dinput.h>
-#include <stddef.h>
-#include <stdio.h>
 
 #include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
@@ -322,7 +320,7 @@ u8 *Controller::GetControllerState()
         {
             g_Supervisor.controller->GetDeviceState(sizeof(DIJOYSTATE2),
                                                     &dijoystate2);
-            // ZUN uses a stale hr here it seems
+            // ZUN bug: hr holds the result of Poll, not GetDeviceState
             if (FAILED(hr))
             {
                 return g_ControllerData;

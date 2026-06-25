@@ -1083,7 +1083,11 @@ Legend:
 
 The output of `stackcmp` may be misleading if there are severe structural mismatches, so you can't rely on it too early. In this case however, there are no structural mismatches.
 
-Inside of `stackcmp`, at least in this situation, you can basically ignore the bottom half that says "Ordered by recomp stack" and focus on the top half. This tells us the order that these variables need to be in, in order to match the original. Instead of playing around with the variables, the preferred way to force a match is to use the `var_order` pragma that comes with this repo. Simply put, just add `#pragma var_order(foo, bar)` in the order recommended by `stackcmp`. Applied to this case:
+Inside of `stackcmp`, at least in this situation, you can basically ignore the bottom half that says "Ordered by recomp stack" and focus on the top half. This tells us the order that these variables need to be in, in order to match the original.
+
+For whatever reason it seems like variables in MSVC 2002 are sorted by their hashed names, making it quite unreliable to force a match this way. It is also possible to simply break the variables into various block scopes, which may be necessary in some cases though it is (in my opinion) super clunky and ugly. 
+
+Instead of playing around with the variables, the preferred way to force a match is to use the `var_order` pragma that comes with this repo. Simply put, just add `#pragma var_order(foo, bar)` in the order recommended by `stackcmp`. Applied to this case:
 
 ```c++
 #pragma var_order(vm, i)

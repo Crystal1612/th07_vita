@@ -381,7 +381,8 @@ void Bullet::RunCommands()
     {
     switchD_00424354_caseD_40:
         this->exFlags = this->exFlags | (u16)pBVar1->type;
-        this->commandStates[3].angle = pBVar1->speed; // Wat
+        // ZUN quirk: Using the BulletCommand's speed for BulletCommandState's angle?
+        this->commandStates[3].angle = pBVar1->speed;
         if (pBVar1->angle <= -999.0f)
         {
             local_28 = this->speed;
@@ -525,7 +526,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     this->screenClearTime = 10;
 }
 
-#pragma var_order(local_8, local_c, local_10, i, local_18, bullet, local_28, \
+#pragma var_order(local_8, local_c, unused_10, i, local_18, bullet, local_28, \
                   laser, local_30, local_34)
 // FUNCTION: TH07 0x004249a0
 i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
@@ -537,13 +538,13 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     Bullet *bullet;
     f32 local_18;
     i32 i;
-    i32 local_10;
+    i32 unused_10; // ZUN bloat
     i32 local_c;
     i32 local_8;
 
     local_c = 0;
     local_8 = 2000;
-    local_10 = 0;
+    unused_10 = 0;
     bullet = g_BulletManager.bullets;
     for (i = 0; i < 0x400; i++, bullet++)
     {
@@ -554,9 +555,11 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
 
         g_ItemManager.SpawnItem(&bullet->pos, this->itemType, 1);
         g_AsciiManager.CreatePopup1(&bullet->pos, local_8,
-                                    local_8 >= param_1 ? -256 : -1);
+                                    local_8 >= param_1
+                                        ? 0xFFFFFF00
+                                        : 0xFFFFFFFF);
         local_c += local_8;
-        local_10++;
+        unused_10++;
         local_8 += 20;
         if (local_8 > param_1)
         {

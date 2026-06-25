@@ -273,7 +273,7 @@ err:
     // STRING: TH07 0x00495084
     DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
     while (false)
-        ; // ??????
+        ; // ZUN bloat: ??????
     return false;
 }
 

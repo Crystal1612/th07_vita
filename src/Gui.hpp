@@ -25,8 +25,8 @@ typedef enum MsgOpcode
 
 struct MsgRawInstrArgPortrait
 {
-    u32 portrait;
-    u32 anmScriptIdx;
+    i16 portraitIdx;
+    i16 anmScriptIdx;
 };
 
 struct MsgRawInstrArgDialogue
@@ -43,8 +43,13 @@ struct MsgRawInstrArgPause
 
 struct MsgRawInstrArgSwitch
 {
-    i16 portraitIdx;
+    i16 unkIdx;
     u8 interrupt;
+};
+
+struct MsgRawInstrArgMusic
+{
+    i32 musicIdx;
 };
 
 union MsgRawInstrArgs {
@@ -52,6 +57,7 @@ union MsgRawInstrArgs {
     MsgRawInstrArgDialogue dialogue;
     MsgRawInstrArgPause pause;
     MsgRawInstrArgSwitch msgSwitch;
+    MsgRawInstrArgMusic music;
 };
 
 struct MsgRawInstr
@@ -186,7 +192,17 @@ struct Gui
     }
 
     i32 frameCounter;
-    u32 flags;
+    union {
+        u32 flags;
+        struct
+        {
+            u32 showLives : 2;
+            u32 showBombs : 2;
+            u32 showPower : 2;
+            u32 showGraze : 2;
+            u32 showPoint : 2;
+        };
+    };
     struct GuiImpl *impl;
     f32 bombNameBarLength;
     f32 spellcardBarLength;

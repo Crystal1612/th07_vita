@@ -8,6 +8,7 @@
 // FUNCTION: TH07 0x0044a460
 void ScreenEffect::Clear(D3DCOLOR color)
 {
+    // ZUN bloat: This is doing the exact same thing twice
     g_Supervisor.d3dDevice->Clear(0, NULL, 3, color, 1.0f, 0);
     if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
     {
