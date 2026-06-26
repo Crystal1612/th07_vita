@@ -163,6 +163,8 @@ cflags = [
     "/GF",
     "/Zi",
     "/DNDEBUG",
+    "/wd4101", # these just got really annoying
+    "/wd4244",
     f'/I"{conv_path(VC_PATH / "include")}"',
     f'/I"{conv_path(VC_PATH / "PlatformSDK" / "include")}"',
     f'/I"{conv_path(DX8_PATH / "include")}"',

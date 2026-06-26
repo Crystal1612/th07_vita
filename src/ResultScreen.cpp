@@ -82,7 +82,7 @@ i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *hscr)
     local_14 = prevNode;
     while (local_14->next &&
            (!local_14->next->data ||
-            (hscr->score < local_14->next->data->score)))
+            hscr->score < local_14->next->data->score))
     {
         local_14 = local_14->next;
         local_8++;
@@ -180,7 +180,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
                                 bVar2 = true;
                                 local_2c = local_24;
                             }
-                            if ((local_24->magic == VRSM_MAGIC) && (local_24->version == 1))
+                            if (local_24->magic == VRSM_MAGIC && local_24->version == 1)
                             {
                                 if (g_Supervisor.CheckIntegrity(
                                         ((Vrsm *)local_24)->versionStr,
@@ -202,7 +202,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
                             local_24 = (Th7k *)((u8 *)local_24 + local_24->th7kLen);
                             local_28 -= len;
                         }
-                        if ((bVar2) && (local_2c->version == 1))
+                        if (bVar2 && local_2c->version == 1)
                         {
                             goto LAB_00444ed5;
                         }
@@ -267,9 +267,9 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
     for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
          local_c = local_c - (u32)pTVar2->th7kLen)
     {
-        if ((((local_8->magic == HSCR_MAGIC) && (local_8->version == 1)) &&
-             (local_8->character == character)) &&
-            (local_8->difficulty == difficulty))
+        if (local_8->magic == HSCR_MAGIC && local_8->version == 1 &&
+            local_8->character == character &&
+            local_8->difficulty == difficulty)
         {
             if (!node)
             {
@@ -331,7 +331,7 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *catk)
         for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
              local_c = local_c - (u32)pTVar1->th7kLen)
         {
-            if ((local_8->magic == CATK_MAGIC) && (local_8->version == 1))
+            if (local_8->magic == CATK_MAGIC && local_8->version == 1)
             {
                 if (0x8c < (u16)local_8->idx)
                 {
@@ -360,7 +360,7 @@ ZunResult ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *param_2)
         {
             return ZUN_ERROR;
         }
-        if ((local_8->magic == LSNM_MAGIC) && (local_8->version == 1))
+        if (local_8->magic == LSNM_MAGIC && local_8->version == 1)
         {
             break;
         }
@@ -407,7 +407,7 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *clrd)
     local_10 = scoreDatCopy->fileLength - scoreDatCopy->dataOffset;
     while (0 < local_10)
     {
-        if ((local_8->magic == CLRD_MAGIC) && (local_8->version == 1))
+        if (local_8->magic == CLRD_MAGIC && local_8->version == 1)
         {
             if (local_8->characterShotType >= 6)
             {
@@ -462,10 +462,10 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *pscr)
         for (local_18 = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_18;
              local_18 = local_18 - (u32)pTVar1->th7kLen)
         {
-            if ((local_c->magic == PSCR_MAGIC) && (local_c->version == 1))
+            if (local_c->magic == PSCR_MAGIC && local_c->version == 1)
             {
-                if ((5 < local_c->character) ||
-                    (4 < local_c->difficulty || (6 < local_c->stage)))
+                if (5 < local_c->character ||
+                    (4 < local_c->difficulty || 6 < local_c->stage))
                 {
                     break;
                 }
@@ -490,7 +490,7 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *param_2)
     for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
          local_c = local_c - (u32)*puVar1)
     {
-        if ((local_8->magic == PLST_MAGIC) && (local_8->version == 1))
+        if (local_8->magic == PLST_MAGIC && local_8->version == 1)
         {
             param_2 = local_8;
         }
@@ -630,7 +630,7 @@ void ResultScreen::WriteScore()
                  local_5c--)
             {
                 uVar1 = local_64[1];
-                bVar3 = ((i32)(local_5d & 0xe0) >> 5) | local_5d << 3;
+                bVar3 = (i32)(local_5d & 0xe0) >> 5 | local_5d << 3;
                 local_64[1] = local_64[1] ^ bVar3;
                 local_5d = bVar3 + uVar1;
                 local_64++;
@@ -862,7 +862,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             g_SoundPlayer.PlaySoundByIdx(SOUND_EXTEND, 0);
         }
     switchD_00445ddb_caseD_3:
-        if ((arg->charUsed != arg->cursor) && (arg->frameTimer == 20))
+        if (arg->charUsed != arg->cursor && arg->frameTimer == 20)
         {
             arg->charUsed = arg->cursor;
             g_AnmManager->DrawStringFormat2(arg->spellcardListVms, 0xffffff, 0,
@@ -900,15 +900,15 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         arg->cursor = arg->diffPlayed;
         goto switchD_00445ddb_caseD_0;
     case 9:
-        if (((arg->lastSpellcardSelected != arg->cursor) ||
-             (arg->prevSpellcardListPage != arg->spellcardListPage)) &&
-            (arg->frameTimer == 20))
+        if ((arg->lastSpellcardSelected != arg->cursor ||
+             arg->prevSpellcardListPage != arg->spellcardListPage) &&
+            arg->frameTimer == 20)
         {
             arg->lastSpellcardSelected = arg->cursor;
             arg->prevSpellcardListPage = arg->spellcardListPage;
             for (curVmIdx = arg->lastSpellcardSelected * 10;
-                 (curVmIdx < arg->lastSpellcardSelected * 10 + 10 &&
-                  (curVmIdx < 141));
+                 curVmIdx < arg->lastSpellcardSelected * 10 + 10 &&
+                 curVmIdx < 141;
                  curVmIdx++)
             {
                 if (g_GameManager.catk[curVmIdx].numAttemptsPerShot[6] == 0)
@@ -1048,8 +1048,8 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         arg->frameTimer = 0;
     switchD_00445ddb_caseD_1:
         iVar1 = MoveCursor(arg, 9);
-        if ((arg->cursor == 5) &&
-            (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0))
+        if (arg->cursor == 5 &&
+            g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
         {
             arg->cursor += iVar1;
         }
@@ -1177,8 +1177,8 @@ ZunResult ResultScreen::HandleResultKeyboard()
     AnmVm *local_c;
     i32 local_8;
 
-    if ((g_Supervisor.CanSaveReplay()) ||
-        ((g_Supervisor.flags >> 3 & 1) != 0))
+    if (g_Supervisor.CanSaveReplay() ||
+        (g_Supervisor.flags >> 3 & 1) != 0)
     {
         this->resultScreenState = 0x10;
         this->frameTimer = 0;
@@ -1338,7 +1338,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
         {
             this->curScore.name[local_20] = g_AlphabetList[this->selectedChar];
         LAB_00446fd4:
-            if ((this->cursor < 8) &&
+            if (this->cursor < 8 &&
                 (this->cursor = this->cursor + 1, this->cursor == 8))
             {
                 this->selectedChar = 0x5f;
@@ -1398,8 +1398,8 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     {
         if (this->frameTimer == 60)
         {
-            if ((g_Supervisor.CanSaveReplay() == 0) &&
-                ((g_Supervisor.flags >> 3 & 1) == 0))
+            if (g_Supervisor.CanSaveReplay() == 0 &&
+                (g_Supervisor.flags >> 3 & 1) == 0)
             {
                 if (g_GameManager.globals->numRetries == 0)
                 {
@@ -1588,7 +1588,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                         }
                         strcpy(this->lsnmHeader.name, this->replayName);
                     }
-                    if ((this->cursor < 8) &&
+                    if (this->cursor < 8 &&
                         (this->cursor = this->cursor + 1, this->cursor == 8))
                     {
                         this->selectedChar = 0x5f;
@@ -1719,7 +1719,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 this->defaultReplay.data.score = g_GameManager.globals->score;
                 if (*(i32 *)&this->replays[this->cursor].head.magic ==
                         *(i32 *)&"T7RP" &&
-                    ((this->replays[this->cursor].head.version & 0xfff) == 0x100))
+                    (this->replays[this->cursor].head.version & 0xfff) == 0x100)
                 {
                     local_8 = this->vms;
                     for (local_10 = 0; local_10 < 0x29; local_10++)
@@ -1783,7 +1783,7 @@ ZunResult ResultScreen::CheckConfirmButton()
             this->resultScreenState = 0x11;
         }
     }
-    else if ((this->resultScreenState == 0x11) && (0x1d < this->frameTimer))
+    else if (this->resultScreenState == 0x11 && 0x1d < this->frameTimer)
     {
         this->frameTimer = 60;
         this->resultScreenState = 0xb;
@@ -2029,7 +2029,7 @@ i32 ResultScreen::DrawStats()
             vm = this->spellcardListVms;
             for (i32 i = 0; i < 14; i++, vm++)
             {
-                vm->color.bytes.a = (this->frameTimer * 255) / 40;
+                vm->color.bytes.a = this->frameTimer * 255 / 40;
             }
         }
         else
@@ -2039,7 +2039,7 @@ i32 ResultScreen::DrawStats()
         break;
 
     case 21:
-        if ((this->frameTimer % 60 == 0) &&
+        if (this->frameTimer % 60 == 0 &&
             (g_Supervisor.UpdateStartupTime(),
              g_GameManager.plst.totalSeconds != this->lastTotalSeconds))
         {
@@ -2064,7 +2064,7 @@ i32 ResultScreen::DrawStats()
             vm = this->spellcardListVms;
             for (i32 i = 0; i < 14; i++, vm++)
             {
-                vm->color.bytes.a = 255 - (this->frameTimer * 255) / 20;
+                vm->color.bytes.a = 255 - this->frameTimer * 255 / 20;
             }
             break;
         }
@@ -2161,12 +2161,12 @@ ZunResult ResultScreen::DrawFinalStats()
         pos.y += 22.0f;
         AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d",
                                     (i32)g_GameManager.globals->deaths);
-        rankingProbably -= ((f32)(i32)g_GameManager.globals->deaths * 5.0f - 10.0f);
+        rankingProbably -= (f32)(i32)g_GameManager.globals->deaths * 5.0f - 10.0f;
 
         pos.y += 22.0f;
         AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d",
                                     (i32)g_GameManager.globals->bombsUsed);
-        rankingProbably -= ((f32)(i32)g_GameManager.globals->bombsUsed * 2.0f - 10.0f);
+        rankingProbably -= (f32)(i32)g_GameManager.globals->bombsUsed * 2.0f - 10.0f;
 
         pos.y += 22.0f;
         AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d",
@@ -2268,9 +2268,9 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             g_AnmManager->DrawNoRotation(arg->spellcardListVms + 10);
             local_38.y = local_38.y + 16.0f;
             for (local_14 = 0;
-                 (local_14 < 10 &&
-                  (local_40 = arg->lastSpellcardSelected * 10 + local_14,
-                  local_40 < 141));
+                 local_14 < 10 &&
+                 (local_40 = arg->lastSpellcardSelected * 10 + local_14,
+                 local_40 < 141);
                  local_14++)
             {
                 local_3c = local_38.x;
@@ -2318,7 +2318,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                         g_GameManager.catk[local_40]
                             .numSuccessesPerShot[arg->prevSpellcardListPage]);
                 }
-                local_38.x = (local_38.x - 496.0f) + 424.0f;
+                local_38.x = local_38.x - 496.0f + 424.0f;
                 local_38.y -= 13.0f;
                 g_AsciiManager.color = 0xffa08090;
                 g_AsciiManager.scale.x = 0.8f;
@@ -2343,12 +2343,12 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 else if (arg->frameTimer < 20)
                 {
                     local_38.y =
-                        (f32)(((20 - arg->frameTimer) * 0x21) / 20) + local_38.y;
+                        (f32)((20 - arg->frameTimer) * 0x21 / 20) + local_38.y;
                 }
                 else
                 {
                     local_38.y =
-                        (f32)(((arg->frameTimer - 20) * 0x21) / 20) + local_38.y;
+                        (f32)((arg->frameTimer - 20) * 0x21 / 20) + local_38.y;
                 }
             }
             if (0x27 < arg->frameTimer)
@@ -2390,8 +2390,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "%2d",
                                             local_14 + 1);
                 local_38.x += 48.0f;
-                if ((arg->resultScreenState == 10) &&
-                    (local_28->data->isPlayerScore))
+                if (arg->resultScreenState == 10 &&
+                    local_28->data->isPlayerScore)
                 {
                     strncpy(buf, "        ", 9);
                     if (arg->cursor < 8)
@@ -2414,8 +2414,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                         local_28->data->name, local_28->data->score,
                         (i32)local_28->data->numRetries, (u32)local_28->data->stage);
                 }
-                else if ((local_28->data->stage == 7) ||
-                         (local_28->data->stage == 8))
+                else if (local_28->data->stage == 7 ||
+                         local_28->data->stage == 8)
                 {
                     AsciiManager::AddFormatText(
                         // STRING: TH07 0x00496488
@@ -2438,7 +2438,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             }
         }
     }
-    if ((arg->resultScreenState == 10) || (arg->resultScreenState == 0xe))
+    if (arg->resultScreenState == 10 || arg->resultScreenState == 0xe)
     {
         local_38.x = 160.0f;
         local_38.y = 356.0f;
@@ -2453,11 +2453,11 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                     g_AsciiManager.color = 0xffffffc0;
                     if (arg->frameTimer % 0x40 < 0x20)
                     {
-                        local_44 = ((f32)(arg->frameTimer % 0x20) * 0.8f) / 32.0f + 1.2f;
+                        local_44 = (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f + 1.2f;
                     }
                     else
                     {
-                        local_44 = 2.0f - ((f32)(arg->frameTimer % 0x20) * 0.8f) / 32.0f;
+                        local_44 = 2.0f - (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f;
                     }
                     g_AsciiManager.scale.y = local_44;
                     local_44 = -(local_44 - 1.0f) * 8.0f;
@@ -2494,7 +2494,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     }
     g_AsciiManager.scale.x = 1.0f;
     g_AsciiManager.scale.y = 1.0f;
-    if ((10 < arg->resultScreenState) && (arg->resultScreenState < 0x10))
+    if (10 < arg->resultScreenState && arg->resultScreenState < 0x10)
     {
         local_24 = arg->vms + 0x12;
         for (local_14 = 0; local_14 < 6; local_14++)
@@ -2524,7 +2524,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 AsciiManager::AddFormatText(
                     // STRING: TH07 0x00496400
                     &g_AsciiManager, &local_38, "No.%.2d %8s %5s  %7s %9d0",
-                    local_14 + 1, arg->replayName, (arg->defaultReplay).data.date,
+                    local_14 + 1, arg->replayName, arg->defaultReplay.data.date,
                     g_CharactersAndShotTypesStrings[(u32)g_GameManager.shotType +
                                                     (u32)g_GameManager.character * 2]);
                 g_AsciiManager.color = 0xfff0f0ff;
@@ -2544,7 +2544,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             }
             else if (*(i32 *)&arg->replays[local_14].head.magic ==
                          *(i32 *)&"T7RP" &&
-                     ((arg->replays[local_14].head.version & 0xfff) == 0x100))
+                     (arg->replays[local_14].head.version & 0xfff) == 0x100)
             {
                 AsciiManager::AddFormatText(
                     &g_AsciiManager, &local_38, "No.%.2d %8s %5s  %7s %9d0",
@@ -2564,8 +2564,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     }
     g_AsciiManager.color = 0xffffffff;
     arg->DrawFinalStats();
-    if (((arg->resultScreenState == 20) || (arg->resultScreenState == 21)) ||
-        (arg->resultScreenState == 0x16))
+    if (arg->resultScreenState == 20 || arg->resultScreenState == 21 ||
+        arg->resultScreenState == 0x16)
     {
         local_24 = arg->spellcardListVms;
         for (local_14 = 0; local_14 < 0xe; local_14++)
@@ -2671,7 +2671,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     // STRING: TH07 0x00496374
     strcpy(arg->lsnmHeader.name, "        ");
     arg->isClearingReplayName = ParseLsnm(arg->scoreDat, &arg->lsnmHeader);
-    if ((arg->resultScreenState != 10) && (arg->resultScreenState != 0x12))
+    if (arg->resultScreenState != 10 && arg->resultScreenState != 0x12)
     {
         ParseCatk(arg->scoreDat, g_GameManager.catk);
         ParseClrd(arg->scoreDat, g_GameManager.clrd);
@@ -2680,7 +2680,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     }
     if (arg->resultScreenState == 0x12)
     {
-        if (g_GameManager
+        if ((u32)g_GameManager
                 .pscr[g_GameManager.shotType + (u32)g_GameManager.character * 2]
                      [g_GameManager.currentStage - 1][g_GameManager.difficulty]
                 .score < g_GameManager.globals->score)
@@ -2699,8 +2699,8 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         arg->totalPlayCountPerCharacter[i + 1] = 0;
         for (local_1c = 0; local_1c < 141; local_1c = local_1c + 1)
         {
-            if (((local_18->magic == CATK_MAGIC) && (local_18->version == 1)) &&
-                (local_18->numSuccessesPerShot[i] != 0))
+            if (local_18->magic == CATK_MAGIC && local_18->version == 1 &&
+                local_18->numSuccessesPerShot[i] != 0)
             {
                 arg->totalPlayCountPerCharacter[i + 1] =
                     arg->totalPlayCountPerCharacter[i + 1] + 1;

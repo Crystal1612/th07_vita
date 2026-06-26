@@ -113,6 +113,7 @@ struct AnmLoadedSprite
     i32 spriteId;
 };
 
+#pragma warning(disable : 4200)
 struct AnmRawInstr
 {
     i16 opcode;

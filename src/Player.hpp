@@ -84,7 +84,9 @@ struct PlayerBombInfo
         if (g_GameManager.cherry - g_GameManager.globals->cherryStart >= cherryDrain)
         {
             g_GameManager.cherry -= cherryDrain;
-        } else {
+        }
+        else
+        {
             g_GameManager.cherry = g_GameManager.globals->cherryStart;
         }
     }
@@ -184,7 +186,7 @@ struct Player
                         D3DXVECTOR3 *param_3, f32 param_4, i32 canGraze);
     i32 CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
     i32 CalcDamageToEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
-                                i32 *param_3);
+                          i32 *param_3);
     i32 CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
 
     void Die();
@@ -198,7 +200,7 @@ struct Player
     static void SpawnBullets(Player *player, u32 timer);
     void StartFireBulletTimer();
 
-    inline void SetToTopLeftPos(AnmVm *vm)
+    void SetToTopLeftPos(AnmVm *vm)
     {
         vm->pos[0] += g_GameManager.arcadeRegionTopLeftPos.x;
         vm->pos[1] += g_GameManager.arcadeRegionTopLeftPos.y;

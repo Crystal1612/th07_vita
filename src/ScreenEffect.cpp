@@ -43,11 +43,11 @@ u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
 {
     if (arg->duration != 0)
     {
-        arg->alpha = (255.0f - (arg->timer.AsFloat() * 255.0f) /
-                                   (f32)arg->duration);
+        arg->alpha = (i32)(255.0f - arg->timer.AsFloat() * 255.0f /
+                                        (f32)arg->duration);
         if (arg->alpha < 0)
         {
-            arg->alpha = 0.0f;
+            arg->alpha = (i32)0.0f;
         }
     }
     if (arg->timer >= arg->duration)
@@ -177,10 +177,10 @@ u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
 {
     if (arg->duration != 0)
     {
-        arg->alpha = (arg->timer.AsFloat() * 255.0f) / (f32)arg->duration;
+        arg->alpha = (i32)(arg->timer.AsFloat() * 255.0f / (f32)arg->duration);
         if (arg->alpha < 0)
         {
-            arg->alpha = 0.0f;
+            arg->alpha = (i32)0.0f;
         }
     }
     if (arg->timer >= arg->duration)
@@ -211,19 +211,19 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
     if (arg->timer < arg->duration)
     {
         arg->alpha =
-            (f32)((u32)((arg->args[1] >> 0x18) -
-                        (u32)(arg->timer.AsFloat() *
-                              (f32)(arg->args[1] >> 0x18)) /
-                            (f32)arg->duration));
+            (i32)(f32)(u32)((arg->args[1] >> 0x18) -
+                            (u32)(arg->timer.AsFloat() *
+                                  (f32)(arg->args[1] >> 0x18)) /
+                                (f32)arg->duration);
         if (arg->alpha < 0)
         {
-            arg->alpha = 0.0f;
+            arg->alpha = (i32)0.0f;
         }
     }
     else
     {
-        arg->alpha = 0.0f;
-        arg->args[0] = arg->args[0] - 1;
+        arg->alpha = (i32)0.0f;
+        arg->args[0]--;
         if ((i32)arg->args[0] < 1)
         {
             return 0;
@@ -268,8 +268,8 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
     }
 
     f32 fVar1 = (f32)(i32)arg->args[0] +
-                (arg->timer.AsFloat() *
-                 (f32)(i32)(arg->args[1] - arg->args[0])) /
+                arg->timer.AsFloat() *
+                    (f32)(i32)(arg->args[1] - arg->args[0]) /
                     (f32)arg->duration;
     switch (g_Rng.GetRandomU32InRange(3))
     {

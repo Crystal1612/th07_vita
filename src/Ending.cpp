@@ -69,8 +69,8 @@ u32 Ending::OnUpdate(Ending *arg)
 // FUNCTION: TH07 0x0041d380
 u32 Ending::OnDraw(Ending *arg)
 {
-    g_AnmManager->DrawEndingRect(0, 0, 0, arg->backgroundPos.x,
-                                 arg->backgroundPos.y, 0x280, 0x1e0);
+    g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x,
+                                 (i32)arg->backgroundPos.y, 640, 480);
     for (i32 i = 0; i < 0xf; i++)
     {
         g_AnmManager->Draw(&arg->sprites[i]);
@@ -115,7 +115,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = 0xff - (this->timeFading * 0xff) / this->fadeFrames;
+        color = 0xff - this->timeFading * 0xff / this->fadeFrames;
         this->endingFadeRectColor.color = color * 0x1000000;
         this->timeFading++;
         break;
@@ -126,7 +126,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = (this->timeFading * 0xff) / this->fadeFrames;
+        color = this->timeFading * 0xff / this->fadeFrames;
         this->endingFadeRectColor.color =
             color << 0x18;
         this->timeFading++;
@@ -139,7 +139,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = 0xff - (this->timeFading * 0xff) / this->fadeFrames;
+        color = 0xff - this->timeFading * 0xff / this->fadeFrames;
         this->endingFadeRectColor.color = color * 0x1000000 | 0xffffff;
         this->timeFading++;
         break;
@@ -150,7 +150,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = (this->timeFading * 0xff) / this->fadeFrames;
+        color = this->timeFading * 0xff / this->fadeFrames;
         this->endingFadeRectColor.color = color << 0x18 | 0xffffff;
         this->timeFading++;
         break;
@@ -301,7 +301,7 @@ ZunResult Ending::ParseEndFile()
                 break;
             case 'M':
                 this->endFileDataPtr++;
-                musicFadeFrames = ReadEndFileParameter();
+                musicFadeFrames = (f32)ReadEndFileParameter();
                 g_Supervisor.FadeOutMusic(musicFadeFrames);
                 break;
             case 's':
@@ -318,12 +318,12 @@ ZunResult Ending::ParseEndFile()
                 this->timer3 = ReadEndFileParameter();
                 this->minWaitResetFrames = ReadEndFileParameter();
                 while (*this->endFileDataPtr != '\n' &&
-                       (*this->endFileDataPtr != '\r'))
+                       *this->endFileDataPtr != '\r')
                 {
                     this->endFileDataPtr++;
                 }
                 while (*this->endFileDataPtr == '\n' ||
-                       (*this->endFileDataPtr == '\r'))
+                       *this->endFileDataPtr == '\r')
                 {
                     this->endFileDataPtr++;
                 }
@@ -333,12 +333,12 @@ ZunResult Ending::ParseEndFile()
                 this->timer2 = ReadEndFileParameter();
                 this->minWaitFrames = ReadEndFileParameter();
                 while (*this->endFileDataPtr != '\n' &&
-                       (*this->endFileDataPtr != '\r'))
+                       *this->endFileDataPtr != '\r')
                 {
                     this->endFileDataPtr++;
                 }
                 while (*this->endFileDataPtr == '\n' ||
-                       (*this->endFileDataPtr == '\r'))
+                       *this->endFileDataPtr == '\r')
                 {
                     this->endFileDataPtr++;
                 }
@@ -371,12 +371,12 @@ ZunResult Ending::ParseEndFile()
                 return ZUN_ERROR;
             }
             while (*this->endFileDataPtr != '\n' &&
-                   (*this->endFileDataPtr != '\r'))
+                   *this->endFileDataPtr != '\r')
             {
                 this->endFileDataPtr++;
             }
             while (*this->endFileDataPtr == '\n' ||
-                   (*this->endFileDataPtr == '\r'))
+                   *this->endFileDataPtr == '\r')
             {
                 this->endFileDataPtr++;
             }
@@ -391,8 +391,8 @@ ZunResult Ending::ParseEndFile()
                                           this->textColor.color, 0xffffffff, local_54);
                 this->sprites[this->timesFileParsed].SetPendingInterrupt(1);
             }
-            while ((*this->endFileDataPtr == '\n' || (*this->endFileDataPtr == '\0')) ||
-                   (*this->endFileDataPtr == '\r'))
+            while (*this->endFileDataPtr == '\n' || *this->endFileDataPtr == '\0' ||
+                   *this->endFileDataPtr == '\r')
             {
                 this->endFileDataPtr++;
             }

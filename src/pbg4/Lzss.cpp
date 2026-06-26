@@ -199,7 +199,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
 
     local_15 = 0x80;
     bVar1 = 0;
-    if (!(dst) && (dst = (u8 *)GlobalAlloc(0, dstLen), dst == NULL))
+    if (!dst && (dst = (u8 *)GlobalAlloc(0, dstLen), dst == NULL))
     {
         return NULL;
     }
@@ -335,7 +335,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
     }
     while (local_15 != 0x80)
     {
-        if ((local_15 == 0x80) && ((i32)local_1c - (i32)src < srcLen))
+        if (local_15 == 0x80 && (i32)local_1c - (i32)src < srcLen)
         {
             local_1c++;
         }

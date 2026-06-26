@@ -101,7 +101,7 @@ start:
         goto cleanup;
     }
     res = RENDER_RESULT_KEEP_RUNNING;
-    g_GameWindow.curFrame = 0xe2;
+    g_GameWindow.curFrame = -30;
     while (!g_GameWindow.isAppClosing)
     {
         if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))

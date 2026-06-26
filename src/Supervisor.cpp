@@ -99,8 +99,8 @@ void Supervisor::CheckTiming()
     }
 
     timeDiff -= perfDiff;
-    timeDiff = (timeDiff * 1000.0 + (f64)this->curTime.wMilliseconds -
-                (f64)this->prevTime.wMilliseconds);
+    timeDiff = timeDiff * 1000.0 + (f64)this->curTime.wMilliseconds -
+               (f64)this->prevTime.wMilliseconds;
     timeDiff /= 1000.0;
 
     perfDiff = (f64)(this->curPerfCounter.LowPart - this->prevPerfCounter.LowPart) /
@@ -280,7 +280,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                 break;
             case 10:
                 GameManager::CutChain();
-                if ((!g_GameManager.practice) && (g_GameManager.difficulty < 4))
+                if (!g_GameManager.practice && g_GameManager.difficulty < 4)
                 {
                     g_GameManager.currentStage = 0;
                 }
@@ -391,9 +391,9 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     }
     arg->wantedState = arg->curState;
     arg->calcCount = arg->calcCount + 1;
-    if ((arg->calcCount % 4000 == 3999) &&
-        (g_Supervisor.CheckIntegrity("0100b", g_Supervisor.exeSize,
-                                     g_Supervisor.exeChecksum) != ZUN_SUCCESS))
+    if (arg->calcCount % 4000 == 3999 &&
+        g_Supervisor.CheckIntegrity("0100b", g_Supervisor.exeSize,
+                                    g_Supervisor.exeChecksum) != ZUN_SUCCESS)
     {
         return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
     }
@@ -874,7 +874,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                 g_NumFramesSinceLastTime = 0;
                 // STRING: TH07 0x00496fa0
                 sprintf(g_FpsCounterBuffer, "%.02ffps", (f64)fps);
-                if ((g_GameManager.notInMenu) && (param_1 != 0))
+                if (g_GameManager.notInMenu && param_1 != 0)
                 {
                     targetFps = 60.0f;
                     g_Supervisor.fpsAccumulator = g_Supervisor.fpsAccumulator + targetFps;
@@ -901,7 +901,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
 
                     if (!g_GameManager.replay)
                     {
-                        g_Supervisor.curFps = (fps + 0.5f);
+                        g_Supervisor.curFps = fps + 0.5f;
                     }
                     else
                     {
@@ -928,8 +928,8 @@ void Supervisor::DrawFpsCounter(i32 param_1)
                                     (g_Supervisor.perfFrequency.LowPart >> 1))
         {
             elapsedTimeInSecs =
-                ((f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
-                 (f32)g_Supervisor.perfFrequency.LowPart);
+                (f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
+                (f32)g_Supervisor.perfFrequency.LowPart;
             g_PerformanceCounter.LowPart = local_18.LowPart;
             g_PerformanceCounter.HighPart = local_18.HighPart;
             g_FpsUpdateCounter++;
@@ -942,14 +942,14 @@ void Supervisor::DrawFpsCounter(i32 param_1)
     }
 
 LAB_00439350:
-    if (!(g_Supervisor.isInEnding) && (param_1 != 0))
+    if (!g_Supervisor.isInEnding && param_1 != 0)
     {
         local_24.x = 512.0f;
         local_24.y = 464.0f;
         local_24.z = 0.0f;
         g_AsciiManager.AddString(&local_24, g_FpsCounterBuffer);
-        if ((g_GameManager.replay) &&
-            (g_GameManager.notInMenu))
+        if (g_GameManager.replay &&
+            g_GameManager.notInMenu)
         {
             local_30.x = 384.0f;
             local_30.y = 448.0f;
@@ -1185,8 +1185,8 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         {
             ReadFile(bgm2, bgm2Data, 0x10, &bytesRead2, NULL);
             CloseHandle(bgm2);
-            if (((bgm2Data[0] != 0x5641575a) || (bgm2Data[1] != 1)) ||
-                (bgm2Data[2] != 0x700))
+            if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 ||
+                bgm2Data[2] != 0x700)
             {
                 // STRING: TH07 0x00496ee4
                 g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
@@ -1219,8 +1219,8 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         {
             ReadFile(bgm, bgmData, 0x10, &bytesRead, NULL);
             CloseHandle(bgm);
-            if (((bgmData[0] != 0x5641575a) || (bgmData[1] != 1)) ||
-                (bgmData[2] != 0x700))
+            if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
+                bgmData[2] != 0x700)
             {
                 g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
                 return ZUN_ERROR;
@@ -1651,7 +1651,7 @@ ZunResult Supervisor::CheckIntegrity(const char *version, i32 exeSize,
                         local_8 = local_8 + 6;
                         // STRING: TH07 0x00496c10
                         sscanf(local_8, "%d %d", &local_18, &local_c);
-                        if ((local_18 == exeSize) && (local_c == exeChecksum))
+                        if (local_18 == exeSize && local_c == exeChecksum)
                         {
                             return ZUN_SUCCESS;
                         }
@@ -1659,7 +1659,7 @@ ZunResult Supervisor::CheckIntegrity(const char *version, i32 exeSize,
                     }
                     local_14 = local_8;
                     local_8 = strchr(local_8, 10) + 1;
-                    local_10 -= ((u8 *)local_8 - (u8 *)local_14);
+                    local_10 -= (u8 *)local_8 - (u8 *)local_14;
                 }
                 return ZUN_ERROR;
             }

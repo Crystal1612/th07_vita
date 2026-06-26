@@ -64,6 +64,7 @@ struct ZunImageInfo
     D3DFORMAT format;
 };
 
+#pragma warning(disable : 4200)
 struct ZunImageInfoEmbedded
 {
     i16 magic;

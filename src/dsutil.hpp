@@ -109,7 +109,7 @@ class CSoundManager
 
     HRESULT Initialize(HWND hWnd, DWORD dwCoopLevel, DWORD dwPrimaryChannels,
                        DWORD dwPrimaryFreq, DWORD dwPrimaryBitRate);
-    inline LPDIRECTSOUND8 GetDirectSound()
+    LPDIRECTSOUND8 GetDirectSound()
     {
         return pDS;
     }
@@ -203,7 +203,7 @@ class CStreamingSound : public CSound
     void FadeOut(f32 duration)
     {
         this->m_dwIsFadingOut = 1;
-        this->m_iCurFadeoutProgress = (duration * 60.0f);
+        this->m_iCurFadeoutProgress = (i32)(duration * 60.0f);
         this->m_iTotalFadeout =
             this->m_iCurFadeoutProgress;
     }

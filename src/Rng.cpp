@@ -9,7 +9,7 @@ u16 Rng::GetRandomU16()
     u16 uVar1;
 
     uVar1 = (this->seed ^ 0x9630) - 0x6553;
-    this->seed = (((uVar1 & 0xc000) >> 14) + uVar1 * 4) & 0xFFFF;
+    this->seed = ((uVar1 & 0xc000) >> 14) + uVar1 * 4 & 0xFFFF;
     this->generationCount++;
     return this->seed;
 }

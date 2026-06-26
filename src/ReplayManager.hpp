@@ -87,7 +87,9 @@ C_ASSERT(sizeof(ReplayHeaderAndData) == 0xe8);
 
 struct ReplayManager
 {
-    ReplayManager() {}
+    ReplayManager()
+    {
+    }
 
     static ZunResult RegisterChain(i32 isDemo, const char *replayFilename);
 

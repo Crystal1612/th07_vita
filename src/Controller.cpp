@@ -145,7 +145,7 @@ u16 Controller::GetControllerInput(u16 buttons)
         SetButtonFromControllerInputs(&buttons,
                                       g_Supervisor.cfg.controllerMapping.skipButton,
                                       TH_BUTTON_SKIP, pji.dwButtons);
-        distance = ((g_JoystickCaps.wXmax - g_JoystickCaps.wXmin) / 2) / 2;
+        distance = (g_JoystickCaps.wXmax - g_JoystickCaps.wXmin) / 2 / 2;
         buttons |= JOYSTICK_MIDPOINT(g_JoystickCaps.wXmin, g_JoystickCaps.wXmax) +
                                distance <
                            pji.dwXpos
@@ -156,7 +156,7 @@ u16 Controller::GetControllerInput(u16 buttons)
                                     distance
                        ? TH_BUTTON_LEFT
                        : 0;
-        distance = ((g_JoystickCaps.wYmax - g_JoystickCaps.wYmin) / 2) / 2;
+        distance = (g_JoystickCaps.wYmax - g_JoystickCaps.wYmin) / 2 / 2;
         buttons |= JOYSTICK_MIDPOINT(g_JoystickCaps.wYmin, g_JoystickCaps.wYmax) +
                                distance <
                            pji.dwYpos

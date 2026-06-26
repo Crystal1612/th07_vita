@@ -29,13 +29,13 @@ u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
 ItemManager g_ItemManager;
 
 // FUNCTION: TH07 0x004325c0
-void AngleToVector(D3DXVECTOR3 *out, f32 angle, f32 speed)
+void AngleToVector(D3DXVECTOR3 *vec, f32 angle, f32 speed)
 {
-    /* out->x = cosf(angle) * speed;
-     * out->y = sinf(angle) * speed;
+    /* vec->x = cosf(angle) * speed;
+     * vec->y = sinf(angle) * speed;
      */
     __asm {
-        mov eax, out
+        mov eax, vec
         fld [angle]
         fsincos
         fmul [speed]
@@ -306,7 +306,7 @@ void ItemManager::OnUpdate()
                     itemScore += (g_GameManager.cherry - g_GameManager.globals->cherryStart - 50000) / 5;
                 }
                 itemScore -= itemScore % 10;
-                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, (item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect == 1) ? 0xffffff00 : 0xffffffff);
+                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect == 1 ? 0xffffff00 : 0xffffffff);
                 g_GameManager.AddScore(itemScore);
                 g_GameManager.globals->pointItemsCollectedThisStage++;
                 g_GameManager.globals->pointItemsCollectedForExtend++;
@@ -432,7 +432,7 @@ void ItemManager::OnUpdate()
             case ITEM_POINT_BULLET:
                 if (!g_Player.isBombing)
                 {
-                    itemScore = (g_GameManager.globals->grazeInTotal / 40) * 10 + 300;
+                    itemScore = g_GameManager.globals->grazeInTotal / 40 * 10 + 300;
                     if (itemScore <= 0)
                     {
                         itemScore = 10;
@@ -468,7 +468,7 @@ void ItemManager::OnUpdate()
                                     ? 50000
                                     : 50000 - item->OffsetFromPoc() * 100;
                     itemScore -= itemScore % 10;
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, (item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect) ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect ? 0xffffff00 : 0xffffffff);
                     g_GameManager.AddScore(itemScore);
                 }
                 itemScore = 1000;
@@ -480,7 +480,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.AddCherryPlus(itemScore);
                 break;
             case ITEM_STAR:
-                itemScore = (g_GameManager.globals->grazeInTotal / 40) * 10 + 300;
+                itemScore = g_GameManager.globals->grazeInTotal / 40 * 10 + 300;
                 if (itemScore <= 0)
                 {
                     itemScore = 10;

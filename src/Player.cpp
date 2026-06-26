@@ -284,8 +284,8 @@ i32 ShtData::UpdateHomingBullet(Player *player, PlayerBullet *bullet)
                 bullet->speed = 1.0f;
             }
 
-            bullet->velocity.x = (x * bullet->speed) / length;
-            bullet->velocity.y = (y * bullet->speed) / length;
+            bullet->velocity.x = x * bullet->speed / length;
+            bullet->velocity.y = y * bullet->speed / length;
         }
         else
         {
@@ -295,8 +295,8 @@ i32 ShtData::UpdateHomingBullet(Player *player, PlayerBullet *bullet)
                 x = bullet->velocity.x;
                 y = bullet->velocity.y;
                 length = sqrtf(x * x + y * y);
-                bullet->velocity.x = (x * bullet->speed) / length;
-                bullet->velocity.y = (y * bullet->speed) / length;
+                bullet->velocity.x = x * bullet->speed / length;
+                bullet->velocity.y = y * bullet->speed / length;
             }
         }
     }
@@ -331,8 +331,8 @@ i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
             {
                 bullet->speed = 1.0f;
             }
-            bullet->velocity.x = (x * bullet->speed) / length;
-            bullet->velocity.y = (y * bullet->speed) / length;
+            bullet->velocity.x = x * bullet->speed / length;
+            bullet->velocity.y = y * bullet->speed / length;
         }
         else
         {
@@ -342,8 +342,8 @@ i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
                 x = bullet->velocity.x;
                 y = bullet->velocity.y;
                 length = sqrtf(x * x + y * y);
-                bullet->velocity.x = (x * bullet->speed) / length;
-                bullet->velocity.y = (y * bullet->speed) / length;
+                bullet->velocity.x = x * bullet->speed / length;
+                bullet->velocity.y = y * bullet->speed / length;
             }
         }
     }
@@ -479,7 +479,7 @@ i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
         bullet->vm.pos.y = bullet->posHistory[i].y;
         bullet->vm.pos.z = bullet->posHistory[i].z;
 
-        bullet->vm.color.bytes.a = origAlpha - (origAlpha * i) / bullet->trailLength;
+        bullet->vm.color.bytes.a = origAlpha - origAlpha * i / bullet->trailLength;
 
         *bullet->GetVmPosX() += g_GameManager.arcadeRegionTopLeftPos.x;
         *bullet->GetVmPosY() += g_GameManager.arcadeRegionTopLeftPos.y;
@@ -1210,7 +1210,7 @@ void Player::ScoreGraze(D3DXVECTOR3 *param_1)
     g_SoundPlayer.PlaySoundByIdx(SOUND_GRAZE, 0);
     g_EnemyManager.spellcardInfo.grazeBonusScore =
         g_EnemyManager.spellcardInfo.grazeBonusScore + 2500 +
-        ((g_GameManager.cherry - g_GameManager.globals->cherryStart) / 1500) * 20;
+        (g_GameManager.cherry - g_GameManager.globals->cherryStart) / 1500 * 20;
     g_GameManager.AddScore(2000);
     if (this->hasBorder == BORDER_ACTIVE)
     {
@@ -1623,7 +1623,7 @@ i32 Player::HandlePlayerInputs()
         {
             if (this->velocity.x != 0.0f)
             {
-                angleStep = ((-(this->velocity.x / 4.0f) * ZUN_PI) / 5.0f) / 10.0f;
+                angleStep = -(this->velocity.x / 4.0f) * ZUN_PI / 5.0f / 10.0f;
                 this->optionAngle -= angleStep;
                 if (this->optionAngle < -2.1991148f)
                 {
@@ -1639,8 +1639,8 @@ i32 Player::HandlePlayerInputs()
                 if (fabsf(this->optionAngle - -1.5707964f) > 0.03141593f)
                 {
                     angleStep = this->optionAngle < -1.5707964f
-                                   ? 0.06283186f * g_Supervisor.effectiveFramerateMultiplier
-                                   : -0.06283186f * g_Supervisor.effectiveFramerateMultiplier;
+                                    ? 0.06283186f * g_Supervisor.effectiveFramerateMultiplier
+                                    : -0.06283186f * g_Supervisor.effectiveFramerateMultiplier;
                     this->optionAngle += angleStep;
                 }
                 else
@@ -1836,12 +1836,12 @@ i32 Player::UpdateDeath()
     else
     {
         invulnScale = this->invulnerabilityTimer.AsFloat() /
-                30.0f;
+                      30.0f;
         this->playerSprite.scale.y = 3.0f * invulnScale + 1.0f;
         this->playerSprite.scale.x = 1.0f - 1.0f * invulnScale;
         this->playerSprite.color.color =
-            (u32)(255.0f - (this->invulnerabilityTimer.AsFloat() *
-                            255.0f) /
+            (u32)(255.0f - this->invulnerabilityTimer.AsFloat() *
+                               255.0f /
                                30.0f)
                 << 0x18 |
             0xffffff;
@@ -1882,14 +1882,14 @@ void Player::Respawn()
 {
     this->bulletGracePeriod = 60;
     f32 invulnScale = 1.0f - this->invulnerabilityTimer.AsFloat() /
-                           30.0f;
+                                 30.0f;
     this->playerSprite.scale.y = 2.0f * invulnScale + 1.0f;
     this->playerSprite.scale.x = 1.0f - 1.0f * invulnScale;
     this->playerSprite.blendMode = 1;
     this->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->playerSprite.color.color =
-        (this->invulnerabilityTimer.GetCurrent() * 0xff) / 30 << 0x18 | 0xffffff;
+        this->invulnerabilityTimer.GetCurrent() * 0xff / 30 << 0x18 | 0xffffff;
     this->respawnTimer = 0;
     if (this->invulnerabilityTimer.GetCurrent() >= 30)
     {
@@ -1949,7 +1949,7 @@ void Player::UpdateState()
         {
             this->borderEffect->pos1 = this->positionCenter;
         }
-        g_GameManager.cherryPlus = (this->invulnerabilityTimer.GetCurrent() * 50000) /
+        g_GameManager.cherryPlus = this->invulnerabilityTimer.GetCurrent() * 50000 /
                                    this->borderTimer.GetCurrent();
         if (g_GameManager.cherryPlus < 0)
         {
@@ -1977,15 +1977,15 @@ void Player::UpdateState()
             {
                 color.bytes.r = color.bytes.g = color.bytes.b =
                     128 -
-                    (((540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80) /
-                     30);
+                    (540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80 /
+                        30;
             }
             else if (g_Player.invulnerabilityTimer < 30)
             {
                 color.bytes.r = color.bytes.g = color.bytes.b =
                     128 -
-                    ((g_Player.invulnerabilityTimer.GetCurrent() * 80) /
-                     30);
+                    g_Player.invulnerabilityTimer.GetCurrent() * 80 /
+                        30;
             }
             else
             {
@@ -2325,15 +2325,15 @@ u32 Player::OnDrawHighPrio(Player *arg)
         {
             color.bytes.r = color.bytes.g = color.bytes.b =
                 128 -
-                (((540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80) /
-                 30);
+                (540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80 /
+                    30;
         }
         else if (g_Player.invulnerabilityTimer < 30)
         {
             color.bytes.r = color.bytes.g = color.bytes.b =
                 128 -
-                ((g_Player.invulnerabilityTimer.GetCurrent() * 80) /
-                 30);
+                g_Player.invulnerabilityTimer.GetCurrent() * 80 /
+                    30;
         }
         else
         {
@@ -2550,7 +2550,7 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
     for (i = 0; i < (i32)(u32)(*data)->entryCount; i++)
     {
         (&(*data)->levels)[i].entry =
-            (ShtEntry *)((i32)(&(*data)->levels)[i].entry + (i32)(*data));
+            (ShtEntry *)((i32)(&(*data)->levels)[i].entry + (i32)*data);
 
         entry = (&(*data)->levels)[i].entry;
         while (entry->fireInterval >= 0)

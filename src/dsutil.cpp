@@ -97,10 +97,10 @@ HRESULT CSoundManager::SetPrimaryBufferFormat(DWORD dwPrimaryChannels,
     WAVEFORMATEX wfx;
     ZeroMemory(&wfx, sizeof(WAVEFORMATEX));
     wfx.wFormatTag = WAVE_FORMAT_PCM;
-    wfx.nChannels = dwPrimaryChannels;
+    wfx.nChannels = (WORD)dwPrimaryChannels;
     wfx.nSamplesPerSec = dwPrimaryFreq;
-    wfx.wBitsPerSample = dwPrimaryBitRate;
-    wfx.nBlockAlign = (wfx.wBitsPerSample / 8) * wfx.nChannels;
+    wfx.wBitsPerSample = (WORD)dwPrimaryBitRate;
+    wfx.nBlockAlign = wfx.wBitsPerSample / 8 * wfx.nChannels;
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 
     hr = pDSBPrimary->SetFormat(&wfx);
@@ -174,7 +174,7 @@ HRESULT CSoundManager::CreateStreaming(CStreamingSound **ppStreamingSound,
 
     for (DWORD i = 0; i < dwNotifyCount; i++)
     {
-        aPosNotify[i].dwOffset = (dwNotifySize * i) + dwNotifySize - 1;
+        aPosNotify[i].dwOffset = dwNotifySize * i + dwNotifySize - 1;
         aPosNotify[i].hEventNotify = hNotifyEvent;
     }
 
@@ -257,7 +257,7 @@ HRESULT CSoundManager::CreateStreamingFromMemory(
 
     for (DWORD i = 0; i < dwNotifyCount; i++)
     {
-        aPosNotify[i].dwOffset = (dwNotifySize * i) + dwNotifySize - 1;
+        aPosNotify[i].dwOffset = dwNotifySize * i + dwNotifySize - 1;
         aPosNotify[i].hEventNotify = hNotifyEvent;
     }
 
@@ -890,7 +890,7 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
     if (dwCurrentPlayPos2 < this->m_dwLastPlayPos)
     {
         dwPlayDelta =
-            (this->m_dwDSBufferSize - this->m_dwLastPlayPos) + dwCurrentPlayPos2;
+            this->m_dwDSBufferSize - this->m_dwLastPlayPos + dwCurrentPlayPos2;
     }
     else
     {

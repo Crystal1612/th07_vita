@@ -251,12 +251,12 @@ u32 MainMenu::OnUpdatePreInput()
         {
             g_Supervisor.PlayLoadedAudio(8);
         }
-        if (((((this->prevGameState == STATE_PRE_INPUT) ||
-               (this->prevGameState == 4)) ||
-              (this->prevGameState == STATE_SELECT_REPLAY)) ||
+        if ((this->prevGameState == STATE_PRE_INPUT ||
+             this->prevGameState == 4 ||
+             this->prevGameState == STATE_SELECT_REPLAY ||
              (this->prevGameState == 8 ||
-              (this->prevGameState == STATE_EXTRA_SELECT_DIFFICULTY))) &&
-            (g_AnmManager->LoadSurface(0, "data/title/title00.jpg") != ZUN_SUCCESS))
+              this->prevGameState == STATE_EXTRA_SELECT_DIFFICULTY)) &&
+            g_AnmManager->LoadSurface(0, "data/title/title00.jpg") != ZUN_SUCCESS)
         {
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
@@ -315,7 +315,7 @@ u32 MainMenu::OnUpdatePreInput()
         if (i != 0)
         {
             while (g_GameManager.HasReachedMaxClearsAllShotTypes() == 0 &&
-                   (this->cursor == 1))
+                   this->cursor == 1)
             {
                 this->cursor += i;
             }
@@ -678,8 +678,8 @@ u32 MainMenu::OnUpdateOptionsMenu()
             {
                 g_Supervisor.cfg.musicMode--;
             }
-            if (((g_Supervisor.cfg.opts >> 0xd & 1) == 0) &&
-                (g_Supervisor.cfg.musicMode == MUSIC_MIDI))
+            if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0 &&
+                g_Supervisor.cfg.musicMode == MUSIC_MIDI)
             {
                 g_SoundPlayer.StartBGM("thbgm.dat");
             }
@@ -936,8 +936,8 @@ u32 MainMenu::OnUpdateKeyConfig()
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             this->controlMapping = g_Supervisor.cfg.controllerMapping;
-            g_Supervisor.cfg.controllerMapping.upButton = 0xffff;
-            g_Supervisor.cfg.controllerMapping.downButton = 0xffff;
+            g_Supervisor.cfg.controllerMapping.upButton = -1;
+            g_Supervisor.cfg.controllerMapping.downButton = -1;
 
             vm = &this->vmHead[0x2f];
             UpdateMenuDigits(vm, this->controlMapping.shootButton);
@@ -1025,7 +1025,7 @@ u32 MainMenu::OnUpdateKeyConfig()
                 break;
             }
         }
-        if ((btnPressed < 0x20) && (g_LastJoystickInput != btnPressed))
+        if (btnPressed < 0x20 && g_LastJoystickInput != btnPressed)
         {
             switch (this->cursor)
             {
@@ -1137,9 +1137,9 @@ ZunResult MainMenu::UpdateMenuDigits(AnmVm *param_1, i16 param_2)
     else
     {
         g_AnmManager->SetActiveSprite(param_1, (i32)param_1->baseSpriteIdx +
-                                                   ((i32)param_2 / 10) * 2);
+                                                   (i32)param_2 / 10 * 2);
         g_AnmManager->SetActiveSprite(param_1 + 1, (i32)param_1[1].baseSpriteIdx +
-                                                       ((i32)param_2 % 10) * 2);
+                                                       (i32)param_2 % 10 * 2);
         param_1->active = 1;
         param_1[1].active = 1;
     }
@@ -1159,10 +1159,10 @@ u32 MainMenu::OnUpdateSelectDifficulty()
     case 0:
         if (this->stateTimer == 0)
         {
-            if ((((this->prevGameState != 5) && (this->prevGameState != 9)) &&
-                 (this->prevGameState != STATE_EXTRA_SELECT_CHARACTER)) &&
-                (g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
-                 ZUN_SUCCESS))
+            if (this->prevGameState != 5 && this->prevGameState != 9 &&
+                this->prevGameState != STATE_EXTRA_SELECT_CHARACTER &&
+                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
+                    ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
@@ -1231,9 +1231,9 @@ u32 MainMenu::OnUpdateSelectDifficulty()
     case 1:
         numDifficulties = this->gameState != STATE_EXTRA_SELECT_DIFFICULTY
                               ? 4
-                              : (g_GameManager.HasUnlockedPhantomAndMaxClears()
-                                     ? 2
-                                     : 1);
+                          : g_GameManager.HasUnlockedPhantomAndMaxClears()
+                              ? 2
+                              : 1;
         if (MoveCursorVertical(numDifficulties))
         {
             if (this->gameState != STATE_EXTRA_SELECT_DIFFICULTY)
@@ -1370,7 +1370,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             {
                 while (
                     g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
-                    (g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0))
+                    g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1383,7 +1383,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             {
                 while (
                     g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                    (g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0))
+                    g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1506,7 +1506,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             {
                 while (
                     g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
-                    (g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0))
+                    g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1519,7 +1519,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             {
                 while (
                     g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                    (g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0))
+                    g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -2007,10 +2007,10 @@ u32 MainMenu::OnUpdateSelectReplay()
     case 0:
         if (this->stateTimer == 0)
         {
-            if ((this->prevGameState != STATE_SELECT_REPLAY) &&
+            if (this->prevGameState != STATE_SELECT_REPLAY &&
                 // STRING: TH07 0x00495680
-                (g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
-                 ZUN_SUCCESS))
+                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
+                    ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
@@ -2355,7 +2355,7 @@ i32 MainMenu::DrawReplayMenu()
             }
             if (this->currentReplay->head.stageReplayData[i].data)
             {
-                if ((i < 6) || (this->currentReplay->data.difficulty <= 4))
+                if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
                     // STRING: TH07 0x00495538
                     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
@@ -2371,7 +2371,7 @@ i32 MainMenu::DrawReplayMenu()
             }
             else
             {
-                if ((i < 6) || (this->currentReplay->data.difficulty <= 4))
+                if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
                     // STRING: TH07 0x00495528
                     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
@@ -2607,8 +2607,8 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 5;
     }
-    if (!(g_GameManager.phantasmUnlocked) &&
-        (g_GameManager.HasUnlockedPhantomAndMaxClears()))
+    if (!g_GameManager.phantasmUnlocked &&
+        g_GameManager.HasUnlockedPhantomAndMaxClears())
     {
         frameCount = 0;
         // STRING: TH07 0x004954bc
@@ -2632,7 +2632,7 @@ ZunResult MainMenu::ActualAddedCallback()
                 local_1c.top = 0.0f;
                 local_1c.right = 639.0f;
                 local_1c.bottom = 479.0f;
-                local_20.bytes.a = ((60 - frameCount) * 0xff) / 60;
+                local_20.bytes.a = (60 - frameCount) * 0xff / 60;
                 local_20.bytes.r = local_20.bytes.g = local_20.bytes.b = 0;
                 ScreenEffect::DrawSquare(&local_1c, local_20.color);
             }
@@ -2642,7 +2642,7 @@ ZunResult MainMenu::ActualAddedCallback()
                 local_34.top = 0.0f;
                 local_34.right = 639.0f;
                 local_34.bottom = 479.0f;
-                local_24.bytes.a = ((frameCount - 840) * 0xff) / 60;
+                local_24.bytes.a = (frameCount - 840) * 0xff / 60;
                 local_24.bytes.r = local_24.bytes.g = local_24.bytes.b = 0;
                 ScreenEffect::DrawSquare(&local_34, local_24.color);
             }
@@ -2652,7 +2652,7 @@ ZunResult MainMenu::ActualAddedCallback()
             {
                 g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
             }
-            if ((120 <= frameCount && frameCount < 840) &&
+            if (120 <= frameCount && frameCount < 840 &&
                 WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU | TH_BUTTON_BOMB))
             {
                 frameCount = 840;

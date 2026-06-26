@@ -40,8 +40,8 @@ ChainElem g_GuiDrawChain;
 // FUNCTION: TH07 0x00427ae0
 i32 Gui::IsStageFinished()
 {
-    return (this->impl->stageClearTextVm.activeSpriteIdx >= 0 &&
-            this->impl->stageClearTextVm.isStopped);
+    return this->impl->stageClearTextVm.activeSpriteIdx >= 0 &&
+           this->impl->stageClearTextVm.isStopped;
 }
 
 // FUNCTION: TH07 0x00427b21
@@ -137,7 +137,7 @@ u32 Gui::OnUpdate(Gui *arg)
     arg->UpdateGui();
     arg->impl->RunMsg();
     arg->frameCounter = arg->frameCounter + 1;
-    if ((g_GameManager.currentStage == 6) && (arg->frameCounter == 300))
+    if (g_GameManager.currentStage == 6 && arg->frameCounter == 300)
     {
         g_Supervisor.PlayLoadedAudio(0);
     }
@@ -318,7 +318,7 @@ u32 Gui::OnDraw(Gui *arg)
     if (arg->impl->spellCardBonus.isShown)
     {
         g_AsciiManager.color = 0xffff0000;
-        arg->impl->spellCardBonus.pos.x = (384.0f - (strlen("Spell Card Bonus!") * 16.0f)) / 2.0f + 32.0f;
+        arg->impl->spellCardBonus.pos.x = (384.0f - strlen("Spell Card Bonus!") * 16.0f) / 2.0f + 32.0f;
         arg->impl->spellCardBonus.pos.y = 80.0f;
         AsciiManager::AddFormatText(
             &g_AsciiManager, &arg->impl->spellCardBonus.pos, "Spell Card Bonus!");
@@ -326,7 +326,7 @@ u32 Gui::OnDraw(Gui *arg)
             arg->impl->spellCardBonus.pos.y + 16.0f;
         sprintf(fmtArg, "+%d", arg->impl->spellCardBonus.fmtArg);
         arg->impl->spellCardBonus.pos.x =
-            (384.0f - (strlen(fmtArg) * 32.0f)) / 2.0f + 32.0f;
+            (384.0f - strlen(fmtArg) * 32.0f) / 2.0f + 32.0f;
         g_AsciiManager.scale.x = 2.0f;
         g_AsciiManager.scale.y = 2.0f;
         g_AsciiManager.color = 0xffff8080;
@@ -351,7 +351,7 @@ void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName, 0x704);
     AnmManager::DrawVmTextFmt(g_AnmManager, &this->impl->bombSpellcardName,
                               0xf0f0ff, 0, name);
-    this->bombNameBarLength = (f32)(u32)((strlen(name)) * 0xf) / 2.0f + 16.0f;
+    this->bombNameBarLength = (f32)(u32)(strlen(name) * 0xf) / 2.0f + 16.0f;
     this->impl->bombSpellcardNameBg.SetPendingInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
     g_Supervisor.renderSkipFrames = 2;
@@ -390,7 +390,7 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
     g_AnmManager->DrawStringFormat(&this->impl->enemySpellcardName, 0xfff0f0, 0,
                                    spellcardName);
     this->spellcardBarLength =
-        (f32)(u32)((strlen(spellcardName)) * 0xf) / 2.0f + 16.0f;
+        (f32)(u32)(strlen(spellcardName) * 0xf) / 2.0f + 16.0f;
     this->impl->enemySpellcardNameBg.SetPendingInterrupt(1);
     this->impl->spellcardBonusIndicator.SetPendingInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
@@ -479,14 +479,14 @@ ZunResult Gui::ActualAddedCallback()
                 this->impl->transitionQuads[i * 12 + j].intVars2[0] =
                     i + j * 2;
                 this->impl->transitionQuads[i * 12 + j].pos.x =
-                    ((f32)j * 32.0f - 0.5f) + 16.0f;
+                    (f32)j * 32.0f - 0.5f + 16.0f;
                 this->impl->transitionQuads[i * 12 + j].pos.y =
-                    ((f32)i * 32.0f - 0.5f) + 16.0f;
+                    (f32)i * 32.0f - 0.5f + 16.0f;
                 this->impl->transitionQuads[i * 12 + j].pos.z = 0.0f;
                 this->impl->transitionQuads[i * 12 + j].uvScrollPos.x =
-                    ((f32)j * 32.0f) / 512.0f;
+                    (f32)j * 32.0f / 512.0f;
                 this->impl->transitionQuads[i * 12 + j].uvScrollPos.y =
-                    ((f32)i * 32.0f) / 512.0f;
+                    (f32)i * 32.0f / 512.0f;
             }
         }
         this->impl->activeTransitionQuads = 0xa8;
@@ -912,7 +912,7 @@ ZunResult GuiImpl::RunMsg()
             if (this->msg.dialogueSkippable == 0 || !IS_PRESSED_GAME(TH_BUTTON_SKIP))
             {
                 if (!WAS_PRESSED_GAME(TH_BUTTON_SHOOT) ||
-                    (this->msg.framesElapsedDuringPause < 12))
+                    this->msg.framesElapsedDuringPause < 12)
                 {
                     if (this->msg.framesElapsedDuringPause >= this->msg.curInstr->args.pause.duration)
                     {
@@ -1117,7 +1117,7 @@ ZunResult GuiImpl::DrawDialogue()
     if (this->msg.timer < 60)
     {
         height =
-            (this->msg.timer.AsFloat() * 48.0f) /
+            this->msg.timer.AsFloat() * 48.0f /
             60.0f;
     }
     else
@@ -1318,8 +1318,8 @@ void Gui::UpdateGui()
         if (this->impl->bonusScore.timer < 30)
         {
             this->impl->bonusScore.pos.x =
-                (this->impl->bonusScore.timer.AsFloat() *
-                 -312.0f) /
+                this->impl->bonusScore.timer.AsFloat() *
+                    -312.0f /
                     30.0f +
                 416.0f;
         }
@@ -1338,8 +1338,8 @@ void Gui::UpdateGui()
         if (this->impl->fullPowerMode.timer < 30)
         {
             this->impl->fullPowerMode.pos.x =
-                (this->impl->fullPowerMode.timer.AsFloat() *
-                 -312.0f) /
+                this->impl->fullPowerMode.timer.AsFloat() *
+                    -312.0f /
                     30.0f +
                 416.0f;
         }
@@ -1383,10 +1383,10 @@ void Gui::UpdateGui()
             scoreBonus /= 2;
             break;
         case DIFF_HARD:
-            scoreBonus = (scoreBonus * 12) / 10;
+            scoreBonus = scoreBonus * 12 / 10;
             break;
         case DIFF_LUNATIC:
-            scoreBonus = (scoreBonus * 15) / 10;
+            scoreBonus = scoreBonus * 15 / 10;
             break;
         case DIFF_EXTRA:
             scoreBonus <<= 1;
@@ -1399,7 +1399,7 @@ void Gui::UpdateGui()
         switch (g_GameManager.defaultCfg->lifeCount)
         {
         case 3:
-            scoreBonus = (scoreBonus * 5) / 10;
+            scoreBonus = scoreBonus * 5 / 10;
             break;
         case 4:
             scoreBonus = (scoreBonus << 1) / 10;
@@ -1593,15 +1593,15 @@ void Gui::DrawGameScene()
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
     }
-    if ((this->showGraze) ||
-        ((g_Supervisor.cfg.opts >> 4 & 1) != 0))
+    if (this->showGraze ||
+        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
     {
         textDrawPos = D3DXVECTOR3(496.0f, 160.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d",
                                     g_GameManager.globals->grazeInTotal);
     }
-    if ((this->showPoint) ||
-        ((g_Supervisor.cfg.opts >> 4 & 1) != 0))
+    if (this->showPoint ||
+        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
     {
         textDrawPos = D3DXVECTOR3(496.0f, 176.0f, 0.0f);
         AsciiManager::AddFormatText(
@@ -1610,8 +1610,8 @@ void Gui::DrawGameScene()
             g_GameManager.globals->nextNeededPointItemsForExtend);
     }
     g_AnmManager->Flush();
-    if ((this->showPower) ||
-        ((g_Supervisor.cfg.opts >> 4 & 1) != 0))
+    if (this->showPower ||
+        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
 
@@ -1863,10 +1863,10 @@ void Gui::DrawStageElements()
         markerGap = (this->bossLifeMarkers <= 5) + 1;
         for (j = 0; j < secondsRemaining; j++)
         {
-            healthBarRect.left = ((f32)j * 26.0f) / (f32)secondsRemaining + 35.0f;
-            healthBarRect.right = (((f32)(j + 1) * 26.0f) / (f32)secondsRemaining + 35.0f) -
+            healthBarRect.left = (f32)j * 26.0f / (f32)secondsRemaining + 35.0f;
+            healthBarRect.right = (f32)(j + 1) * 26.0f / (f32)secondsRemaining + 35.0f -
                                   (f32)markerGap;
-            color1 = this->bossHealthBarAlpha << 0x18 | (0xffffff - (j * 0xff) / 9);
+            color1 = this->bossHealthBarAlpha << 0x18 | 0xffffff - j * 0xff / 9;
             color2 = this->bossHealthBarAlpha << 0x18 | 0x202020;
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }

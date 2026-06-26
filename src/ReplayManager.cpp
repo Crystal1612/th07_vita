@@ -39,8 +39,8 @@ u32 ReplayManager::OnUpdate(ReplayManager *arg)
     {
         g_LastFrameGameInput = g_CurFrameGameInput;
         g_CurFrameGameInput = g_CurFrameRawInput;
-        if (!(g_GameManager.defaultCfg->slowMode) &&
-            ((g_Supervisor.flags >> 3 & 1) == 0))
+        if (!g_GameManager.defaultCfg->slowMode &&
+            (g_Supervisor.flags >> 3 & 1) == 0)
         {
             stage = g_GameManager.currentStage - 1;
             if (6 < stage)
@@ -76,15 +76,15 @@ u32 ReplayManager::OnUpdateDemoLowPrio(ReplayManager *arg)
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
 
-    if (((g_Gui.HasCurrentMsgIdx()) &&
-         (g_Gui.IsDialogueSkippable())) &&
-        (arg->frameId % 3 != 2))
+    if (g_Gui.HasCurrentMsgIdx() &&
+        g_Gui.IsDialogueSkippable() &&
+        arg->frameId % 3 != 2)
     {
         return CHAIN_CALLBACK_RESULT_RESTART_FROM_FIRST_JOB;
     }
-    if (((g_GameManager.replayStage == 2) &&
-         (g_EnemyManager.HasActiveBoss() == 0)) &&
-        (arg->frameId % 5 != 4))
+    if (g_GameManager.replayStage == 2 &&
+        g_EnemyManager.HasActiveBoss() == 0 &&
+        arg->frameId % 5 != 4)
     {
         return CHAIN_CALLBACK_RESULT_RESTART_FROM_FIRST_JOB;
     }
@@ -115,7 +115,9 @@ u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
         if (g_NumOfFramesInputsWereHeld >= 30)
         {
             if (g_NumOfFramesInputsWereHeld % 8 == 0)
+            {
                 g_IsEighthFrameOfHeldInput = 1;
+            }
             if (g_NumOfFramesInputsWereHeld >= 38)
             {
                 g_NumOfFramesInputsWereHeld = 30;
@@ -171,9 +173,9 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
             arg->data->head.stageEndData[i].data = NULL;
         }
     }
-    else if ((-1 < g_GameManager.currentStage - 2) &&
-             (arg->data->head.stageReplayData[g_GameManager.currentStage - 2]
-                  .data != NULL))
+    else if (-1 < g_GameManager.currentStage - 2 &&
+             arg->data->head.stageReplayData[g_GameManager.currentStage - 2]
+                     .data != NULL)
     {
         arg->data->head.stageReplayData[g_GameManager.currentStage - 2]
             .data->score = g_GameManager.globals->score;
@@ -240,8 +242,8 @@ ReplayManager::ValidateReplayData(ReplayHeaderAndData *data, i32 size)
     u8 obfOffset;
     i32 i;
 
-    if (((data) && (data->head.magic == *(u32 *)&"T7RP")) &&
-        (data->head.version == 0x1100))
+    if (data && data->head.magic == *(u32 *)&"T7RP" &&
+        data->head.version == 0x1100)
     {
         curByte = &data->head.replaySize;
         obfOffset = data->head.key;
@@ -265,10 +267,10 @@ ReplayManager::ValidateReplayData(ReplayHeaderAndData *data, i32 size)
             memcpy(puVar1, data, sizeof(ReplayHeader));
             Lzss::Decompress(&data->data.rngValue3, data->head.compressedSize,
                              &puVar1->data.rngValue3, data->head.sizeWithoutHeader);
-            if (((puVar1->data.cfg).slowMode == 0) &&
-                (g_Supervisor.CheckIntegrity(
-                     puVar1->data.replayStr, puVar1->data.exeSize,
-                     puVar1->data.exeChecksum) == ZUN_SUCCESS))
+            if (puVar1->data.cfg.slowMode == 0 &&
+                g_Supervisor.CheckIntegrity(
+                    puVar1->data.replayStr, puVar1->data.exeSize,
+                    puVar1->data.exeChecksum) == ZUN_SUCCESS)
             {
                 free(data);
                 return puVar1;
@@ -301,7 +303,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
             arg->stageEndDataSize[i] = 0;
             if (arg->data->head.stageReplayData[i].offset != 0)
             {
-                if ((i < 6) && (arg->data->head.stageReplayData[i + 1].offset != 0))
+                if (i < 6 && arg->data->head.stageReplayData[i + 1].offset != 0)
                 {
                     arg->stageReplayDataSize[i] =
                         arg->data->head.stageReplayData[i + 1].offset -
@@ -313,7 +315,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
                         arg->data->head.stageEndData[i].offset -
                         arg->data->head.stageReplayData[i].offset;
                 }
-                if ((i < 6) && (arg->data->head.stageEndData[i + 1].offset != 0))
+                if (i < 6 && arg->data->head.stageEndData[i + 1].offset != 0)
                 {
                     arg->stageEndDataSize[i] =
                         arg->data->head.stageEndData[i + 1].offset -
@@ -322,7 +324,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
                 else
                 {
                     arg->stageEndDataSize[i] =
-                        (arg->data->head.sizeWithoutHeader + sizeof(ReplayHeader)) -
+                        arg->data->head.sizeWithoutHeader + sizeof(ReplayHeader) -
                         arg->data->head.stageEndData[i].offset;
                 }
             }
@@ -396,10 +398,10 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
         g_GameManager.globals->nextNeededPointItemsForExtend =
             arg->data->head.stageReplayData[i].data->nextNeededPointItemsForExtend;
         arg->stageReplayData = arg->data->head.stageEndData[i].data;
-        if (((1 < g_GameManager.currentStage) &&
-             (g_GameManager.currentStage < 7)) &&
-            (arg->data->head.stageReplayData[g_GameManager.currentStage - 2].data !=
-             NULL))
+        if (1 < g_GameManager.currentStage &&
+            g_GameManager.currentStage < 7 &&
+            arg->data->head.stageReplayData[g_GameManager.currentStage - 2].data !=
+                NULL)
         {
             g_GameManager.globals->score =
                 arg->data->head.stageReplayData[g_GameManager.currentStage - 2]
@@ -551,7 +553,7 @@ void ReplayManager::SaveReplay(const char *param_1, char *param_2)
     {
         goto LAB_004444a9;
     }
-    if ((!g_GameManager.practice) && ((i32)g_GameManager.difficulty < 4))
+    if (!g_GameManager.practice && g_GameManager.difficulty < 4)
     {
         bool bVar9 = true;
 
@@ -573,7 +575,7 @@ void ReplayManager::SaveReplay(const char *param_1, char *param_2)
     else
     {
     LAB_00443e18:
-        if (!(g_ReplayManager->data->data.cfg.slowMode) && (param_1))
+        if (!g_ReplayManager->data->data.cfg.slowMode && param_1)
         {
             // STRING: TH07 0x00496a80
             DebugPrint("info : Replay File write %s\r\n", param_1);
@@ -727,7 +729,7 @@ void ReplayManager::SaveReplay2(const char *param_1)
         return;
     }
     local_c = g_ReplayManager;
-    if ((!g_GameManager.practice) && (g_GameManager.difficulty < 4))
+    if (!g_GameManager.practice && g_GameManager.difficulty < 4)
     {
         if (memcmp(&g_Supervisor.cfg, &g_ReplayManager->data->data.cfg,
                    sizeof(GameConfiguration)) != 0)
@@ -735,7 +737,7 @@ void ReplayManager::SaveReplay2(const char *param_1)
             goto LAB_00444a3e;
         }
     }
-    if (!(g_ReplayManager->data->data.cfg.slowMode) && (param_1))
+    if (!g_ReplayManager->data->data.cfg.slowMode && param_1)
     {
         // STRING: TH07 0x00496a2c
         DebugPrint("info : Replay File rewrite %s\r\n", param_1);

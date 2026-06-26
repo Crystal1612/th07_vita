@@ -120,7 +120,7 @@ bool TextHelper::AllocateBufferWithFallback(i32 width, i32 height,
     {
         return true;
     }
-    else if ((format == D3DFMT_A1R5G5B5) || (format == D3DFMT_A4R4G4B4))
+    else if (format == D3DFMT_A1R5G5B5 || format == D3DFMT_A4R4G4B4)
     {
         return TryAllocateBuffer(width, height, D3DFMT_A8R8G8B8);
     }
@@ -162,14 +162,14 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
     {
         return false;
     }
-    imageWidthInBytes = (((width * formatInfo->bitCount) / 8 + 3) / 4) * 4;
+    imageWidthInBytes = (width * formatInfo->bitCount / 8 + 3) / 4 * 4;
     bitmapInfo.bmiHeader.biSize = sizeof(ThBitmapInfo);
     bitmapInfo.bmiHeader.biWidth = width;
     bitmapInfo.bmiHeader.biHeight = -(height + 1);
     bitmapInfo.bmiHeader.biPlanes = 1;
     bitmapInfo.bmiHeader.biBitCount = (WORD)formatInfo->bitCount;
     bitmapInfo.bmiHeader.biSizeImage = height * imageWidthInBytes;
-    if ((format != D3DFMT_X1R5G5B5) && (format != D3DFMT_X8R8G8B8))
+    if (format != D3DFMT_X1R5G5B5 && format != D3DFMT_X8R8G8B8)
     {
         bitmapInfo.bmiHeader.biCompression = 3;
         ((u32 *)bitmapInfo.bmiColors)[0] = formatInfo->redMask;
@@ -348,7 +348,7 @@ bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
 
     dstWidthBytes = lockedRect.Pitch;
     srcWidthBytes = this->imageWidthInBytes;
-    srcBuf = (u8 *)this->buffer;
+    srcBuf = this->buffer;
     dstBuf = (u8 *)lockedRect.pBits;
     if (surfaceDesc.Format == this->GetFormat())
     {

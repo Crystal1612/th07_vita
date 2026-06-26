@@ -507,8 +507,8 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
 
     // STRING: TH07 0x00495ef8
     DebugPrint("Streming BGM Load no %d\r\n", idx);
-    blockAlign = (this->bgmPreloadFmtData[idx]->format).nBlockAlign;
-    samplesPerSec = (this->bgmPreloadFmtData[idx]->format).nSamplesPerSec;
+    blockAlign = this->bgmPreloadFmtData[idx]->format.nBlockAlign;
+    samplesPerSec = this->bgmPreloadFmtData[idx]->format.nSamplesPerSec;
     notifySize = samplesPerSec * 4 * blockAlign >> 4;
     notifySize -= notifySize % blockAlign;
     this->backgroundMusicUpdateEvent = CreateEventA(NULL, 0, 0, NULL);

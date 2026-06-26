@@ -90,6 +90,7 @@ typedef enum EclVarId
 typedef void (*EclExInstr)(struct Enemy *, struct EclRawInstr *);
 typedef void (*EclInterpFn)(struct Enemy *, struct EclInterp *, f32 t);
 
+#pragma warning(disable : 4200)
 struct EclRawHeader
 {
     i16 subCount;
@@ -103,6 +104,7 @@ struct EclRawHeader
     }
 };
 
+#pragma warning(disable : 4200)
 struct EclRawInstr
 {
     u32 time;

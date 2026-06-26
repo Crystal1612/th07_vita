@@ -473,7 +473,6 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
     }
 stop:
     timeline->timelineTime++;
-    return;
 }
 
 #pragma var_order(enemy, i, j)
@@ -585,8 +584,8 @@ i32 Enemy::HandleTimerCallback()
             }
             g_BulletManager.RemoveAllBullets(10);
             cherryPenalty =
-                ((f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
-                 0.25f);
+                (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
+                0.25f;
             cherryPenalty -= (i32)cherryPenalty % 10;
             g_GameManager.cherry -= cherryPenalty;
         }
@@ -640,7 +639,7 @@ void Enemy::Despawn()
     {
         this->canDie = 0;
     }
-    if ((this->isBoss) && (this->bossId < 4))
+    if (this->isBoss && this->bossId < 4)
     {
         g_Gui.bossPresent = 0;
     }
@@ -694,9 +693,9 @@ void Enemy::CheckBulletPlayerCollision(D3DXVECTOR3 *bulletCenter,
         g_Player.CheckGraze(bulletCenter, &grazeSize);
     }
     grazeSize = *bulletSize / 1.5f;
-    if (((g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1) &&
-         this->canDie) &&
-        (!this->isBoss && (!this->isProjectile)))
+    if (g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 &&
+        this->canDie &&
+        (!this->isBoss && !this->isProjectile))
     {
         this->life = this->life - 10;
     }
@@ -806,31 +805,31 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             enemy->hasNoCollision = 1;
         }
-        if (((!enemy->hasNoCollision) &&
-             (!enemy->isInBounds)) &&
-            (g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
-                                      enemy->primaryVm.sprite->widthPx,
-                                      enemy->primaryVm.sprite->heightPx) !=
-             0))
+        if (!enemy->hasNoCollision &&
+            !enemy->isInBounds &&
+            g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
+                                     enemy->primaryVm.sprite->widthPx,
+                                     enemy->primaryVm.sprite->heightPx) !=
+                0)
         {
             enemy->isInBounds = 1;
         }
-        if ((enemy->isInBounds == 1) &&
+        if (enemy->isInBounds == 1 &&
             (((enemy->trailFlags == 0 &&
-               (g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
-                                         enemy->primaryVm.sprite->widthPx,
-                                         enemy->primaryVm.sprite->heightPx) ==
-                0)) ||
+               g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
+                                        enemy->primaryVm.sprite->widthPx,
+                                        enemy->primaryVm.sprite->heightPx) ==
+                   0) ||
               (enemy->trailFlags != 0 &&
                (g_GameManager.IsInBounds(
                     enemy->position.x, enemy->position.y,
                     enemy->primaryVm.sprite->widthPx,
                     enemy->primaryVm.sprite->heightPx) == 0 &&
-                (g_GameManager.IsInBounds(
-                     enemy->enemyHistory[enemy->trailCount - 1].position.x,
-                     enemy->enemyHistory[enemy->trailCount - 1].position.y,
-                     enemy->primaryVm.sprite->widthPx,
-                     enemy->primaryVm.sprite->heightPx) == 0)))) &&
+                g_GameManager.IsInBounds(
+                    enemy->enemyHistory[enemy->trailCount - 1].position.x,
+                    enemy->enemyHistory[enemy->trailCount - 1].position.y,
+                    enemy->primaryVm.sprite->widthPx,
+                    enemy->primaryVm.sprite->heightPx) == 0))) &&
              !enemy->disableOOBDespawn))
         {
             enemy->active = 0;
@@ -902,11 +901,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     {
                         if (enemy->isBoss && !g_Player.isFocus)
                         {
-                            cherryGain = (damage / (10 - stageFactor / 3)) * 10;
+                            cherryGain = damage / (10 - stageFactor / 3) * 10;
                         }
                         else
                         {
-                            cherryGain = (damage / (30 - stageFactor)) * 10;
+                            cherryGain = damage / (30 - stageFactor) * 10;
                         }
                         if (cherryGain > 0x46)
                         {
@@ -935,7 +934,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         if (g_GameManager.currentStage == 4 &&
                             !enemy->isBoss)
                         {
-                            damage -= (damage / 4) + (damage / 16);
+                            damage -= damage / 4 + damage / 16;
                         }
 
                     wtf:
@@ -948,7 +947,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     {
                         damage = 0x46;
                     }
-                    g_GameManager.AddScore((damage / 5) * 10);
+                    g_GameManager.AddScore(damage / 5 * 10);
                     if (enemy->canBeDamaged)
                     {
                         if (arg->spellcardInfo.isActive)
@@ -1118,7 +1117,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 break;
             }
 
-            g_SoundPlayer.PlaySoundByIdx((i % 2) + 2, 0);
+            g_SoundPlayer.PlaySoundByIdx(i % 2 + 2, 0);
             if (enemy->deathAnm1 >= 0)
             {
                 g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1, 0xffffffff);
@@ -1230,12 +1229,12 @@ f32 AngleLerp(f32 start, f32 target, f32 t)
     if (start < target)
     {
         direct = target - start;
-        wrapped = (start + ZUN_2PI) - target;
+        wrapped = start + ZUN_2PI - target;
     }
     else
     {
         direct = start - target;
-        wrapped = (target + ZUN_2PI) - start;
+        wrapped = target + ZUN_2PI - start;
         start = target;
     }
     if (direct < wrapped)
@@ -1346,11 +1345,11 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                         }
                         if ((enemy->trailFlags & 2) != 0)
                         {
-                            enemy->primaryVm.scale.x = scale.x - ((f32)j * scale.x) / (f32)enemy->trailCount;
+                            enemy->primaryVm.scale.x = scale.x - (f32)j * scale.x / (f32)enemy->trailCount;
                         }
                         if ((enemy->trailFlags & 4) != 0)
                         {
-                            enemy->primaryVm.color.bytes.a = baseColor.bytes.a - ((baseColor.bytes.a * j) / enemy->trailCount);
+                            enemy->primaryVm.color.bytes.a = baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
                         }
                         enemy->primaryVm.pos = enemy->enemyHistory[j].position + enemy->primaryVm.offset;
                         enemy->primaryVm.pos.z = 0.3f;
@@ -1422,7 +1421,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
 
                             if ((enemy->trailFlags & 4) != 0)
                             {
-                                trailVert[1].color.bytes.a = baseColor.bytes.a - ((baseColor.bytes.a * j) / enemy->trailCount);
+                                trailVert[1].color.bytes.a = baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
                                 trailVert[0].color.bytes.a = trailVert[1].color.bytes.a;
                             }
 
@@ -1474,15 +1473,15 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
     Enemy *enemy;
 
     enemy = &arg->enemies[0];
-    if ((arg->stgEnmAnmFilename) &&
-        (g_AnmManager->LoadAnms(0xf, arg->stgEnmAnmFilename, 0x900) !=
-         ZUN_SUCCESS))
+    if (arg->stgEnmAnmFilename &&
+        g_AnmManager->LoadAnms(0xf, arg->stgEnmAnmFilename, 0x900) !=
+            ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    if ((arg->stgEnm2AnmFilename) &&
-        (g_AnmManager->LoadAnms(0x10, arg->stgEnm2AnmFilename, 0x900) !=
-         ZUN_SUCCESS))
+    if (arg->stgEnm2AnmFilename &&
+        g_AnmManager->LoadAnms(0x10, arg->stgEnm2AnmFilename, 0x900) !=
+            ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }

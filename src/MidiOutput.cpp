@@ -292,7 +292,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 
     memcpy(&hdrRaw, currentCursor, 8);
     currentCursor += sizeof(hdrRaw);
-    hdrLength = Ntohl(*(u32 *)(&hdrRaw[4]));
+    hdrLength = Ntohl(*(u32 *)&hdrRaw[4]);
     header = (u16 *)currentCursor;
     currentCursor += hdrLength;
 
@@ -451,7 +451,7 @@ void MidiOutput::OnTimerElapsed()
     trackLoaded = false;
 
     local_14 =
-        this->field_0x130 + (this->volume * this->divisions * 1000) / this->tempo;
+        this->field_0x130 + this->volume * this->divisions * 1000 / this->tempo;
     if (this->fadeOutFlag)
     {
         if (this->fadeOutElapsedMs < this->fadeOutInterval)
@@ -462,8 +462,8 @@ void MidiOutput::OnTimerElapsed()
             {
                 FadeOutSetVolume(0);
             }
-            this->fadeOutLastSetVolume = this->fadeOutVolumeMultiplier * 128.0f;
-            this->fadeOutElapsedMs = this->fadeOutElapsedMs + 1;
+            this->fadeOutLastSetVolume = (i32)(this->fadeOutVolumeMultiplier * 128.0f);
+            this->fadeOutElapsedMs++;
         }
         else
         {
@@ -630,7 +630,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             break;
         case 7:
             this->channels[opcodeLow].channelVolume = arg2;
-            volumeClamped = (f32)arg2 * this->fadeOutVolumeMultiplier;
+            volumeClamped = (i32)((f32)arg2 * this->fadeOutVolumeMultiplier);
             if (volumeClamped < 0)
             {
                 volumeClamped = 0;

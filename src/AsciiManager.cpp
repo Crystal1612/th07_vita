@@ -65,7 +65,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     i32 i;
     AsciiManagerPopup *curPopup;
 
-    if (!(g_GameManager.isInRetryMenu) && (!g_GameManager.isInPauseMenu))
+    if (!g_GameManager.isInRetryMenu && !g_GameManager.isInPauseMenu)
     {
         curPopup = arg->popups;
         for (i = 0; i < 0x2d3; i++, curPopup++)
@@ -351,15 +351,15 @@ void AsciiManager::DrawStrings()
     }
     for (i = 0; i < 4; i++)
     {
-        if ((this->bossMarkers[i].pos.x >= 56.0f) &&
-            (this->bossMarkers[i].pos.x <= 392.0f))
+        if (this->bossMarkers[i].pos.x >= 56.0f &&
+            this->bossMarkers[i].pos.x <= 392.0f)
         {
-            charWidth = fabsf((this->bossMarkers[i].pos.x - 32.0f) -
+            charWidth = fabsf(this->bossMarkers[i].pos.x - 32.0f -
                               g_Player.positionCenter.x);
             if (charWidth < 64.0f)
             {
                 this->bossMarkers[i].color.bytes.a =
-                    ((charWidth * 128.0f) / 64.0f + 48.0f);
+                    charWidth * 128.0f / 64.0f + 48.0f;
             }
             else
             {
@@ -481,7 +481,7 @@ i32 RetryMenu::OnUpdate()
         this->menuBackground.pendingInterrupt = 1;
     }
     if (WAS_PRESSED_RAW(TH_BUTTON_Q) &&
-        (this->curState != 9))
+        this->curState != 9)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
         this->curState = 9;
@@ -494,7 +494,7 @@ i32 RetryMenu::OnUpdate()
         }
         this->numFrames = 0;
     }
-    if (!(g_GameManager.replay) &&
+    if (!g_GameManager.replay &&
         WAS_PRESSED_RAW(TH_BUTTON_RESET) &&
         this->curState != 9)
     {
@@ -526,7 +526,7 @@ i32 RetryMenu::OnUpdate()
         {
             this->menuSprites[8].SetInvisible();
         }
-        if ((g_GameManager.defaultCfg)->slowMode == 0)
+        if (g_GameManager.defaultCfg->slowMode == 0)
         {
             this->menuSprites[9].SetInvisible();
         }
@@ -541,7 +541,8 @@ i32 RetryMenu::OnUpdate()
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, 0x724);
             if (g_AnmManager->CreateScreenshotTexture(this->menuBackground.sprite->startPixelInclusive.x,
                                                       this->menuBackground.sprite->startPixelInclusive.y,
-                                                      this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
+                                                      this->menuBackground.sprite->heightPx,
+                                                      this->menuBackground.sprite->widthPx))
             {
                 this->curState = 0;
                 return 0;
@@ -680,7 +681,7 @@ i32 RetryMenu::OnUpdate()
             {
                 this->menuSprites[i].SetInvisible();
             }
-            if ((g_GameManager.currentStage != 6) || (g_Gui.frameCounter >= 300))
+            if (g_GameManager.currentStage != 6 || g_Gui.frameCounter >= 300)
             {
                 // STRING: TH07 0x00498a38
                 g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, (char *)"UnPause");
@@ -816,12 +817,12 @@ void RetryMenu::OnDraw()
     if (g_GameManager.isInRetryMenu)
     {
         g_AnmManager->Flush();
-        g_Supervisor.viewport.X = (u32)(g_GameManager.arcadeRegionTopLeftPos.x);
-        g_Supervisor.viewport.Y = (u32)(g_GameManager.arcadeRegionTopLeftPos.y);
-        g_Supervisor.viewport.Width = (u32)(g_GameManager.arcadeRegionSize.x);
-        g_Supervisor.viewport.Height = (u32)(g_GameManager.arcadeRegionSize.y);
+        g_Supervisor.viewport.X = (u32)g_GameManager.arcadeRegionTopLeftPos.x;
+        g_Supervisor.viewport.Y = (u32)g_GameManager.arcadeRegionTopLeftPos.y;
+        g_Supervisor.viewport.Width = (u32)g_GameManager.arcadeRegionSize.x;
+        g_Supervisor.viewport.Height = (u32)g_GameManager.arcadeRegionSize.y;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-        if (((g_Supervisor.flags >> 1 & 1) != 0) && (this->curState != 0))
+        if ((g_Supervisor.flags >> 1 & 1) != 0 && this->curState != 0)
         {
             AnmVm local_25c = this->menuBackground;
             local_25c.zWriteDisable = 1;
@@ -856,8 +857,8 @@ i32 PauseMenu::OnUpdate()
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         return 1;
     }
-    if (((i32)(u32)g_GameManager.globals->numRetries >= g_GameManager.maxRetries) ||
-        (g_GameManager.difficulty >= 4))
+    if ((i32)(u32)g_GameManager.globals->numRetries >= g_GameManager.maxRetries ||
+        g_GameManager.difficulty >= 4)
     {
         g_GameManager.isInPauseMenu = 0;
         g_Supervisor.curState = 6;
@@ -877,7 +878,7 @@ i32 PauseMenu::OnUpdate()
             }
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[4], 0x10c);
             g_AnmManager->SetActiveSprite(&this->menuSprites[4],
-                                          (g_GameManager.maxRetries + 0x106) -
+                                          g_GameManager.maxRetries + 0x106 -
                                               (u32)g_GameManager.globals->numRetries);
             this->menuSprites[4].pendingInterrupt = 1;
             if ((g_Supervisor.flags >> 1 & 1) != 0)
@@ -1049,12 +1050,12 @@ void PauseMenu::OnDraw()
         g_Supervisor.viewport.Width = g_GameManager.arcadeRegionSize.x;
         g_Supervisor.viewport.Height = g_GameManager.arcadeRegionSize.y;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-        if (((g_Supervisor.flags >> 1 & 1) != 0) &&
-            (this->curState != 0 || (2 < this->numFrames)))
+        if ((g_Supervisor.flags >> 1 & 1) != 0 &&
+            (this->curState != 0 || 2 < this->numFrames))
         {
             g_AnmManager->DrawNoRotation(&this->menuBackground);
         }
-        if ((this->curState == 1) || (this->curState == 2))
+        if (this->curState == 1 || this->curState == 2)
         {
             g_AnmManager->DrawNoRotation(&this->menuSprites[4]);
         }
@@ -1253,9 +1254,9 @@ void AsciiManager::DrawPopups()
                 divisor = 4000 - divisor;
             }
             this->cherryDigit.color.bytes.g =
-                (cherry * 0xc0) / 50000 + (divisor * 64) / 2000;
+                cherry * 0xc0 / 50000 + divisor * 64 / 2000;
             this->cherryDigit.color.bytes.b =
-                (cherry * 0xc0) / 50000 + (divisor * 64) / 2000;
+                cherry * 0xc0 / 50000 + divisor * 64 / 2000;
             this->cherryDigit.scale.x = 1.41f;
             this->cherryDigit.scale.y = 1.41f;
             xInc = 10;

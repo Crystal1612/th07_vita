@@ -515,8 +515,8 @@ i32 GameWindow::InitD3dRendering()
                                          &g_Supervisor.projectionMatrix);
     g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
-    if (((g_Supervisor.cfg.opts & 1) == 0) &&
-        ((g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0))
+    if ((g_Supervisor.cfg.opts & 1) == 0 &&
+        (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
         // STRING: TH07 0x00497948
         g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
@@ -529,7 +529,7 @@ i32 GameWindow::InitD3dRendering()
     }
     FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
     g_GameErrorContext.Log(capsBuffer);
-    if (((g_Supervisor.cfg.opts >> 2 & 1) == 0) && (usingD3dHal))
+    if ((g_Supervisor.cfg.opts >> 2 & 1) == 0 && usingD3dHal)
     {
         if (g_Supervisor.d3dIface->CheckDeviceFormat(
                 0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
@@ -837,8 +837,8 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     if (startupInfo.lpTitle)
     {
         ext = strrchr(startupInfo.lpTitle, '.');
-        if ((FileSystem::CheckFileExists(startupInfo.lpTitle)) &&
-            (ext))
+        if (FileSystem::CheckFileExists(startupInfo.lpTitle) &&
+            ext)
         {
             // STRING: TH07 0x0049730c
             if (_stricmp(ext, ".lnk") == 0)
@@ -912,7 +912,7 @@ i32 GameWindow::ChecksumExecutable()
             return -1;
         }
 
-        for (i = 0; i < (g_LastFileSize / 4) - 1; i++, dataCursor++)
+        for (i = 0; i < g_LastFileSize / 4 - 1; i++, dataCursor++)
         {
             checksum += *dataCursor;
         }

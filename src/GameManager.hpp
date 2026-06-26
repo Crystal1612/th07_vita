@@ -90,7 +90,7 @@ struct GameManager
         this->globals->curCsum = this->globals->rng1[2];
         this->globals->csumAsSum = ComputeGameIntegrityCsum();
         this->csumFloat =
-            (f32)(i32)(this->globals->csumAsSum + this->globals->rng2[3]);
+            (f32)(this->globals->csumAsSum + this->globals->rng2[3]);
     }
 
     // FUNCTION: TH07 0x00404fe0
@@ -165,7 +165,7 @@ struct GameManager
 
     void SetCurrentPower(i32 amount)
     {
-        this->globals->currentPower = amount;
+        this->globals->currentPower = (f32)amount;
     }
 
     static ZunResult RegisterChain();

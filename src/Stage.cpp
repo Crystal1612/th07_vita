@@ -651,7 +651,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
                 local_1c.top = 16.0f;
                 local_1c.right = 416.0f;
                 local_1c.bottom = 464.0f;
-                alpha = (arg->ticksSinceSpellcardStarted * 0xff) / 60;
+                alpha = arg->ticksSinceSpellcardStarted * 0xff / 60;
                 g_AnmManager->Flush();
                 g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
                 if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
@@ -1007,7 +1007,7 @@ i32 Stage::RenderObjects(i32 zLevel)
                 }
                 else
                 {
-                    *(i8 *)&obj->flags |= 2;
+                    obj->flags |= 2;
                     didDraw = 1;
 
                     while (curQuad->type >= 0)

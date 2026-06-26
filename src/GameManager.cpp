@@ -172,8 +172,8 @@ u32 GameManager::OnUpdate(GameManager *arg)
     u32 i;
     i32 csum;
 
-    if (((arg->isInPauseMenu == 0 && arg->isInRetryMenu == 0) &&
-         arg->demo == 0) &&
+    if (arg->isInPauseMenu == 0 && arg->isInRetryMenu == 0 &&
+        arg->demo == 0 &&
         (arg->slowModeSlowActive == 0 && WAS_PRESSED_RAW(TH_BUTTON_MENU)))
     {
         arg->isInRetryMenu = 1;
@@ -190,10 +190,10 @@ u32 GameManager::OnUpdate(GameManager *arg)
         g_SoundPlayer.PlaySoundByIdx(SOUND_37, 0);
         g_Supervisor.UpdateTime();
     }
-    g_Supervisor.viewport.X = (arg->arcadeRegionTopLeftPos).x;
-    g_Supervisor.viewport.Y = (arg->arcadeRegionTopLeftPos).y;
-    g_Supervisor.viewport.Width = (arg->arcadeRegionSize).x;
-    g_Supervisor.viewport.Height = (arg->arcadeRegionSize).y;
+    g_Supervisor.viewport.X = arg->arcadeRegionTopLeftPos.x;
+    g_Supervisor.viewport.Y = arg->arcadeRegionTopLeftPos.y;
+    g_Supervisor.viewport.Width = arg->arcadeRegionSize.x;
+    g_Supervisor.viewport.Height = arg->arcadeRegionSize.y;
     g_Supervisor.viewport.MinZ = 0.0f;
     g_Supervisor.viewport.MaxZ = 1.0f;
     g_AnmManager->SetCameraMode(0xff);
@@ -237,38 +237,38 @@ u32 GameManager::OnUpdate(GameManager *arg)
     g_GameManager.csumFloat = (f32)csum + (f32)g_GameManager.globals->rng2[3];
     for (i = 0; i < 7; i++)
     {
-        if ((arg->globals->rng1[i] < 0x198f) || (arg->globals->rng1[i] > 0x1a02f))
+        if (arg->globals->rng1[i] < 0x198f || arg->globals->rng1[i] > 0x1a02f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
     for (i = 0; i < 2; i++)
     {
-        if ((arg->globals->rngFloat2[i] < 6543.0f) ||
-            (arg->globals->rngFloat2[i] > 106543.0f))
+        if (arg->globals->rngFloat2[i] < 6543.0f ||
+            arg->globals->rngFloat2[i] > 106543.0f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    arg->notInMenu = (!arg->isInPauseMenu) && (!arg->isInRetryMenu);
+    arg->notInMenu = !arg->isInPauseMenu && !arg->isInRetryMenu;
     for (i = 0; i < 2; i++)
     {
-        if ((arg->globals->rngFloat1[i] < 6543.0f) ||
-            (arg->globals->rngFloat1[i] > 106543.0f))
+        if (arg->globals->rngFloat1[i] < 6543.0f ||
+            arg->globals->rngFloat1[i] > 106543.0f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
     for (i = 0; i < 8; i++)
     {
-        if ((arg->globals->rng2[i] < 0x198f) || (arg->globals->rng2[i] > 0x1a02f))
+        if (arg->globals->rng2[i] < 0x198f || arg->globals->rng2[i] > 0x1a02f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
     g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.skyFog.color.color, 1.0f, 0);
-    if (((arg->isInRetryMenu == 1) || (arg->isInRetryMenu == 2)) ||
-        (arg->isInPauseMenu))
+    if (arg->isInRetryMenu == 1 || arg->isInRetryMenu == 2 ||
+        arg->isInPauseMenu)
     {
         return CHAIN_CALLBACK_RESULT_BREAK;
     }
@@ -317,29 +317,29 @@ u32 GameManager::OnUpdate(GameManager *arg)
     }
     for (i = 0; i < 3; i++)
     {
-        if ((arg->globals->rngFloat3[i] < 6543.0f) ||
-            (arg->globals->rngFloat3[i] > 106543.0f))
+        if (arg->globals->rngFloat3[i] < 6543.0f ||
+            arg->globals->rngFloat3[i] > 106543.0f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
     for (i = 0; i < 2; i++)
     {
-        if ((arg->globals->rngFloat4[i] < 6543.0f) ||
-            (arg->globals->rngFloat4[i] > 106543.0f))
+        if (arg->globals->rngFloat4[i] < 6543.0f ||
+            arg->globals->rngFloat4[i] > 106543.0f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
     for (i = 0; i < 5; i++)
     {
-        if ((arg->globals->csumData[i] < 0x198f) ||
-            (arg->globals->csumData[i] > 0x1a02f))
+        if (arg->globals->csumData[i] < 0x198f ||
+            arg->globals->csumData[i] > 0x1a02f)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    if ((g_GameManager.defaultCfg)->slowMode)
+    if (g_GameManager.defaultCfg->slowMode)
     {
         g_GameManager.slowModeSlowActive = 0;
         arg->bulletLagTime = arg->bulletLagTime + 1;
@@ -541,7 +541,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
 
     g_Supervisor.checkTiming = 0;
     arg->difficultyMask = 1 << arg->difficulty;
-    arg->shotTypeAndCharacter = (arg->character * 2 + arg->shotType);
+    arg->shotTypeAndCharacter = arg->character * 2 + arg->shotType;
     g_Supervisor.currentTime = timeGetTime();
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
     if (g_Supervisor.curState != 3)
@@ -741,10 +741,10 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     if (!g_GameManager.replay)
     {
         shotTypeAndChar = g_GameManager.shotTypeAndCharacter;
-        if ((arg->globals->numRetries == 0) &&
-            ((i32)(u32)arg->clrd[shotTypeAndChar]
-                 .difficultyClearedWithRetries[g_GameManager.difficulty] <
-             arg->currentStage - 1))
+        if (arg->globals->numRetries == 0 &&
+            (i32)(u32)arg->clrd[shotTypeAndChar]
+                    .difficultyClearedWithRetries[g_GameManager.difficulty] <
+                arg->currentStage - 1)
         {
             arg->clrd[shotTypeAndChar]
                 .difficultyClearedWithRetries[g_GameManager.difficulty] =
@@ -865,8 +865,8 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
 ZunResult GameManager::DeletedCallback(GameManager *arg)
 {
     g_Supervisor.StopAudio();
-    if ((g_Supervisor.cfg.musicMode == MUSIC_MIDI) &&
-        (g_Supervisor.midiOutput))
+    if (g_Supervisor.cfg.musicMode == MUSIC_MIDI &&
+        g_Supervisor.midiOutput)
     {
         g_Supervisor.midiOutput->PlayLoaded(0x1e);
     }
@@ -978,7 +978,7 @@ void GameManager::AddCherryPlus(i32 amount)
             g_Player.ActivateBorder();
         }
     }
-    if ((this->cherry >= this->cherryMax) && (oldCherry != this->cherry))
+    if (this->cherry >= this->cherryMax && oldCherry != this->cherry)
     {
         g_Gui.ShowFullPowerMode(this->cherry - this->globals->cherryStart, 3);
     }
@@ -993,7 +993,7 @@ void GameManager::AddCherry(i32 amount)
     {
         this->cherry = this->cherryMax;
     }
-    if ((this->cherry >= this->cherryMax) && (oldCherry != this->cherry))
+    if (this->cherry >= this->cherryMax && oldCherry != this->cherry)
     {
         g_Gui.ShowFullPowerMode(this->cherry - this->globals->cherryStart, 3);
     }
@@ -1042,8 +1042,8 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
             local_8++;
         }
     }
-    if ((local_8 >= 60) &&
-        (this->clrd[shotType].difficultyClearedWithRetries[4] == 99))
+    if (local_8 >= 60 &&
+        this->clrd[shotType].difficultyClearedWithRetries[4] == 99)
     {
         this->clrd[shotType].difficultyClearedWithRetries[5] = 99;
     }
