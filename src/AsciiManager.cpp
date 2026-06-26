@@ -50,7 +50,7 @@ PauseMenu::PauseMenu()
 }
 
 // FUNCTION: TH07 0x004017b0
-void IncrementCapped(u32 *param, u32 param_2)
+void IncrementCapped(u32 *param, u32 cap)
 {
     if (*param < 999999)
     {
@@ -233,7 +233,7 @@ void AsciiManager::CutChain()
 {
     g_Chain.Cut(&g_AsciiManagerCalcChain);
     g_Chain.Cut(&g_AsciiManagerOnDrawMenusChain);
-    // forgot something? popups?
+    // ZUN bug: g_AsciiManagerOnDrawPopupsChain is not cut here
 }
 
 // FUNCTION: TH07 0x00401f40

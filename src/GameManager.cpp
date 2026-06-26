@@ -266,7 +266,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.fogColor.color, 1.0f, 0);
+    g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.skyFog.color.color, 1.0f, 0);
     if (((arg->isInRetryMenu == 1) || (arg->isInRetryMenu == 2)) ||
         (arg->isInPauseMenu))
     {

@@ -2413,7 +2413,7 @@ i32 MainMenu::DrawPracticeMenu()
         g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
             .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
 
-    // this is always false, since difficultyClearedWithoutRetries is unsigned
+    // ZUN bloat: this is always false, since difficultyClearedWithoutRetries is unsigned
     if (local_10 < 0)
     {
         local_10 = 1;
@@ -2741,7 +2741,7 @@ ZunResult MainMenu::Release()
     {
         delete[] this->vmHead;
         this->vmHead = NULL;
-        this->vmHead = NULL; // ?
+        this->vmHead = NULL; // ZUN bloat: this is the same exact thing twice
     }
     return ZUN_SUCCESS;
 }

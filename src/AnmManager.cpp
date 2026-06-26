@@ -658,7 +658,7 @@ ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
     D3DXMatrixIdentity(&vm->uvMatrix);
     if (vm->sprite->cols < 1.0f)
     {
-        // This is despite the fact that spriteIdx is never used ever again
+        // ZUN bloat: This is despite the fact that spriteIdx is never used ever again
         spriteIdx = 0;
     }
     vm->matrix.m[0][0] = vm->sprite->widthPx / 256.0f;

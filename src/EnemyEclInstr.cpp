@@ -208,7 +208,7 @@ void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy,
     memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
     bulletProps.soundOverride = -1;
 
-    // Ok
+    // ZUN bloat: Ok
     instr->GetSecondArg();
 
     enemy->currentContext.eclContextArgs.floatVars1[0] = -999.0f;

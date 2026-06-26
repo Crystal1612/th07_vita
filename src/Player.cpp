@@ -49,7 +49,7 @@ ShtFunc4 g_ShtHitFuncs[4] = {
     NULL,
     ShtData::OnMissileHit,
     ShtData::SpawnHitParticles,
-    (ShtFunc4)0x00000001, // i guess bro
+    (ShtFunc4)0x00000001, // ZUN landmine: i guess bro
 };
 
 // GLOBAL: TH07 0x0049f530

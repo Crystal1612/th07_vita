@@ -112,7 +112,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
     i32 i;
     f32 bulletSpeed;
 
-    // i is assigned twice here for some reason.
+    // ZUN bloat: i is assigned twice here for some reason
     i = 0;
     for (bullet = this->bulletsStart, i = 0; i < 0x400; i++)
     {
@@ -495,9 +495,9 @@ void BulletManager::RemoveAllBullets(i32 param_1)
             continue;
         }
 
-        if (laser->state < 2)
+        if (laser->state < LASER_DESPAWNING)
         {
-            laser->state = 2;
+            laser->state = LASER_DESPAWNING;
             laser->timer = 0;
             laser->width = laser->targetWidth;
             if ((param_1 != 0) && (param_1 < 9))
@@ -574,9 +574,9 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
         {
             continue;
         }
-        if (laser->state < 2)
+        if (laser->state < LASER_DESPAWNING)
         {
-            laser->state = 2;
+            laser->state = LASER_DESPAWNING;
             laser->timer = 0;
             laser->width = laser->targetWidth;
             if (turnIntoItem)
@@ -713,10 +713,10 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         laser->hideWarning = 0;
         if (laser->startTime == 0)
         {
-            laser->state = 1;
+            laser->state = LASER_ACTIVE;
             break;
         }
-        laser->state = 0;
+        laser->state = LASER_SPAWNING;
         break;
     }
     return laser;
@@ -1151,7 +1151,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
 
         switch (laser->state)
         {
-        case 0:
+        case LASER_SPAWNING:
             if ((laser->flags & 1) != 0)
             {
                 local_24 = (laser->timer.AsFloat() * 255.0f) / (f32)laser->startTime;
@@ -1187,7 +1187,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             laser->timer = 0;
             laser->state++;
             laser->targetWidth = laser->width;
-        case 1:
+        case LASER_ACTIVE:
             g_Player.CalcLaserHitbox(&local_38, &local_20, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
             if (laser->timer < laser->duration)
             {
@@ -1200,7 +1200,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                 laser->inUse = 0;
                 continue;
             }
-        case 2:
+        case LASER_DESPAWNING:
             if ((laser->flags & 1) != 0)
             {
                 local_24 = (laser->timer.AsFloat() * 255.0f) / (f32)laser->startTime;
@@ -1310,7 +1310,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
         laser->vm0.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
         g_AnmManager->Draw(&laser->vm0);
         if ((laser->startOffset < 16.0f || laser->speed == 0.0f) &&
-            (laser->hideWarning == 0 || laser->state != 0))
+            (laser->hideWarning == 0 || laser->state != LASER_SPAWNING))
         {
             laser->vm1.pos.x = local_18 * laser->startOffset + laser->pos.x;
             laser->vm1.pos.y = local_c * laser->startOffset + laser->pos.y;

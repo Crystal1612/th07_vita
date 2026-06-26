@@ -16,6 +16,13 @@ typedef enum BulletState
     BULLET_END_ARRAY = 6
 } BulletState;
 
+typedef enum LaserState
+{
+    LASER_SPAWNING = 0,
+    LASER_ACTIVE = 1,
+    LASER_DESPAWNING = 2
+} LaserState;
+
 struct BulletTypeInfo
 {
     i32 anmFileIdx;

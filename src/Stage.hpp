@@ -5,6 +5,7 @@
 #include "ScreenEffect.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
+#include "d3dx8.h"
 #include "utils.hpp"
 
 struct StageAnms
@@ -53,12 +54,22 @@ struct StdRawInstance
     D3DXVECTOR3 pos;
 };
 
+struct StdRawInstrArgs
+{
+    AnyArg args[3];
+
+    D3DXVECTOR3 *AsVec()
+    {
+        return (D3DXVECTOR3 *)args;
+    }
+};
+
 struct StdRawInstr
 {
     i32 frame;
     i16 opcode;
     i16 size;
-    AnyArg args[3];
+    StdRawInstrArgs args;
 };
 
 struct StageCameraSky
@@ -75,6 +86,13 @@ struct StageCamera
     D3DXVECTOR3 lookAtDir;
     D3DXVECTOR3 right;
     f32 fov;
+};
+
+struct StageFog
+{
+    f32 nearPlane;
+    f32 farPlane;
+    ZunColor color;
 };
 
 struct Stage
@@ -127,14 +145,9 @@ struct Stage
     u32 stage;
     D3DXVECTOR3 position;
     D3DCOLOR color;
-    StageCameraSky skyFog;
-    ZunColor fogColor;
-    f32 fogNearPlaneEnd;
-    f32 fogFarPlaneEnd;
-    ZunColor fogColorEnd;
-    f32 fogNearPlaneStart;
-    f32 fogFarPlaneStart;
-    ZunColor fogColorStart;
+    StageFog skyFog;
+    StageFog fogEnd;
+    StageFog fogStart;
     i32 skyFogInterpDuration;
     ZunTimer skyFogInterpTimer;
     u8 renderStateWasReset;

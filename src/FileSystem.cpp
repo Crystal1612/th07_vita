@@ -80,6 +80,8 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
         CloseHandle(hFile);
         return NULL;
     }
+
+    // ZUN landmine: ReadFile is not checked for failure.
     ReadFile(hFile, buf, fsize, &fsize, NULL);
     g_LastFileSize = fsize;
     CloseHandle(hFile);

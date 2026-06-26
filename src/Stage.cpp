@@ -169,7 +169,7 @@ u32 Stage::OnUpdate(Stage *arg)
         curInstr = arg->beginningOfScript;
         arg->instructionIndex = 0;
         while ((curInstr->opcode != 0x1f ||
-                arg->scriptWaitTime != curInstr->args[0].i) &&
+                arg->scriptWaitTime != curInstr->args.args[0].i) &&
                curInstr->frame != -1)
         {
             curInstr++;
@@ -191,14 +191,14 @@ loop_begin:
         case 0:
             if (curInstr->frame == -1)
             {
-                arg->positionInterpInitial = *(D3DXVECTOR3 *)curInstr->args;
+                arg->positionInterpInitial = *curInstr->args.AsVec();
                 arg->position.x = arg->positionInterpInitial.x;
                 arg->position.y = arg->positionInterpInitial.y;
                 arg->position.z = arg->positionInterpInitial.z;
             }
             else
             {
-                pos = *(D3DXVECTOR3 *)curInstr->args;
+                pos = *curInstr->args.AsVec();
                 arg->position.x = pos.x;
                 arg->position.y = pos.y;
                 arg->position.z = pos.z;
@@ -210,80 +210,80 @@ loop_begin:
                     curInstr++;
                 }
                 arg->positionInterpEndTime = curInstr->frame;
-                arg->positionStart = *(D3DXVECTOR3 *)curInstr->args;
+                arg->positionStart = *curInstr->args.AsVec();
             }
             break;
         case 1:
-            arg->fogColor.color = curInstr->args[0].u;
-            arg->skyFog.nearPlane = curInstr->args[1].f;
-            arg->skyFog.farPlane = curInstr->args[2].f;
-            *(D3DXVECTOR3 *)&arg->fogNearPlaneStart = *(D3DXVECTOR3 *)&arg->skyFog;
+            arg->skyFog.color.color = curInstr->args.args[0].u;
+            arg->skyFog.nearPlane = curInstr->args.args[1].f;
+            arg->skyFog.farPlane = curInstr->args.args[2].f;
+            arg->fogStart = arg->skyFog;
             break;
         case 2:
-            *(D3DXVECTOR3 *)&arg->fogNearPlaneEnd = *(D3DXVECTOR3 *)&arg->skyFog;
-            arg->skyFogInterpDuration = curInstr->args[0].i;
+            arg->fogEnd = arg->skyFog;
+            arg->skyFogInterpDuration = curInstr->args.args[0].i;
             arg->skyFogInterpTimer = 0;
             break;
         case 5:
             if (arg->cameraTeleported)
             {
-                D3DXVECTOR3 diff = *(D3DXVECTOR3 *)curInstr->args - arg->camEnd.pos;
+                D3DXVECTOR3 diff = *curInstr->args.AsVec() - arg->camEnd.pos;
                 EffectManager::DoSomethingWithEffects(&diff);
                 arg->cameraTeleported = 0;
             }
             arg->camStart.pos = arg->camEnd.pos;
-            arg->camEnd.pos = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.pos = *curInstr->args.AsVec();
             if (arg->timersMax[0] == 0)
             {
-                arg->cam.pos = *(D3DXVECTOR3 *)curInstr->args;
+                arg->cam.pos = *curInstr->args.AsVec();
             }
             break;
         case 6:
-            arg->timersMax[0] = curInstr->args[0].i;
+            arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
-            arg->interpModes[0] = curInstr->args[1].i;
+            arg->interpModes[0] = curInstr->args.args[1].i;
             break;
         case 7:
             arg->camStart.lookAt = arg->camEnd.lookAt;
-            arg->camEnd.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.lookAt = *curInstr->args.AsVec();
             if (arg->timersMax[1] == 0)
             {
-                arg->cam.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+                arg->cam.lookAt = *curInstr->args.AsVec();
             }
             break;
         case 8:
-            arg->timersMax[1] = curInstr->args[0].i;
+            arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
-            arg->interpModes[1] = curInstr->args[1].i;
+            arg->interpModes[1] = curInstr->args.args[1].i;
             break;
         case 9:
             arg->camStart.up = arg->camEnd.up;
-            arg->camEnd.up = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.up = *curInstr->args.AsVec();
             if (arg->timersMax[2] == 0)
             {
-                arg->cam.up = *(D3DXVECTOR3 *)curInstr->args;
+                arg->cam.up = *curInstr->args.AsVec();
             }
             break;
         case 10:
-            arg->timersMax[2] = curInstr->args[0].i;
-            arg->interpModes[2] = curInstr->args[1].i;
+            arg->timersMax[2] = curInstr->args.args[0].i;
+            arg->interpModes[2] = curInstr->args.args[1].i;
             arg->timers[2] = 0;
             break;
         case 0xb:
             arg->camStart.fov = arg->camEnd.fov;
-            arg->camEnd.fov = curInstr->args[0].f;
+            arg->camEnd.fov = curInstr->args.args[0].f;
             if (arg->timersMax[3] == 0)
             {
-                arg->cam.fov = curInstr->args[0].f;
+                arg->cam.fov = curInstr->args.args[0].f;
             }
             break;
         case 0xc:
-            arg->timersMax[3] = curInstr->args[0].i;
+            arg->timersMax[3] = curInstr->args.args[0].i;
             arg->timers[3] = 0;
-            arg->interpModes[3] = curInstr->args[1].i;
+            arg->interpModes[3] = curInstr->args.args[1].i;
             break;
         case 0xd:
-            arg->color = curInstr->args[0].u;
+            arg->color = curInstr->args.args[0].u;
             break;
         case 3:
             if (arg->scriptWaitTime != 0)
@@ -293,66 +293,66 @@ loop_begin:
             }
             goto LAB_004061aa;
         case 4:
-            arg->instructionIndex = curInstr->args[0].i;
-            arg->scriptTime = curInstr->args[1].i;
+            arg->instructionIndex = curInstr->args.args[0].i;
+            arg->scriptTime = curInstr->args.args[1].i;
             arg->timersMax[0] = 0;
             arg->cameraTeleported = 1;
             goto loop_begin;
         case 0xe:
-            arg->camStart.pos = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camStart.pos = *curInstr->args.AsVec();
             break;
         case 0xf:
-            arg->camEnd.pos = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.pos = *curInstr->args.AsVec();
             break;
         case 0x10:
-            arg->camTangentStart.pos = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentStart.pos = *curInstr->args.AsVec();
             break;
         case 0x11:
-            arg->camTangentEnd.pos = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentEnd.pos = *curInstr->args.AsVec();
             break;
         case 0x12:
-            arg->timersMax[0] = curInstr->args[0].i;
+            arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
             arg->interpModes[0] = 7;
             break;
         case 0x13:
-            arg->camStart.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camStart.lookAt = *curInstr->args.AsVec();
             break;
         case 0x14:
-            arg->camEnd.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.lookAt = *curInstr->args.AsVec();
             break;
         case 0x15:
-            arg->camTangentStart.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentStart.lookAt = *curInstr->args.AsVec();
             break;
         case 0x16:
-            arg->camTangentEnd.lookAt = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentEnd.lookAt = *curInstr->args.AsVec();
             break;
         case 0x17:
-            arg->timersMax[1] = curInstr->args[0].i;
+            arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
             arg->interpModes[1] = 7;
             break;
         case 0x18:
-            arg->camStart.up = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camStart.up = *curInstr->args.AsVec();
             break;
         case 0x19:
-            arg->camEnd.up = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camEnd.up = *curInstr->args.AsVec();
             break;
         case 0x1a:
-            arg->camTangentStart.up = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentStart.up = *curInstr->args.AsVec();
             break;
         case 0x1b:
-            arg->camTangentEnd.up = *(D3DXVECTOR3 *)curInstr->args;
+            arg->camTangentEnd.up = *curInstr->args.AsVec();
             break;
         case 0x1c:
-            arg->timersMax[2] = curInstr->args[0].i;
+            arg->timersMax[2] = curInstr->args.args[0].i;
             arg->timers[2] = 0;
             arg->interpModes[2] = 7;
             break;
         case 0x1d:
-            if (curInstr->args[0].i >= 0)
+            if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm1, curInstr->args[0].i + 0x300);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm1, curInstr->args.args[0].i + 0x300);
             }
             else
             {
@@ -360,9 +360,9 @@ loop_begin:
             }
             break;
         case 0x1e:
-            if (curInstr->args[0].i >= 0)
+            if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm2, curInstr->args[0].i + 0x300);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm2, curInstr->args.args[0].i + 0x300);
             }
             else
             {
@@ -454,18 +454,18 @@ LAB_004061aa: {
         }
         for (i32 i = 0; i < 4; i++)
         {
-            arg->fogColor.raw[i] =
-                (u8)(((f32)arg->fogColorStart.raw[i] -
-                      (f32)arg->fogColorEnd.raw[i]) *
+            arg->skyFog.color.raw[i] =
+                (u8)(((f32)arg->fogStart.color.raw[i] -
+                      (f32)arg->fogEnd.color.raw[i]) *
                          t +
-                     (f32)arg->fogColorEnd.raw[i]);
+                     (f32)arg->fogEnd.color.raw[i]);
         }
         arg->skyFog.nearPlane =
-            (arg->fogNearPlaneStart - arg->fogNearPlaneEnd) * t +
-            arg->fogNearPlaneEnd;
+            (arg->fogStart.nearPlane - arg->fogEnd.nearPlane) * t +
+            arg->fogEnd.nearPlane;
         arg->skyFog.farPlane =
-            (arg->fogFarPlaneStart - arg->fogFarPlaneEnd) * t +
-            arg->fogFarPlaneEnd;
+            (arg->fogStart.farPlane - arg->fogEnd.farPlane) * t +
+            arg->fogEnd.farPlane;
 
         if (arg->skyFogInterpTimer >= arg->skyFogInterpDuration)
         {
@@ -598,11 +598,11 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     g_Supervisor.SetRenderState(D3DRS_ZFUNC, 4);
     if (!g_AnmManager->colorMulEnabled)
     {
-        g_Supervisor.SetRenderState(D3DRS_FOGCOLOR, arg->fogColor.color);
+        g_Supervisor.SetRenderState(D3DRS_FOGCOLOR, arg->skyFog.color.color);
     }
     else
     {
-        fogColor.color = arg->fogColor.color;
+        fogColor.color = arg->skyFog.color.color;
         fogColor.bytes.r = ClampColorChannel((u32)(fogColor.bytes.r * g_AnmManager->color.bytes.r) >> 7);
         fogColor.bytes.g = ClampColorChannel((u32)(fogColor.bytes.g * g_AnmManager->color.bytes.g) >> 7);
         fogColor.bytes.b = ClampColorChannel((u32)(fogColor.bytes.b * g_AnmManager->color.bytes.b) >> 7);
@@ -778,7 +778,7 @@ ZunResult Stage::AddedCallback(Stage *arg)
         return ZUN_ERROR;
     }
 
-    arg->fogColor.color = 0xff000000;
+    arg->skyFog.color.color = 0xff000000;
     arg->skyFog.nearPlane = 200.0f;
     arg->skyFog.farPlane = 500.0f;
     arg->cam.pos = D3DXVECTOR3(0.0f, 0.0f, 1000.0f);
@@ -1075,9 +1075,9 @@ i32 Stage::RenderObjects(i32 zLevel)
                                         goto skip_draw;
                                     }
 
-                                    curQuadVm->color.bytes.b = curQuadVm->color.bytes.b - (u8)((curQuadVm->color.bytes.b - this->fogColor.bytes.b) * var_98);
-                                    curQuadVm->color.bytes.g = curQuadVm->color.bytes.g - (u8)((curQuadVm->color.bytes.g - this->fogColor.bytes.g) * var_98);
-                                    curQuadVm->color.bytes.r = curQuadVm->color.bytes.r - (u8)((curQuadVm->color.bytes.r - this->fogColor.bytes.r) * var_98);
+                                    curQuadVm->color.bytes.b = curQuadVm->color.bytes.b - (u8)((curQuadVm->color.bytes.b - this->skyFog.color.bytes.b) * var_98);
+                                    curQuadVm->color.bytes.g = curQuadVm->color.bytes.g - (u8)((curQuadVm->color.bytes.g - this->skyFog.color.bytes.g) * var_98);
+                                    curQuadVm->color.bytes.r = curQuadVm->color.bytes.r - (u8)((curQuadVm->color.bytes.r - this->skyFog.color.bytes.r) * var_98);
                                     curQuadVm->color.bytes.a = (u8)(curQuadVm->color.bytes.a * (1.0f - var_98));
                                 }
 

@@ -1407,7 +1407,11 @@ void Gui::UpdateGui()
         }
         this->impl->stageClearBonus = scoreBonus;
 
-        // ZUN bloat: do i even gotta say anything brah
+        // ZUN bloat:
+        // To add the score, in full without divide
+        // It would be simple if we multiplied
+        // But ZUN said "we must copy paste ten times"
+        // And so we got whatever the hell this is. Perchance
         g_GameManager.AddScore(scoreBonus);
         g_GameManager.AddScore(scoreBonus);
         g_GameManager.AddScore(scoreBonus);

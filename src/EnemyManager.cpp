@@ -1045,7 +1045,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (enemy->life <= 0 && enemy->canDie)
         {
-            // ?
+            // ZUN bloat: ?
             k = 0;
             for (k = 0; k < 4; k++)
             {
@@ -1173,7 +1173,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 g_Gui.SetBossHealthBar((f32)enemy->life / (f32)enemy->maxLife);
             }
 
-            // ZUN bug: This is always true
+            // ZUN landmine: This is always true
             // ZUN probably meant to check bossId instead
             if (enemy->isBoss < 4)
             {
@@ -1187,6 +1187,10 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 bossMarkerPos.y = 472.0f;
                 bossMarkerPos.z = 0.0f;
+
+                // ZUN landmine: There's no earlier check for bossId, since ZUN
+                // instead opted to use isBoss, meaning that if bossId >= 4,
+                // there will be an OOB array access.
                 g_AsciiManager.SetBossMarkerPos(enemy->bossId, &bossMarkerPos);
                 g_AsciiManager.SetBossDamageTint(enemy->bossId, enemy->primaryVm.useColor2);
             }

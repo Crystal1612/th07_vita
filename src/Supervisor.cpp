@@ -1353,6 +1353,8 @@ i32 Supervisor::LoadAudio(i32 idx, const char *path)
         if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
         {
             strcpy(pathbuf, path);
+
+            // ZUN landmine: the result of strrchr is not checked for NULL.
             pathext = strrchr(pathbuf, '.');
             pathext[1] = 'w';
             pathext[2] = 'a';
@@ -1403,6 +1405,7 @@ ZunResult Supervisor::PlayAudio(const char *path)
     {
         if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
         {
+            // ZUN landmine: the result of strrchr is not checked for NULL.
             strcpy(local_10c, path);
             local_8 = strrchr(local_10c, 0x2e);
             local_8[1] = 'w';

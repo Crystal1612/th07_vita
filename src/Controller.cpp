@@ -320,7 +320,7 @@ u8 *Controller::GetControllerState()
         {
             g_Supervisor.controller->GetDeviceState(sizeof(DIJOYSTATE2),
                                                     &dijoystate2);
-            // ZUN bug: hr holds the result of Poll, not GetDeviceState
+            // ZUN landmine: hr holds the result of Poll, not GetDeviceState
             if (FAILED(hr))
             {
                 return g_ControllerData;
