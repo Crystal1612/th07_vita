@@ -901,7 +901,7 @@ i32 PauseMenu::OnUpdate()
         {
             break;
         }
-        this->curState = this->curState + 2;
+        this->curState += 2;
         this->numFrames = 0;
     case 1:
         this->menuSprites[2].color.color = 0xffff8080;
@@ -982,8 +982,7 @@ i32 PauseMenu::OnUpdate()
             g_GameManager.globals->guiScore = (u32)g_GameManager.globals->numRetries;
             g_GameManager.globals->guiScoreDifference = 0;
             g_GameManager.globals->score = g_GameManager.globals->guiScore;
-            g_GameManager.globals->livesRemaining =
-                (f32)g_GameManager.defaultCfg->lifeCount;
+            g_GameManager.SetLivesRemaining(g_GameManager.defaultCfg->lifeCount);
             g_GameManager.RegenerateGameIntegrityCsum();
             g_GameManager.SetBombsRemainingAndComputeCsum(
                 g_Player.shooterData->initialBombs);
@@ -1004,20 +1003,20 @@ i32 PauseMenu::OnUpdate()
                 &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                      .playCount,
                 999999);
-            IncrementCapped(&g_GameManager.plst.playDataTotals.playCount, 999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].playCount, 999999);
             IncrementCapped(
                 &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                      .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
                 999999);
             IncrementCapped(
-                &g_GameManager.plst.playDataTotals
+                &g_GameManager.plst.playDataByDifficulty[6]
                      .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
                 999999);
             IncrementCapped(
                 &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                      .retryCount,
                 999999);
-            IncrementCapped(&g_GameManager.plst.playDataTotals.retryCount, 999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].retryCount, 999999);
             g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, "UnPause");
             g_Supervisor.currentTime = timeGetTime();
             return 0;
@@ -1033,7 +1032,6 @@ i32 PauseMenu::OnUpdate()
         g_AnmManager->ExecuteScript(&this->menuBackground);
     }
     this->numFrames++;
-    UselessStack::FourBytes();
     return 0;
 }
 

@@ -101,8 +101,8 @@ struct ReplayManager
     static u32 OnUpdateDemoLowPrio(ReplayManager *arg);
     static u32 OnUpdateRng(ReplayManager *arg);
 
-    static void SaveReplay(const char *param_1, char *param_2);
-    static void SaveReplay2(const char *param_1);
+    static void SaveReplay(const char *filename, char *replayName);
+    static void SaveReplay2(const char *filename);
     static void StopRecording();
     static ReplayHeaderAndData *ValidateReplayData(ReplayHeaderAndData *data,
                                                    i32 size);
@@ -110,6 +110,11 @@ struct ReplayManager
     i32 StageReplayExists(i32 stage)
     {
         return this->data->head.stageReplayData[stage].data != NULL;
+    }
+
+    i32 IsDemo()
+    {
+        return this->isDemo;
     }
 
     i32 frameId;

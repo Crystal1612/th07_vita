@@ -1854,7 +1854,7 @@ i32 ResultScreen::DrawStats()
                         g_GameManager.plst.playDataByDifficulty[3].playCountPerShotType[i],
                         g_GameManager.plst.playDataByDifficulty[4].playCountPerShotType[i],
                         g_GameManager.plst.playDataByDifficulty[5].playCountPerShotType[i],
-                        g_GameManager.plst.playDataTotals.playCountPerShotType[i]);
+                        g_GameManager.plst.playDataByDifficulty[6].playCountPerShotType[i]);
                 }
                 else
                 {
@@ -1866,7 +1866,7 @@ i32 ResultScreen::DrawStats()
                         g_GameManager.plst.playDataByDifficulty[2].playCountPerShotType[i],
                         g_GameManager.plst.playDataByDifficulty[3].playCountPerShotType[i],
                         g_GameManager.plst.playDataByDifficulty[4].playCountPerShotType[i],
-                        g_GameManager.plst.playDataTotals.playCountPerShotType[i]);
+                        g_GameManager.plst.playDataByDifficulty[6].playCountPerShotType[i]);
                 }
             }
 
@@ -1884,7 +1884,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[3].playCount,
                     g_GameManager.plst.playDataByDifficulty[4].playCount,
                     g_GameManager.plst.playDataByDifficulty[5].playCount,
-                    g_GameManager.plst.playDataTotals.playCount);
+                    g_GameManager.plst.playDataByDifficulty[6].playCount);
             }
             else
             {
@@ -1896,13 +1896,13 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[2].playCount,
                     g_GameManager.plst.playDataByDifficulty[3].playCount,
                     g_GameManager.plst.playDataByDifficulty[4].playCount,
-                    g_GameManager.plst.playDataTotals.playCount);
+                    g_GameManager.plst.playDataByDifficulty[6].playCount);
             }
 
             vm++;
             pos.y += 34.0f;
             vm->pos = pos;
-            g_GameManager.plst.playDataTotals.noContinueClearCount =
+            g_GameManager.plst.playDataByDifficulty[6].noContinueClearCount =
                 g_GameManager.plst.playDataByDifficulty[0].noContinueClearCount +
                 g_GameManager.plst.playDataByDifficulty[1].noContinueClearCount +
                 g_GameManager.plst.playDataByDifficulty[2].noContinueClearCount +
@@ -1921,7 +1921,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[3].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[4].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[5].noContinueClearCount,
-                    g_GameManager.plst.playDataTotals.noContinueClearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].noContinueClearCount);
             }
             else
             {
@@ -1933,7 +1933,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[2].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[3].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[4].noContinueClearCount,
-                    g_GameManager.plst.playDataTotals.noContinueClearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].noContinueClearCount);
             }
 
             vm++;
@@ -1950,7 +1950,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[3].retryCount,
                     g_GameManager.plst.playDataByDifficulty[4].retryCount,
                     g_GameManager.plst.playDataByDifficulty[5].retryCount,
-                    g_GameManager.plst.playDataTotals.retryCount);
+                    g_GameManager.plst.playDataByDifficulty[6].retryCount);
             }
             else
             {
@@ -1962,7 +1962,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[2].retryCount,
                     g_GameManager.plst.playDataByDifficulty[3].retryCount,
                     g_GameManager.plst.playDataByDifficulty[4].retryCount,
-                    g_GameManager.plst.playDataTotals.retryCount);
+                    g_GameManager.plst.playDataByDifficulty[6].retryCount);
             }
 
             vm++;
@@ -1979,7 +1979,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[3].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[4].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[5].extraClearCount,
-                    g_GameManager.plst.playDataTotals.extraClearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].extraClearCount);
             }
             else
             {
@@ -1991,7 +1991,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[2].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[3].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[4].extraClearCount,
-                    g_GameManager.plst.playDataTotals.extraClearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].extraClearCount);
             }
 
             vm++;
@@ -2008,7 +2008,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[3].clearCount,
                     g_GameManager.plst.playDataByDifficulty[4].clearCount,
                     g_GameManager.plst.playDataByDifficulty[5].clearCount,
-                    g_GameManager.plst.playDataTotals.clearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].clearCount);
             }
             else
             {
@@ -2020,7 +2020,7 @@ i32 ResultScreen::DrawStats()
                     g_GameManager.plst.playDataByDifficulty[2].clearCount,
                     g_GameManager.plst.playDataByDifficulty[3].clearCount,
                     g_GameManager.plst.playDataByDifficulty[4].clearCount,
-                    g_GameManager.plst.playDataTotals.clearCount);
+                    g_GameManager.plst.playDataByDifficulty[6].clearCount);
             }
         }
 

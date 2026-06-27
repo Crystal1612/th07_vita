@@ -94,8 +94,7 @@ struct Plst : Th7k
     u32 gameMinutes;
     u32 gameSeconds;
     u32 gameMilliseconds;
-    PlstPlayCounts playDataByDifficulty[6];
-    PlstPlayCounts playDataTotals;
+    PlstPlayCounts playDataByDifficulty[7]; // 7 is Total
 };
 
 struct Lsnm : Th7k

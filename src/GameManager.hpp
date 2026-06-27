@@ -168,6 +168,11 @@ struct GameManager
         this->globals->currentPower = (f32)amount;
     }
 
+    void SetLivesRemaining(i32 amount)
+    {
+        this->globals->livesRemaining = (f32)amount;
+    }
+
     static ZunResult RegisterChain();
     static void CutChain();
 

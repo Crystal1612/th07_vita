@@ -575,7 +575,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         }
         if (!g_GameManager.replay)
         {
-            g_GameManager.globals->livesRemaining = (f32)arg->defaultCfg->lifeCount;
+            g_GameManager.SetLivesRemaining(arg->defaultCfg->lifeCount);
             g_GameManager.RegenerateGameIntegrityCsum();
             g_GameManager.SetBombsRemainingAndComputeCsum(
                 g_Player.shooterData->initialBombs);
@@ -685,14 +685,14 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                          .playCount,
                     999999);
-                IncrementCappedAgain(&g_GameManager.plst.playDataTotals.playCount,
+                IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].playCount,
                                      999999);
                 IncrementCappedAgain(
                     &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                          .playCountPerShotType[arg->shotTypeAndCharacter],
                     999999);
                 IncrementCappedAgain(
-                    g_GameManager.plst.playDataTotals.playCountPerShotType +
+                    g_GameManager.plst.playDataByDifficulty[6].playCountPerShotType +
                         arg->shotTypeAndCharacter,
                     999999);
                 if (g_Supervisor.curState == 10)
@@ -702,7 +702,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                              ->playDataByDifficulty[g_GameManager.difficulty]
                              .clearCount,
                         999999);
-                    IncrementCappedAgain(&g_GameManager.plst.playDataTotals.clearCount,
+                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].clearCount,
                                          999999);
                 }
                 if (g_GameManager.practice)
@@ -713,7 +713,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                              .extraClearCount,
                         999999);
                     IncrementCappedAgain(
-                        &g_GameManager.plst.playDataTotals.extraClearCount, 999999);
+                        &g_GameManager.plst.playDataByDifficulty[6].extraClearCount, 999999);
                 }
             }
         }

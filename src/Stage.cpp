@@ -1085,7 +1085,7 @@ i32 Stage::RenderObjects(i32 zLevel)
 
                                 if (curQuadVm->pos.z < 0.0f || curQuadVm->pos.z > 1.0f)
                                 {
-                                    // blank branch
+                                    // empty branch
                                 }
                                 else
                                 {
