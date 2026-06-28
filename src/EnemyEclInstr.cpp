@@ -674,6 +674,7 @@ void EnemyEclInstr::ExInsBurstLargeBullets(Enemy *enemy, EclRawInstr *instr)
                 case 2:
                     bulletProps.sprite = 7;
                     bulletProps.spriteOffset = 1;
+                    break;
                 }
                 if (instr->args[1].i == 0)
                 {
@@ -903,6 +904,7 @@ void EnemyEclInstr::ExInsBurstLargeBullets2(Enemy *enemy, EclRawInstr *instr)
                 case 2:
                     bulletProps.sprite = 7;
                     bulletProps.spriteOffset = 2;
+                    break;
                 }
                 if (instr->args[1].i == 0)
                 {

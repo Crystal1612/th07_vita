@@ -209,6 +209,8 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
         }
     }
     info = imageInfo;
+
+    // ZUN landmine: CreateImageSurface is not checked for failure.
     g_Supervisor.d3dDevice->CreateImageSurface(
         (i32)info->width, (i32)info->height,
         g_TextureFormatD3D8Mapping[info->format], &surf);

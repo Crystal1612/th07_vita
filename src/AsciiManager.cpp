@@ -246,6 +246,10 @@ void AsciiManager::AddString(D3DXVECTOR3 *param_1, const char *text)
 
     AsciiManagerString *curString = &this->strings[this->numStrings];
     this->numStrings++;
+
+    // ZUN landmine: I LOVE UNGUARDED STRCPYS!!!!!!!!!!!
+    // the only reason this doesn't cause a problem is because nothing more
+    // than 64 chars is passed through this function
     strcpy(curString->text, text);
     curString->position = *param_1;
     curString->color = this->color;

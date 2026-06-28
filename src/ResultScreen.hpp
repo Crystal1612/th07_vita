@@ -43,7 +43,7 @@ C_ASSERT(sizeof(Catk) == 0x78);
 struct Hscr : Th7k
 {
     u32 score;
-    u32 slowRatePercent;
+    f32 slowRatePercent;
     u8 character;
     u8 difficulty;
     u8 stage;
@@ -167,7 +167,7 @@ struct ResultScreen
     static i32 LinkScore(ScoreListNode *prevNode, Hscr *hscr);
     i32 LinkScoreEx(Hscr *out, i32 difficulty, i32 character);
     static u32 GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
-                            u32 character, u32 difficulty, u8 *noClue);
+                            u32 character, u32 difficulty, u8 *numRetries);
     static ZunResult ParseCatk(ScoreDat *scoreDat, Catk *catk);
     static ZunResult ParseClrd(ScoreDat *scoreDat, Clrd *clrd);
     static ZunResult ParsePlst(ScoreDat *scoreDat, Plst *plst);

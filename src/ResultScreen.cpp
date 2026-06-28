@@ -14,6 +14,7 @@
 #include "SoundPlayer.hpp"
 #include "ZunResult.hpp"
 #include "pbg4/Lzss.hpp"
+#include "utils.hpp"
 
 // GLOBAL: TH07 0x004964f4
 static const f32 g_DifficultyWeightsList[] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
@@ -74,39 +75,40 @@ const char *g_DifficultyNameTable[6] = {
 // FUNCTION: TH07 0x00444b56
 i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *hscr)
 {
-    ScoreListNode *pSVar1;
-    ScoreListNode *local_14;
-    i32 local_8;
+    ScoreListNode *nextNode;
+    i32 scoresAmount;
 
-    local_8 = 0;
-    local_14 = prevNode;
-    while (local_14->next &&
-           (!local_14->next->data ||
-            hscr->score < local_14->next->data->score))
+    scoresAmount = 0;
+    while (prevNode->next)
     {
-        local_14 = local_14->next;
-        local_8++;
+        if (prevNode->next->data &&
+            prevNode->next->data->score <= hscr->score)
+        {
+            break;
+        }
+        prevNode = prevNode->next;
+        scoresAmount++;
     }
-    pSVar1 = local_14->next;
-    local_14->next = (ScoreListNode *)malloc(sizeof(ScoreListNode));
-    local_14->next->prev = local_14;
-    local_14->next->data = hscr;
-    local_14->next->next = pSVar1;
-    return local_8;
+    nextNode = prevNode->next;
+    prevNode->next = (ScoreListNode *)ZunMemory::Alloc2(sizeof(ScoreListNode));
+    prevNode->next->prev = prevNode;
+    prevNode = prevNode->next;
+    prevNode->data = hscr;
+    prevNode->next = nextNode;
+    return scoresAmount;
 }
 
 // FUNCTION: TH07 0x00444bed
 void ResultScreen::FreeAllScores(ScoreListNode *scores)
 {
-    ScoreListNode *pSVar1;
-    ScoreListNode *local_c;
+    ScoreListNode *next;
 
-    local_c = scores->next;
-    while (local_c)
+    scores = scores->next;
+    while (scores)
     {
-        pSVar1 = local_c->next;
-        free(local_c);
-        local_c = pSVar1;
+        next = scores->next;
+        free(scores);
+        scores = next;
     }
 }
 
@@ -247,7 +249,7 @@ LAB_00444ed5:
 
 // FUNCTION: TH07 0x00444f0d
 u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
-                               u32 character, u32 difficulty, u8 *noClue)
+                               u32 character, u32 difficulty, u8 *numRetries)
 {
     u8 bVar1;
     Th7k *pTVar2;
@@ -283,7 +285,7 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
         pTVar2 = local_8;
         local_8 = (Hscr *)((u8 *)local_8 + local_8->th7kLen);
     }
-    if (noClue)
+    if (numRetries)
     {
         if (!scoreDat->scores->next)
         {
@@ -293,7 +295,7 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
         {
             bVar1 = scoreDat->scores->next->data->numRetries;
         }
-        *noClue = bVar1;
+        *numRetries = bVar1;
     }
     if (!scoreDat->scores->next)
     {
@@ -504,169 +506,199 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *param_2)
 void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
 {
     FreeAllScores(scoreDat->scores);
-    free(scoreDat->scores);
+    ZunMemory::Free(scoreDat->scores);
     free(scoreDat);
 }
 
+#pragma function(memcpy, strcpy)
+#pragma var_order(difficulty, characterSlot, fileBuffer, sizeOfFile,         \
+                  currentCharacter, character, clrd, catk, pscr, j, k, vrsm, \
+                  compressedBuffer, scoreDat, originalByte, remainingSize,   \
+                  xorValue, bytes, sd)
 // FUNCTION: TH07 0x0044552c
 void ResultScreen::WriteScore()
 {
-    u8 uVar1;
-    u8 bVar3;
-    u8 *fileBuffer;
+    ScoreDat *sd;
+    u8 *bytes;
+    u8 xorValue;
+    i32 remainingSize;
+    u8 originalByte;
+    ScoreDat *scoreDat;
     u8 *compressedBuffer;
-    DWORD bytesToWrite;
-    u8 local_78;
-    u8 local_74;
-    u8 *local_64;
-    u8 local_5d;
-    i32 local_5c;
     Vrsm vrsm;
     i32 k;
     i32 j;
     Pscr *pscr;
     Catk *catk;
     Clrd *clrd;
-    i32 local_1c;
-    ScoreListNode *local_18;
-    size_t local_14;
-    i32 local_c;
-    i32 i;
+    i32 character;
+    ScoreListNode *currentCharacter;
+    size_t sizeOfFile;
+    u8 *fileBuffer;
+    i32 characterSlot;
+    i32 difficulty;
 
-    fileBuffer = (u8 *)malloc(0xa0000);
-    memcpy(fileBuffer, this->scoreDat, sizeof(ScoreDat));
+    sizeOfFile = 0;
+
+    fileBuffer = (u8 *)ZunMemory::Alloc2(0xa0000);
+
+    memcpy(fileBuffer + sizeOfFile, this->scoreDat, sizeof(ScoreDat));
+    sizeOfFile += sizeof(ScoreDat);
+
     this->th7kHeader.magic = TH7K_MAGIC;
     this->th7kHeader.th7kLen2 = sizeof(Th7k);
     this->th7kHeader.th7kLen = sizeof(Th7k);
     this->th7kHeader.version = 1;
-    memcpy(fileBuffer + sizeof(ScoreDat), &this->th7kHeader, sizeof(Th7k));
-    local_14 = 0x28;
-    i = 0;
-    while (true)
+
+    memcpy(fileBuffer + sizeOfFile, &this->th7kHeader, sizeof(Th7k));
+    sizeOfFile += sizeof(Th7k);
+
+    for (difficulty = 0; difficulty < 6; difficulty++)
     {
-        if (5 < i)
+        for (character = 0; character < 6; character++)
         {
-            clrd = g_GameManager.clrd;
-            for (i = 0; i < 6; i++)
+            currentCharacter = this->scoreLists[difficulty][character].next;
+            characterSlot = 0;
+
+            for (;;)
             {
-                clrd->magic = CLRD_MAGIC;
-                clrd->th7kLen2 = sizeof(Clrd);
-                clrd->th7kLen = sizeof(Clrd);
-                clrd->version = 1;
-                memcpy(fileBuffer + local_14, clrd, sizeof(Clrd));
-                local_14 += sizeof(Clrd);
-                clrd++;
-            }
-            catk = g_GameManager.catk;
-            for (i = 0; i < 141; i++)
-            {
-                if (catk->magic == CATK_MAGIC)
+                if (currentCharacter)
                 {
-                    catk->idx = i;
-                    catk->th7kLen2 = sizeof(Catk);
-                    catk->th7kLen = sizeof(Catk);
-                    catk->version = 1;
-                    memcpy(fileBuffer + local_14, catk, sizeof(Catk));
-                    local_14 += sizeof(Catk);
-                }
-                catk++;
-            }
-            pscr = &g_GameManager.pscr[0][0][0];
-            for (i = 0; i < 6; i++)
-            {
-                for (j = 0; j < 6; j++)
-                {
-                    for (k = 0; k < 4; k++)
+                    if (currentCharacter->data->magic == HSCR_MAGIC)
                     {
-                        if (pscr->score != 0)
-                        {
-                            memcpy(fileBuffer + local_14, pscr, sizeof(Pscr));
-                            local_14 += sizeof(Pscr);
-                        }
-                        pscr++;
+                        currentCharacter->data->character = character;
+                        currentCharacter->data->difficulty = difficulty;
+                        currentCharacter->data->th7kLen2 = sizeof(Hscr);
+                        currentCharacter->data->th7kLen = sizeof(Hscr);
+                        currentCharacter->data->version = 1;
+                        currentCharacter->data->isPlayerScore = 0;
+
+                        memcpy(fileBuffer + sizeOfFile, currentCharacter->data, sizeof(Hscr));
+                        sizeOfFile += sizeof(Hscr);
+                    }
+
+                    currentCharacter = currentCharacter->next;
+                    characterSlot++;
+
+                    if (characterSlot >= 10)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
+                break;
             }
-            memcpy(fileBuffer + local_14, &this->lsnmHeader, sizeof(Lsnm));
-            g_Supervisor.UpdateStartupTime();
-            memcpy(fileBuffer + local_14 + sizeof(this->lsnmHeader),
-                   &g_GameManager.plst, sizeof(Plst));
-            vrsm.magic = VRSM_MAGIC;
-            vrsm.version = 1;
-            vrsm.th7kLen2 = sizeof(Vrsm);
-            vrsm.th7kLen = sizeof(Vrsm);
-            vrsm.isPlayerScore = 0;
-            strcpy(vrsm.versionStr, "0100b");
-            vrsm.exeSize = g_Supervisor.exeSize;
-            vrsm.exeChecksum = g_Supervisor.exeChecksum;
-            memcpy(fileBuffer + local_14 + sizeof(Lsnm) + sizeof(Plst), &vrsm,
-                   sizeof(Vrsm));
-
-            ((ScoreDat *)fileBuffer)->dstLen = local_14 + sizeof(Lsnm) + sizeof(Plst);
-            ((ScoreDat *)fileBuffer)->fileLength =
-                local_14 + sizeof(Lsnm) + sizeof(Plst) + sizeof(ScoreDat);
-            compressedBuffer = Lzss::Compress(fileBuffer + sizeof(ScoreDat),
-                                              ((ScoreDat *)fileBuffer)->dstLen,
-                                              &((ScoreDat *)fileBuffer)->srcLen);
-            memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer,
-                   ((ScoreDat *)fileBuffer)->srcLen);
-            GlobalFree(compressedBuffer);
-            bytesToWrite = ((ScoreDat *)fileBuffer)->srcLen + sizeof(ScoreDat);
-            ((ScoreDat *)fileBuffer)->dataOffset = sizeof(ScoreDat);
-            ((ScoreDat *)fileBuffer)->csum = 0;
-            local_74 = (u32)g_Rng.GetRandomU16InRange(0x100);
-            ((ScoreDat *)fileBuffer)->xorseed[1] = local_74;
-            local_78 = (u32)g_Rng.GetRandomU16InRange(0x100);
-            ((ScoreDat *)fileBuffer)->unused_6 = local_78;
-            ((ScoreDat *)fileBuffer)->magic = 0xb;
-            for (local_5c = 4; local_5c < (i32)bytesToWrite; local_5c++)
-            {
-                ((ScoreDat *)fileBuffer)->csum +=
-                    ((ScoreDat *)fileBuffer)->xorseed[local_5c];
-            }
-            local_64 = fileBuffer + 1;
-            local_5d = *local_64;
-            for (local_5c = ((ScoreDat *)fileBuffer)->srcLen + 0x1a; 0 < local_5c;
-                 local_5c--)
-            {
-                uVar1 = local_64[1];
-                bVar3 = (i32)(local_5d & 0xe0) >> 5 | local_5d << 3;
-                local_64[1] = local_64[1] ^ bVar3;
-                local_5d = bVar3 + uVar1;
-                local_64++;
-            }
-            FileSystem::WriteDataToFile("score.dat", fileBuffer, bytesToWrite);
-            free(fileBuffer);
-            return;
         }
-        for (local_1c = 0; local_1c < 6; local_1c++)
-        {
-            local_18 = this->scoreLists[i][local_1c].next;
-            local_c = 0;
-            do
-            {
-                if (!local_18)
-                {
-                    break;
-                }
-                if (local_18->data->magic == HSCR_MAGIC)
-                {
-                    local_18->data->character = local_1c;
-                    local_18->data->difficulty = i;
-                    local_18->data->th7kLen2 = sizeof(Hscr);
-                    local_18->data->th7kLen = sizeof(Hscr);
-                    local_18->data->version = 1;
-                    local_18->data->isPlayerScore = 0;
-                    memcpy(fileBuffer + local_14, local_18->data, sizeof(Hscr));
-                    local_14 += sizeof(Hscr);
-                }
-                local_18 = local_18->next;
-                local_c++;
-            } while (local_c < 10);
-        }
-        i++;
     }
+
+    clrd = g_GameManager.clrd;
+    for (difficulty = 0; difficulty < 6; difficulty++, clrd++)
+    {
+        clrd->magic = CLRD_MAGIC;
+        clrd->th7kLen2 = sizeof(Clrd);
+        clrd->th7kLen = sizeof(Clrd);
+        clrd->version = 1;
+
+        memcpy(fileBuffer + sizeOfFile, clrd, sizeof(Clrd));
+        sizeOfFile += sizeof(Clrd);
+    }
+
+    catk = g_GameManager.catk;
+    for (difficulty = 0; difficulty < 141; difficulty++, catk++)
+    {
+        if (catk->magic == CATK_MAGIC)
+        {
+            catk->idx = difficulty;
+            catk->th7kLen2 = sizeof(Catk);
+            catk->th7kLen = sizeof(Catk);
+            catk->version = 1;
+
+            memcpy(fileBuffer + sizeOfFile, catk, sizeof(Catk));
+            sizeOfFile += sizeof(Catk);
+        }
+    }
+
+    pscr = &g_GameManager.pscr[0][0][0];
+    for (difficulty = 0; difficulty < 6; difficulty++)
+    {
+        for (j = 0; j < 6; j++)
+        {
+            for (k = 0; k < 4; k++, pscr++)
+            {
+                if (pscr->score != 0)
+                {
+                    memcpy(fileBuffer + sizeOfFile, pscr, sizeof(Pscr));
+                    sizeOfFile += sizeof(Pscr);
+                }
+            }
+        }
+    }
+    memcpy(fileBuffer + sizeOfFile, &this->lsnmHeader, sizeof(Lsnm));
+    sizeOfFile += sizeof(Lsnm);
+
+    g_Supervisor.UpdateStartupTime();
+
+    memcpy(fileBuffer + sizeOfFile, &g_GameManager.plst, sizeof(Plst));
+    sizeOfFile += sizeof(Plst);
+
+    vrsm.magic = VRSM_MAGIC;
+    vrsm.version = 1;
+    vrsm.th7kLen2 = sizeof(Vrsm);
+    vrsm.th7kLen = sizeof(Vrsm);
+    vrsm.isPlayerScore = 0;
+    strcpy(vrsm.versionStr, "0100b");
+    vrsm.exeSize = g_Supervisor.exeSize;
+    vrsm.exeChecksum = g_Supervisor.exeChecksum;
+
+    memcpy(fileBuffer + sizeOfFile, &vrsm, sizeof(Vrsm));
+    sizeOfFile += sizeof(Vrsm);
+
+    scoreDat = (ScoreDat *)fileBuffer;
+    scoreDat->dstLen = sizeOfFile - sizeof(ScoreDat);
+    scoreDat->fileLength = sizeOfFile;
+    compressedBuffer = Lzss::Compress(fileBuffer + sizeof(ScoreDat),
+                                      scoreDat->dstLen,
+                                      &scoreDat->srcLen);
+
+    memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer,
+           scoreDat->srcLen);
+    GlobalFree(compressedBuffer);
+    sizeOfFile = scoreDat->srcLen + sizeof(ScoreDat);
+
+    sd = (ScoreDat *)fileBuffer;
+    sd->dataOffset = sizeof(ScoreDat);
+    sd->csum = 0;
+    sd->xorseed[1] = g_Rng.GetRandomU16InRange(0x100);
+    sd->unused_6 = g_Rng.GetRandomU16InRange(0x100);
+    sd->magic = 0xb;
+    for (remainingSize = 4; remainingSize < (i32)sizeOfFile; remainingSize++)
+    {
+        sd->csum += ((ScoreDat *)fileBuffer)->xorseed[remainingSize];
+    }
+    xorValue = 0;
+    originalByte = 0;
+
+    bytes = (u8 *)sd + 1;
+    remainingSize = sizeOfFile;
+    remainingSize -= 2;
+    xorValue = bytes[0];
+
+    while (remainingSize > 0)
+    {
+        originalByte = bytes[1];
+        xorValue = (i32)(xorValue & 0xe0) >> 5 | (xorValue & 0x1f) << 3;
+        bytes[1] ^= xorValue;
+        xorValue += originalByte;
+        bytes++;
+        remainingSize--;
+    }
+    FileSystem::WriteDataToFile("score.dat", fileBuffer, sizeOfFile);
+    free(fileBuffer);
 }
+#pragma intrinsic(memcpy, strcpy)
 
 // FUNCTION: TH07 0x00445a57
 i32 ResultScreen::MoveCursor(ResultScreen *screen, i32 max)
@@ -1230,7 +1262,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
         {
             local_10 = 0.0f;
         }
-        this->curScore.slowRatePercent = (u32)((1.0f - local_10) * 100.0f);
+        this->curScore.slowRatePercent = (1.0f - local_10) * 100.0f;
         if (9 < LinkScoreEx(&this->curScore, this->diffPlayed, this->charUsed))
         {
             goto LAB_004470e9;
@@ -1770,23 +1802,31 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
 // FUNCTION: TH07 0x00447fd0
 ZunResult ResultScreen::CheckConfirmButton()
 {
-    if (this->resultScreenState == 0x10)
+    AnmVm *viewport;
+
+    switch (this->resultScreenState)
     {
-        if (this->frameTimer < 0x1f)
+    case 0x10:
+        if (this->frameTimer <= 30)
         {
-            this->vms[0x28].pendingInterrupt = 0x12;
+            viewport = &this->vms[0x28];
+            viewport->pendingInterrupt = 0x12;
         }
-        if (0x59 < this->frameTimer && WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
+        if (this->frameTimer >= 90 && WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            this->vms[0x28].pendingInterrupt = 2;
+            viewport = &this->vms[0x28];
+            viewport->pendingInterrupt = 2;
             this->frameTimer = 0;
             this->resultScreenState = 0x11;
         }
-    }
-    else if (this->resultScreenState == 0x11 && 0x1d < this->frameTimer)
-    {
-        this->frameTimer = 60;
-        this->resultScreenState = 0xb;
+        break;
+    case 0x11:
+        if (this->frameTimer >= 30)
+        {
+            this->frameTimer = 59;
+            this->resultScreenState = 0xb;
+        }
+        break;
     }
     return ZUN_SUCCESS;
 }
@@ -2577,23 +2617,27 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
+#pragma function(strcpy)
+#pragma var_order(i, local_c, j, k, local_18, local_1c)
 // FUNCTION: TH07 0x00449b05
 ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
 {
-    i16 local_44;
+    i32 k;
+    i32 j;
     i32 local_1c;
     Catk *local_18;
     AnmVm *local_c;
+    i32 i;
 
     g_GameManager.HasUnlockedPhantomAndMaxClears();
-    for (i32 i = 0; i < 6; i++)
+    for (i = 0; i < 6; i++)
     {
-        for (i32 j = 0; j < 6; j++)
+        for (j = 0; j < 6; j++)
         {
-            for (i32 k = 0; k < 10; k = k + 1)
+            for (k = 0; k < 10; k++)
             {
-                arg->defaultScores[i][j][k].score = k * -10000 + 100000;
-                arg->defaultScores[i][j][k].slowRatePercent = 0;
+                arg->defaultScores[i][j][k].score = 100000 - k * 10000;
+                arg->defaultScores[i][j][k].slowRatePercent = 0.0f;
                 // STRING: TH07 0x004963c0
                 arg->defaultScores[i][j][k].magic = *(u32 *)&"DMYS";
                 arg->defaultScores[i][j][k].difficulty = (u8)i;
@@ -2625,41 +2669,30 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             return ZUN_ERROR;
         }
         local_c = arg->vms;
-        for (i32 i = 0; i < 0x29; i++)
+        for (i = 0; i < 0x29; i++, local_c++)
         {
-            local_c->pos.x = 0.0f;
-            local_c->pos.y = 0.0f;
-            local_c->pos.z = 0.0f;
-            local_c->offset.x = 0.0f;
-            local_c->offset.y = 0.0f;
-            local_c->offset.z = 0.0f;
-            local_44 = (i16)i + 0x900;
-            local_c->anmFileIdx = local_44;
-            g_AnmManager->SetAndExecuteScript(local_c,
-                                              g_AnmManager->scripts[i + 0x900]);
-            local_c++;
+            local_c->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            local_c->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            g_AnmManager->SetAnmIdxAndExecuteScript(local_c, i + 0x900);
         }
-        arg->rightArrowVm.Initialize();
-        g_AnmManager->SetActiveSprite(&arg->rightArrowVm, 0x910);
+        UselessStack::FourBytes();
+        g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 0x910);
         local_c = arg->spellcardListVms;
-        for (i32 i = 0; i < 0xf; i++)
+        for (i = 0; i < 0xf; i++, local_c++)
         {
-            local_c->Initialize();
-            g_AnmManager->SetActiveSprite(local_c, i + 0x715);
-            local_c->pos.x = 0.0f;
-            local_c->pos.y = 0.0f;
-            local_c->pos.z = 0.0f;
+            UselessStack::FourBytes();
+            g_AnmManager->InitializeAndSetActiveSprite(local_c, i + 0x715);
+            local_c->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
             local_c->anchor = 3;
             local_c->fontWidth = 15;
             local_c->fontHeight = 15;
-            local_c++;
         }
     }
     arg->prevCursor = 0;
     arg->scoreDat = OpenScore("score.dat");
-    for (i32 i = 0; i < 6; i++)
+    for (i = 0; i < 6; i++)
     {
-        for (i32 j = 0; j < 6; j++)
+        for (j = 0; j < 6; j++)
         {
             GetHighScore(arg->scoreDat, arg->scoreLists[i] + j, j, i, NULL);
         }
@@ -2681,31 +2714,32 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     if (arg->resultScreenState == 0x12)
     {
         if ((u32)g_GameManager
-                .pscr[g_GameManager.shotType + (u32)g_GameManager.character * 2]
+                .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
                      [g_GameManager.currentStage - 1][g_GameManager.difficulty]
                 .score < g_GameManager.globals->score)
         {
             g_GameManager
-                .pscr[g_GameManager.shotType + (u32)g_GameManager.character * 2]
+                .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
                      [g_GameManager.currentStage - 1][g_GameManager.difficulty]
                 .score = g_GameManager.globals->score;
         }
         arg->resultScreenState = 0xb;
         strcpy(arg->replayName, arg->lsnmHeader.name);
     }
-    for (i32 i = 0; i < 7; i++)
+    for (i = 0; i < 7; i++)
     {
         local_18 = g_GameManager.catk;
         arg->totalPlayCountPerCharacter[i + 1] = 0;
-        for (local_1c = 0; local_1c < 141; local_1c = local_1c + 1)
+        for (local_1c = 0; local_1c < 141; local_1c++, local_18++)
         {
-            if (local_18->magic == CATK_MAGIC && local_18->version == 1 &&
-                local_18->numSuccessesPerShot[i] != 0)
+            if (local_18->magic != CATK_MAGIC || local_18->version != 1)
             {
-                arg->totalPlayCountPerCharacter[i + 1] =
-                    arg->totalPlayCountPerCharacter[i + 1] + 1;
+                continue;
             }
-            local_18++;
+            if (local_18->numSuccessesPerShot[i] != 0)
+            {
+                arg->totalPlayCountPerCharacter[i + 1]++;
+            }
         }
     }
     arg->spellcardListPage = 6;
@@ -2717,11 +2751,10 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         DeletedCallback(arg);
         return ZUN_ERROR;
     }
-    else
-    {
-        return ZUN_SUCCESS;
-    }
+
+    return ZUN_SUCCESS;
 }
+#pragma intrinsic(strcpy)
 
 // FUNCTION: TH07 0x0044a1f9
 ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)

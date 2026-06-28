@@ -1,6 +1,6 @@
 # th07
 
-<img src="resources/progress.svg" alt="Implemented: 100%. Accuracy: 96.48%" width="50%">
+<img src="resources/progress.svg" alt="Implemented: 100%. Accuracy: 97.00%" width="50%">
 
 A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfect Cherry Blossom 1.00b (md5: 0126afce1e805370d36c3482445e98da) by Team Shanghai Alice.
 
@@ -50,3 +50,5 @@ See the [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## Credits
 
 * The earlier [decompilation for th06](https://github.com/GensokyoClub), used as a source of shared types, function names, file names, source organization, basically everything. Because EoSD and PCB are so similar architecturally, the pre-existing th06 decompilation could be used as a direct reference for reverse engineering th07.
+
+* EstexNT for porting the [var_order pragma](https://gist.github.com/EstexNT/e98a1384b906a3eedaaa3eeb7e58cd9d) to MSVC 7, which is used extensively throughout this project.
