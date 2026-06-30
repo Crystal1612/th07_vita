@@ -1459,7 +1459,7 @@ i32 Player::HandlePlayerInputs()
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 if (this->focusEffect)
                 {
-                    this->focusEffect->vm.SetPendingInterrupt(1);
+                    this->focusEffect->vm.SetInterrupt(1);
                 }
                 goto CASE_OPTION_UNFOCUSING;
             }
@@ -1473,7 +1473,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_UNFOCUSING;
                 if (this->focusEffect)
                 {
-                    this->focusEffect->vm.SetPendingInterrupt(1);
+                    this->focusEffect->vm.SetInterrupt(1);
                 }
                 goto CASE_OPTION_UNFOCUSING;
             }
@@ -1535,7 +1535,7 @@ i32 Player::HandlePlayerInputs()
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 if (this->focusEffect)
                 {
-                    this->focusEffect->vm.SetPendingInterrupt(1);
+                    this->focusEffect->vm.SetInterrupt(1);
                 }
                 goto CASE_OPTION_UNFOCUSING_2;
             }
@@ -1567,7 +1567,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_UNFOCUSING;
                 if (this->focusEffect)
                 {
-                    this->focusEffect->vm.SetPendingInterrupt(1);
+                    this->focusEffect->vm.SetInterrupt(1);
                 }
                 goto CASE_OPTION_UNFOCUSING_2;
             }

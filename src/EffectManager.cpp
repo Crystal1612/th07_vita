@@ -75,10 +75,10 @@ ChainElem g_EffectManagerDrawChain;
 EffectManager::EffectManager()
 {
     Reset();
-    this->globalColorMultiplierR = 1.0;
-    this->globalColorMultiplierG = 1.0;
-    this->globalColorMultiplierB = 1.0;
-    this->globalColorMultiplierA = 1.0;
+    this->globalColorMultiplierR = 1.0f;
+    this->globalColorMultiplierG = 1.0f;
+    this->globalColorMultiplierB = 1.0f;
+    this->globalColorMultiplierA = 1.0f;
 }
 
 // FUNCTION: TH07 0x0041a350

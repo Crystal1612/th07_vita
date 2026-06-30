@@ -48,15 +48,15 @@ i32 Gui::IsStageFinished()
 void Gui::EndPlayerSpellcard()
 {
     this->impl->bombSpellcardName.pendingInterrupt = 1;
-    this->impl->bombSpellcardNameBg.SetPendingInterrupt(2);
+    this->impl->bombSpellcardNameBg.SetInterrupt(2);
 }
 
 // FUNCTION: TH07 0x00427b54
 void Gui::EndEnemySpellcard()
 {
     this->impl->enemySpellcardName.pendingInterrupt = 1;
-    this->impl->enemySpellcardNameBg.SetPendingInterrupt(2);
-    this->impl->spellcardBonusIndicator.SetPendingInterrupt(2);
+    this->impl->enemySpellcardNameBg.SetInterrupt(2);
+    this->impl->spellcardBonusIndicator.SetInterrupt(2);
 }
 
 // FUNCTION: TH07 0x00427ba2
@@ -352,7 +352,7 @@ void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
     AnmManager::DrawVmTextFmt(g_AnmManager, &this->impl->bombSpellcardName,
                               0xf0f0ff, 0, name);
     this->bombNameBarLength = (f32)(u32)(strlen(name) * 0xf) / 2.0f + 16.0f;
-    this->impl->bombSpellcardNameBg.SetPendingInterrupt(1);
+    this->impl->bombSpellcardNameBg.SetInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
     g_Supervisor.renderSkipFrames = 2;
 }
@@ -391,8 +391,8 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
                                    spellcardName);
     this->spellcardBarLength =
         (f32)(u32)(strlen(spellcardName) * 0xf) / 2.0f + 16.0f;
-    this->impl->enemySpellcardNameBg.SetPendingInterrupt(1);
-    this->impl->spellcardBonusIndicator.SetPendingInterrupt(1);
+    this->impl->enemySpellcardNameBg.SetInterrupt(1);
+    this->impl->spellcardBonusIndicator.SetInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
     g_Supervisor.renderSkipFrames = 2;
 }
@@ -1213,7 +1213,7 @@ void Gui::UpdateGui()
         {
             if (this->impl->bossHealthBarState == 0)
             {
-                this->impl->vms0[11].SetPendingInterrupt(1);
+                this->impl->vms0[11].SetInterrupt(1);
                 this->impl->bossHealthBarState = 1;
                 this->bossHealthBarAlpha = 0;
             }
@@ -1237,7 +1237,7 @@ void Gui::UpdateGui()
         {
             if (this->impl->bossHealthBarState <= 2)
             {
-                this->impl->vms0[11].SetPendingInterrupt(2);
+                this->impl->vms0[11].SetInterrupt(2);
                 this->impl->bossHealthBarState = 3;
             }
             if (this->bossHealthBarAlpha > 0)

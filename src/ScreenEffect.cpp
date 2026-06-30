@@ -210,21 +210,18 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
 {
     if (arg->timer < arg->duration)
     {
-        arg->alpha =
-            (i32)(f32)(u32)((arg->args[1] >> 0x18) -
-                            (u32)(arg->timer.AsFloat() *
-                                  (f32)(arg->args[1] >> 0x18)) /
-                                (f32)arg->duration);
+        arg->alpha = ((arg->args[1] >> 24) & 0xff) -
+                     (i32)(((arg->args[1] >> 24) & 0xff) * arg->timer.AsFloat() / arg->duration);
         if (arg->alpha < 0)
         {
-            arg->alpha = (i32)0.0f;
+            arg->alpha = 0;
         }
     }
     else
     {
-        arg->alpha = (i32)0.0f;
+        arg->alpha = 0;
         arg->args[0]--;
-        if ((i32)arg->args[0] < 1)
+        if ((i32)arg->args[0] <= 0)
         {
             return 0;
         }
@@ -267,10 +264,9 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
         return 0;
     }
 
-    f32 fVar1 = (f32)(i32)arg->args[0] +
-                arg->timer.AsFloat() *
-                    (f32)(i32)(arg->args[1] - arg->args[0]) /
-                    (f32)arg->duration;
+    f32 fVar1 = (f32)(i32)(arg->args[1] - arg->args[0]) * arg->timer.AsFloat();
+    fVar1 /= (f32)arg->duration;
+    fVar1 += (f32)(i32)arg->args[0];
     switch (g_Rng.GetRandomU32InRange(3))
     {
     case 0:

@@ -389,7 +389,7 @@ ZunResult Ending::ParseEndFile()
                 AnmManager::DrawVmTextFmt(g_AnmManager,
                                           &this->sprites[this->timesFileParsed],
                                           this->textColor.color, 0xffffffff, local_54);
-                this->sprites[this->timesFileParsed].SetPendingInterrupt(1);
+                this->sprites[this->timesFileParsed].SetInterrupt(1);
             }
             while (*this->endFileDataPtr == '\n' || *this->endFileDataPtr == '\0' ||
                    *this->endFileDataPtr == '\r')

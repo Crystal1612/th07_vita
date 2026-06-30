@@ -8,3 +8,4 @@
 ?UpdateScripts@AsciiManager@@QAEXXZ
 ??0AsciiManager@@QAE@XZ
 ??0RetryMenu@@QAE@XZ
+??0PauseMenu@@QAE@XZ

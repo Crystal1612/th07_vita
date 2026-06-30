@@ -373,7 +373,6 @@ ZunResult ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *param_2)
     return ZUN_SUCCESS;
 }
 
-#pragma function(memset)
 #pragma var_order(local_8, i, local_10, j, idk)
 // FUNCTION: TH07 0x00445192
 ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *clrd)
@@ -510,7 +509,6 @@ void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
     free(scoreDat);
 }
 
-#pragma function(memcpy, strcpy)
 #pragma var_order(difficulty, characterSlot, fileBuffer, sizeOfFile,         \
                   currentCharacter, character, clrd, catk, pscr, j, k, vrsm, \
                   compressedBuffer, scoreDat, originalByte, remainingSize,   \
@@ -698,7 +696,6 @@ void ResultScreen::WriteScore()
     FileSystem::WriteDataToFile("score.dat", fileBuffer, sizeOfFile);
     free(fileBuffer);
 }
-#pragma intrinsic(memcpy, strcpy)
 
 // FUNCTION: TH07 0x00445a57
 i32 ResultScreen::MoveCursor(ResultScreen *screen, i32 max)
@@ -2617,7 +2614,6 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma function(strcpy)
 #pragma var_order(i, local_c, j, k, local_18, local_1c)
 // FUNCTION: TH07 0x00449b05
 ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
@@ -2754,7 +2750,6 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
 
     return ZUN_SUCCESS;
 }
-#pragma intrinsic(strcpy)
 
 // FUNCTION: TH07 0x0044a1f9
 ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)

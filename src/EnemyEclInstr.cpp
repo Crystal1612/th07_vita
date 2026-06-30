@@ -127,15 +127,12 @@ void EnemyEclInstr::ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr)
 void EnemyEclInstr::ExInsTurnBulletsIntoOtherBullets(Enemy *enemy,
                                                      EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     f32 distance;
     f32 local_e4;
     i32 i;
     EnemyBulletShooter bulletProps;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     switch (instr->GetSecondArg().i)
     {
     case 0:
@@ -199,13 +196,9 @@ void EnemyEclInstr::ExInsNoOp(Enemy *enemy, EclRawInstr *instr)
 void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy,
                                                       EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
-
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
 
     // ZUN bloat: Ok
     instr->GetSecondArg();
@@ -244,13 +237,10 @@ void EnemyEclInstr::ExInsCopyMainBossMovement(Enemy *enemy, EclRawInstr *instr)
 void EnemyEclInstr::ExInsSplitBulletsOrShootBackwards(Enemy *enemy,
                                                       EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     for (i = 0; i < 0x400; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE ||
@@ -626,14 +616,11 @@ void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
 void EnemyEclInstr::ExInsBurstLargeBullets(Enemy *enemy, EclRawInstr *instr)
 {
     i32 j;
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     i32 numBullets;
     EnemyBulletShooter bulletProps;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     BombEffects::RegisterChain(3, 8, 1, 0x50cfcfff, 0);
 
     numBullets = g_GameManager.difficulty == DIFF_EASY ? 10 : g_GameManager.difficulty == DIFF_NORMAL ? 18
@@ -765,13 +752,10 @@ void EnemyEclInstr::ExInsFlashScreen(Enemy *enemy, EclRawInstr *instr)
 void EnemyEclInstr::ExInsYuyukoTransformButterflyBullets(Enemy *enemy,
                                                          EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     EnemyBulletShooter bulletProps;
     i32 i;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     for (i = 0; i < 0x400; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE)
@@ -864,14 +848,11 @@ void EnemyEclInstr::ExInsYuyukoCountButterflyBullets(Enemy *enemy,
 void EnemyEclInstr::ExInsBurstLargeBullets2(Enemy *enemy, EclRawInstr *instr)
 {
     i32 j;
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
     f32 triggerHeight;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     triggerHeight = g_GameManager.difficulty == DIFF_HARD ? 128.0f : 180.0f;
     BombEffects::RegisterChain(3, 8, 1, 0x50cfcfff, 0);
     for (i = 0; i < 0x400; i++, bullet++)
@@ -950,14 +931,11 @@ void EnemyEclInstr::ExInsYuyukoPlayResurrectionButterflyBgm(Enemy *enemy,
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy,
                                                    EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     u32 timerMod2;
     EnemyBulletShooter bulletProps;
     i32 i;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     if (enemy->timer.current % 3 == 0)
     {
         return;
@@ -1022,14 +1000,11 @@ void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy,
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange2(Enemy *enemy,
                                                     EclRawInstr *instr)
 {
-    Bullet *bullet;
+    Bullet *bullet = g_BulletManager.bullets;
     i32 timerMod3;
     EnemyBulletShooter bulletProps;
     i32 i;
 
-    bullet = g_BulletManager.bullets;
-    memset(&bulletProps, 0, sizeof(EnemyBulletShooter));
-    bulletProps.soundOverride = -1;
     if (enemy->timer.current % 3 == 2)
     {
         return;

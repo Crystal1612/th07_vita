@@ -9,7 +9,6 @@ extern EclInterpFn g_EclInterpFuncs[8];
 
 namespace EnemyEclInstr
 {
-
 void ExInsSetPosToBoss(Enemy *enemy, EclRawInstr *instr);
 void ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr);
 void ExInsTurnBulletsIntoOtherBullets(Enemy *enemy, EclRawInstr *instr);

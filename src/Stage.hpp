@@ -157,7 +157,8 @@ struct Stage
     i32 clearBackground;
     i32 numSpellcardVms;
     i32 spellcardVmsIdx;
-    AnmVm spellcardVms[33];
+    AnmVm spellcardVms[32];
+    AnmVm unusedVm;
     i32 scriptWaitTime;
     StageCamera camEnd;
     StageCamera camStart;

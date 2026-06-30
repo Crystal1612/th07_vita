@@ -86,6 +86,17 @@ SMALL_SOURCES: List[Path] = list(
     )
 )
 
+SMALL_NON_INTRINSIC_SOURCES: List[Path] = list(
+    map(
+        lambda x: Path(x),
+        [
+            "MainMenu.cpp",
+            "ResultScreen.cpp",
+            "TextHelper.cpp",
+        ]
+    )
+)
+
 parser = argparse.ArgumentParser()
 _ = parser.add_argument(
     "--no-icon",
@@ -155,7 +166,6 @@ cflags = [
     "/W3",
     "/MT",
     "/Ob1",
-    "/Oi",
     "/EHsc",
     "/Gr",
     "/GL",
@@ -215,8 +225,9 @@ with open("build.ninja", "w") as f:
     f.write(f'link = {wine_cmd}"{conv_path(LINK_PATH)}"\n')
     f.write(f'rc = {wine_cmd}"{conv_path(RC_PATH)}"\n')
 
-    f.write(f"cflags = {'/Od ' + ' '.join(cflags)}\n")
-    f.write(f"cflags_small = {'/Os ' + ' '.join(cflags)}\n")
+    f.write(f"cflags = {'/Od /Oi ' + ' '.join(cflags)}\n")
+    f.write(f"cflags_small = {'/Os /Oi ' + ' '.join(cflags)}\n")
+    f.write(f"cflags_small_nonintrinsic = {'/Os ' + ' '.join(cflags)}\n")
     f.write(f"lflags = {' '.join(lflags)}\n")
     f.write(f"libs = {' '.join(libs)}\n\n")
 
@@ -240,9 +251,11 @@ with open("build.ninja", "w") as f:
         pdb_name = "obj/" + src.with_suffix(".pdb").as_posix()
         f.write(f"build {obj_name}: cxx ../src/{src_name}\n")
         if src not in SMALL_SOURCES:
-            f.write(f"  in_cflags = $cflags\n")
+            f.write("  in_cflags = $cflags\n")
+        elif src in SMALL_NON_INTRINSIC_SOURCES:
+            f.write("  in_cflags = $cflags_small_nonintrinsic\n")
         else:
-            f.write(f"  in_cflags = $cflags_small\n")
+            f.write("  in_cflags = $cflags_small\n")
         f.write(f"  pdb = {pdb_name}\n")
         objects.append(obj_name)
     f.write("\n")

@@ -70,6 +70,12 @@ struct BulletCommandState
 
 struct EnemyBulletShooter
 {
+    EnemyBulletShooter()
+    {
+        memset(this, 0, sizeof(EnemyBulletShooter));
+        this->soundOverride = -1;
+    }
+
     BulletCommand *AddCommand(i32 command, i32 flag, u32 type);
     void AddAngleAccelCommand(i32 command, i32 flag, i32 duration, f32 angle,
                               f32 speed);
@@ -101,6 +107,12 @@ C_ASSERT(sizeof(EnemyBulletShooter) == 0xd4);
 
 struct EnemyLaserShooter
 {
+    EnemyLaserShooter()
+    {
+        memset(this, 0, sizeof(EnemyLaserShooter));
+        this->soundOverride = -1;
+    }
+
     i16 sprite;
     i16 spriteOffset;
     D3DXVECTOR3 position;

@@ -151,7 +151,7 @@ struct AnmVm : AnmVmBase
         this->visible = 0;
     }
 
-    void SetPendingInterrupt(i16 interrupt)
+    void SetInterrupt(i16 interrupt)
     {
         this->pendingInterrupt = interrupt;
     }

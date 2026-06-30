@@ -141,7 +141,6 @@ struct ThBitmapInfo
 };
 C_ASSERT(sizeof(ThBitmapInfo) == 0x6c);
 
-#pragma function(memset)
 #pragma var_order(imageWidthInBytes, deviceContext, originalBitmapObj, \
                   bitmapInfo, formatInfo, bitmapObj, bitmapData)
 // FUNCTION: TH07 0x00431b2d
@@ -316,7 +315,6 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
     return true;
 }
 
-#pragma function(memcpy)
 #pragma var_order(dstBuf, dstWidthBytes, rectToLock, curHeight, srcWidthBytes, \
                   outSurfaceDesc, srcBuf, lockedRect)
 // FUNCTION: TH07 0x00432164
@@ -378,7 +376,6 @@ void TextHelper::ReleaseTextBuffer()
 
 #pragma var_order(hdc, hFont, textSurfaceDesc, h, textHelper, srcRect, \
                   dstRect, dstSurface)
-#pragma function(strlen)
 // FUNCTION: TH07 0x004322a3
 void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
                                          i32 spriteHeight, i32 fontHeight,

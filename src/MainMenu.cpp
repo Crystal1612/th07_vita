@@ -237,7 +237,6 @@ u32 MainMenu::OnUpdate(MainMenu *arg)
     return result;
 }
 
-#pragma function(strcpy)
 // FUNCTION: TH07 0x004555dd
 u32 MainMenu::OnUpdatePreInput()
 {
@@ -289,7 +288,7 @@ u32 MainMenu::OnUpdatePreInput()
             this->menuSubState = 0;
             this->idleFrames = 0;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xd);
-            this->cursorVm->SetPendingInterrupt(2);
+            this->cursorVm->SetInterrupt(2);
             g_GameManager.SetReplay(0);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
@@ -302,7 +301,7 @@ u32 MainMenu::OnUpdatePreInput()
             this->menuSubState = 0;
             this->idleFrames = 0;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 5);
-            this->cursorVm->SetPendingInterrupt(2);
+            this->cursorVm->SetInterrupt(2);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
         for (i = 0; (u32)i < 8; i++)
@@ -374,7 +373,7 @@ u32 MainMenu::OnUpdatePreInput()
         if (this->selected != this->cursor)
         {
             this->cursorVm = &this->vms[this->cursor];
-            this->cursorVm->SetPendingInterrupt(1);
+            this->cursorVm->SetInterrupt(1);
         }
         this->selected = this->cursor;
         if (this->stateTimer < 10)
@@ -401,7 +400,7 @@ u32 MainMenu::OnUpdatePreInput()
                 this->menuSubState = 0;
                 this->idleFrames = 0;
                 g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 5);
-                this->cursorVm->SetPendingInterrupt(2);
+                this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case 2:
                 g_GameManager.practice = 1;
@@ -417,7 +416,7 @@ u32 MainMenu::OnUpdatePreInput()
                 this->menuSubState = 0;
                 this->idleFrames = 0;
                 g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 5);
-                this->cursorVm->SetPendingInterrupt(2);
+                this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case 1:
                 if (g_GameManager.HasReachedMaxClearsAllShotTypes())
@@ -431,7 +430,7 @@ u32 MainMenu::OnUpdatePreInput()
                     this->menuSubState = 0;
                     this->idleFrames = 0;
                     g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 5);
-                    this->cursorVm->SetPendingInterrupt(2);
+                    this->cursorVm->SetInterrupt(2);
                     return CHAIN_CALLBACK_RESULT_CONTINUE;
                 }
             case 3:
@@ -443,15 +442,15 @@ u32 MainMenu::OnUpdatePreInput()
                 this->menuSubState = 0;
                 this->idleFrames = 0;
                 g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xd);
-                this->cursorVm->SetPendingInterrupt(2);
+                this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case 5:
                 g_Supervisor.curState = 8;
-                this->cursorVm->SetPendingInterrupt(2);
+                this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             case 4:
                 g_Supervisor.curState = 5;
-                this->cursorVm->SetPendingInterrupt(2);
+                this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             case 6:
                 this->menuSubState = 0;
@@ -571,7 +570,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
     if (this->selected != this->cursor)
     {
         this->cursorVm = &this->vms[this->cursor];
-        this->cursorVm->SetPendingInterrupt(1);
+        this->cursorVm->SetInterrupt(1);
     }
     this->selected = this->cursor;
 
@@ -982,7 +981,7 @@ u32 MainMenu::OnUpdateKeyConfig()
         if (this->selected != this->cursor)
         {
             this->cursorVm = &this->vms[this->cursor];
-            // this should be using setpendinginterrupt?
+            // this should be using SetInterrupt?
             cursorVmTmp = this->cursorVm;
             cursorVmTmp->pendingInterrupt = 1;
         }
@@ -1351,18 +1350,18 @@ u32 MainMenu::OnUpdateSelectCharacter()
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
                 this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x43]
-                    .SetPendingInterrupt(9);
+                    .SetInterrupt(9);
             }
             else
             {
                 if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
                 {
-                    this->vmHead[0xa1].SetPendingInterrupt(9);
+                    this->vmHead[0xa1].SetInterrupt(9);
                 }
                 else
                 {
                     this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x9e]
-                        .SetPendingInterrupt(9);
+                        .SetInterrupt(9);
                 }
             }
             this->cursor = g_GameManager.character;
@@ -1434,53 +1433,53 @@ u32 MainMenu::OnUpdateSelectCharacter()
             switch (this->cursor)
             {
             case 0:
-                this->vmHead[0x47].SetPendingInterrupt(9);
-                this->vmHead[0x4a].SetPendingInterrupt(8);
-                this->vmHead[0x4d].SetPendingInterrupt(8);
+                this->vmHead[0x47].SetInterrupt(9);
+                this->vmHead[0x4a].SetInterrupt(8);
+                this->vmHead[0x4d].SetInterrupt(8);
                 this->vmHead[0x4a].color.bytes.a = 0;
                 this->vmHead[0x4d].color.bytes.a = 0;
-                this->vmHead[0x50].SetPendingInterrupt(9);
-                this->vmHead[0x51].SetPendingInterrupt(8);
-                this->vmHead[0x52].SetPendingInterrupt(8);
+                this->vmHead[0x50].SetInterrupt(9);
+                this->vmHead[0x51].SetInterrupt(8);
+                this->vmHead[0x52].SetInterrupt(8);
                 this->vmHead[0x51].color.bytes.a = 0;
                 this->vmHead[0x52].color.bytes.a = 0;
-                this->vmHead[0x53].SetPendingInterrupt(9);
-                this->vmHead[0x54].SetPendingInterrupt(8);
-                this->vmHead[0x55].SetPendingInterrupt(8);
+                this->vmHead[0x53].SetInterrupt(9);
+                this->vmHead[0x54].SetInterrupt(8);
+                this->vmHead[0x55].SetInterrupt(8);
                 this->vmHead[0x54].color.bytes.a = 0;
                 this->vmHead[0x55].color.bytes.a = 0;
                 break;
             case 1:
-                this->vmHead[0x47].SetPendingInterrupt(8);
-                this->vmHead[0x4a].SetPendingInterrupt(9);
-                this->vmHead[0x4d].SetPendingInterrupt(8);
+                this->vmHead[0x47].SetInterrupt(8);
+                this->vmHead[0x4a].SetInterrupt(9);
+                this->vmHead[0x4d].SetInterrupt(8);
                 this->vmHead[0x47].color.bytes.a = 0;
                 this->vmHead[0x4d].color.bytes.a = 0;
-                this->vmHead[0x50].SetPendingInterrupt(8);
-                this->vmHead[0x51].SetPendingInterrupt(9);
-                this->vmHead[0x52].SetPendingInterrupt(8);
+                this->vmHead[0x50].SetInterrupt(8);
+                this->vmHead[0x51].SetInterrupt(9);
+                this->vmHead[0x52].SetInterrupt(8);
                 this->vmHead[0x50].color.bytes.a = 0;
                 this->vmHead[0x52].color.bytes.a = 0;
-                this->vmHead[0x53].SetPendingInterrupt(8);
-                this->vmHead[0x54].SetPendingInterrupt(9);
-                this->vmHead[0x55].SetPendingInterrupt(8);
+                this->vmHead[0x53].SetInterrupt(8);
+                this->vmHead[0x54].SetInterrupt(9);
+                this->vmHead[0x55].SetInterrupt(8);
                 this->vmHead[0x53].color.bytes.a = 0;
                 this->vmHead[0x55].color.bytes.a = 0;
                 break;
             case 2:
-                this->vmHead[0x47].SetPendingInterrupt(8);
-                this->vmHead[0x4a].SetPendingInterrupt(8);
-                this->vmHead[0x4d].SetPendingInterrupt(9);
+                this->vmHead[0x47].SetInterrupt(8);
+                this->vmHead[0x4a].SetInterrupt(8);
+                this->vmHead[0x4d].SetInterrupt(9);
                 this->vmHead[0x4a].color.bytes.a = 0;
                 this->vmHead[0x47].color.bytes.a = 0;
-                this->vmHead[0x50].SetPendingInterrupt(8);
-                this->vmHead[0x51].SetPendingInterrupt(8);
-                this->vmHead[0x52].SetPendingInterrupt(9);
+                this->vmHead[0x50].SetInterrupt(8);
+                this->vmHead[0x51].SetInterrupt(8);
+                this->vmHead[0x52].SetInterrupt(9);
                 this->vmHead[0x50].color.bytes.a = 0;
                 this->vmHead[0x51].color.bytes.a = 0;
-                this->vmHead[0x53].SetPendingInterrupt(8);
-                this->vmHead[0x54].SetPendingInterrupt(8);
-                this->vmHead[0x55].SetPendingInterrupt(9);
+                this->vmHead[0x53].SetInterrupt(8);
+                this->vmHead[0x54].SetInterrupt(8);
+                this->vmHead[0x55].SetInterrupt(9);
                 this->vmHead[0x53].color.bytes.a = 0;
                 this->vmHead[0x54].color.bytes.a = 0;
                 break;
@@ -1546,37 +1545,37 @@ u32 MainMenu::OnUpdateSelectCharacter()
             switch (this->cursor)
             {
             case 0:
-                this->vmHead[0x47].SetPendingInterrupt(9);
-                this->vmHead[0x4a].SetPendingInterrupt(8);
-                this->vmHead[0x4d].SetPendingInterrupt(8);
-                this->vmHead[0x50].SetPendingInterrupt(9);
-                this->vmHead[0x51].SetPendingInterrupt(8);
-                this->vmHead[0x52].SetPendingInterrupt(8);
-                this->vmHead[0x53].SetPendingInterrupt(9);
-                this->vmHead[0x54].SetPendingInterrupt(8);
-                this->vmHead[0x55].SetPendingInterrupt(8);
+                this->vmHead[0x47].SetInterrupt(9);
+                this->vmHead[0x4a].SetInterrupt(8);
+                this->vmHead[0x4d].SetInterrupt(8);
+                this->vmHead[0x50].SetInterrupt(9);
+                this->vmHead[0x51].SetInterrupt(8);
+                this->vmHead[0x52].SetInterrupt(8);
+                this->vmHead[0x53].SetInterrupt(9);
+                this->vmHead[0x54].SetInterrupt(8);
+                this->vmHead[0x55].SetInterrupt(8);
                 break;
             case 1:
-                this->vmHead[0x47].SetPendingInterrupt(8);
-                this->vmHead[0x4a].SetPendingInterrupt(9);
-                this->vmHead[0x4d].SetPendingInterrupt(8);
-                this->vmHead[0x50].SetPendingInterrupt(8);
-                this->vmHead[0x51].SetPendingInterrupt(9);
-                this->vmHead[0x52].SetPendingInterrupt(8);
-                this->vmHead[0x53].SetPendingInterrupt(8);
-                this->vmHead[0x54].SetPendingInterrupt(9);
-                this->vmHead[0x55].SetPendingInterrupt(8);
+                this->vmHead[0x47].SetInterrupt(8);
+                this->vmHead[0x4a].SetInterrupt(9);
+                this->vmHead[0x4d].SetInterrupt(8);
+                this->vmHead[0x50].SetInterrupt(8);
+                this->vmHead[0x51].SetInterrupt(9);
+                this->vmHead[0x52].SetInterrupt(8);
+                this->vmHead[0x53].SetInterrupt(8);
+                this->vmHead[0x54].SetInterrupt(9);
+                this->vmHead[0x55].SetInterrupt(8);
                 break;
             case 2:
-                this->vmHead[0x47].SetPendingInterrupt(8);
-                this->vmHead[0x4a].SetPendingInterrupt(8);
-                this->vmHead[0x4d].SetPendingInterrupt(9);
-                this->vmHead[0x50].SetPendingInterrupt(8);
-                this->vmHead[0x51].SetPendingInterrupt(8);
-                this->vmHead[0x52].SetPendingInterrupt(9);
-                this->vmHead[0x53].SetPendingInterrupt(8);
-                this->vmHead[0x54].SetPendingInterrupt(8);
-                this->vmHead[0x55].SetPendingInterrupt(9);
+                this->vmHead[0x47].SetInterrupt(8);
+                this->vmHead[0x4a].SetInterrupt(8);
+                this->vmHead[0x4d].SetInterrupt(9);
+                this->vmHead[0x50].SetInterrupt(8);
+                this->vmHead[0x51].SetInterrupt(8);
+                this->vmHead[0x52].SetInterrupt(9);
+                this->vmHead[0x53].SetInterrupt(8);
+                this->vmHead[0x54].SetInterrupt(8);
+                this->vmHead[0x55].SetInterrupt(9);
                 break;
             }
         }
@@ -1646,18 +1645,18 @@ u32 MainMenu::OnUpdateSelectShotType()
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
                 this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x43]
-                    .SetPendingInterrupt(9);
+                    .SetInterrupt(9);
             }
             else
             {
                 if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
                 {
-                    this->vmHead[0xa1].SetPendingInterrupt(9);
+                    this->vmHead[0xa1].SetInterrupt(9);
                 }
                 else
                 {
                     this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x9e]
-                        .SetPendingInterrupt(9);
+                        .SetInterrupt(9);
                 }
             }
             this->vmHead[0x48].active = 0;
@@ -2130,7 +2129,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             this->menuSubState = 2;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xf);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetPendingInterrupt(0x11);
+            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
             this->currentReplay = (ReplayHeaderAndData *)FileSystem::OpenFile(
                 this->replayFilenames[this->chosenReplay], 1);
             this->currentReplay = ReplayManager::ValidateReplayData(
@@ -2200,7 +2199,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0x13);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetPendingInterrupt(0x11);
+            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
             this->menuSubState = 3;
             this->cursor = 0;
             this->vmHead[0x9e].pendingInterrupt = 21;
@@ -2255,7 +2254,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->stateTimer = 0;
             this->cursor = this->selectedStage;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xf);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetPendingInterrupt(0x11);
+            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
             break;
         }
         break;
@@ -2764,7 +2763,6 @@ ZunResult MainMenu::DeletedCallback(MainMenu *arg)
     return ZUN_SUCCESS;
 }
 
-#pragma function(memset)
 // FUNCTION: TH07 0x0045c5d0
 ZunResult MainMenu::RegisterChain(u32 param_1)
 {
