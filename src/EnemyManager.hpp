@@ -37,10 +37,10 @@ struct SpellcardInfo
 {
     u32 isCapturing;
     u32 isActive;
-    u32 captureScore;
+    i32 captureScore;
     i32 grazeBonusScore;
     i32 scoreDrainRate;
-    u32 spellcardIdx;
+    i32 spellcardIdx;
     u32 usedBomb;
 };
 
@@ -57,6 +57,41 @@ struct Enemy
     void Move();
     void ResetEffectArray();
     void UpdateEffects();
+
+    static i32 BulletRankAmountInner(i32 low, i32 high, i32 scaleFactor)
+    {
+        return scaleFactor * (high - low) / 32 + low;
+    }
+
+    i32 BulletRankAmount1(i32 scaleFactor)
+    {
+        return BulletRankAmountInner(this->bulletRankAmount1Low, this->bulletRankAmount1High, scaleFactor);
+    }
+
+    i32 BulletRankAmount2(i32 scaleFactor)
+    {
+        return BulletRankAmountInner(this->bulletRankAmount2Low, this->bulletRankAmount2High, scaleFactor);
+    }
+
+    static f32 BulletRankSpeedInner(f32 low, f32 high, f32 scaleFactor)
+    {
+        return scaleFactor * (high - low) / 32 + low;
+    }
+
+    f32 BulletRankSpeed(f32 scaleFactor)
+    {
+        return Enemy::BulletRankSpeedInner(this->bulletRankSpeedLow, this->bulletRankSpeedHigh, scaleFactor);
+    }
+
+    static i32 ShootIntervalInner(i32 low, i32 high, i32 scaleFactor)
+    {
+        return scaleFactor * (high - low) / 32 + low;
+    }
+
+    i32 ShootInterval(i32 scaleFactor)
+    {
+        return Enemy::ShootIntervalInner(this->shootInterval / 5, -this->shootInterval / 5, scaleFactor);
+    }
 
     AnmVm primaryVm;
     AnmVm vms[2];
@@ -159,7 +194,7 @@ struct Enemy
             u8 freezeEclDuringBombs : 1;
         };
     };
-    i16 spellcardDelayTimer;
+    u16 spellcardDelayTimer;
     u8 anmExFlags;
     u8 zLayer;
     i16 anmExDefaults;
@@ -187,7 +222,17 @@ struct Enemy
     ZunTimer unused_2f6c;
     EnemyHistory enemyHistory[96];
     VertexTex1DiffuseXyzrwh trailVertices[194];
-    u8 trailFlags;
+    union {
+        u8 trailFlags;
+        struct
+        {
+            u8 enable : 1;
+            u8 shrink : 1;
+            u8 fade : 1;
+            u8 useTriangleStrip : 1;
+            u8 hidePrimarySprite : 1;
+        };
+    };
     // pad 1
     i16 trailCount;
     i16 trailInterval;
@@ -218,7 +263,7 @@ struct EnemyManager
     static void RunEclTimeline(EclTimeline *timeline);
     Enemy *SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
                       i32 score, u8 param_6);
-    Enemy *SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i8 itemDrop,
+    Enemy *SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
                         i32 score, EclContextArgs *args);
 
     const char *stgEnmAnmFilename;

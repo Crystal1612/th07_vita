@@ -181,6 +181,12 @@ struct Gui
         this->spellcardSecondsRemaining = seconds;
     }
 
+    void SetBossHealth(i32 idx, f32 eased, f32 health)
+    {
+        this->bossHealthEased[idx] = eased;
+        this->bossHealth[idx] = health;
+    }
+
     void SetBossHealthBar(f32 amount)
     {
         this->bossHealthBar = amount;

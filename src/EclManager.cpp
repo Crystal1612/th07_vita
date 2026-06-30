@@ -30,11 +30,11 @@
 #define GET_FLOAT_VALUE(enemy, argIdx) \
     (((instr->paramMask & (1 << argIdx)) != 0) ? GetFloatVarValue(enemy, instr->args[argIdx].f) : instr->args[argIdx].f)
 
-#define GET_INT_VALUE_D(enemy, argIdx, bitIdx) \
-    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetVarValue(enemy, instr->args[argIdx].i) : instr->args[argIdx].i)
+#define GET_INT_VALUE_D(enemy, args, argIdx, bitIdx) \
+    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetVarValue(enemy, args[argIdx].i) : args[argIdx].i)
 
-#define GET_FLOAT_VALUE_D(enemy, argIdx, bitIdx) \
-    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetFloatVarValue(enemy, instr->args[argIdx].f) : instr->args[argIdx].f)
+#define GET_FLOAT_VALUE_D(enemy, args, argIdx, bitIdx) \
+    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetFloatVarValue(enemy, args[argIdx].f) : args[argIdx].f)
 
 // GLOBAL: TH07 0x0049f560
 const char *g_EclPaths[10] = {
@@ -685,7 +685,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
         g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx];
     g_EnemyManager.spellcardInfo.grazeBonusScore = 0;
     g_EnemyManager.spellcardInfo.scoreDrainRate =
-        (i32)g_EnemyManager.spellcardInfo.captureScore /
+        g_EnemyManager.spellcardInfo.captureScore /
         (enemy->timerCallbackThreshold / 60 + 10);
     g_EnemyManager.timer = 0;
     enemy->bulletRankSpeedLow = -0.5f;
@@ -848,52 +848,51 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
     g_Stage.spellCardState = 0;
 }
 
-#pragma var_order(local_8, instr, local_10, local_14, local_18, local_1c,     \
-                  local_20, local_24, local_28, local_30, local_34, local_38, \
-                  local_3c, local_40, local_4c, local_50, local_54, local_60, \
-                  local_64, local_68, local_74, local_a0, local_cc, local_d8, \
-                  local_e8, local_f0, local_f4, local_fc, uVar6, fVar3,       \
-                  fVar28, bVar7)
+#pragma var_order(local_8, instr, lerpDelta, interpIdx, interp, bulletInstrArgs,     \
+                  bulletProps, bulletCommand, laserProps, laserInstrArgs, laserIdx, effectInstrArgs, \
+                  exitAngle, healthIdx, bossIdx, particleVel, numDrops, itemDropIdx, \
+                  itemDropPos, numPointItems, pointItemIdx, pointItemPos, unusedEnemyAbs, absSpawnInstrArgs, \
+                  absEnemySpawnPos, unusedEnemyRel, relSpawnInstrArgs, relEnemySpawnPos, local_d8, unused_e4, \
+                  t1, anmDirection, interpIdx2, t2, local_f8, interp2)
 // FUNCTION: TH07 0x00410520
 ZunResult EclManager::RunEcl(Enemy *enemy)
 {
-    i32 iVar13;
-    u32 uVar17;
-    i32 iVar19;
-    f32 fVar8;
-
-    EclInterp *local_fc;
-    f32 local_f4;
-    i32 local_f0;
-    f32 local_e8;
+    EclInterp *interp2;
+    i32 local_f8;
+    f32 t2;
+    i32 interpIdx2;
+    u32 anmDirection;
+    f32 t1;
+    D3DXVECTOR3 unused_e4;
     D3DXVECTOR3 local_d8;
-    D3DXVECTOR3 local_cc;
-    D3DXVECTOR3 local_a0;
-    D3DXVECTOR3 local_74;
-    i32 local_68;
-    i32 local_64;
-    D3DXVECTOR3 local_60;
-    i32 local_54;
-    i32 local_50;
-    D3DXVECTOR3 local_4c;
-    i32 local_40;
-    i32 local_3c;
-    f32 local_38;
-    AnyArg *local_34;
-    i32 local_30;
-    EnemyLaserShooter *local_28;
-    BulletCommand *local_24;
-    EnemyBulletShooter *local_20;
-    AnyArg *local_1c;
-    EclInterp *local_18;
-    i32 local_14;
-    f32 local_10;
+    D3DXVECTOR3 relEnemySpawnPos;
+    AnyArg relSpawnInstrArgs[7];
+    Enemy *unusedEnemyRel;
+    D3DXVECTOR3 absEnemySpawnPos;
+    AnyArg absSpawnInstrArgs[7];
+    Enemy *unusedEnemyAbs;
+    D3DXVECTOR3 pointItemPos;
+    i32 pointItemIdx;
+    i32 numPointItems;
+    D3DXVECTOR3 itemDropPos;
+    i32 itemDropIdx;
+    i32 numDrops;
+    D3DXVECTOR3 particleVel;
+    i32 bossIdx;
+    i32 healthIdx;
+    f32 exitAngle;
+    AnyArg *effectInstrArgs;
+    i32 laserIdx;
+    AnyArg *laserInstrArgs;
+    EnemyLaserShooter *laserProps;
+    BulletCommand *bulletCommand;
+    EnemyBulletShooter *bulletProps;
+    AnyArg *bulletInstrArgs;
+    EclInterp *interp;
+    i32 interpIdx;
+    f32 lerpDelta;
     EclRawInstr *instr;
     i32 local_8;
-    bool bVar7;
-    f32 fVar28;
-    f32 fVar3;
-    u8 uVar6;
 
 restart:
     instr = enemy->currentContext.curInstr;
@@ -926,7 +925,7 @@ restart:
         {
             enemy->currentContext.timer2--;
             enemy->currentContext.time--;
-            break;
+            goto exit;
         }
         if (enemy->currentContext.time == instr->time)
         {
@@ -982,12 +981,13 @@ restart:
                 break;
             case 10:
                 *GET_INT_PTR(enemy, 0) =
-                    (((g_Rng.GetRandomU16() & 1) != 0 ? 2 : 0) - 1) *
+                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1 : -1) *
                     GET_INT_VALUE(enemy, 1);
                 break;
             case 0xb:
                 *GET_FLOAT_PTR(enemy, 0) =
-                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1.0f : -1.0f) * GET_FLOAT_VALUE(enemy, 1);
+                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1.0f : -1.0f) *
+                    GET_FLOAT_VALUE(enemy, 1);
                 break;
             case 0x11:
                 *GET_INT_PTR(enemy, 0) += 1;
@@ -1059,31 +1059,31 @@ restart:
                            GET_FLOAT_VALUE(enemy, 3) - GET_FLOAT_VALUE(enemy, 1));
                 break;
             case 0x9f:
-                local_10 = GET_FLOAT_VALUE(enemy, 1) -
+                lerpDelta = GET_FLOAT_VALUE(enemy, 1) -
                            GET_FLOAT_VALUE(enemy, 2);
                 *GET_FLOAT_PTR(enemy, 0) =
-                    local_10 * GET_FLOAT_VALUE(enemy, 3) +
-                    GET_FLOAT_VALUE(enemy, 2);
+                    lerpDelta * GET_FLOAT_VALUE(enemy, 3) + GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 0x1b:
-                local_18 = enemy->currentContext.interps;
-                for (local_14 = 0; local_14 < 8; local_14++, local_18++)
+                interp = enemy->currentContext.interps;
+                for (interpIdx = 0; interpIdx < 8; interpIdx++, interp++)
                 {
-                    if (!local_18->fn ||
-                        local_18->args[7].f == instr->args[0].f)
+                    if (interp->fn &&
+                        interp->args[7].f != instr->args[0].f)
                     {
-                        local_18->timer = 0;
-                        local_18->args[7] = instr->args[0];
-                        local_18->args[0].i = GET_INT_VALUE(enemy, 1);
-                        local_18->args[1].i = GET_INT_VALUE(enemy, 2);
-                        local_18->args[2].i = GET_INT_VALUE(enemy, 3);
-                        local_18->fn = g_EclInterpFuncs[local_18->args[1].i];
-                        local_18->args[3].f = GET_FLOAT_VALUE(enemy, 4);
-                        local_18->args[4].f = GET_FLOAT_VALUE(enemy, 5);
-                        local_18->args[5].f = GET_FLOAT_VALUE(enemy, 6);
-                        local_18->args[6].f = GET_FLOAT_VALUE(enemy, 7);
-                        break;
+                        continue;
                     }
+                    interp->timer = 0;
+                    interp->args[7].i = instr->args[0].i;
+                    interp->args[0].i = GET_INT_VALUE(enemy, 1);
+                    interp->args[1].i = GET_INT_VALUE(enemy, 2);
+                    interp->args[2].i = GET_INT_VALUE(enemy, 3);
+                    interp->fn = g_EclInterpFuncs[interp->args[1].i];
+                    interp->args[3].f = GET_FLOAT_VALUE(enemy, 4);
+                    interp->args[4].f = GET_FLOAT_VALUE(enemy, 5);
+                    interp->args[5].f = GET_FLOAT_VALUE(enemy, 6);
+                    interp->args[6].f = GET_FLOAT_VALUE(enemy, 7);
+                    break;
                 }
                 break;
             case 0x1c:
@@ -1196,7 +1196,7 @@ restart:
                                                         GET_INT_VALUE(enemy, 0) + 0x900);
                 break;
             case 0x61:
-                if (1 < GET_INT_VALUE(enemy, 0))
+                if (GET_INT_VALUE(enemy, 0) >= 2)
                 {
                     // STRING: TH07 0x004986c8
                     DebugPrint("error : sub anim overflow\r\n");
@@ -1223,38 +1223,38 @@ restart:
                 enemy->axisSpeed.y = GET_FLOAT_VALUE(enemy, 1);
                 enemy->axisSpeed.z = GET_FLOAT_VALUE(enemy, 2);
                 enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
-                enemy->flags1 &= 0xfc;
+                enemy->moveMode = 0;
                 break;
             case 0x30:
                 enemy->angularVelocity = GET_FLOAT_VALUE(enemy, 0);
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                enemy->moveMode = 1;
                 break;
             case 0x35:
                 enemy->angle = g_Player.AngleToPlayer(&enemy->position) +
                                GET_FLOAT_VALUE(enemy, 0);
                 enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 1);
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                enemy->moveMode = 1;
                 break;
             case 0x31:
                 enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 0);
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                enemy->moveMode = 1;
                 break;
             case 0x32:
                 enemy->moveAcceleration = GET_FLOAT_VALUE(enemy, 0);
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                enemy->moveMode = 1;
                 break;
             case 0x3b:
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                enemy->moveMode = 1;
                 enemy->moveInterpTimer = enemy->moveInterpStartTime =
                     GET_INT_VALUE(enemy, 0);
                 break;
             case 0x3c:
-                enemy->flags1 = enemy->flags1 | 3;
+                enemy->moveMode = 3;
                 enemy->moveInterpTimer = enemy->moveInterpStartTime =
                     GET_INT_VALUE(enemy, 0);
                 break;
             case 0x3d:
-                enemy->flags1 = (enemy->flags1 & 0xfc) | 2;
+                enemy->moveMode = 2;
                 enemy->moveInterpTimer = enemy->moveInterpStartTime =
                     GET_INT_VALUE(enemy, 0);
                 break;
@@ -1267,83 +1267,72 @@ restart:
             case 0x46:
             case 0x47:
             case 0x48:
-                if (0 < enemy->life)
+                if (enemy->life <= 0)
                 {
-                    local_1c = instr->args;
-                    local_20 = &enemy->bulletProps;
-                    local_8 = (instr->paramMask & 1) != 0
-                                  ? GetVarValue(enemy, local_1c->s[0])
-                                  : local_1c->s[0];
-                    local_20->sprite = local_8;
-                    local_20->aimMode = instr->id - 0x40;
-                    local_20->count1 = GET_INT_VALUE_D(enemy, 1, 2);
-                    local_20->count2 = GET_INT_VALUE_D(enemy, 2, 3);
-                    local_20->position = enemy->position + enemy->shootOffset;
-                    local_20->angle1 = GET_FLOAT_VALUE_D(enemy, 5, 6);
-                    local_20->speed1 = GET_FLOAT_VALUE_D(enemy, 3, 4);
-                    local_20->angle2 = GET_FLOAT_VALUE_D(enemy, 6, 7);
-                    local_20->speed2 = GET_FLOAT_VALUE_D(enemy, 4, 5);
-                    if (!g_EnemyManager.spellcardInfo.isActive)
+                    break;
+                }
+                bulletInstrArgs = instr->args;
+                bulletProps = &enemy->bulletProps;
+                local_8 = bulletInstrArgs->s[0];
+                bulletProps->sprite = (instr->paramMask & 1) != 0
+                                       ? GetVarValue(enemy, local_8)
+                                       : local_8;
+                bulletProps->aimMode = instr->id - 0x40;
+                bulletProps->count1 = GET_INT_VALUE_D(enemy, bulletInstrArgs, 1, 2);
+                bulletProps->count2 = GET_INT_VALUE_D(enemy, bulletInstrArgs, 2, 3);
+                bulletProps->position = enemy->position + enemy->shootOffset;
+                bulletProps->angle1 = GET_FLOAT_VALUE_D(enemy, bulletInstrArgs, 5, 6);
+                bulletProps->speed1 = GET_FLOAT_VALUE_D(enemy, bulletInstrArgs, 3, 4);
+                bulletProps->angle2 = GET_FLOAT_VALUE_D(enemy, bulletInstrArgs, 6, 7);
+                bulletProps->speed2 = GET_FLOAT_VALUE_D(enemy, bulletInstrArgs, 4, 5);
+                if (!g_EnemyManager.spellcardInfo.isActive)
+                {
+                    bulletProps->count1 += enemy->BulletRankAmount1(g_GameManager.rank.rank);
+                    if (bulletProps->count1 <= 0)
                     {
-                        iVar13 = enemy->bulletRankAmount1Low;
-                        iVar19 = ((i32)enemy->bulletRankAmount1High - iVar13) *
-                                 g_GameManager.rank.rank;
-                        local_20->count1 += iVar13 + (i16)(i32)(iVar19 / 32);
-                        if (local_20->count1 <= 0)
+                        bulletProps->count1 = 1;
+                    }
+
+                    bulletProps->count2 += enemy->BulletRankAmount2(g_GameManager.rank.rank);
+                    if (bulletProps->count2 <= 0)
+                    {
+                        bulletProps->count2 = 1;
+                    }
+                    if (bulletProps->speed1 != 0.0f)
+                    {
+                        bulletProps->speed1 += enemy->BulletRankSpeed(g_GameManager.rank.rank);
+                        if (bulletProps->speed1 < 0.3f)
                         {
-                            local_20->count1 = 1;
-                        }
-                        iVar13 = enemy->bulletRankAmount1Low;
-                        iVar19 = ((i32)enemy->bulletRankAmount2High - iVar13) *
-                                 g_GameManager.rank.rank;
-                        local_20->count2 += iVar13 + (i16)(i32)(iVar19 / 32);
-                        if (local_20->count2 <= 0)
-                        {
-                            local_20->count2 = 1;
-                        }
-                        fVar28 = enemy->bulletRankSpeedLow;
-                        local_20->speed1 +=
-                            (enemy->bulletRankSpeedHigh - fVar28) *
-                                (f32)g_GameManager.rank.rank /
-                                32.0f +
-                            fVar28;
-                        if (local_20->speed1 < 0.3f)
-                        {
-                            local_20->speed1 = 0.3f;
-                        }
-                        fVar28 = enemy->bulletRankSpeedLow;
-                        local_20->speed2 +=
-                            ((enemy->bulletRankSpeedHigh - fVar28) *
-                                 (f32)g_GameManager.rank.rank /
-                                 32.0f +
-                             fVar28) /
-                            2.0f;
-                        if (local_20->speed2 < 0.3f)
-                        {
-                            local_20->speed2 = 0.3f;
+                            bulletProps->speed1 = 0.3f;
                         }
                     }
-                    local_20->unused_c2 = 0;
-                    local_20->flags = local_1c[7].u;
-                    local_8 = (instr->paramMask & 2) != 0
-                                  ? GetVarValue(enemy, local_1c->s[1])
-                                  : local_1c->s[1];
-                    local_20->spriteOffset = local_8;
-                    if ((enemy->flags1 >> 5 & 1) == 0)
+                    bulletProps->speed2 += enemy->BulletRankSpeed(g_GameManager.rank.rank) /
+                                        2.0f;
+                    if (bulletProps->speed2 < 0.3f)
                     {
-                        g_BulletManager.SpawnBulletPattern(local_20);
+                        bulletProps->speed2 = 0.3f;
                     }
+                }
+                bulletProps->unused_c2 = 0;
+                bulletProps->flags = bulletInstrArgs[7].u;
+                local_8 = bulletInstrArgs->s[1];
+                bulletProps->spriteOffset = (instr->paramMask & 2) != 0
+                                             ? GetVarValue(enemy, local_8)
+                                             : local_8;
+                if (!enemy->disableBullets)
+                {
+                    g_BulletManager.SpawnBulletPattern(bulletProps);
                 }
                 break;
             case 0x4f:
-                local_24 =
+                bulletCommand =
                     &enemy->bulletProps.commands[GET_INT_VALUE(enemy, 0)];
-                local_24->speed = GET_FLOAT_VALUE(enemy, 5);
-                local_24->angle = GET_FLOAT_VALUE(enemy, 6);
-                local_24->duration = GET_INT_VALUE(enemy, 3);
-                local_24->loopCount = GET_INT_VALUE(enemy, 4);
-                local_24->type = GET_INT_VALUE(enemy, 1);
-                local_24->flag = GET_INT_VALUE(enemy, 2);
+                bulletCommand->type = GET_INT_VALUE(enemy, 1);
+                bulletCommand->flag = GET_INT_VALUE(enemy, 2);
+                bulletCommand->duration = GET_INT_VALUE(enemy, 3);
+                bulletCommand->loopCount = GET_INT_VALUE(enemy, 4);
+                bulletCommand->speed = GET_FLOAT_VALUE(enemy, 5);
+                bulletCommand->angle = GET_FLOAT_VALUE(enemy, 6);
                 break;
             case 0x62:
                 enemy->deathAnm1 = instr->args[0].c[0];
@@ -1354,11 +1343,7 @@ restart:
                 enemy->shootInterval = GET_INT_VALUE(enemy, 0);
                 if (enemy->shootInterval != 0)
                 {
-                    iVar19 = enemy->shootInterval / 5;
-                    iVar13 =
-                        (-enemy->shootInterval / 5 - iVar19) * g_GameManager.rank.rank;
-                    enemy->shootInterval =
-                        (i32)(iVar13 / 32) + iVar19 + enemy->shootInterval;
+                    enemy->shootInterval += enemy->ShootInterval(g_GameManager.rank.rank);
                     enemy->shootIntervalTimer = 0;
                 }
                 break;
@@ -1366,20 +1351,16 @@ restart:
                 enemy->shootInterval = GET_INT_VALUE(enemy, 0);
                 if (enemy->shootInterval != 0)
                 {
-                    iVar19 = enemy->shootInterval / 5;
-                    iVar13 =
-                        (-enemy->shootInterval / 5 - iVar19) * g_GameManager.rank.rank;
-                    enemy->shootInterval =
-                        (i32)(iVar13 / 32) + iVar19 + enemy->shootInterval;
+                    enemy->shootInterval += enemy->ShootInterval(g_GameManager.rank.rank);
                     enemy->shootIntervalTimer =
                         g_Rng.GetRandomU32InRange(enemy->shootInterval);
                 }
                 break;
             case 0x4b:
-                enemy->flags1 |= 0x20;
+                enemy->disableBullets = 1;
                 break;
             case 0x4c:
-                enemy->flags1 &= 0xdf;
+                enemy->disableBullets = 0;
                 break;
             case 0x4d:
                 enemy->bulletProps.position = enemy->position + enemy->shootOffset;
@@ -1392,46 +1373,58 @@ restart:
                 break;
             case 0x52:
             case 0x53:
-                local_28 = &enemy->laserProps;
-                local_28->position = enemy->position + enemy->shootOffset;
-                local_28->sprite = instr->args[0].s[0];
-                local_28->spriteOffset = (instr->paramMask & 2) != 0
-                                             ? (i16)GetVarValue(enemy, (i32)instr->args[0].s[1])
-                                             : instr->args[0].s[1];
-                local_28->angle1 = GET_FLOAT_VALUE_D(enemy, 1, 2);
-                local_28->speed1 = GET_FLOAT_VALUE_D(enemy, 2, 3);
-                local_28->startOffset = GET_FLOAT_VALUE_D(enemy, 3, 4);
-                local_28->endOffset = GET_FLOAT_VALUE_D(enemy, 4, 5);
-                local_28->startLength = GET_FLOAT_VALUE_D(enemy, 5, 6);
-                local_28->width = instr->args[6].f;
-                local_28->startTime = instr->args[7].i;
-                local_28->duration = instr->args[8].i;
-                local_28->endTime = instr->args[9].i;
-                local_28->grazeDelay = instr->args[10].i;
-                local_28->aimMode = instr->args[11].i;
-                local_28->flags = instr->args[12].u;
-                local_28->type = instr->id == 0x53 ? 0 : 1;
+                laserInstrArgs = instr->args;
+                laserProps = &enemy->laserProps;
+                laserProps->position = enemy->position + enemy->shootOffset;
+                laserProps->sprite = laserInstrArgs->s[0];
+                laserProps->spriteOffset = (instr->paramMask & 2) != 0
+                                             ? GetVarValue(enemy, laserInstrArgs->s[1])
+                                             : (i32)laserInstrArgs->s[1];
+                laserProps->angle1 = GET_FLOAT_VALUE_D(enemy, laserInstrArgs, 1, 2);
+                laserProps->speed1 = GET_FLOAT_VALUE_D(enemy, laserInstrArgs, 2, 3);
+                laserProps->startOffset = GET_FLOAT_VALUE_D(enemy, laserInstrArgs, 3, 4);
+                laserProps->endOffset = GET_FLOAT_VALUE_D(enemy, laserInstrArgs, 4, 5);
+                laserProps->startLength = GET_FLOAT_VALUE_D(enemy, laserInstrArgs, 5, 6);
+                laserProps->width = laserInstrArgs[6].f;
+                laserProps->startTime = laserInstrArgs[7].i;
+                laserProps->duration = laserInstrArgs[8].i;
+                laserProps->endTime = laserInstrArgs[9].i;
+                laserProps->grazeDelay = laserInstrArgs[10].i;
+                laserProps->aimMode = laserInstrArgs[11].i;
+                laserProps->flags = laserInstrArgs[12].u;
+
+                if (instr->id == 0x53)
+                {
+                    laserProps->type = 0;
+                }
+                else
+                {
+                    laserProps->type = 1;
+                }
                 enemy->lasers[enemy->laserIdx] =
-                    g_BulletManager.SpawnLaserPattern(local_28);
+                    g_BulletManager.SpawnLaserPattern(laserProps);
                 break;
             case 0x54:
                 enemy->laserIdx = GET_INT_VALUE(enemy, 0);
                 break;
             case 0x55:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->angle = utils::AddNormalizeAngle(
                         enemy->lasers[local_8]->angle, GET_FLOAT_VALUE(enemy, 1));
                 }
                 break;
             case 0x98:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->angle = GET_FLOAT_VALUE(enemy, 1);
                 }
                 break;
             case 0x56:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->angle =
                         g_Player.AngleToPlayer(&enemy->lasers[local_8]->pos) +
@@ -1439,7 +1432,8 @@ restart:
                 }
                 break;
             case 0x57:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->pos.x =
                         GET_FLOAT_VALUE(enemy, 1) + enemy->position.x;
@@ -1450,7 +1444,8 @@ restart:
                 }
                 break;
             case 0x9c:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->hideWarning =
                         GET_INT_VALUE(enemy, 1);
@@ -1458,14 +1453,14 @@ restart:
                 break;
             case 0x58:
                 local_8 = GET_INT_VALUE(enemy, 0);
-                if (!enemy->lasers[local_8] ||
-                    !enemy->lasers[local_8]->inUse)
+                if (enemy->lasers[local_8] &&
+                    enemy->lasers[local_8]->inUse)
                 {
-                    enemy->currentContext.compareRegister = 1;
+                    enemy->currentContext.compareRegister = 0;
                 }
                 else
                 {
-                    enemy->currentContext.compareRegister = 0;
+                    enemy->currentContext.compareRegister = 1;
                 }
                 break;
             case 0x59:
@@ -1481,20 +1476,22 @@ restart:
                 }
                 break;
             case 0x86:
-                for (local_30 = 0; local_30 < 0x20; local_30++)
+                for (laserIdx = 0; laserIdx < 0x20; laserIdx++)
                 {
-                    enemy->lasers[local_30] = NULL;
+                    enemy->lasers[laserIdx] = NULL;
                 }
                 break;
             case 0x9d:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->startLength =
                         GET_FLOAT_VALUE(enemy, 1);
                 }
                 break;
             case 0x9e:
-                if (enemy->lasers[local_8 = GET_INT_VALUE(enemy, 0)] != NULL)
+                local_8 = GET_INT_VALUE(enemy, 0);
+                if (enemy->lasers[local_8])
                 {
                     enemy->lasers[local_8]->startOffset =
                         GET_FLOAT_VALUE(enemy, 1);
@@ -1506,7 +1503,16 @@ restart:
                 g_EnemyManager.unused_9545f0 = GET_INT_VALUE(enemy, 0);
                 break;
             case 0x63:
-                if (GET_INT_VALUE(enemy, 0) < 0)
+                if (GET_INT_VALUE(enemy, 0) >= 0)
+                {
+                    g_EnemyManager.bosses[GET_INT_VALUE(enemy, 0)] = enemy;
+                    g_Gui.bossPresent = 1;
+                    g_Gui.bossHealthBar = 1.0f;
+                    enemy->isBoss = 1;
+                    enemy->bossId = GET_INT_VALUE(enemy, 0);
+                    g_AsciiManager.SetBossMarkerInterrupt(enemy->bossId, 1);
+                }
+                else
                 {
                     if (enemy->bossId < 4)
                     {
@@ -1514,37 +1520,26 @@ restart:
                     }
                     g_EnemyManager.bosses[enemy->bossId] = NULL;
                     enemy->isBoss = 0;
-                    g_AsciiManager.bossMarkers[enemy->bossId].pendingInterrupt = 2;
+                    g_AsciiManager.SetBossMarkerInterrupt(enemy->bossId, 2);
                     enemy->ResetEffectArray();
-                }
-                else
-                {
-                    g_EnemyManager.bosses[GET_INT_VALUE(enemy, 0)] = enemy;
-                    g_Gui.bossPresent = 1;
-                    g_Gui.bossHealthBar = 1.0f;
-                    enemy->isBoss = 1;
-                    enemy->bossId = GET_INT_VALUE(enemy, 0);
-                    g_AsciiManager.bossMarkers[enemy->bossId].pendingInterrupt = 1;
                 }
                 break;
             case 0x64:
-                local_34 = instr->args;
+                effectInstrArgs = instr->args;
                 enemy->effects[enemy->effectsNum] = g_EffectManager.SpawnParticles(
-                    0xd, &enemy->position, 1, g_BulletColor[local_34->i]);
-                enemy->effects[enemy->effectsNum]->direction.x = local_34[1].f;
-                enemy->effects[enemy->effectsNum]->direction.y = local_34[2].f;
-                enemy->effects[enemy->effectsNum]->direction.z = local_34[3].f;
-                enemy->effectDistance = local_34[4].f;
+                    0xd, &enemy->position, 1, g_BulletColor[effectInstrArgs->i]);
+                enemy->effects[enemy->effectsNum]->direction = *(D3DXVECTOR3 *)&effectInstrArgs[1];
+                enemy->effectDistance = effectInstrArgs[4].f;
                 enemy->effectsNum++;
                 break;
             case 0x36:
-                if (GET_INT_VALUE(enemy, 0) < 1)
+                if (GET_INT_VALUE(enemy, 0) <= 0)
                 {
                     enemy->angle =
                         utils::AddNormalizeAngle(
                             GET_FLOAT_VALUE(enemy, 2), 0.0f);
                     enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 3);
-                    enemy->flags1 = (enemy->flags1 & 0xfc) | 1;
+                    enemy->moveMode = 1;
                     enemy->moveInterpTimer = enemy->moveInterpStartTime =
                         GET_INT_VALUE(enemy, 0);
                 }
@@ -1566,7 +1561,7 @@ restart:
                 enemy->moveAngularVelocity = GET_FLOAT_VALUE(enemy, 5);
                 enemy->moveRadius = GET_FLOAT_VALUE(enemy, 6);
                 enemy->moveRadialVelocity = GET_FLOAT_VALUE(enemy, 7);
-                enemy->flags1 |= 3;
+                enemy->moveMode = 3;
                 break;
             case 0x39:
                 enemy->moveRadius = GET_FLOAT_VALUE(enemy, 0);
@@ -1593,50 +1588,48 @@ restart:
                     GET_FLOAT_VALUE(enemy, 1);
                 break;
             case 0x34:
-                local_38 =
-                    g_Player.positionCenter.x < enemy->position.x
-                        ? utils::AddNormalizeAngle(
-                              g_Rng.GetRandomFloatInRange(1.5707964f) + 2.3561945f, 0.0f)
-                        : g_Rng.GetRandomFloatInRange(1.5707964f) - 0.7853982f;
-                if (enemy->position.x < enemy->lowerMoveLimit.x + 96.0)
+                if (g_Player.positionCenter.x < enemy->position.x)
                 {
-                    if (local_38 <= 1.5707964f)
+                    exitAngle = utils::AddNormalizeAngle(
+                        g_Rng.GetRandomFloatInRange(1.5707964f) + 2.3561945f, 0.0f);
+                }
+                else
+                {
+                    exitAngle = g_Rng.GetRandomFloatInRange(1.5707964f) - 0.7853982f;
+                }
+                if (enemy->position.x < enemy->lowerMoveLimit.x + 96.0f)
+                {
+                    if (exitAngle > 1.5707964f)
                     {
-                        if (local_38 < -1.5707964f)
-                        {
-                            local_38 = -3.1415927f - local_38;
-                        }
+                        exitAngle = 3.1415927f - exitAngle;
                     }
-                    else
+                    else if (exitAngle < -1.5707964f)
                     {
-                        local_38 = 3.1415927f - local_38;
+                        exitAngle = -3.1415927f - exitAngle;
                     }
                 }
                 if (enemy->upperMoveLimit.x - 96.0f < enemy->position.x)
                 {
-                    if (1.5707964f <= local_38 || local_38 < 0.0f)
+                    if (exitAngle < 1.5707964f && exitAngle >= 0.0f)
                     {
-                        if (-1.5707964f < local_38 && local_38 <= 0.0f)
-                        {
-                            local_38 = -3.1415927f - local_38;
-                        }
+                        exitAngle = 3.1415927f - enemy->angle;
                     }
-                    else
+                    else if (exitAngle > -1.5707964f && exitAngle <= 0.0f)
                     {
-                        local_38 = 3.1415927f - enemy->angle;
+                        exitAngle = -3.1415927f - exitAngle;
                     }
                 }
                 if (enemy->lowerMoveLimit.y + 48.0f > enemy->position.y &&
-                    local_38 < 0.0f)
+                    exitAngle < 0.0f)
                 {
-                    local_38 = -local_38;
+                    exitAngle = -exitAngle;
                 }
                 if (enemy->upperMoveLimit.y - 48.0f < enemy->position.y &&
-                    0.0f < local_38)
+                    exitAngle > 0.0f)
                 {
-                    local_38 = -local_38;
+                    exitAngle = -exitAngle;
                 }
-                *GET_FLOAT_PTR(enemy, 0) = local_38;
+                *GET_FLOAT_PTR(enemy, 0) = exitAngle;
                 break;
             case 0x60:
                 enemy->anmExDefaults = instr->args[0].s[0];
@@ -1698,22 +1691,21 @@ restart:
                 enemy->life = enemy->maxLife = GET_INT_VALUE(enemy, 0);
                 if (enemy->bossId == 0 && enemy->isBoss)
                 {
-                    for (local_3c = 0; local_3c < 8; local_3c++)
+                    for (healthIdx = 0; healthIdx < 8; healthIdx++)
                     {
-                        g_Gui.bossHealthEased[local_3c] = 0.0f;
-                        g_Gui.bossHealth[local_3c] = 0.0f;
+                        g_Gui.bossHealthEased[healthIdx] = 0.0f;
+                        g_Gui.bossHealth[healthIdx] = 0.0f;
                     }
                 }
                 break;
             case 0x8b:
-                local_40 = GET_INT_VALUE(enemy, 0);
-                g_Gui.bossHealthEased[local_40] =
-                    (f32)GET_INT_VALUE(enemy, 1) /
-                    (f32)enemy->maxLife;
-                g_Gui.bossHealth[local_40] =
-                    (f32)GET_INT_VALUE(enemy, 2) /
-                    (f32)enemy->maxLife;
-                g_Gui.bossColor[local_40] = GET_INT_VALUE(enemy, 3);
+                bossIdx = GET_INT_VALUE(enemy, 0);
+                g_Gui.SetBossHealth(bossIdx,
+                                    GET_INT_VALUE(enemy, 1) /
+                                        (f32)enemy->maxLife,
+                                    GET_INT_VALUE(enemy, 2) /
+                                        (f32)enemy->maxLife);
+                g_Gui.bossColor[bossIdx] = GET_INT_VALUE(enemy, 3);
                 break;
             case 0x5a:
                 BeginSpellcard(enemy, instr);
@@ -1760,60 +1752,60 @@ restart:
                     *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
                 break;
             case 0x76:
-                local_4c.x = GET_FLOAT_VALUE(enemy, 3);
-                local_4c.y = GET_FLOAT_VALUE(enemy, 4);
-                local_4c.z = GET_FLOAT_VALUE(enemy, 5);
+                particleVel.x = GET_FLOAT_VALUE(enemy, 3);
+                particleVel.y = GET_FLOAT_VALUE(enemy, 4);
+                particleVel.z = GET_FLOAT_VALUE(enemy, 5);
                 g_EffectManager.SpawnMovingParticles(
                     GET_INT_VALUE(enemy, 0),
                     &enemy->position,
-                    &local_4c,
+                    &particleVel,
                     GET_INT_VALUE(enemy, 1),
                     *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
                 break;
             case 0x77:
-                local_50 = GET_INT_VALUE(enemy, 0);
-                for (local_54 = 0; local_54 < local_50; local_54++)
+                numDrops = GET_INT_VALUE(enemy, 0);
+                for (itemDropIdx = 0; itemDropIdx < numDrops; itemDropIdx++)
                 {
-                    local_60 = enemy->position;
-                    local_60.x = g_Rng.GetRandomFloatInRange(128.0f) - 64.0f + local_60.x;
-                    local_60.y = g_Rng.GetRandomFloatInRange(128.0f) - 64.0f + local_60.y;
+                    itemDropPos = enemy->position;
+                    itemDropPos[0] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    itemDropPos[1] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     if ((i32)g_GameManager.globals->currentPower < 128)
                     {
-                        g_ItemManager.SpawnItem(&local_60,
-                                                local_54 == 0 ? 2 : 0, 0);
+                        g_ItemManager.SpawnItem(&itemDropPos,
+                                                itemDropIdx == 0 ? ITEM_POWER_BIG : ITEM_POWER_SMALL, 0);
                     }
                     else
                     {
-                        g_ItemManager.SpawnItem(&local_60, ITEM_POINT, 0);
+                        g_ItemManager.SpawnItem(&itemDropPos, ITEM_POINT, 0);
                     }
                 }
                 break;
             case 0x9a:
-                local_64 = GET_INT_VALUE(enemy, 0);
-                for (local_68 = 0; local_68 < local_64; local_68++)
+                numPointItems = GET_INT_VALUE(enemy, 0);
+                for (pointItemIdx = 0; pointItemIdx < numPointItems; pointItemIdx++)
                 {
-                    local_74 = enemy->position;
-                    local_74.x = g_Rng.GetRandomFloatInRange(128.0f) - 64.0f + local_74.x;
-                    local_74.y = g_Rng.GetRandomFloatInRange(128.0f) - 64.0f + local_74.y;
-                    g_ItemManager.SpawnItem(&local_74, ITEM_POINT, 0);
+                    pointItemPos = enemy->position;
+                    pointItemPos[0] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    pointItemPos[1] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    g_ItemManager.SpawnItem(&pointItemPos, ITEM_POINT, 0);
                 }
                 break;
             case 0x78:
                 enemy->primaryVmAutoRotate = instr->args[0].b[0];
                 break;
             case 0x79:
-                (*g_EclExInstr[GET_INT_VALUE(enemy, 0)])(enemy, instr);
+                g_EclExInstr[GET_INT_VALUE(enemy, 0)](enemy, instr);
                 break;
             case 0x7a:
-                if (GET_INT_VALUE(enemy, 0) < 0)
-                {
-                    enemy->currentContext.func = NULL;
-                }
-                else
+                if (GET_INT_VALUE(enemy, 0) >= 0)
                 {
                     enemy->currentContext.func =
                         g_EclExInstr[GET_INT_VALUE(enemy, 0)];
                     enemy->currentContext.eclExInstr = instr;
+                }
+                else
+                {
+                    enemy->currentContext.func = NULL;
                 }
                 break;
             case 0x7b:
@@ -1831,30 +1823,32 @@ restart:
                 g_GameManager.playTimeAll += 0x708;
                 break;
             case 0x5c:
-                if (0 < enemy->life)
+                if (enemy->life > 0)
                 {
-                    local_a0.x = GET_FLOAT_VALUE(enemy, 1);
-                    local_a0.y = GET_FLOAT_VALUE(enemy, 2);
-                    local_a0.z = GET_FLOAT_VALUE(enemy, 3);
-                    g_EnemyManager.SpawnEnemyEx(instr->args[0].i, &local_a0,
-                                                GET_INT_VALUE(enemy, 4),
-                                                GET_INT_VALUE(enemy, 5),
-                                                GET_INT_VALUE(enemy, 6),
-                                                &enemy->currentContext.eclContextArgs);
+                    memcpy(absSpawnInstrArgs, instr->args, sizeof(absSpawnInstrArgs));
+                    absEnemySpawnPos.x = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 1, 1);
+                    absEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 2, 2);
+                    absEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 3, 3);
+                    unusedEnemyAbs = g_EnemyManager.SpawnEnemyEx(absSpawnInstrArgs[0].i, &absEnemySpawnPos,
+                                                           GET_INT_VALUE(enemy, 4),
+                                                           GET_INT_VALUE(enemy, 5),
+                                                           GET_INT_VALUE(enemy, 6),
+                                                           &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 0x5d:
-                if (0 < enemy->life)
+                if (enemy->life > 0)
                 {
-                    local_cc.x = GET_FLOAT_VALUE(enemy, 1);
-                    local_cc.y = GET_FLOAT_VALUE(enemy, 2);
-                    local_cc.z = GET_FLOAT_VALUE(enemy, 3);
-                    local_cc += enemy->position;
-                    g_EnemyManager.SpawnEnemyEx(instr->args[0].i, &local_cc,
-                                                GET_INT_VALUE(enemy, 4),
-                                                GET_INT_VALUE(enemy, 5),
-                                                GET_INT_VALUE(enemy, 6),
-                                                &enemy->currentContext.eclContextArgs);
+                    memcpy(relSpawnInstrArgs, instr->args, sizeof(relSpawnInstrArgs));
+                    relEnemySpawnPos.x = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 1, 1);
+                    relEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 2, 2);
+                    relEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 3, 3);
+                    relEnemySpawnPos += enemy->position;
+                    unusedEnemyRel = g_EnemyManager.SpawnEnemyEx(relSpawnInstrArgs[0].i, &relEnemySpawnPos,
+                                                           GET_INT_VALUE(enemy, 4),
+                                                           GET_INT_VALUE(enemy, 5),
+                                                           GET_INT_VALUE(enemy, 6),
+                                                           &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 0x5e:
@@ -1870,14 +1864,14 @@ restart:
                 g_BulletManager.RemoveAllBullets(1);
                 break;
             case 0x51:
-                if (GET_INT_VALUE(enemy, 0) < 0)
-                {
-                    enemy->bulletProps.flags &= 0xfffffdff;
-                }
-                else
+                if (GET_INT_VALUE(enemy, 0) >= 0)
                 {
                     enemy->bulletProps.soundIdx = GET_INT_VALUE(enemy, 0);
                     enemy->bulletProps.flags = enemy->bulletProps.flags | 0x200;
+                }
+                else
+                {
+                    enemy->bulletProps.flags &= 0xfffffdff;
                 }
                 enemy->bulletProps.soundOverride = GET_INT_VALUE(enemy, 1);
                 break;
@@ -1948,9 +1942,8 @@ restart:
                 g_BulletManager.RemoveAllBullets(0);
                 break;
             case 0x95:
-                enemy->flags4 = (enemy->flags4 & 0xfd) |
-                                ((u8)GET_INT_VALUE(enemy, 0) & 1) << 1;
-                if ((enemy->flags4 >> 1 & 1) == 0)
+                enemy->customSpecialEffectPos = GET_INT_VALUE(enemy, 0);
+                if (!enemy->customSpecialEffectPos)
                 {
                     enemy->specialEffect->pos1.x = GET_FLOAT_VALUE(enemy, 1);
                     enemy->specialEffect->pos1.y = GET_FLOAT_VALUE(enemy, 2);
@@ -1968,8 +1961,8 @@ restart:
                 break;
             case 0x9b:
                 if ((g_Player.positionCenter.x < enemy->position.x &&
-                     96.0 < enemy->position.x) ||
-                    288.0 < enemy->position.x)
+                     enemy->position.x > 96.0f) ||
+                    enemy->position.x > 288.0f)
                 {
                     *GET_FLOAT_PTR(enemy, 0) =
                         utils::AddNormalizeAngle(
@@ -1985,307 +1978,303 @@ restart:
                 g_GameManager.AddCherryPlus(GET_INT_VALUE(enemy, 0));
                 break;
             case 0xa1:
-                enemy->flags4 = (enemy->flags4 & 0xf7) |
-                                ((u8)GET_INT_VALUE(enemy, 0) & 1) << 3;
+                enemy->freezeEclDuringBombs = GET_INT_VALUE(enemy, 0);
                 break;
             }
             }
+
+        skip:
+            instr = (EclRawInstr *)((u8 *)instr + instr->size);
+            continue;
         }
         else
         {
-            break;
-        }
-    skip:
-        instr = (EclRawInstr *)((u8 *)instr + instr->size);
-    }
-    if ((enemy->flags1 & 3) == 1)
-    {
-        enemy->angle = utils::AddNormalizeAngle(
-            enemy->angle,
-            g_Supervisor.effectiveFramerateMultiplier * enemy->angularVelocity);
-        enemy->moveSpeed = g_Supervisor.effectiveFramerateMultiplier *
-                               enemy->moveAcceleration +
-                           enemy->moveSpeed;
-        AngleToVector(&enemy->axisSpeed, enemy->angle, enemy->moveSpeed);
-        enemy->axisSpeed.z = 0.0f;
-        if (0 < enemy->moveInterpStartTime &&
-            (enemy->moveInterpTimer--,
-             enemy->moveInterpTimer < 1))
-        {
-            enemy->flags1 = enemy->flags1 & 0xfc;
-        }
-    }
-    else if ((enemy->flags1 & 3) == 2)
-    {
-        enemy->moveInterpTimer--;
-        local_e8 = 1.0f - ((f32)enemy->moveInterpTimer.current +
-                           enemy->moveInterpTimer.subFrame) /
-                              (f32)enemy->moveInterpStartTime;
-        if (local_e8 < 0.0f)
-        {
-            local_e8 = 0.0f;
-        }
-        switch (enemy->flags1 >> 2 & 7)
-        {
-        case 1: {
-            local_e8 = local_e8 * local_e8;
-            break;
-        }
-        case 2: {
-            local_e8 = local_e8 * local_e8 * local_e8;
-            break;
-        }
-        case 3: {
-            local_e8 = local_e8 * local_e8 * local_e8 * local_e8;
-            break;
-        }
-        case 4: {
-            local_e8 = 1.0f - (1.0f - local_e8) * (1.0f - local_e8);
-            break;
-        }
-        case 5: {
-            local_e8 = 1.0f - local_e8;
-            local_e8 = 1.0f - local_e8 * local_e8 * local_e8;
-            break;
-        }
-        case 6: {
-            local_e8 = 1.0f - local_e8;
-            local_e8 = 1.0f - local_e8 * local_e8 * local_e8 * local_e8;
-        }
-        }
-        enemy->axisSpeed =
-            local_e8 * enemy->moveInterp + enemy->moveInterpStartPos -
-            enemy->position;
-        if ((enemy->flags1 >> 6 & 1) != 0)
-        {
-            enemy->axisSpeed.x = -enemy->axisSpeed.x;
-        }
-        enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
-        if (enemy->moveInterpTimer < 1)
-        {
-            enemy->flags1 = enemy->flags1 & 0xfc;
-            enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
-            enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-        }
-    }
-    else if ((enemy->flags1 & 3) == 3)
-    {
-        enemy->moveAngle = utils::AddNormalizeAngle(
-            enemy->moveAngle, g_Supervisor.effectiveFramerateMultiplier *
-                                  enemy->moveAngularVelocity);
-        enemy->moveRadius = g_Supervisor.effectiveFramerateMultiplier *
-                                enemy->moveRadialVelocity +
-                            enemy->moveRadius;
-        AngleToVector(&local_d8, enemy->moveAngle, enemy->moveRadius);
-        enemy->axisSpeed.x =
-            local_d8.x + enemy->moveInterpStartPos.x - enemy->position.x;
-        enemy->axisSpeed.y =
-            local_d8.y + enemy->moveInterpStartPos.y - enemy->position.y;
-        enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
-        if (0 < enemy->moveInterpStartTime &&
-            (enemy->moveInterpTimer--,
-             enemy->moveInterpTimer < 1))
-        {
-            enemy->flags1 &= 0xfc;
-        }
-    }
-    if (0 < enemy->life)
-    {
-        if (0 < enemy->shootInterval)
-        {
-            enemy->shootIntervalTimer++;
-            if (enemy->shootInterval <= enemy->shootIntervalTimer.current)
+        exit:
+            switch (enemy->moveMode)
             {
-                enemy->bulletProps.position = enemy->position + enemy->shootOffset;
-                g_BulletManager.SpawnBulletPattern(&enemy->bulletProps);
-                enemy->shootIntervalTimer = 0;
-            }
-        }
-        if (enemy->anmExLeft >= 0)
-        {
-            uVar6 = 0;
-            if ((enemy->flags1 >> 6 & 1) == 0)
-            {
-                if (-0.01 <= enemy->axisSpeed.x)
+            case 3:
+                enemy->moveAngle = utils::AddNormalizeAngle(
+                    enemy->moveAngle, g_Supervisor.effectiveFramerateMultiplier *
+                                          enemy->moveAngularVelocity);
+                enemy->moveRadius = g_Supervisor.effectiveFramerateMultiplier *
+                                        enemy->moveRadialVelocity +
+                                    enemy->moveRadius;
+                AngleToVector(&local_d8, enemy->moveAngle, enemy->moveRadius);
+                enemy->axisSpeed.x =
+                    local_d8.x + enemy->moveInterpStartPos.x - enemy->position.x;
+                enemy->axisSpeed.y =
+                    local_d8.y + enemy->moveInterpStartPos.y - enemy->position.y;
+                enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
+                if (enemy->moveInterpStartTime > 0)
                 {
-                    if (0.01 < enemy->axisSpeed.x)
+                    enemy->moveInterpTimer--;
+                    if (enemy->moveInterpTimer <= 0)
                     {
-                        uVar6 = 2;
+                        enemy->moveMode = 0;
                     }
                 }
-                else
+                break;
+            case 1:
+                enemy->angle = utils::AddNormalizeAngle(
+                    enemy->angle,
+                    g_Supervisor.effectiveFramerateMultiplier * enemy->angularVelocity);
+                enemy->moveSpeed = g_Supervisor.effectiveFramerateMultiplier *
+                                       enemy->moveAcceleration +
+                                   enemy->moveSpeed;
+                AngleToVector(&enemy->axisSpeed, enemy->angle, enemy->moveSpeed);
+                enemy->axisSpeed.z = 0.0f;
+                if (enemy->moveInterpStartTime > 0)
                 {
-                    uVar6 = 1;
-                }
-            }
-            else if (-0.01 <= enemy->axisSpeed.x)
-            {
-                if (0.01 < enemy->axisSpeed.x)
-                {
-                    uVar6 = 1;
-                }
-            }
-            else
-            {
-                uVar6 = 2;
-            }
-            if (enemy->anmExFlags != uVar6)
-            {
-                if (uVar6 == 0)
-                {
-                    if (enemy->anmExFlags == 0xff)
+                    enemy->moveInterpTimer--;
+                    if (enemy->moveInterpTimer <= 0)
                     {
-                        g_AnmManager->SetAnmIdxAndExecuteScript(
-                            &enemy->primaryVm,
-                            enemy->anmExDefaults + 0x900);
-                    }
-                    else if (enemy->anmExFlags == 1)
-                    {
-                        g_AnmManager->SetAnmIdxAndExecuteScript(
-                            &enemy->primaryVm,
-                            enemy->anmExFarLeft + 0x900);
-                    }
-                    else
-                    {
-                        g_AnmManager->SetAnmIdxAndExecuteScript(
-                            &enemy->primaryVm,
-                            enemy->anmExFarRight + 0x900);
+                        enemy->moveMode = 0;
                     }
                 }
-                else if (uVar6 == 1)
+                break;
+            case 2:
+                enemy->moveInterpTimer--;
+                t1 = 1.0f - enemy->moveInterpTimer.AsFloat() /
+                                      (f32)enemy->moveInterpStartTime;
+                if (t1 < 0.0f)
                 {
-                    g_AnmManager->SetAnmIdxAndExecuteScript(
-                        &enemy->primaryVm,
-                        enemy->anmExLeft + 0x900);
+                    t1 = 0.0f;
                 }
-                else if (uVar6 == 2)
-                {
-                    g_AnmManager->SetAnmIdxAndExecuteScript(
-                        &enemy->primaryVm,
-                        enemy->anmExRight + 0x900);
-                }
-                enemy->anmExFlags = uVar6;
-            }
-        }
-        if (enemy->currentContext.func)
-        {
-            enemy->currentContext.func(enemy, enemy->currentContext.eclExInstr);
-        }
-        bVar7 = false;
-        local_fc = enemy->currentContext.interps;
-        fVar8 = enemy->position.x;
-        fVar28 = enemy->position.y;
-        fVar3 = enemy->position.z;
-        for (local_f0 = 0; local_f0 < 8; local_f0++)
-        {
-            if (local_fc->fn)
-            {
-                local_fc->timer++;
-                if (local_fc->args[0].i <= local_fc->timer.current)
-                {
-                    local_fc->timer = local_fc->args[0].i;
-                }
-                local_f4 =
-                    ((f32)local_fc->timer.current + local_fc->timer.subFrame) /
-                    (f32)local_fc->args[0].i;
-                switch (local_fc->args[2].i)
+                switch (enemy->interpEasing)
                 {
                 case 1: {
-                    local_f4 = local_f4 * local_f4;
+                    t1 = t1 * t1;
                     break;
                 }
                 case 2: {
-                    local_f4 = local_f4 * local_f4 * local_f4;
+                    t1 = t1 * t1 * t1;
                     break;
                 }
                 case 3: {
-                    local_f4 = local_f4 * local_f4 * local_f4 * local_f4;
+                    t1 = t1 * t1 * t1 * t1;
                     break;
                 }
                 case 4: {
-                    local_f4 = 1.0f - (1.0f - local_f4) * (1.0f - local_f4);
+                    t1 = 1.0f - t1;
+                    t1 = t1 * t1;
+                    t1 = 1.0f - t1;
                     break;
                 }
                 case 5: {
-                    local_f4 = 1.0f - local_f4;
-                    local_f4 = 1.0f - local_f4 * local_f4 * local_f4;
+                    t1 = 1.0f - t1;
+                    t1 = t1 * t1 * t1;
+                    t1 = 1.0f - t1;
                     break;
                 }
                 case 6: {
-                    local_f4 = 1.0f - local_f4;
-                    local_f4 = 1.0f - local_f4 * local_f4 * local_f4 * local_f4;
+                    t1 = 1.0f - t1;
+                    t1 = t1 * t1 * t1 * t1;
+                    t1 = 1.0f - t1;
+                    break;
                 }
                 }
-                local_fc->fn(enemy, local_fc, local_f4);
-                if (local_fc->args[0].i <= local_fc->timer.current)
+                enemy->axisSpeed =
+                    t1 * enemy->moveInterp + enemy->moveInterpStartPos -
+                    enemy->position;
+                if (enemy->mirror)
                 {
-                    local_fc->fn = NULL;
+                    enemy->axisSpeed.x = -enemy->axisSpeed.x;
                 }
-                if (local_fc->args[7].f == 10018.0f ||
-                    local_fc->args[7].f == 10019.0f ||
-                    local_fc->args[7].f == 10020.0f)
+                enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
+                if (enemy->moveInterpTimer <= 0)
                 {
-                    bVar7 = true;
+                    enemy->moveMode = 0;
+                    enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
+                    enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                }
+                break;
+            }
+            if (enemy->life > 0)
+            {
+                if (enemy->shootInterval > 0)
+                {
+                    enemy->shootIntervalTimer++;
+                    if (enemy->shootIntervalTimer >= enemy->shootInterval)
+                    {
+                        enemy->bulletProps.position = enemy->position + enemy->shootOffset;
+                        g_BulletManager.SpawnBulletPattern(&enemy->bulletProps);
+                        enemy->shootIntervalTimer = 0;
+                    }
+                }
+                if (enemy->anmExLeft >= 0)
+                {
+                    anmDirection = 0;
+                    if (!enemy->mirror)
+                    {
+                        if (enemy->axisSpeed.x < -0.01f)
+                        {
+                            anmDirection = 1;
+                        }
+                        else if (enemy->axisSpeed.x > 0.01f)
+                        {
+                            anmDirection = 2;
+                        }
+                    }
+                    else
+                    {
+                        if (enemy->axisSpeed.x < -0.01f)
+                        {
+                            anmDirection = 2;
+                        }
+                        else if (enemy->axisSpeed.x > 0.01f)
+                        {
+                            anmDirection = 1;
+                        }
+                    }
+                    if (enemy->anmExFlags != anmDirection)
+                    {
+                        switch (anmDirection)
+                        {
+                        case 0:
+                            if (enemy->anmExFlags == 0xff)
+                            {
+                                g_AnmManager->SetAnmIdxAndExecuteScript(
+                                    &enemy->primaryVm,
+                                    enemy->anmExDefaults + 0x900);
+                            }
+                            else if (enemy->anmExFlags == 1)
+                            {
+                                g_AnmManager->SetAnmIdxAndExecuteScript(
+                                    &enemy->primaryVm,
+                                    enemy->anmExFarLeft + 0x900);
+                            }
+                            else
+                            {
+                                g_AnmManager->SetAnmIdxAndExecuteScript(
+                                    &enemy->primaryVm,
+                                    enemy->anmExFarRight + 0x900);
+                            }
+                            break;
+                        case 1:
+                            g_AnmManager->SetAnmIdxAndExecuteScript(
+                                &enemy->primaryVm,
+                                enemy->anmExLeft + 0x900);
+                            break;
+                        case 2:
+                            g_AnmManager->SetAnmIdxAndExecuteScript(
+                                &enemy->primaryVm,
+                                enemy->anmExRight + 0x900);
+                            break;
+                        }
+                        enemy->anmExFlags = anmDirection;
+                    }
+                }
+                if (enemy->currentContext.func)
+                {
+                    enemy->currentContext.func(enemy, enemy->currentContext.eclExInstr);
+                }
+                local_f8 = false;
+                interp2 = enemy->currentContext.interps;
+                D3DXVECTOR3 local_104 = enemy->position;
+                for (interpIdx2 = 0; interpIdx2 < 8; interpIdx2++, interp2++)
+                {
+                    if (interp2->fn)
+                    {
+                        interp2->timer++;
+                        if (interp2->timer >= interp2->args[0].i)
+                        {
+                            interp2->timer = interp2->args[0].i;
+                        }
+                        t2 =
+                            interp2->timer.AsFloat() / (f32)interp2->args[0].i;
+                        switch (interp2->args[2].i)
+                        {
+                        case 1: {
+                            t2 = t2 * t2;
+                            break;
+                        }
+                        case 2: {
+                            t2 = t2 * t2 * t2;
+                            break;
+                        }
+                        case 3: {
+                            t2 = t2 * t2 * t2 * t2;
+                            break;
+                        }
+                        case 4: {
+                            t2 = 1.0f - t2;
+                            t2 = t2 * t2;
+                            t2 = 1.0f - t2;
+                            break;
+                        }
+                        case 5: {
+                            t2 = 1.0f - t2;
+                            t2 = t2 * t2 * t2;
+                            t2 = 1.0f - t2;
+                            break;
+                        }
+                        case 6: {
+                            t2 = 1.0f - t2;
+                            t2 = t2 * t2 * t2 * t2;
+                            t2 = 1.0f - t2;
+                            break;
+                        }
+                        }
+                        interp2->fn(enemy, interp2, t2);
+                        if (interp2->timer >= interp2->args[0].i)
+                        {
+                            interp2->fn = NULL;
+                        }
+                        if (interp2->args[7].f == 10018.0f ||
+                            interp2->args[7].f == 10019.0f ||
+                            interp2->args[7].f == 10020.0f)
+                        {
+                            local_f8 = true;
+                        }
+                    }
+                }
+                if (local_f8)
+                {
+                    enemy->axisSpeed.x = enemy->position.x - local_104.x;
+                    enemy->axisSpeed.y = enemy->position.y - local_104.y;
+                    enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
+                    enemy->position = local_104;
                 }
             }
-            local_fc++;
-        }
-        if (bVar7)
-        {
-            enemy->axisSpeed.x = enemy->position.x - fVar8;
-            enemy->axisSpeed.y = enemy->position.y - fVar28;
-            enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
-            enemy->position.x = fVar8;
-            enemy->position.y = fVar28;
-            enemy->position.z = fVar3;
-        }
-    }
-    enemy->currentContext.curInstr = instr;
-    enemy->currentContext.time++;
-    if (enemy->isBoss && enemy->bossId == 0 &&
-        (g_EnemyManager.spellcardInfo.isActive &&
-         g_EnemyManager.spellcardInfo.isCapturing))
-    {
-        if (!enemy->isSurvivalSpellcard)
-        {
-            uVar17 =
-                (f32)(i32)
-                    g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx] -
-                ((f32)g_EnemyManager.timer.current +
-                 g_EnemyManager.timer.subFrame) *
-                    (f32)g_EnemyManager.spellcardInfo.scoreDrainRate /
-                    60.0;
-            g_EnemyManager.spellcardInfo.captureScore =
-                (i32)((f32)(i32)
-                          g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx] -
-                      ((f32)g_EnemyManager.timer.current +
-                       g_EnemyManager.timer.subFrame) *
-                          (f32)g_EnemyManager.spellcardInfo.scoreDrainRate /
-                          60.0f);
-            g_EnemyManager.spellcardInfo.captureScore = g_EnemyManager.spellcardInfo.captureScore - g_EnemyManager.spellcardInfo.captureScore % 10;
-        }
-        g_EnemyManager.timer++;
-    }
-    if (enemy->isBoss && 6 < g_GameManager.currentStage)
-    {
-        if (!g_Player.bombInfo.isInUse ||
-            (g_EnemyManager.spellcardInfo.isActive == 0 ||
-             (i32)g_EnemyManager.spellcardInfo.spellcardIdx < 0x76))
-        {
-            if (enemy->spellcardDelayTimer == 0)
+            enemy->currentContext.curInstr = instr;
+            enemy->currentContext.time++;
+            if (enemy->isBoss && enemy->bossId == 0 &&
+                (g_EnemyManager.spellcardInfo.isActive &&
+                 g_EnemyManager.spellcardInfo.isCapturing))
             {
-                enemy->flags4 = enemy->flags4 & 0xfb;
+                if (!enemy->isSurvivalSpellcard)
+                {
+                    g_EnemyManager.spellcardInfo.captureScore =
+                        (i32)((f32)(i32)
+                                  g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx] -
+                              g_EnemyManager.timer.AsFloat() *
+                                  (f32)g_EnemyManager.spellcardInfo.scoreDrainRate /
+                                  60.0f);
+                    g_EnemyManager.spellcardInfo.captureScore =
+                        g_EnemyManager.spellcardInfo.captureScore -
+                        g_EnemyManager.spellcardInfo.captureScore % 10;
+                }
+                g_EnemyManager.timer++;
             }
-            else
+            if (enemy->isBoss && g_GameManager.currentStage >= 7)
             {
-                enemy->spellcardDelayTimer = enemy->spellcardDelayTimer + -1;
+                if (g_Player.bombInfo.isInUse &&
+                    g_EnemyManager.spellcardInfo.isActive &&
+                    g_EnemyManager.spellcardInfo.spellcardIdx >= 0x76)
+                {
+                    enemy->invisibleOnBomb = 1;
+                    enemy->spellcardDelayTimer = 1;
+                }
+                else if (enemy->spellcardDelayTimer > 0)
+                {
+                    enemy->spellcardDelayTimer--;
+                }
+                else
+                {
+                    enemy->invisibleOnBomb = 0;
+                }
             }
-        }
-        else
-        {
-            enemy->flags4 = enemy->flags4 | 4;
-            enemy->spellcardDelayTimer = 1;
+            return ZUN_SUCCESS;
         }
     }
-    return ZUN_SUCCESS;
 }

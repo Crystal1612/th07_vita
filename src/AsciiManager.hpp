@@ -112,6 +112,11 @@ struct AsciiManager
         this->bossDamageTint[idx] = color;
     }
 
+    void SetBossMarkerInterrupt(i32 idx, i32 interrupt)
+    {
+        this->bossMarkers[idx].pendingInterrupt = interrupt;
+    }
+
     AnmVm vm0;
     AnmVm vm1;
     AnmVm cherryGauge;

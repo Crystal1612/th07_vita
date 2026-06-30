@@ -201,7 +201,7 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
 #pragma var_order(i, enemy)
 // FUNCTION: TH07 0x0041f430
 Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
-                                  i8 itemDrop, i32 score, EclContextArgs *args)
+                                  i32 itemDrop, i32 score, EclContextArgs *args)
 {
     Enemy *enemy;
     i32 i;
@@ -229,7 +229,7 @@ Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
         else
         {
             enemy->color.color = enemy->primaryVm.color.color;
-            enemy->itemDrop = itemDrop;
+            enemy->itemDrop = (i8)itemDrop;
             if (life >= 0)
             {
                 enemy->life = life;

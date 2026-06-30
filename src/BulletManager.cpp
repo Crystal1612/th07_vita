@@ -313,138 +313,100 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
 // FUNCTION: TH07 0x00424290
 void Bullet::RunCommands()
 {
-    BulletCommand *pBVar1;
-    f32 local_28;
-    f32 local_24;
+    BulletCommand *cmd;
 
-    while (true)
+    for (;;)
     {
-        while (true)
+        if (this->curCmdIdx >= 5)
         {
-            if (4 < this->curCmdIdx)
-            {
-                return;
-            }
-            pBVar1 = &this->commands[this->curCmdIdx];
-            if (pBVar1->type == 0)
-            {
-                return;
-            }
-            if (pBVar1->flag == 0 && this->exFlags != 0)
-            {
-                return;
-            }
-            if (((u32)this->moreFlags & pBVar1->type) != 0)
-            {
-                break;
-            }
-            this->curCmdIdx = this->curCmdIdx + 1;
+            return;
         }
-        if (pBVar1->type < 0x81)
+
+        cmd = &this->commands[this->curCmdIdx];
+        if (cmd->type == 0)
         {
-            break;
+            return;
         }
-        if (pBVar1->type < 0x801)
+        if (cmd->flag == 0 && this->exFlags != 0)
         {
-            if (pBVar1->type != 0x800)
-            {
-                if (pBVar1->type == 0x100)
-                {
-                    goto switchD_00424354_caseD_40;
-                }
-                if (pBVar1->type != 0x400)
-                {
-                    goto switchD_00424354_caseD_2;
-                }
-            }
-            this->exFlags = this->exFlags | pBVar1->type;
-            if (pBVar1->speed < 0.0f)
-            {
-                this->commandStates[4].speed = this->speed;
-            }
-            else
-            {
-                this->commandStates[4].speed = pBVar1->speed;
-            }
-            this->commandStates[4].maxTimes = pBVar1->duration;
-            this->commandStates[4].duration = 0;
-            goto switchD_00424354_caseD_2;
+            return;
         }
-        if (pBVar1->type != 0x2000)
+        if (((u32)this->moreFlags & cmd->type) == 0)
         {
-            goto switchD_00424354_caseD_2;
+            this->curCmdIdx++;
+            continue;
         }
-        this->spawnDelay = pBVar1->duration;
-        this->curCmdIdx = this->curCmdIdx + 1;
-    }
-    if (pBVar1->type == 0x80)
-    {
-    switchD_00424354_caseD_40:
-        this->exFlags = this->exFlags | (u16)pBVar1->type;
-        // ZUN quirk: Using the BulletCommand's speed for BulletCommandState's angle?
-        this->commandStates[3].angle = pBVar1->speed;
-        if (pBVar1->angle <= -999.0f)
-        {
-            local_28 = this->speed;
-        }
-        else
-        {
-            local_28 = pBVar1->angle;
-        }
-        this->commandStates[3].speed = local_28;
-        this->commandStates[3].timer = 0;
-        this->commandStates[3].duration = pBVar1->duration;
-        this->commandStates[3].maxTimes = pBVar1->loopCount;
-        this->commandStates[3].minTimes = 0;
-    }
-    else
-    {
-        switch (pBVar1->type)
+
+        switch (cmd->type)
         {
         case 1:
-            this->exFlags = this->exFlags | 1;
+            this->exFlags |= 1;
             this->commandStates[0].timer = 0;
             this->commandStates[0].vec3.z = 0.0f;
             break;
         case 0x10:
-            this->exFlags = this->exFlags | 0x10;
-            this->commandStates[1].speed = pBVar1->speed;
-            if (pBVar1->angle <= -990.0f)
-            {
-                local_24 = this->angle;
-            }
-            else
-            {
-                local_24 = pBVar1->angle;
-            }
-            this->commandStates[1].angle = local_24;
+            this->exFlags |= 0x10;
+            this->commandStates[1].speed = cmd->speed;
+            this->commandStates[1].angle = cmd->angle > -990.0f
+                                               ? cmd->angle
+                                               : this->angle;
             this->commandStates[1].timer = 0;
-            this->commandStates[1].duration = pBVar1->duration;
+            this->commandStates[1].duration = cmd->duration;
             AngleToVector(&this->commandStates[1].vec3, this->commandStates[1].angle,
                           g_Supervisor.effectiveFramerateMultiplier *
                               this->commandStates[1].speed);
-            if (this->curCmdIdx != 0 && -1 < this->soundIdx)
+            if (this->curCmdIdx != 0 && this->soundIdx >= 0)
             {
                 g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
             }
             break;
         case 0x20:
-            this->exFlags = this->exFlags | 0x20;
-            this->commandStates[2].speed = pBVar1->speed;
-            this->commandStates[2].angle = pBVar1->angle;
+            this->exFlags |= 0x20;
+            this->commandStates[2].speed = cmd->speed;
+            this->commandStates[2].angle = cmd->angle;
             this->commandStates[2].timer = 0;
-            this->commandStates[2].duration = pBVar1->duration;
-            if (this->curCmdIdx != 0 && -1 < this->soundIdx)
+            this->commandStates[2].duration = cmd->duration;
+            if (this->curCmdIdx != 0 && this->soundIdx >= 0)
             {
                 g_SoundPlayer.PlaySoundByIdx(this->soundIdx, 0);
             }
             break;
         case 0x40:
-            goto switchD_00424354_caseD_40;
+        case 0x80:
+        case 0x100:
+            this->exFlags |= cmd->type;
+            // ZUN quirk: Using the BulletCommand's speed for BulletCommandState's angle?
+            this->commandStates[3].angle = cmd->speed;
+            this->commandStates[3].speed = cmd->angle > -999.0f
+                                               ? cmd->angle
+                                               : this->speed;
+            this->commandStates[3].timer = 0;
+            this->commandStates[3].duration = cmd->duration;
+            this->commandStates[3].maxTimes = cmd->loopCount;
+            this->commandStates[3].minTimes = 0;
+            break;
+        case 0x400:
+        case 0x800:
+            this->exFlags |= cmd->type;
+            if (cmd->speed >= 0.0f)
+            {
+                this->commandStates[4].speed = cmd->speed;
+            }
+            else
+            {
+                this->commandStates[4].speed = this->speed;
+            }
+            this->commandStates[4].maxTimes = cmd->duration;
+            this->commandStates[4].duration = 0;
+            break;
+        case 0x2000:
+            this->spawnDelay = cmd->duration;
+            this->curCmdIdx++;
+            continue;
         }
+        this->curCmdIdx++;
+        return;
     }
-switchD_00424354_caseD_2:
-    this->curCmdIdx = this->curCmdIdx + 1;
 }
 
 #pragma var_order(local_10, i, local_18, bullet, laser, local_24, local_28)
@@ -727,14 +689,13 @@ void Bullet::UpdateBulletBurstSpeed()
 {
     if (this->commandStates[0].timer <= 16)
     {
+        f32 local_8 = 5.0f - this->commandStates[0].timer.AsFloat() * 5.0f / 16.0f;
         AngleToVector(&this->velocity, this->angle,
-                      (5.0f - this->commandStates[0].timer.AsFloat() * 5.0f / 16.0f +
-                       this->speed) *
-                          g_Supervisor.effectiveFramerateMultiplier);
+                      (local_8 + this->speed) * g_Supervisor.effectiveFramerateMultiplier);
     }
     else
     {
-        this->exFlags = this->exFlags ^ 1;
+        this->exFlags ^= 1;
     }
     this->commandStates[0].timer++;
 }
@@ -1251,7 +1212,6 @@ void Bullet::Draw()
 {
     AnmVm *vm;
 
-    vm = &this->sprites.spriteBullet;
     switch (this->state)
     {
     case BULLET_SPAWNING_FAST:
@@ -1265,6 +1225,9 @@ void Bullet::Draw()
         break;
     case BULLET_DESPAWN:
         vm = &this->sprites.spriteSpawnEffectDonut;
+        break;
+    default:
+        vm = &this->sprites.spriteBullet;
         break;
     }
     vm->pos.x = g_GameManager.arcadeRegionTopLeftPos.x + this->pos.x;
