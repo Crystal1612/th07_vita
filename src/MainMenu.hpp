@@ -27,6 +27,7 @@ struct MainMenu
 {
     MainMenu()
     {
+        i32 idk[2];
         memset(this, 0, sizeof(MainMenu));
     }
 

@@ -112,391 +112,368 @@ void ResultScreen::FreeAllScores(ScoreListNode *scores)
     }
 }
 
+#pragma var_order(uncompressedData, scoreData, i, xorValue,                \
+                  checksum, idx, remainingData, chunk, cursor, parsedTh7k, \
+                  isTh7k, parsedVrsm)
 // FUNCTION: TH07 0x00444c20
 ScoreDat *ResultScreen::OpenScore(const char *path)
 {
-    bool bVar2;
+    ScoreDat *uncompressedData;
     ScoreDat *scoreData;
-    Th7k *local_2c;
-    i32 local_28;
-    Th7k *local_24;
-    i32 remainingData;
-    ScoreDat *idx;
-    u16 checksum;
+    i32 i;
     u8 xorValue;
-    i32 local_10;
-    ScoreDat *local_c;
-    ScoreDat *pbVar2;
+    u16 checksum;
+    u8 *idx;
+    i32 remainingData;
+    Th7k *chunk;
+    i32 cursor;
+    Th7k *parsedTh7k;
+    i32 isTh7k;
+    Vrsm *parsedVrsm;
 
-    // STRING: TH07 0x00496924
     Supervisor::DebugPrint2("info : score load\r\n");
     scoreData = (ScoreDat *)FileSystem::OpenFile(path, 1);
-    local_c = scoreData;
-    if (scoreData)
+    if (!scoreData)
     {
-        if (g_LastFileSize < sizeof(ScoreDat))
+    RECREATE_SCORE:
+        Supervisor::DebugPrint2("info : score recreate\r\n");
+        if (scoreData)
         {
-            // STRING: TH07 0x004968e8
-            Supervisor::DebugPrint2("warning : score.dat size is short\r\n");
             free(scoreData);
         }
-        else
+        scoreData = (ScoreDat *)ZunMemory::Alloc2(sizeof(ScoreDat));
+        scoreData->dataOffset = sizeof(ScoreDat);
+        scoreData->fileLength = sizeof(ScoreDat);
+        goto INIT_SCORES;
+    }
+
+    if (g_LastFileSize < sizeof(ScoreDat))
+    {
+        Supervisor::DebugPrint2("warning : score.dat size is short\r\n");
+        free(scoreData);
+        goto RECREATE_SCORE;
+    }
+
+    remainingData = g_LastFileSize - 2;
+    checksum = 0;
+    xorValue = 0;
+    i = 0;
+    idx = scoreData->xorseed + 1;
+    while (remainingData > 0)
+    {
+        xorValue += idx[0];
+        xorValue = (xorValue & 0xe0) >> 5 | (xorValue & 0x1f) << 3;
+        idx[1] ^= xorValue;
+        if (i >= 2)
         {
-            checksum = 0;
-            xorValue = 0;
-            local_10 = 0;
-            pbVar2 = scoreData;
-            for (remainingData = g_LastFileSize - 2;
-                 idx = (ScoreDat *)(pbVar2->xorseed + 1), 0 < remainingData;
-                 remainingData = remainingData - 1)
+            checksum += idx[1];
+        }
+        idx++;
+        remainingData--;
+        i++;
+    }
+
+    if (scoreData->csum != checksum)
+    {
+        Supervisor::DebugPrint2("warning : score.dat chksum error\r\n");
+        goto RECREATE_SCORE;
+    }
+
+    if (scoreData->dataOffset != sizeof(ScoreDat))
+    {
+        Supervisor::DebugPrint2("warning : header size is mismatch\r\n");
+        goto RECREATE_SCORE;
+    }
+
+    if (scoreData->magic != 0xb)
+    {
+        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
+        goto RECREATE_SCORE;
+    }
+
+    uncompressedData = (ScoreDat *)ZunMemory::Alloc2(0xa001c);
+    memcpy(uncompressedData, scoreData, sizeof(ScoreDat));
+    Lzss::Decompress(
+        (u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
+        (u8 *)uncompressedData + sizeof(ScoreDat), scoreData->dstLen);
+    free(scoreData);
+    scoreData = uncompressedData;
+
+    cursor = scoreData->fileLength;
+    isTh7k = false;
+    chunk = (Th7k *)((u8 *)scoreData + scoreData->dataOffset);
+    cursor -= scoreData->dataOffset;
+
+    while (cursor > 0)
+    {
+        if (chunk->magic == TH7K_MAGIC)
+        {
+            isTh7k = true;
+            parsedTh7k = chunk;
+        }
+        if (chunk->magic == VRSM_MAGIC)
+        {
+            if (chunk->version == 1)
             {
-                xorValue += idx->xorseed[0];
-                xorValue = (u8)((i32)(xorValue & 0xe0) >> 5) | xorValue * '\b';
-                *(u8 *)&pbVar2->csum = (u8)pbVar2->csum ^ xorValue;
-                if (1 < local_10)
+                parsedVrsm = (Vrsm *)chunk;
+                if (g_Supervisor.CheckIntegrity(
+                        parsedVrsm->versionStr,
+                        parsedVrsm->exeSize,
+                        parsedVrsm->exeChecksum) != ZUN_SUCCESS)
                 {
-                    checksum = checksum + (u8)pbVar2->csum;
+                    Supervisor::DebugPrint2("warning : score.dat exesumcheck error\r\n");
+                    goto RECREATE_SCORE;
                 }
-                local_10++;
-                pbVar2 = idx;
-            }
-            if (scoreData->csum == checksum)
-            {
-                if (scoreData->dataOffset == sizeof(ScoreDat))
-                {
-                    if (scoreData->magic == 0xb)
-                    {
-                        local_c = (ScoreDat *)malloc(0xa001c);
-                        memcpy(local_c, scoreData, sizeof(ScoreDat));
-                        Lzss::Decompress(
-                            (u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
-                            (u8 *)local_c + sizeof(ScoreDat), scoreData->dstLen);
-                        free(scoreData);
-                        bVar2 = false;
-                        local_24 = (Th7k *)(local_c->xorseed + local_c->dataOffset);
-                        local_28 = local_c->fileLength - local_c->dataOffset;
-                        while (0 < local_28)
-                        {
-                            if (local_24->magic == TH7K_MAGIC)
-                            {
-                                bVar2 = true;
-                                local_2c = local_24;
-                            }
-                            if (local_24->magic == VRSM_MAGIC && local_24->version == 1)
-                            {
-                                if (g_Supervisor.CheckIntegrity(
-                                        ((Vrsm *)local_24)->versionStr,
-                                        ((Vrsm *)local_24)->exeSize,
-                                        ((Vrsm *)local_24)->exeChecksum) != ZUN_SUCCESS)
-                                {
-                                    // STRING: TH07 0x00496850
-                                    Supervisor::DebugPrint2("warning : score.dat exesumcheck error\r\n");
-                                    goto LAB_00444c48;
-                                }
-                            }
-                            if (local_24->th7kLen == 0)
-                            {
-                                // STRING: TH07 0x00496824
-                                Supervisor::DebugPrint2("warning : score.dat chapter size is ZERO\r\n");
-                                goto LAB_00444c48;
-                            }
-                            u16 len = local_24->th7kLen;
-                            local_24 = (Th7k *)((u8 *)local_24 + local_24->th7kLen);
-                            local_28 -= len;
-                        }
-                        if (bVar2 && local_2c->version == 1)
-                        {
-                            goto LAB_00444ed5;
-                        }
-                        // STRING: TH07 0x00496878
-                        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
-                    }
-                    else
-                    {
-                        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
-                    }
-                }
-                else
-                {
-                    // STRING: TH07 0x004968a0
-                    Supervisor::DebugPrint2("warning : header size is mismatch\r\n");
-                }
-            }
-            else
-            {
-                // STRING: TH07 0x004968c4
-                Supervisor::DebugPrint2("warning : score.dat chksum error\r\n");
             }
         }
+        if (chunk->th7kLen == 0)
+        {
+            Supervisor::DebugPrint2("warning : score.dat chapter size is ZERO\r\n");
+            goto RECREATE_SCORE;
+        }
+        cursor -= chunk->th7kLen;
+        chunk = (Th7k *)((u8 *)chunk + chunk->th7kLen);
     }
-LAB_00444c48:
-    // STRING: TH07 0x0049690c
-    Supervisor::DebugPrint2("info : score recreate\r\n");
-    if (local_c)
+
+    if (!isTh7k || parsedTh7k->version != 1)
     {
-        free(local_c);
+        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
+        goto RECREATE_SCORE;
     }
-    local_c = (ScoreDat *)malloc(sizeof(ScoreDat));
-    local_c->dataOffset = sizeof(ScoreDat);
-    local_c->fileLength = sizeof(ScoreDat);
-LAB_00444ed5:
-    local_c->scores = (ScoreListNode *)malloc(sizeof(ScoreListNode));
-    local_c->scores->next = NULL;
-    local_c->scores->data = NULL;
-    local_c->scores->prev = NULL;
-    return local_c;
+
+INIT_SCORES:
+    scoreData->scores = (ScoreListNode *)ZunMemory::Alloc2(sizeof(ScoreListNode));
+    scoreData->scores->next = NULL;
+    scoreData->scores->data = NULL;
+    scoreData->scores->prev = NULL;
+    return scoreData;
 }
 
+#pragma var_order(parsedHscr, cursor, sd)
 // FUNCTION: TH07 0x00444f0d
 u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
                                u32 character, u32 difficulty, u8 *numRetries)
 {
-    u8 bVar1;
-    Th7k *pTVar2;
-    u32 local_24;
-    u32 local_20;
-    i32 local_c;
-    Hscr *local_8;
+    ScoreDat *sd = scoreDat;
+    i32 cursor;
+    Hscr *parsedHscr;
 
     if (!node)
     {
-        FreeAllScores(scoreDat->scores);
-        scoreDat->scores->next = NULL;
-        scoreDat->scores->data = NULL;
-        scoreDat->scores->prev = NULL;
+        FreeAllScores(sd->scores);
+        sd->scores->next = NULL;
+        sd->scores->data = NULL;
+        sd->scores->prev = NULL;
     }
-    local_8 = (Hscr *)(scoreDat->xorseed + scoreDat->dataOffset);
-    for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
-         local_c = local_c - (u32)pTVar2->th7kLen)
+
+    cursor = sd->fileLength;
+    parsedHscr = (Hscr *)(sd->xorseed + sd->dataOffset);
+    cursor -= sd->dataOffset;
+    while (cursor > 0)
     {
-        if (local_8->magic == HSCR_MAGIC && local_8->version == 1 &&
-            local_8->character == character &&
-            local_8->difficulty == difficulty)
+        if (parsedHscr->magic == HSCR_MAGIC && parsedHscr->version == 1 &&
+            parsedHscr->character == character &&
+            parsedHscr->difficulty == difficulty)
         {
-            if (!node)
+            if (node)
             {
-                LinkScore(scoreDat->scores, local_8);
+                LinkScore(node, parsedHscr);
             }
             else
             {
-                LinkScore(node, local_8);
+                LinkScore(sd->scores, parsedHscr);
             }
         }
-        pTVar2 = local_8;
-        local_8 = (Hscr *)((u8 *)local_8 + local_8->th7kLen);
+        cursor -= parsedHscr->th7kLen;
+        parsedHscr = (Hscr *)((u8 *)parsedHscr + parsedHscr->th7kLen);
     }
-    if (numRetries)
+    if (numRetries != 0)
     {
-        if (!scoreDat->scores->next)
-        {
-            bVar1 = 0;
-        }
-        else
-        {
-            bVar1 = scoreDat->scores->next->data->numRetries;
-        }
-        *numRetries = bVar1;
+        *numRetries = sd->scores->next ? sd->scores->next->data->numRetries : 0;
     }
-    if (!scoreDat->scores->next)
-    {
-        local_24 = 100000;
-    }
-    else
-    {
-        if (scoreDat->scores->next->data->score < 0x186a1)
-        {
-            local_20 = 100000;
-        }
-        else
-        {
-            local_20 = scoreDat->scores->next->data->score;
-        }
-        local_24 = local_20;
-    }
-    return local_24;
+    return sd->scores->next
+               ? sd->scores->next->data->score > 100000
+                     ? sd->scores->next->data->score
+                     : 100000
+               : 100000;
 }
 
+#pragma var_order(parsedCatk, cursor, sd)
 // FUNCTION: TH07 0x00445069
-ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *catk)
+ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
 {
-    Th7k *pTVar1;
-    i32 local_c;
-    Catk *local_8;
+    Catk *parsedCatk;
+    i32 cursor;
+    ScoreDat *sd = scoreDat;
 
-    if (!catk)
+    if (!outCatk)
     {
         return ZUN_ERROR;
     }
-    else
+
+    parsedCatk = (Catk *)(sd->xorseed + sd->dataOffset);
+    cursor = sd->fileLength - sd->dataOffset;
+    while (cursor > 0)
     {
-        local_8 = (Catk *)(scoreDat->xorseed + scoreDat->dataOffset);
-        for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
-             local_c = local_c - (u32)pTVar1->th7kLen)
+        if (parsedCatk->magic == CATK_MAGIC && parsedCatk->version == 1)
         {
-            if (local_8->magic == CATK_MAGIC && local_8->version == 1)
+            if (parsedCatk->idx >= 141)
             {
-                if (0x8c < (u16)local_8->idx)
-                {
-                    break;
-                }
-                catk[local_8->idx] = *local_8;
+                break;
             }
-            pTVar1 = local_8;
-            local_8 = (Catk *)((u8 *)local_8 + local_8->th7kLen);
+            outCatk[parsedCatk->idx] = *parsedCatk;
         }
-        return ZUN_SUCCESS;
+        cursor -= parsedCatk->th7kLen;
+        parsedCatk = (Catk *)((u8 *)parsedCatk + parsedCatk->th7kLen);
     }
-}
-
-// FUNCTION: TH07 0x00445110
-ZunResult ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *param_2)
-{
-    i32 local_c;
-    Lsnm *local_8;
-
-    local_8 = (Lsnm *)(scoreDat->xorseed + scoreDat->dataOffset);
-    local_c = scoreDat->fileLength - scoreDat->dataOffset;
-    while (true)
-    {
-        if (local_c < 1)
-        {
-            return ZUN_ERROR;
-        }
-        if (local_8->magic == LSNM_MAGIC && local_8->version == 1)
-        {
-            break;
-        }
-        local_c = local_c - (u32)local_8->th7kLen;
-        local_8 = (Lsnm *)((u8 *)local_8 + local_8->th7kLen);
-    }
-    param_2 = local_8;
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, i, local_10, j, idk)
-// FUNCTION: TH07 0x00445192
-ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *clrd)
+#pragma var_order(parsedLsnm, cursor, sd)
+// FUNCTION: TH07 0x00445110
+i32 ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm)
 {
-    ScoreDat *scoreDatCopy;
-    i32 j;
-    i32 local_10;
+    i32 cursor;
+    Lsnm *parsedLsnm;
+    ScoreDat *sd = scoreDat;
+
+    parsedLsnm = (Lsnm *)(sd->xorseed + sd->dataOffset);
+    cursor = sd->fileLength - sd->dataOffset;
+    while (cursor > 0)
+    {
+        if (parsedLsnm->magic == LSNM_MAGIC && parsedLsnm->version == 1)
+        {
+            *outLsnm = *parsedLsnm;
+            return 1;
+        }
+        cursor -= parsedLsnm->th7kLen;
+        parsedLsnm = (Lsnm *)((u8 *)parsedLsnm + parsedLsnm->th7kLen);
+    }
+    return 0;
+}
+
+#pragma var_order(parsedClrd, i, cursor, j, sd)
+// FUNCTION: TH07 0x00445192
+ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
+{
+    Clrd *parsedClrd;
     i32 i;
-    Clrd *local_8;
+    i32 cursor;
+    i32 j;
+    ScoreDat *sd = scoreDat;
 
-    scoreDatCopy = scoreDat;
-
-    if (!clrd)
+    if (!outClrd)
     {
         return ZUN_ERROR;
     }
 
     for (i = 0; i < 6; i++)
     {
-        memset(clrd + i, 0, sizeof(Clrd));
-        clrd[i].magic = CLRD_MAGIC;
-        clrd[i].th7kLen2 = sizeof(Clrd);
-        clrd[i].th7kLen = sizeof(Clrd);
-        clrd[i].version = 1;
-        clrd[i].characterShotType = (u8)i;
+        memset(outClrd + i, 0, sizeof(Clrd));
+        outClrd[i].magic = CLRD_MAGIC;
+        outClrd[i].th7kLen2 = sizeof(Clrd);
+        outClrd[i].th7kLen = sizeof(Clrd);
+        outClrd[i].version = 1;
+        outClrd[i].characterShotType = (u8)i;
         for (j = 0; j < 5; j++)
         {
-            clrd[i].difficultyClearedWithRetries[j] = 1;
-            clrd[i].difficultyClearedWithoutRetries[j] = 1;
+            outClrd[i].difficultyClearedWithRetries[j] = 1;
+            outClrd[i].difficultyClearedWithoutRetries[j] = 1;
         }
     }
-    local_8 = (Clrd *)(scoreDatCopy->xorseed + scoreDatCopy->dataOffset);
-    local_10 = scoreDatCopy->fileLength - scoreDatCopy->dataOffset;
-    while (0 < local_10)
+    parsedClrd = (Clrd *)(sd->xorseed + sd->dataOffset);
+    cursor = sd->fileLength - sd->dataOffset;
+    while (cursor > 0)
     {
-        if (local_8->magic == CLRD_MAGIC && local_8->version == 1)
+        if (parsedClrd->magic == CLRD_MAGIC && parsedClrd->version == 1)
         {
-            if (local_8->characterShotType >= 6)
+            if (parsedClrd->characterShotType >= 6)
             {
                 break;
             }
-            clrd[local_8->characterShotType] = *local_8;
+            outClrd[parsedClrd->characterShotType] = *parsedClrd;
         }
-        local_10 -= (u32)local_8->th7kLen;
-        local_8 = (Clrd *)((u8 *)local_8 + local_8->th7kLen);
+        cursor -= parsedClrd->th7kLen;
+        parsedClrd = (Clrd *)((u8 *)parsedClrd + parsedClrd->th7kLen);
     }
     return ZUN_SUCCESS;
 }
 
+#pragma var_order(pscr, parsedPscr, i, j, cursor, k, sd)
 // FUNCTION: TH07 0x004452f4
-ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *pscr)
+ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
 {
-    Th7k *pTVar1;
-    i32 local_1c;
-    i32 local_18;
-    i32 local_14;
-    i32 local_10;
-    Pscr *local_c;
-    Pscr *local_8;
+    i32 k;
+    i32 cursor;
+    i32 j;
+    i32 i;
+    Pscr *parsedPscr;
+    Pscr *pscr;
+    ScoreDat *sd = scoreDat;
 
-    if (!pscr)
+    if (!outPscr)
     {
         return ZUN_ERROR;
     }
-    else
+
+    pscr = outPscr;
+    for (i = 0; i < 6; i++)
     {
-        local_8 = pscr;
-        for (local_10 = 0; local_10 < 6; local_10 = local_10 + 1)
+        for (j = 0; j < 6; j++)
         {
-            for (local_14 = 0; local_14 < 6; local_14 = local_14 + 1)
+            for (k = 0; k < 4; k++, pscr++)
             {
-                for (local_1c = 0; local_1c < 4; local_1c = local_1c + 1)
-                {
-                    memset(local_8, 0, sizeof(Pscr));
-                    local_8->magic = PSCR_MAGIC;
-                    local_8->th7kLen2 = sizeof(Pscr);
-                    local_8->th7kLen = sizeof(Pscr);
-                    local_8->version = 1;
-                    local_8->character = (u8)local_10;
-                    local_8->difficulty = (u8)local_1c;
-                    local_8->stage = (u8)local_14;
-                    local_8->playCount = 0;
-                    local_8++;
-                }
+                memset(pscr, 0, sizeof(Pscr));
+                pscr->magic = PSCR_MAGIC;
+                pscr->th7kLen2 = sizeof(Pscr);
+                pscr->th7kLen = sizeof(Pscr);
+                pscr->version = 1;
+                pscr->character = i;
+                pscr->difficulty = k;
+                pscr->stage = j;
+                pscr->playCount = 0;
             }
         }
-        local_c = (Pscr *)(scoreDat->xorseed + scoreDat->dataOffset);
-        for (local_18 = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_18;
-             local_18 = local_18 - (u32)pTVar1->th7kLen)
-        {
-            if (local_c->magic == PSCR_MAGIC && local_c->version == 1)
-            {
-                if (5 < local_c->character ||
-                    (4 < local_c->difficulty || 6 < local_c->stage))
-                {
-                    break;
-                }
-                pscr[(u32)local_c->stage * 4 + (u32)local_c->character * 0x18 +
-                     (u32)local_c->difficulty] = *local_c;
-            }
-            pTVar1 = local_c;
-            local_c = (Pscr *)((u8 *)local_c + local_c->th7kLen);
-        }
-        return ZUN_SUCCESS;
     }
+    parsedPscr = (Pscr *)(sd->xorseed + sd->dataOffset);
+    cursor = sd->fileLength - sd->dataOffset;
+    while (cursor > 0)
+    {
+        if (parsedPscr->magic == PSCR_MAGIC && parsedPscr->version == 1)
+        {
+            pscr = parsedPscr;
+            if (pscr->character >= 6 ||
+                (pscr->difficulty >= 5 || pscr->stage >= 7))
+            {
+                break;
+            }
+            outPscr[pscr->character * 6 * 4 + pscr->stage * 4 +
+                    pscr->difficulty] = *pscr;
+        }
+        cursor -= parsedPscr->th7kLen;
+        parsedPscr = (Pscr *)((u8 *)parsedPscr + parsedPscr->th7kLen);
+    }
+    return ZUN_SUCCESS;
 }
 
+#pragma var_order(parsedPlst, cursor, sd)
 // FUNCTION: TH07 0x0044547f
-ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *param_2)
+ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
 {
-    u16 *puVar1;
-    i32 local_c;
-    Plst *local_8;
+    i32 cursor;
+    Plst *parsedPlst;
+    ScoreDat *sd = scoreDat;
 
-    local_8 = (Plst *)(scoreDat->xorseed + scoreDat->dataOffset);
-    for (local_c = scoreDat->fileLength - scoreDat->dataOffset; 0 < local_c;
-         local_c = local_c - (u32)*puVar1)
+    parsedPlst = (Plst *)(sd->xorseed + sd->dataOffset);
+    cursor = sd->fileLength - sd->dataOffset;
+    while (cursor > 0)
     {
-        if (local_8->magic == PLST_MAGIC && local_8->version == 1)
+        if (parsedPlst->magic == PLST_MAGIC && parsedPlst->version == 1)
         {
-            param_2 = local_8;
+            *outPlst = *parsedPlst;
         }
-        puVar1 = &local_8->th7kLen;
-        local_8 = (Plst *)((u8 *)local_8 + local_8->th7kLen);
+        cursor -= parsedPlst->th7kLen;
+        parsedPlst = (Plst *)((u8 *)parsedPlst + parsedPlst->th7kLen);
     }
     return ZUN_SUCCESS;
 }
@@ -782,115 +759,245 @@ i32 ResultScreen::LinkScoreEx(Hscr *out, i32 difficulty, i32 character)
 }
 
 // FUNCTION: TH07 0x00445d8b
-void ResultScreen::FreeScore(i32 param_1, i32 param_2)
+void ResultScreen::FreeScore(i32 difficulty, i32 character)
 {
-    FreeAllScores(this->scoreLists[param_1] + param_2);
+    FreeAllScores(&this->scoreLists[difficulty][character]);
 }
 
+#pragma var_order(vmIdx, vm, i, j)
 // FUNCTION: TH07 0x00445db3
 u32 ResultScreen::OnUpdate(ResultScreen *arg)
 {
-    i32 iVar1;
     i32 j;
     i32 i;
     AnmVm *vm;
-    i32 curVmIdx;
+    i32 vmIdx;
 
     switch (arg->resultScreenState)
     {
+    case 0x12:
+        g_Supervisor.curState = 1;
+        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+    case 0x13:
+        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
     case 0:
-        goto switchD_00445ddb_caseD_0;
-    case 1:
-        goto switchD_00445ddb_caseD_1;
-    case 2:
-        if (arg->frameTimer > 60)
+    switchD_00445ddb_caseD_0:
+        if (arg->frameTimer == 0)
         {
-            g_Supervisor.curState = 1;
-            return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+            vm = arg->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 1;
+                vm->flag6 = 1;
+                vm->color.color = vm->color.color;
+            }
+            vm = arg->vms;
+            for (vmIdx = 0; vmIdx <= 8; vmIdx++, vm++)
+            {
+                if (vmIdx == arg->cursor)
+                {
+                    vm->color.color = 0xffffffff;
+                    vm->offset = D3DXVECTOR3(-4.0f, -4.0f, 0.0f);
+                }
+                else
+                {
+                    vm->color.color = 0xb0ffffff;
+                    vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                }
+            }
+            if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
+            {
+                arg->vms[5].active = 0;
+                arg->vms[6].offset.y += -32.0f;
+                arg->vms[7].offset.y += -32.0f;
+                arg->vms[8].offset.y += -32.0f;
+            }
+            else
+            {
+                arg->vms[5].active = 1;
+            }
+        }
+        if (arg->frameTimer < 20)
+        {
+            break;
+        }
+        arg->resultScreenState++;
+        arg->frameTimer = 0;
+    case 1:
+        vmIdx = MoveCursor(arg, 9);
+        if (arg->cursor == 5 &&
+            !g_GameManager.HasUnlockedPhantomAndMaxClears())
+        {
+            arg->cursor += vmIdx;
+        }
+        vm = arg->vms;
+        for (vmIdx = 0; vmIdx <= 8; vmIdx++, vm++)
+        {
+            if (vmIdx == arg->cursor)
+            {
+                vm->color.color = 0xffffffff;
+                vm->offset = D3DXVECTOR3(-4.0f, -4.0f, 0.0f);
+            }
+            else
+            {
+                vm->color.color = 0xb0ffffff;
+                vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            }
+        }
+        if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
+        {
+            arg->vms[5].active = 0;
+            arg->vms[6].offset.y += -32.0f;
+            arg->vms[7].offset.y += -32.0f;
+            arg->vms[8].offset.y += -32.0f;
+        }
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+        {
+            vm = arg->vms;
+            if (arg->cursor == 8)
+            {
+                goto GO_BACK;
+            }
+            arg->cursor = 8;
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+        }
+        if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
+        {
+            vm = arg->vms;
+            switch (arg->cursor)
+            {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = arg->cursor + 3;
+                }
+                arg->diffPlayed = arg->cursor;
+                arg->resultScreenState = arg->cursor + 3;
+                arg->stateStep = arg->resultScreenState;
+                arg->frameTimer = 0;
+                arg->cursor = arg->prevCursor;
+                arg->charUsed = -1;
+                arg->lastSpellcardSelected = -1;
+                break;
+            case 6:
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 10;
+                }
+                arg->diffPlayed = arg->cursor;
+                arg->resultScreenState = 9;
+                arg->stateStep = arg->resultScreenState;
+                arg->frameTimer = 0;
+                arg->charUsed = -1;
+                arg->cursor = arg->savedCursor;
+                arg->lastSpellcardSelected = -1;
+                break;
+            case 7:
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 9;
+                }
+                arg->diffPlayed = arg->cursor;
+                arg->resultScreenState = 20;
+                arg->stateStep = arg->resultScreenState;
+                arg->frameTimer = 0;
+                arg->charUsed = -1;
+                break;
+            GO_BACK:
+            case 8:
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 2;
+                }
+                arg->resultScreenState = 2;
+                g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+                arg->frameTimer = 0;
+                break;
+            }
         }
         break;
+    case 2:
+        if (arg->frameTimer < 60)
+        {
+            break;
+        }
+        g_Supervisor.curState = 1;
+        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+    case 5:
+        if (IS_PRESSED_RAW(TH_BUTTON_FOCUS) || IS_PRESSED_RAW(TH_BUTTON_SKIP))
+        {
+            if (arg->cheatCodeStep < 3)
+            {
+                if (WAS_PRESSED_RAW(TH_BUTTON_UP))
+                {
+                    arg->cheatCodeStep++;
+                }
+                else if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
+                {
+                    arg->cheatCodeStep = 0;
+                }
+            }
+            else if (arg->cheatCodeStep < 5)
+            {
+                if (WAS_PRESSED_RAW(TH_BUTTON_D))
+                {
+                    arg->cheatCodeStep++;
+                }
+                else if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
+                {
+                    arg->cheatCodeStep = 0;
+                }
+            }
+            else if (arg->cheatCodeStep < 7)
+            {
+                if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
+                {
+                    arg->cheatCodeStep++;
+                }
+                else if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
+                {
+                    arg->cheatCodeStep = 0;
+                }
+            }
+            else if (arg->cheatCodeStep < 10)
+            {
+                if (WAS_PRESSED_RAW(TH_BUTTON_Q))
+                {
+                    arg->cheatCodeStep++;
+                }
+                else if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
+                {
+                    arg->cheatCodeStep = 0;
+                }
+            }
+            else
+            {
+                for (i = 0; i < 6; i++)
+                {
+                    for (j = 0; j < 6; j++)
+                    {
+                        g_GameManager.clrd[i].difficultyClearedWithRetries[j] = 99;
+                        g_GameManager.clrd[i].difficultyClearedWithoutRetries[j] = 99;
+                    }
+                }
+                arg->cheatCodeStep = 0;
+                g_SoundPlayer.PlaySoundByIdx(SOUND_EXTEND, 0);
+            }
+        }
+        else
+        {
+            arg->cheatCodeStep = 0;
+        }
     case 3:
     case 4:
     case 6:
     case 7:
     case 8:
-        goto switchD_00445ddb_caseD_3;
-    case 5:
-        if (!IS_PRESSED_RAW(TH_BUTTON_FOCUS) &&
-            !IS_PRESSED_RAW(TH_BUTTON_SKIP))
-        {
-            arg->cheatCodeStep = 0;
-        }
-        else if (arg->cheatCodeStep < 3)
-        {
-            if (!WAS_PRESSED_RAW(TH_BUTTON_UP))
-            {
-                if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
-                {
-                    arg->cheatCodeStep = 0;
-                }
-            }
-            else
-            {
-                arg->cheatCodeStep = arg->cheatCodeStep + 1;
-            }
-        }
-        else if (arg->cheatCodeStep < 5)
-        {
-            if (!WAS_PRESSED_RAW(TH_BUTTON_D))
-            {
-                if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
-                {
-                    arg->cheatCodeStep = 0;
-                }
-            }
-            else
-            {
-                arg->cheatCodeStep = arg->cheatCodeStep + 1;
-            }
-        }
-        else if (arg->cheatCodeStep < 7)
-        {
-            if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
-            {
-                if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
-                {
-                    arg->cheatCodeStep = 0;
-                }
-            }
-            else
-            {
-                arg->cheatCodeStep = arg->cheatCodeStep + 1;
-            }
-        }
-        else if (arg->cheatCodeStep < 10)
-        {
-            if (WAS_PRESSED_RAW(TH_BUTTON_Q))
-            {
-                if (WAS_PRESSED_RAW(TH_BUTTON_WRONG_CHEATCODE))
-                {
-                    arg->cheatCodeStep = 0;
-                }
-            }
-            else
-            {
-                arg->cheatCodeStep = arg->cheatCodeStep + 1;
-            }
-        }
-        else
-        {
-            for (i = 0; i < 6; i++)
-            {
-                for (j = 0; j < 6; j++)
-                {
-                    g_GameManager.clrd[i].difficultyClearedWithRetries[j] = 99;
-                    g_GameManager.clrd[i].difficultyClearedWithoutRetries[j] = 99;
-                }
-            }
-            arg->cheatCodeStep = 0;
-            g_SoundPlayer.PlaySoundByIdx(SOUND_EXTEND, 0);
-        }
-    switchD_00445ddb_caseD_3:
         if (arg->charUsed != arg->cursor && arg->frameTimer == 20)
         {
             arg->charUsed = arg->cursor;
@@ -906,28 +1013,26 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         {
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
             {
-                vm->pendingInterrupt = (i16)arg->diffPlayed + 3;
-                vm++;
+                vm->pendingInterrupt = arg->diffPlayed + 3;
             }
         }
-        if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
-            break;
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+            arg->resultScreenState = 0;
+            arg->frameTimer = 0;
+            vm = arg->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 1;
+            }
+            arg->prevCursor = arg->cursor;
+            arg->cursor = arg->diffPlayed;
+            goto switchD_00445ddb_caseD_0;
         }
-        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-        arg->resultScreenState = 0;
-        arg->frameTimer = 0;
-        vm = arg->vms;
-        for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-        {
-            vm->pendingInterrupt = 1;
-            vm++;
-        }
-        arg->prevCursor = arg->cursor;
-        arg->cursor = arg->diffPlayed;
-        goto switchD_00445ddb_caseD_0;
+        break;
     case 9:
         if ((arg->lastSpellcardSelected != arg->cursor ||
              arg->prevSpellcardListPage != arg->spellcardListPage) &&
@@ -935,25 +1040,28 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         {
             arg->lastSpellcardSelected = arg->cursor;
             arg->prevSpellcardListPage = arg->spellcardListPage;
-            for (curVmIdx = arg->lastSpellcardSelected * 10;
-                 curVmIdx < arg->lastSpellcardSelected * 10 + 10 &&
-                 curVmIdx < 141;
-                 curVmIdx++)
+            for (vmIdx = arg->lastSpellcardSelected * 10;
+                 vmIdx < arg->lastSpellcardSelected * 10 + 10;
+                 vmIdx++)
             {
-                if (g_GameManager.catk[curVmIdx].numAttemptsPerShot[6] == 0)
+                if (vmIdx >= 141)
+                {
+                    break;
+                }
+                if (g_GameManager.catk[vmIdx].numAttemptsPerShot[6] == 0)
                 {
                     AnmManager::DrawVmTextFmt(g_AnmManager,
-                                              arg->spellcardListVms + curVmIdx % 10,
+                                              arg->spellcardListVms + vmIdx % 10,
                                               // STRING: TH07 0x00496818
                                               0xffffff, 0, "？？？？？");
                 }
                 else
                 {
                     AnmManager::DrawVmTextFmt(
-                        g_AnmManager, arg->spellcardListVms + curVmIdx % 10, 0xffffff, 0,
-                        g_GameManager.catk[curVmIdx].name);
+                        g_AnmManager, arg->spellcardListVms + vmIdx % 10, 0xffffff, 0,
+                        g_GameManager.catk[vmIdx].name);
                 }
-                arg->spellcardListVms[curVmIdx % 10].color.bytes.a = 0xff;
+                arg->spellcardListVms[vmIdx % 10].color.bytes.a = 0xff;
             }
             AnmManager::DrawVmTextFmt(
                 g_AnmManager, arg->spellcardListVms + 10, 0xffffff, 0,
@@ -967,40 +1075,35 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         {
             break;
         }
-        if (MoveCursorHorizontally(arg, 0xf) == 0)
-        {
-            if (MoveCursor2(arg, 7))
-            {
-                arg->frameTimer = 0;
-                arg->listScrollAnimState = 1;
-            }
-        }
-        else
+        if (MoveCursorHorizontally(arg, 0xf) != 0)
         {
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 10;
-                vm++;
             }
         }
-        if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+        else if (MoveCursor2(arg, 7))
         {
-            break;
+            arg->frameTimer = 0;
+            arg->listScrollAnimState = 1;
         }
-        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-        arg->resultScreenState = 0;
-        arg->frameTimer = 0;
-        vm = arg->vms;
-        for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
-            vm->pendingInterrupt = 1;
-            vm++;
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+            arg->resultScreenState = 0;
+            arg->frameTimer = 0;
+            vm = arg->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 1;
+            }
+            arg->savedCursor = arg->cursor;
+            arg->cursor = arg->diffPlayed;
+            goto switchD_00445ddb_caseD_0;
         }
-        arg->savedCursor = arg->cursor;
-        arg->cursor = arg->diffPlayed;
-        goto switchD_00445ddb_caseD_0;
+        break;
     case 10:
         arg->HandleResultKeyboard();
         break;
@@ -1015,196 +1118,33 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
     case 0x11:
         arg->CheckConfirmButton();
         break;
-    case 0x12:
-        g_Supervisor.curState = 1;
-        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
-    case 0x13:
-        return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
     case 0x14:
     case 0x15:
     case 0x16:
-        if (arg->DrawStats() == ZUN_SUCCESS)
+        if (arg->DrawStats() != ZUN_SUCCESS)
         {
-            break;
+            goto switchD_00445ddb_caseD_0;
         }
-    switchD_00445ddb_caseD_0:
-        if (arg->frameTimer == 0)
-        {
-            vm = arg->vms;
-            for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-            {
-                vm->pendingInterrupt = 1;
-                vm->flag6 = 1;
-                vm->color = vm->color;
-                vm++;
-            }
-            vm = arg->vms;
-            for (curVmIdx = 0; curVmIdx < 9; curVmIdx++)
-            {
-                if (curVmIdx == arg->cursor)
-                {
-                    vm->color.color = 0xffffffff;
-                    vm->offset.x = -4.0f;
-                    vm->offset.y = -4.0f;
-                    vm->offset.z = 0.0f;
-                }
-                else
-                {
-                    vm->color.color = 0xb0ffffff;
-                    vm->offset.x = 0.0f;
-                    vm->offset.y = 0.0f;
-                    vm->offset.z = 0.0f;
-                }
-                vm++;
-            }
-            if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
-            {
-                arg->vms[5].active = 0;
-                arg->vms[6].offset.y = arg->vms[6].offset.y - 32.0f;
-                arg->vms[7].offset.y = arg->vms[7].offset.y - 32.0f;
-                arg->vms[8].offset.y = arg->vms[8].offset.y - 32.0f;
-            }
-            else
-            {
-                arg->vms[5].active = 1;
-            }
-        }
-        if (arg->frameTimer < 20)
-        {
-            break;
-        }
-        arg->resultScreenState = arg->resultScreenState + 1;
-        arg->frameTimer = 0;
-    switchD_00445ddb_caseD_1:
-        iVar1 = MoveCursor(arg, 9);
-        if (arg->cursor == 5 &&
-            g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
-        {
-            arg->cursor += iVar1;
-        }
-        vm = arg->vms;
-        for (curVmIdx = 0; curVmIdx < 9; curVmIdx++)
-        {
-            if (curVmIdx == arg->cursor)
-            {
-                vm->color.color = 0xffffffff;
-                vm->offset.x = -4.0f;
-                vm->offset.y = -4.0f;
-                vm->offset.z = 0.0f;
-            }
-            else
-            {
-                vm->color.color = 0xb0ffffff;
-                vm->offset.x = 0.0f;
-                vm->offset.y = 0.0f;
-                vm->offset.z = 0.0f;
-            }
-            vm++;
-        }
-        if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
-        {
-            arg->vms[5].active = 0;
-            arg->vms[6].offset.y = arg->vms[6].offset.y - 32.0f;
-            arg->vms[7].offset.y = arg->vms[7].offset.y - 32.0f;
-            arg->vms[8].offset.y = arg->vms[8].offset.y - 32.0f;
-        }
-        if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
-        {
-        LAB_00446123:
-            if (!WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
-            {
-                break;
-            }
-            vm = arg->vms;
-            if (arg->cursor < 0)
-            {
-                break;
-            }
-            if (arg->cursor < 6)
-            {
-                for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-                {
-                    vm->pendingInterrupt = arg->cursor + 3;
-                    vm++;
-                }
-                arg->diffPlayed = arg->cursor;
-                arg->resultScreenState = arg->cursor + 3;
-                arg->stateStep = arg->resultScreenState;
-                arg->frameTimer = 0;
-                arg->cursor = arg->prevCursor;
-                arg->charUsed = -1;
-                arg->lastSpellcardSelected = -1;
-                break;
-            }
-            if (arg->cursor == 6)
-            {
-                for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-                {
-                    vm->pendingInterrupt = 10;
-                    vm++;
-                }
-                arg->diffPlayed = arg->cursor;
-                arg->resultScreenState = 9;
-                arg->stateStep = arg->resultScreenState;
-                arg->frameTimer = 0;
-                arg->charUsed = -1;
-                arg->cursor = arg->savedCursor;
-                arg->lastSpellcardSelected = -1;
-                break;
-            }
-            if (arg->cursor == 7)
-            {
-                for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-                {
-                    vm->pendingInterrupt = 9;
-                    vm++;
-                }
-                arg->diffPlayed = arg->cursor;
-                arg->resultScreenState = 20;
-                arg->stateStep = arg->resultScreenState;
-                arg->frameTimer = 0;
-                arg->charUsed = -1;
-                break;
-            }
-            if (arg->cursor != 8)
-            {
-                break;
-            }
-        }
-        else if (arg->cursor != 8)
-        {
-            arg->cursor = 8;
-            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-            goto LAB_00446123;
-        }
-        vm = arg->vms;
-        for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
-        {
-            vm->pendingInterrupt = 2;
-            vm++;
-        }
-        arg->resultScreenState = 2;
-        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-        arg->frameTimer = 0;
+        break;
     }
     vm = arg->vms;
-    for (curVmIdx = 0; curVmIdx < 0x29; curVmIdx++)
+    for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
     {
         g_AnmManager->ExecuteScript(vm);
-        vm++;
     }
-    arg->frameTimer = arg->frameTimer + 1;
+    arg->frameTimer++;
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
+#pragma var_order(vmIdx, vm, slowRateFactor, cursor, cursor2)
 // FUNCTION: TH07 0x00446a66
 ZunResult ResultScreen::HandleResultKeyboard()
 {
-    i32 local_24;
-    i32 local_20;
-    f32 local_10;
-    AnmVm *local_c;
-    i32 local_8;
+    i32 cursor2;
+    i32 cursor;
+    f32 slowRateFactor;
+    AnmVm *vm;
+    i32 vmIdx;
 
     if (g_Supervisor.CanSaveReplay() ||
         (g_Supervisor.flags >> 3 & 1) != 0)
@@ -1217,13 +1157,12 @@ ZunResult ResultScreen::HandleResultKeyboard()
     if (this->frameTimer == 0)
     {
         this->charUsed =
-            (u32)g_GameManager.shotType + (u32)g_GameManager.character * 2;
+            (u32)g_GameManager.character * 2 + (u32)g_GameManager.shotType;
         this->diffPlayed = g_GameManager.difficulty;
-        local_c = this->vms;
-        for (local_8 = 0; local_8 < 0x29; local_8++)
+        vm = this->vms;
+        for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
         {
-            local_c->pendingInterrupt = (i16)this->diffPlayed + 3;
-            local_c++;
+            vm->pendingInterrupt = this->diffPlayed + 3;
         }
         g_AnmManager->DrawStringFormat2(this->spellcardListVms, 0xffffff, 0,
                                         g_CharacterList[this->charUsed]);
@@ -1245,22 +1184,18 @@ ZunResult ResultScreen::HandleResultKeyboard()
         this->curScore.isPlayerScore = 1;
         strcpy(this->curScore.name, this->lsnmHeader.name);
         GetDate(this->curScore.date);
-        local_10 =
-            g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f;
-        local_10 = local_10 + local_10;
-        if (0.0f <= local_10)
+        slowRateFactor =
+            (g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f) * 2.0f;
+        if (slowRateFactor < 0.0f)
         {
-            if (1.0f <= local_10)
-            {
-                local_10 = 1.0f;
-            }
+            slowRateFactor = 0.0f;
         }
-        else
+        else if (slowRateFactor >= 1.0f)
         {
-            local_10 = 0.0f;
+            slowRateFactor = 1.0f;
         }
-        this->curScore.slowRatePercent = (1.0f - local_10) * 100.0f;
-        if (9 < LinkScoreEx(&this->curScore, this->diffPlayed, this->charUsed))
+        this->curScore.slowRatePercent = (1.0f - slowRateFactor) * 100.0f;
+        if (LinkScoreEx(&this->curScore, this->diffPlayed, this->charUsed) >= 10)
         {
             goto LAB_004470e9;
         }
@@ -1271,38 +1206,365 @@ ZunResult ResultScreen::HandleResultKeyboard()
         }
         strcpy(this->replayName, "");
     }
-    if (this->frameTimer < 0x1e)
+    if (this->frameTimer < 30)
     {
         return ZUN_SUCCESS;
     }
     if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_UP))
     {
-        do
+    WEIRD_ASS_LOOP_WITH_GOTO:
+        this->selectedChar = this->selectedChar - 16;
+        if (this->selectedChar < 0)
         {
+            this->selectedChar = this->selectedChar + 96;
+        }
+        if (g_AlphabetList[this->selectedChar] == ' ')
+        {
+            goto WEIRD_ASS_LOOP_WITH_GOTO;
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+    }
+    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
+    {
+    WEIRD_ASS_LOOP_WITH_GOTO_2:
+        this->selectedChar = this->selectedChar + 16;
+        if (this->selectedChar >= 96)
+        {
+            this->selectedChar = this->selectedChar - 96;
+        }
+        if (g_AlphabetList[this->selectedChar] == ' ')
+        {
+            goto WEIRD_ASS_LOOP_WITH_GOTO_2;
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+    }
+    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
+    {
+    WEIRD_ASS_LOOP_WITH_GOTO_3:
+        this->selectedChar--;
+        if (this->selectedChar % 16 == 15)
+        {
+            this->selectedChar = this->selectedChar + 16;
+        }
+        if (this->selectedChar < 0)
+        {
+            this->selectedChar = 15;
+        }
+        if (g_AlphabetList[this->selectedChar] == ' ')
+        {
+            goto WEIRD_ASS_LOOP_WITH_GOTO_3;
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+    }
+    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RIGHT))
+    {
+    WEIRD_ASS_LOOP_WITH_GOTO_4:
+        this->selectedChar = this->selectedChar + 1;
+        if (this->selectedChar % 16 == 0)
+        {
+            this->selectedChar = this->selectedChar - 16;
+        }
+        if (g_AlphabetList[this->selectedChar] == ' ')
+        {
+            goto WEIRD_ASS_LOOP_WITH_GOTO_4;
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+    }
+    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
+    {
+        cursor = this->cursor >= 8 ? 7 : this->cursor;
+        if (this->selectedChar < 0x5e)
+        {
+            this->curScore.name[cursor] = g_AlphabetList[this->selectedChar];
+        }
+        else if (this->selectedChar == 0x5e)
+        {
+            this->curScore.name[cursor] = ' ';
+        }
+        else
+        {
+            goto LAB_004470db;
+        }
+
+        if (this->cursor < 8)
+        {
+            this->cursor++;
+            if (this->cursor == 8)
+            {
+                this->selectedChar = 0x5f;
+            }
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
+    }
+    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RETURNMENU))
+    {
+        cursor2 = this->cursor >= 8 ? 7 : this->cursor;
+        if (this->cursor > 0)
+        {
+            this->cursor--;
+            this->curScore.name[cursor2] = ' ';
+            this->curScore.name[this->cursor] = ' ';
+        }
+        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+    }
+    if (WAS_PRESSED_RAW(TH_BUTTON_MENU))
+    {
+    LAB_004470db:
+        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+    LAB_004470e9:
+        this->resultScreenState = 0x10;
+        this->frameTimer = 0;
+        vm = this->vms;
+        for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+        {
+            vm->pendingInterrupt = 2;
+        }
+        strcpy(this->replayName, this->curScore.name);
+        strcpy(this->lsnmHeader.name, this->replayName);
+    }
+    return ZUN_SUCCESS;
+}
+
+#pragma var_order(timeinfo, seconds)
+// FUNCTION: TH07 0x00447161
+void ResultScreen::GetDate(char *outDate)
+{
+    time_t seconds;
+    tm *timeinfo;
+
+    time(&seconds);
+    timeinfo = localtime(&seconds);
+    // STRING: TH07 0x004967dc
+    strftime(outDate, 6, "%m/%d", timeinfo);
+}
+
+#pragma var_order(vm, interrupt, vmIdx, replayFile, replayPath, cursor, \
+                  replayPath2, cursor2)
+// FUNCTION: TH07 0x00447198
+ZunResult ResultScreen::HandleReplaySaveKeyboard()
+{
+    i32 cursor2;
+    char replayPath2[64];
+    i32 cursor;
+    char replayPath[64];
+    ReplayHeaderAndData *replayFile;
+    i32 vmIdx;
+    i32 interrupt;
+    AnmVm *vm;
+
+    switch (this->resultScreenState)
+    {
+    case 0xb:
+        if (this->frameTimer == 60)
+        {
+            if (g_Supervisor.CanSaveReplay() ||
+                (g_Supervisor.flags >> 3 & 1) != 0)
+            {
+                interrupt = 0x13;
+            }
+            else if (g_GameManager.globals->numRetries != 0)
+            {
+                interrupt = 0xe;
+            }
+            else
+            {
+                interrupt = 0xb;
+            }
+            vm = this->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = (i16)interrupt;
+            }
+            if (interrupt != 0xb)
+            {
+                this->resultScreenState = 0xc;
+            }
+            this->cursor = 0;
+        }
+        vm = this->vms + 0x13;
+        if (this->cursor == 0)
+        {
+            vm[0].color.color =
+                (vm[0].color.color & 0xff000000) | 0xff6060;
+            vm[1].color.color =
+                (vm[1].color.color & 0xff000000) | 0x606060;
+        }
+        else
+        {
+            vm[0].color.color =
+                (vm[0].color.color & 0xff000000) | 0x606060;
+            vm[1].color.color =
+                (vm[1].color.color & 0xff000000) | 0xff6060;
+        }
+        if (this->frameTimer < 0x50)
+        {
+            return ZUN_SUCCESS;
+        }
+        MoveCursorHorizontally(this, 2);
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) || WAS_PRESSED_RAW(TH_BUTTON_MENU))
+        {
+            goto SOUND_BACK_AND_RETURN;
+        }
+        else if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
+        {
+            if (this->cursor == 0)
+            {
+            LAB_004473e3:
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
+                this->resultScreenState = 0xd;
+                vm = this->vms;
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 0xc;
+                }
+                this->frameTimer = 0;
+                goto LAB_0044756a;
+            }
+
+        SOUND_BACK_AND_RETURN:
+            this->frameTimer = 0;
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+            this->resultScreenState = 2;
+            vm = this->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 2;
+            }
+        }
+        break;
+    case 0xc:
+        if (this->frameTimer < 20)
+        {
+            return ZUN_SUCCESS;
+        }
+        if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU) || WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+        {
+            this->frameTimer = 0;
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+            this->resultScreenState = 2;
+            vm = this->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 2;
+            }
+        }
+        break;
+    LAB_0044756a:
+    case 0xd:
+        if (this->frameTimer == 0)
+        {
+            // STRING: TH07 0x004967d4
+            _mkdir("replay");
+            for (vmIdx = 0; vmIdx < 0xf; vmIdx++)
+            {
+                sprintf(replayPath, "./replay/th7_%.2d.rpy", vmIdx + 1);
+                replayFile = (ReplayHeaderAndData *)FileSystem::OpenFile(replayPath, 1);
+                if (!replayFile)
+                {
+                    continue;
+                }
+
+                replayFile = ReplayManager::ValidateReplayData(replayFile, g_LastFileSize);
+                if (replayFile)
+                {
+                    this->replays[vmIdx] = *replayFile;
+                    free(replayFile);
+                }
+            }
+        }
+        if (this->frameTimer < 20)
+        {
+            return ZUN_SUCCESS;
+        }
+
+        MoveCursor(this, 0xf);
+        this->chosenReplayIdx = this->cursor;
+        if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
+        {
+            g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
+            this->chosenReplayIdx = this->cursor;
+            this->frameTimer = 0;
+            GetDate(this->defaultReplay.data.date);
+            this->defaultReplay.data.score = g_GameManager.globals->score;
+            if (*(i32 *)&this->replays[this->cursor].head.magic !=
+                    *(i32 *)&"T7RP" ||
+                (this->replays[this->cursor].head.version & 0xfff) != 0x100)
+            {
+                vm = this->vms;
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 0x11;
+                }
+                vm = &this->vms[this->chosenReplayIdx + 0x19];
+                vm->pendingInterrupt = 0x10;
+                this->resultScreenState = 0xe;
+            }
+            else
+            {
+                vm = this->vms;
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 0xd;
+                }
+                vm = &this->vms[this->chosenReplayIdx + 0x19];
+                vm->pendingInterrupt = 0x10;
+                this->resultScreenState = 0xf;
+            }
+            this->cursor = 0;
+            this->selectedChar = 0;
+            if (this->isClearingReplayName)
+            {
+                this->selectedChar = 0x5f;
+            }
+        }
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+        {
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+            this->resultScreenState = 0xb;
+            vm = this->vms;
+            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            {
+                vm->pendingInterrupt = 2;
+            }
+            this->frameTimer = 0;
+        }
+        break;
+    case 0xe:
+        if (this->frameTimer < 30)
+        {
+            return ZUN_SUCCESS;
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_UP))
+        {
+        WEIRD_ASS_LOOP_WITH_GOTO:
             this->selectedChar = this->selectedChar - 0x10;
             if (this->selectedChar < 0)
             {
                 this->selectedChar = this->selectedChar + 0x60;
             }
-        } while (g_AlphabetList[this->selectedChar] == ' ');
-        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-    }
-    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
-    {
-        do
+            if (g_AlphabetList[this->selectedChar] == ' ')
+            {
+                goto WEIRD_ASS_LOOP_WITH_GOTO;
+            }
+            g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
         {
+        WEIRD_ASS_LOOP_WITH_GOTO_2:
             this->selectedChar = this->selectedChar + 0x10;
-            if (0x5f < this->selectedChar)
+            if (this->selectedChar >= 0x60)
             {
                 this->selectedChar = this->selectedChar - 0x60;
             }
-        } while (g_AlphabetList[this->selectedChar] == ' ');
-        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-    }
-    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
-    {
-        do
+            if (g_AlphabetList[this->selectedChar] == ' ')
+            {
+                goto WEIRD_ASS_LOOP_WITH_GOTO_2;
+            }
+            g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
         {
+        WEIRD_ASS_LOOP_WITH_GOTO_3:
             this->selectedChar--;
             if (this->selectedChar % 0x10 == 0xf)
             {
@@ -1312,487 +1574,127 @@ ZunResult ResultScreen::HandleResultKeyboard()
             {
                 this->selectedChar = 0xf;
             }
-        } while (g_AlphabetList[this->selectedChar] == ' ');
-        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-    }
-    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RIGHT))
-    {
-        do
+            if (g_AlphabetList[this->selectedChar] == ' ')
+            {
+                goto WEIRD_ASS_LOOP_WITH_GOTO_3;
+            }
+            g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RIGHT))
         {
+        WEIRD_ASS_LOOP_WITH_GOTO_4:
             this->selectedChar = this->selectedChar + 1;
             if (this->selectedChar % 0x10 == 0)
             {
                 this->selectedChar = this->selectedChar - 0x10;
             }
-        } while (g_AlphabetList[this->selectedChar] == ' ');
-        g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-    }
-    if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
-    {
-    LAB_0044700b:
-        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RETURNMENU))
+            if (g_AlphabetList[this->selectedChar] == ' ')
+            {
+                goto WEIRD_ASS_LOOP_WITH_GOTO_4;
+            }
+            g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
         {
+            cursor = this->cursor >= 8 ? 7 : this->cursor;
+            if (this->selectedChar < 0x5e)
+            {
+                this->replayName[cursor] = g_AlphabetList[this->selectedChar];
+            }
+            else if (this->selectedChar == 0x5e)
+            {
+                this->replayName[cursor] = ' ';
+            }
+            else
+            {
+                sprintf(replayPath2, "./replay/th7_%.2d.rpy",
+                        this->chosenReplayIdx + 1);
+                ReplayManager::SaveReplay(replayPath2, this->replayName);
+                this->frameTimer = 0;
+                this->resultScreenState = 2;
+                vm = this->vms;
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                {
+                    vm->pendingInterrupt = 2;
+                }
+                strcpy(this->lsnmHeader.name, this->replayName);
+            }
             if (this->cursor < 8)
             {
-                local_24 = this->cursor;
-            }
-            else
-            {
-                local_24 = 7;
-            }
-            if (0 < this->cursor)
-            {
-                this->cursor--;
-                this->curScore.name[local_24] = ' ';
-                this->curScore.name[this->cursor] = ' ';
-            }
-            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-        }
-        if (!WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_MENU))
-        {
-            return ZUN_SUCCESS;
-        }
-    }
-    else
-    {
-        if (this->cursor < 8)
-        {
-            local_20 = this->cursor;
-        }
-        else
-        {
-            local_20 = 7;
-        }
-        if (this->selectedChar < 0x5e)
-        {
-            this->curScore.name[local_20] = g_AlphabetList[this->selectedChar];
-        LAB_00446fd4:
-            if (this->cursor < 8 &&
-                (this->cursor = this->cursor + 1, this->cursor == 8))
-            {
-                this->selectedChar = 0x5f;
-            }
-            g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-            goto LAB_0044700b;
-        }
-        if (this->selectedChar == 0x5e)
-        {
-            this->curScore.name[local_20] = ' ';
-            goto LAB_00446fd4;
-        }
-    }
-    g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-LAB_004470e9:
-    this->resultScreenState = 0x10;
-    this->frameTimer = 0;
-    local_c = this->vms;
-    for (local_8 = 0; local_8 < 0x29; local_8++)
-    {
-        local_c->pendingInterrupt = 2;
-        local_c++;
-    }
-    strcpy(this->replayName, this->curScore.name);
-    strcpy(this->lsnmHeader.name, this->replayName);
-    return ZUN_SUCCESS;
-}
-
-#pragma var_order(timeinfo, local_c)
-// FUNCTION: TH07 0x00447161
-void ResultScreen::GetDate(char *out)
-{
-    time_t local_c;
-    tm *timeinfo;
-
-    time(&local_c);
-    timeinfo = localtime(&local_c);
-    // STRING: TH07 0x004967dc
-    strftime(out, 6, "%m/%d", timeinfo);
-}
-
-// FUNCTION: TH07 0x00447198
-ZunResult ResultScreen::HandleReplaySaveKeyboard()
-{
-    ResultScreen *_Memory;
-    i32 iVar2;
-    i32 local_ac;
-    char local_9c[68];
-    i32 local_58;
-    char local_54[64];
-    ReplayHeaderAndData *local_14;
-    i32 local_10;
-    i32 local_c;
-    AnmVm *local_8;
-
-    if (this->resultScreenState == 0xb)
-    {
-        if (this->frameTimer == 60)
-        {
-            if (g_Supervisor.CanSaveReplay() == 0 &&
-                (g_Supervisor.flags >> 3 & 1) == 0)
-            {
-                if (g_GameManager.globals->numRetries == 0)
-                {
-                    local_c = 0xb;
-                }
-                else
-                {
-                    local_c = 0xe;
-                }
-            }
-            else
-            {
-                local_c = 0x13;
-            }
-            local_8 = this->vms;
-            for (local_10 = 0; local_10 < 0x29; local_10++)
-            {
-                local_8->pendingInterrupt = (i16)local_c;
-                local_8++;
-            }
-            if (local_c != 0xb)
-            {
-                this->resultScreenState = 0xc;
-            }
-            this->cursor = 0;
-        }
-        local_8 = this->vms + 0x13;
-        if (this->cursor == 0)
-        {
-            this->vms[0x13].color.color =
-                (this->vms[0x13].color.color & 0xff000000) | 0xff6060;
-            this->vms[0x14].color.color =
-                (this->vms[0x14].color.color & 0xff000000) | 0x606060;
-        }
-        else
-        {
-            this->vms[0x13].color.color =
-                (this->vms[0x13].color.color & 0xff000000) | 0x606060;
-            this->vms[0x14].color.color =
-                (this->vms[0x14].color.color & 0xff000000) | 0xff6060;
-        }
-        if (this->frameTimer < 0x50)
-        {
-            return ZUN_SUCCESS;
-        }
-        MoveCursorHorizontally(this, 2);
-        if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) || !WAS_PRESSED_RAW(TH_BUTTON_MENU))
-        {
-            if (!WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
-            {
-                return ZUN_SUCCESS;
-            }
-
-            if (this->cursor == 0)
-            {
-                goto LAB_004473e3;
-            }
-        }
-        this->frameTimer = 0;
-        g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-        this->resultScreenState = 2;
-        local_8 = this->vms;
-        for (local_10 = 0; local_10 < 0x29; local_10++)
-        {
-            local_8->pendingInterrupt = 2;
-            local_8++;
-        }
-    }
-    else
-    {
-        if (this->resultScreenState == 0xc)
-        {
-            if (this->frameTimer < 20)
-            {
-                return ZUN_SUCCESS;
-            }
-            if (!WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
-            {
-                if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
-                {
-                    return ZUN_SUCCESS;
-                }
-            }
-            this->frameTimer = 0;
-            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-            this->resultScreenState = 2;
-            local_8 = this->vms;
-            for (local_10 = 0; local_10 < 0x29; local_10++)
-            {
-                local_8->pendingInterrupt = 2;
-                local_8++;
-            }
-            return ZUN_SUCCESS;
-        }
-        if (this->resultScreenState != 0xd)
-        {
-            if (this->resultScreenState == 0xe)
-            {
-                if (this->frameTimer < 0x1e)
-                {
-                    return ZUN_SUCCESS;
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_UP))
-                {
-                    do
-                    {
-                        this->selectedChar = this->selectedChar - 0x10;
-                        if (this->selectedChar < 0)
-                        {
-                            this->selectedChar = this->selectedChar + 0x60;
-                        }
-                    } while (g_AlphabetList[this->selectedChar] == ' ');
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
-                {
-                    do
-                    {
-                        this->selectedChar = this->selectedChar + 0x10;
-                        if (0x5f < this->selectedChar)
-                        {
-                            this->selectedChar = this->selectedChar - 0x60;
-                        }
-                    } while (g_AlphabetList[this->selectedChar] == ' ');
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
-                {
-                    do
-                    {
-                        this->selectedChar--;
-                        if (this->selectedChar % 0x10 == 0xf)
-                        {
-                            this->selectedChar = this->selectedChar + 0x10;
-                        }
-                        if (this->selectedChar < 0)
-                        {
-                            this->selectedChar = 0xf;
-                        }
-                    } while (g_AlphabetList[this->selectedChar] == ' ');
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RIGHT))
-                {
-                    do
-                    {
-                        this->selectedChar = this->selectedChar + 1;
-                        if (this->selectedChar % 0x10 == 0)
-                        {
-                            this->selectedChar = this->selectedChar - 0x10;
-                        }
-                    } while (g_AlphabetList[this->selectedChar] == ' ');
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_MOVE_MENU, 0);
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
-                {
-                    if (this->cursor < 8)
-                    {
-                        local_ac = this->cursor;
-                    }
-                    else
-                    {
-                        local_ac = 7;
-                    }
-                    local_58 = local_ac;
-                    if (this->selectedChar < 0x5e)
-                    {
-                        this->replayName[local_ac] = g_AlphabetList[this->selectedChar];
-                    }
-                    else if (this->selectedChar == 0x5e)
-                    {
-                        this->replayName[local_ac] = ' ';
-                    }
-                    else
-                    {
-                        sprintf(local_9c, "./replay/th7_%.2d.rpy",
-                                this->chosenReplayIdx + 1);
-                        ReplayManager::SaveReplay(local_9c, this->replayName);
-                        this->frameTimer = 0;
-                        this->resultScreenState = 2;
-                        local_8 = this->vms;
-                        for (local_10 = 0; local_10 < 0x29; local_10++)
-                        {
-                            local_8->pendingInterrupt = 2;
-                            local_8++;
-                        }
-                        strcpy(this->lsnmHeader.name, this->replayName);
-                    }
-                    if (this->cursor < 8 &&
-                        (this->cursor = this->cursor + 1, this->cursor == 8))
-                    {
-                        this->selectedChar = 0x5f;
-                    }
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                }
-                if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RETURNMENU))
-                {
-                    if (this->cursor < 8)
-                    {
-                        iVar2 = this->cursor;
-                    }
-                    else
-                    {
-                        iVar2 = 7;
-                    }
-                    if (0 < this->cursor)
-                    {
-                        this->cursor--;
-                        this->replayName[iVar2] = ' ';
-                        this->replayName[this->cursor] = ' ';
-                    }
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-                }
-                if (!WAS_PRESSED_RAW(TH_BUTTON_MENU))
-                {
-                    return ZUN_SUCCESS;
-                }
-            }
-            else
-            {
-                if (this->resultScreenState != 0xf)
-                {
-                    return ZUN_SUCCESS;
-                }
-                local_8 = this->vms + 0x13;
-                if (this->cursor == 0)
-                {
-                    this->vms[0x13].color.color =
-                        (this->vms[0x13].color.color & 0xff000000) | 0xff6060;
-                    this->vms[0x14].color.color =
-                        (this->vms[0x14].color.color & 0xff000000) | 0x606060;
-                }
-                else
-                {
-                    this->vms[0x13].color.color =
-                        (this->vms[0x13].color.color & 0xff000000) | 0x606060;
-                    this->vms[0x14].color.color =
-                        (this->vms[0x14].color.color & 0xff000000) | 0xff6060;
-                }
-                if (this->frameTimer < 20)
-                {
-                    return ZUN_SUCCESS;
-                }
-                MoveCursorHorizontally(this, 2);
-                if (!WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) &&
-                    !WAS_PRESSED_RAW(TH_BUTTON_MENU))
-                {
-                    if (!WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
-                    {
-                        return ZUN_SUCCESS;
-                    }
-
-                    this->frameTimer = 0;
-                    if (this->cursor == 0)
-                    {
-                        local_8 = this->vms;
-                        for (local_10 = 0; local_10 < 0x29; local_10++)
-                        {
-                            local_8->pendingInterrupt = 0x11;
-                            local_8++;
-                        }
-                        this->vms[(i32)((i32) & ((StageReplayData *)this->chosenReplayIdx)
-                                                        ->extendsFromPointItems +
-                                                    1)]
-                            .pendingInterrupt = 0x10;
-                        this->resultScreenState = 0xe;
-                        return ZUN_SUCCESS;
-                    }
-                }
-            }
-        LAB_004473e3:
-            g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-            this->resultScreenState = 0xd;
-            local_8 = this->vms;
-            for (local_10 = 0; local_10 < 0x29; local_10++)
-            {
-                local_8->pendingInterrupt = 0xc;
-                local_8++;
-            }
-            this->frameTimer = 0;
-        }
-        if (this->frameTimer == 0)
-        {
-            // STRING: TH07 0x004967d4
-            _mkdir("replay");
-            for (local_10 = 0; local_10 < 0xf; local_10++)
-            {
-                sprintf(local_54, "./replay/th7_%.2d.rpy", local_10 + 1);
-                local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(local_54, 1);
-                if (!local_14)
-                {
-                    local_14 = NULL;
-                }
-                else
-                {
-                    _Memory = (ResultScreen *)ReplayManager::ValidateReplayData(
-                        local_14, g_LastFileSize);
-                    local_14 = (ReplayHeaderAndData *)_Memory;
-                    if (_Memory)
-                    {
-                        this->replays[local_10] = *(ReplayHeaderAndData *)_Memory;
-                        free(_Memory);
-                    }
-                }
-            }
-        }
-        if (0x13 < this->frameTimer)
-        {
-            MoveCursor(this, 0xf);
-            this->chosenReplayIdx = this->cursor;
-            if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
-            {
-                g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                this->chosenReplayIdx = this->cursor;
-                this->frameTimer = 0;
-                GetDate(this->defaultReplay.data.date);
-                this->defaultReplay.data.score = g_GameManager.globals->score;
-                if (*(i32 *)&this->replays[this->cursor].head.magic ==
-                        *(i32 *)&"T7RP" &&
-                    (this->replays[this->cursor].head.version & 0xfff) == 0x100)
-                {
-                    local_8 = this->vms;
-                    for (local_10 = 0; local_10 < 0x29; local_10++)
-                    {
-                        local_8->pendingInterrupt = 0xd;
-                        local_8++;
-                    }
-                    local_8 = this->vms + this->chosenReplayIdx + 0x19;
-                    local_8->pendingInterrupt = 0x10;
-                    this->resultScreenState = 0xf;
-                }
-                else
-                {
-                    local_8 = this->vms;
-                    for (local_10 = 0; local_10 < 0x29; local_10++)
-                    {
-                        local_8->pendingInterrupt = 0x11;
-                        local_8++;
-                    }
-                    local_8 = this->vms + this->chosenReplayIdx + 0x19;
-                    local_8->pendingInterrupt = 0x10;
-                    this->resultScreenState = 0xe;
-                }
-                this->cursor = 0;
-                this->selectedChar = 0;
-                if (this->isClearingReplayName)
+                this->cursor++;
+                if (this->cursor == 8)
                 {
                     this->selectedChar = 0x5f;
                 }
             }
-            if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
+            g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
+        }
+        if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RETURNMENU))
+        {
+            cursor2 = this->cursor >= 8 ? 7 : this->cursor;
+            if (this->cursor > 0)
             {
-                g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-                this->resultScreenState = 0xb;
-                local_8 = this->vms;
-                for (local_10 = 0; local_10 < 0x29; local_10++)
+                this->cursor--;
+                this->replayName[cursor2] = ' ';
+                this->replayName[this->cursor] = ' ';
+            }
+            g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
+        }
+        if (WAS_PRESSED_RAW(TH_BUTTON_MENU))
+        {
+            goto LAB_004473e3;
+        }
+        break;
+    case 0xf:
+        vm = this->vms + 0x13;
+        if (this->cursor == 0)
+        {
+            vm[0].color.color =
+                (vm[0].color.color & 0xff000000) | 0xff6060;
+            vm[1].color.color =
+                (vm[1].color.color & 0xff000000) | 0x606060;
+        }
+        else
+        {
+            vm[0].color.color =
+                (vm[0].color.color & 0xff000000) | 0x606060;
+            vm[1].color.color =
+                (vm[1].color.color & 0xff000000) | 0xff6060;
+        }
+        if (this->frameTimer < 20)
+        {
+            return ZUN_SUCCESS;
+        }
+        MoveCursorHorizontally(this, 2);
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) ||
+            WAS_PRESSED_RAW(TH_BUTTON_MENU))
+        {
+            goto LAB_004473e3;
+        }
+        else if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
+        {
+            this->frameTimer = 0;
+            if (this->cursor == 0)
+            {
+                vm = this->vms;
+                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
                 {
-                    local_8->pendingInterrupt = 2;
-                    local_8++;
+                    vm->pendingInterrupt = 0x11;
                 }
-                this->frameTimer = 0;
+                vm = &this->vms[(i32)((i32) & ((StageReplayData *)this->chosenReplayIdx)
+                                                           ->extendsFromPointItems +
+                                                       1)];
+                vm->pendingInterrupt = 0x10;
+                this->resultScreenState = 0xe;
+            }
+            else
+            {
+                goto LAB_004473e3;
             }
         }
+        break;
     }
+
     return ZUN_SUCCESS;
 }
 
@@ -2261,25 +2163,25 @@ ZunResult ResultScreen::DrawFinalStats()
     return ZUN_SUCCESS;
 }
 
+#pragma var_order(charPos, i, name, vm, node, j, \
+                  pos, oldX, spellcardIdx, offsetX, offsetY, charBuf)
 // FUNCTION: TH07 0x00448d40
 u32 ResultScreen::OnDraw(ResultScreen *arg)
 {
-    i32 cursor2;
-    i32 cursor;
-    char local_58[16];
-    f32 local_48;
-    f32 local_44;
-    i32 local_40;
-    f32 local_3c;
-    D3DXVECTOR3 local_38;
-    i32 local_2c;
-    ScoreListNode *local_28;
-    AnmVm *local_24;
-    char buf[9];
-    i32 local_14;
-    D3DXVECTOR3 local_10;
+    char charBuf[16];
+    f32 offsetY;
+    f32 offsetX;
+    i32 spellcardIdx;
+    f32 oldX;
+    D3DXVECTOR3 pos;
+    i32 j;
+    ScoreListNode *node;
+    AnmVm *vm;
+    char name[9];
+    i32 i;
+    D3DXVECTOR3 charPos;
 
-    local_24 = arg->vms;
+    vm = arg->vms;
     g_AnmManager->Flush();
     g_Supervisor.viewport.X = 0;
     g_Supervisor.viewport.Y = 0;
@@ -2287,268 +2189,265 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_Supervisor.viewport.Height = 0x1e0;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
-    for (local_14 = 0; local_14 < 0x29; local_14++)
+    for (i = 0; i < 0x29; i++, vm++)
     {
-        local_38 = local_24->pos;
-        local_24->pos += local_24->offset;
-        g_AnmManager->DrawNoRotation(local_24);
-        local_24->pos = local_38;
-        local_24++;
+        pos = vm->pos;
+        vm->pos += vm->offset;
+        g_AnmManager->DrawNoRotation(vm);
+        vm->pos = pos;
     }
-    local_24 = arg->vms + 0x10;
-    if (arg->vms[0x10].pos.x < 640.0f)
+    vm = arg->vms + 0x10;
+    if (vm->pos.x < 640.0f)
     {
-        if (arg->stateStep == 9)
+        if (arg->stateStep != 9)
         {
-            local_38 = arg->vms[0x10].pos;
-            arg->spellcardListVms[10].pos = local_38;
-            g_AnmManager->DrawNoRotation(arg->spellcardListVms + 10);
-            local_38.y = local_38.y + 16.0f;
-            for (local_14 = 0;
-                 local_14 < 10 &&
-                 (local_40 = arg->lastSpellcardSelected * 10 + local_14,
-                 local_40 < 141);
-                 local_14++)
-            {
-                local_3c = local_38.x;
-                local_38.x += 320.0f;
-                local_38.y += 16.0f;
-                arg->rightArrowVm.pos = local_38;
-                arg->rightArrowVm.scale.x = 2.375f;
-                g_AnmManager->DrawNoRotation(&arg->rightArrowVm);
-                local_38.y -= 16.0f;
-                local_38.x = local_3c;
-                arg->spellcardListVms[local_14].pos.x = local_3c;
-                arg->spellcardListVms[local_14].pos.y = local_38.y;
-                arg->spellcardListVms[local_14].pos.z = local_38.z;
-                if (g_GameManager.catk[local_40]
-                        .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
-                {
-                    g_AsciiManager.color = 0xc0c0c0ff;
-                }
-                else if (g_GameManager.catk[local_40]
-                             .numSuccessesPerShot[arg->prevSpellcardListPage] == 0)
-                {
-                    g_AsciiManager.color = 0xffc0a0a0;
-                }
-                else
-                {
-                    g_AsciiManager.color = local_14 * -0x80800 - 0xf0f01;
-                }
-                AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "No.%.2d",
-                                            local_14 + 1);
-                arg->spellcardListVms[local_14].pos.x += 96.0f;
-                g_AnmManager->DrawNoRotation(arg->spellcardListVms + local_14);
-                local_38.x += 496.0f;
-                if (g_GameManager.catk[local_40]
-                        .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
-                {
-                    // STRING: TH07 0x00496458
-                    AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "---/---");
-                }
-                else
-                {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &local_38, "%3d/%3d",
-                        g_GameManager.catk[local_40]
-                            .numAttemptsPerShot[arg->prevSpellcardListPage],
-                        g_GameManager.catk[local_40]
-                            .numSuccessesPerShot[arg->prevSpellcardListPage]);
-                }
-                local_38.x = local_38.x - 496.0f + 424.0f;
-                local_38.y -= 13.0f;
-                g_AsciiManager.color = 0xffa08090;
-                g_AsciiManager.scale.x = 0.8f;
-                g_AsciiManager.scale.y = 0.8f;
-                if (g_GameManager.catk[local_40]
-                        .numAttemptsPerShot[arg->prevSpellcardListPage] != 0)
-                {
-                    AsciiManager::AddFormatText(
-                        // STRING: TH07 0x00496440
-                        &g_AsciiManager, &local_38, "MaxBonus %8d",
-                        g_GameManager.catk[local_40]
-                            .highScorePerShot[arg->prevSpellcardListPage]);
-                }
-                local_38.x -= 424.0f;
-                local_38.y += 13.0f;
-                g_AsciiManager.scale.x = 1.0f;
-                g_AsciiManager.scale.y = 1.0f;
-                if (arg->listScrollAnimState == 0)
-                {
-                    local_38.y = local_38.y + 33.0f;
-                }
-                else if (arg->frameTimer < 20)
-                {
-                    local_38.y =
-                        (f32)((20 - arg->frameTimer) * 0x21 / 20) + local_38.y;
-                }
-                else
-                {
-                    local_38.y =
-                        (f32)((arg->frameTimer - 20) * 0x21 / 20) + local_38.y;
-                }
-            }
-            if (0x27 < arg->frameTimer)
-            {
-                arg->listScrollAnimState = 0;
-            }
-        }
-        else
-        {
-            local_38 = arg->vms[0x10].pos;
-            arg->spellcardListVms[0].pos = local_38;
+            pos = vm->pos;
+            arg->spellcardListVms[0].pos = pos;
             arg->spellcardListVms[0].pos.x += 64.0f;
             g_AnmManager->DrawNoRotation(arg->spellcardListVms);
-            local_38.y += 18.0f;
-            local_38.x += 24.0f;
+            pos[1] += 18.0f;
+            pos[0] += 24.0f;
             g_AsciiManager.color = 0xffe0e0ef;
-            AsciiManager::AddFormatText(&g_AsciiManager, &local_38,
+            AsciiManager::AddFormatText(&g_AsciiManager, &pos,
                                         // STRING: TH07 0x004964b4
                                         "No  Name      Score(Stage)  Date   Slow");
-            local_28 = arg->scoreLists[arg->diffPlayed][arg->charUsed].next;
-            for (local_14 = 0; local_38.y = local_38.y + 18.0f, local_14 < 10;
-                 local_14++)
+            pos[1] += 18.0f;
+            node = arg->scoreLists[arg->diffPlayed][arg->charUsed].next;
+            for (i = 0; i < 10; i++)
             {
                 if (arg->resultScreenState == 10)
                 {
-                    if (!local_28->data->isPlayerScore)
+                    if (node->data->isPlayerScore)
                     {
-                        g_AsciiManager.color = 0xc0ffc0c0;
+                        g_AsciiManager.color = 0xfff0f0ff;
                     }
                     else
                     {
-                        g_AsciiManager.color = 0xfff0f0ff;
+                        g_AsciiManager.color = 0xc0ffc0c0;
                     }
                 }
                 else
                 {
                     g_AsciiManager.color = 0xffffc0c0;
                 }
-                AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "%2d",
-                                            local_14 + 1);
-                local_38.x += 48.0f;
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%2d",
+                                            i + 1);
+                pos.x += 48.0f;
                 if (arg->resultScreenState == 10 &&
-                    local_28->data->isPlayerScore)
+                    node->data->isPlayerScore)
                 {
-                    strncpy(buf, "        ", 9);
-                    if (arg->cursor < 8)
-                    {
-                        cursor = arg->cursor;
-                    }
-                    else
-                    {
-                        cursor = 7;
-                    }
-                    buf[cursor] = '_';
+                    // ZUN quirk: VIRGIN strcpy vs CHAD whatever tf this is
+                    *(u32 *)&name[0] = *(u32 *)"    ";
+                    *(u32 *)&name[4] = *(u32 *)"    ";
+                    name[8] = '\0';
+                    name[arg->cursor >= 8 ? 7 : arg->cursor] = '_';
                     // STRING: TH07 0x004964a8
-                    AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "%8s", buf);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%8s", name);
                 }
-                if (local_28->data->stage < 7)
+                if (node->data->stage <= 6)
                 {
                     AsciiManager::AddFormatText(
                         // STRING: TH07 0x00496498
-                        &g_AsciiManager, &local_38, "%8s %9d%1d(%d)",
-                        local_28->data->name, local_28->data->score,
-                        (i32)local_28->data->numRetries, (u32)local_28->data->stage);
+                        &g_AsciiManager, &pos, "%8s %9d%1d(%d)",
+                        node->data->name, node->data->score,
+                        (i32)node->data->numRetries, (u32)node->data->stage);
                 }
-                else if (local_28->data->stage == 7 ||
-                         local_28->data->stage == 8)
+                else if (node->data->stage == 7 ||
+                         node->data->stage == 8)
                 {
                     AsciiManager::AddFormatText(
                         // STRING: TH07 0x00496488
-                        &g_AsciiManager, &local_38, "%8s %9d%1d(1)", local_28->data->name,
-                        local_28->data->score, (i32)local_28->data->numRetries);
+                        &g_AsciiManager, &pos, "%8s %9d%1d(1)", node->data->name,
+                        node->data->score, (i32)node->data->numRetries);
                 }
                 else
                 {
                     AsciiManager::AddFormatText(
                         // STRING: TH07 0x00496478
-                        &g_AsciiManager, &local_38, "%8s %9d%1d(C)", local_28->data->name,
-                        local_28->data->score, (i32)local_28->data->numRetries);
+                        &g_AsciiManager, &pos, "%8s %9d%1d(C)", node->data->name,
+                        node->data->score, (i32)node->data->numRetries);
                 }
-                local_38.x += 320.0f;
+                pos.x += 320.0f;
                 // STRING: TH07 0x00496468
-                AsciiManager::AddFormatText(&g_AsciiManager, &local_38, " %5s   %3.2f",
-                                            local_28->data->date);
-                local_38.x -= 368.0f;
-                local_28 = local_28->next;
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, " %5s   %3.2f",
+                                            node->data->date, node->data->slowRatePercent);
+                pos[1] += 18.0f;
+                pos[0] -= 368.0f;
+                node = node->next;
+            }
+        }
+        else
+        {
+            pos = vm->pos;
+            arg->spellcardListVms[10].pos = pos;
+            g_AnmManager->DrawNoRotation(arg->spellcardListVms + 10);
+            pos[1] += 16.0f;
+            for (i = 0; i < 10; i++)
+            {
+                spellcardIdx = arg->lastSpellcardSelected * 10 + i;
+                if (spellcardIdx >= 141)
+                {
+                    break;
+                }
+                oldX = pos.x;
+                pos[0] += 320.0f;
+                pos[1] += 16.0f;
+                arg->rightArrowVm.pos = pos;
+                arg->rightArrowVm.scale.x = 2.375f;
+                g_AnmManager->DrawNoRotation(&arg->rightArrowVm);
+                pos[1] -= 16.0f;
+                pos.x = oldX;
+                arg->spellcardListVms[i].pos = pos;
+                if (g_GameManager.catk[spellcardIdx]
+                        .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
+                {
+                    g_AsciiManager.color = 0xc0c0c0ff;
+                }
+                else if (g_GameManager.catk[spellcardIdx]
+                             .numSuccessesPerShot[arg->prevSpellcardListPage] == 0)
+                {
+                    g_AsciiManager.color = 0xffc0a0a0;
+                }
+                else
+                {
+                    g_AsciiManager.color = 0xfff0f0ff - i * 0x80800;
+                }
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "No.%.2d",
+                                            spellcardIdx + 1);
+                arg->spellcardListVms[i].pos[0] += 96.0f;
+                g_AnmManager->DrawNoRotation(arg->spellcardListVms + i);
+                pos[0] += 496.0f;
+                if (g_GameManager.catk[spellcardIdx]
+                        .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
+                {
+                    // STRING: TH07 0x00496458
+                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "---/---",
+                                                g_GameManager.catk[spellcardIdx].numSuccessesPerShot[arg->prevSpellcardListPage],
+                                                g_GameManager.catk[spellcardIdx].numAttemptsPerShot[arg->prevSpellcardListPage]);
+                }
+                else
+                {
+                    AsciiManager::AddFormatText(
+                        &g_AsciiManager, &pos, "%3d/%3d",
+                        g_GameManager.catk[spellcardIdx]
+                            .numSuccessesPerShot[arg->prevSpellcardListPage],
+                        g_GameManager.catk[spellcardIdx]
+                            .numAttemptsPerShot[arg->prevSpellcardListPage]);
+                }
+                pos[0] -= 496.0f;
+                pos[0] += 424.0f;
+                pos[1] -= 13.0f;
+                g_AsciiManager.color = 0xffa08090;
+                g_AsciiManager.scale.x = 0.8f;
+                g_AsciiManager.scale.y = 0.8f;
+                if (g_GameManager.catk[spellcardIdx]
+                        .numAttemptsPerShot[arg->prevSpellcardListPage] != 0)
+                {
+                    AsciiManager::AddFormatText(
+                        // STRING: TH07 0x00496440
+                        &g_AsciiManager, &pos, "MaxBonus %8d",
+                        g_GameManager.catk[spellcardIdx]
+                            .highScorePerShot[arg->prevSpellcardListPage]);
+                }
+                pos[0] -= 424.0f;
+                pos[1] += 13.0f;
+                g_AsciiManager.scale.x = 1.0f;
+                g_AsciiManager.scale.y = 1.0f;
+                if (arg->listScrollAnimState == 0)
+                {
+                    pos[1] += 33.0f;
+                }
+                else if (arg->frameTimer < 20)
+                {
+                    pos[1] +=
+                        (f32)((20 - arg->frameTimer) * 0x21 / 20);
+                }
+                else
+                {
+                    pos[1] +=
+                        (f32)((arg->frameTimer - 20) * 0x21 / 20);
+                }
+            }
+            if (arg->frameTimer >= 40)
+            {
+                arg->listScrollAnimState = 0;
             }
         }
     }
     if (arg->resultScreenState == 10 || arg->resultScreenState == 0xe)
     {
-        local_38.x = 160.0f;
-        local_38.y = 356.0f;
-        local_38.z = 0.0f;
-        for (local_14 = 0; local_14 < 6; local_14++)
+        pos = D3DXVECTOR3(160.0f, 356.0f, 0.0f);
+        for (i = 0; i < 6; i++)
         {
-            for (local_2c = 0; local_2c < 0x10; local_2c++)
+            for (j = 0; j < 0x10; j++)
             {
-                local_44 = 0.0f;
-                if (arg->selectedChar == local_14 * 0x10 + local_2c)
+                offsetX = 0.0f;
+                offsetY = 0.0f;
+                if (arg->selectedChar == i * 0x10 + j)
                 {
                     g_AsciiManager.color = 0xffffffc0;
                     if (arg->frameTimer % 0x40 < 0x20)
                     {
-                        local_44 = (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f + 1.2f;
+                        offsetX = (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f + 1.2f;
                     }
                     else
                     {
-                        local_44 = 2.0f - (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f;
+                        offsetX = 2.0f - (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f;
                     }
-                    g_AsciiManager.scale.y = local_44;
-                    local_44 = -(local_44 - 1.0f) * 8.0f;
+                    g_AsciiManager.scale.x = offsetX;
+                    g_AsciiManager.scale.y = offsetX;
+                    offsetX = -(offsetX - 1.0f) * 8.0f;
+                    offsetY = offsetX;
                 }
                 else
                 {
                     g_AsciiManager.color = 0xc0c0c0c0;
+                    g_AsciiManager.scale.x = 1.0f;
                     g_AsciiManager.scale.y = 1.0f;
                 }
-                local_10.z = local_38.z;
-                local_10.x = local_38.x + local_44;
-                local_10.y = local_38.y + local_44;
-                local_58[0] = g_AlphabetList[local_14 * 0x10 + local_2c];
-                local_58[1] = 0;
-                if (local_14 == 5)
+                charPos = pos;
+                charPos.x += offsetX;
+                charPos.y += offsetY;
+                charBuf[0] = g_AlphabetList[i * 0x10 + j];
+                charBuf[1] = 0;
+                if (i == 5)
                 {
-                    if (local_2c == 0xe)
+                    if (j == 0xe)
                     {
-                        local_58[0] = -0x80;
+                        charBuf[0] = (char)0x80;
                     }
-                    else if (local_2c == 0xf)
+                    else if (j == 0xf)
                     {
-                        local_58[0] = -0x7f;
+                        charBuf[0] = (char)0x81;
                     }
                 }
-                g_AsciiManager.scale.x = g_AsciiManager.scale.y;
-                local_48 = local_44;
-                g_AsciiManager.AddString(&local_10, local_58);
-                local_38.x += 20.0f;
+                g_AsciiManager.AddString(&charPos, charBuf);
+                pos[0] += 20.0f;
             }
-            local_38.x -= (f32)(local_2c * 20);
-            local_38.y += 18.0f;
+            pos[0] -= (f32)(j * 20);
+            pos[1] += 18.0f;
         }
     }
     g_AsciiManager.scale.x = 1.0f;
     g_AsciiManager.scale.y = 1.0f;
-    if (10 < arg->resultScreenState && arg->resultScreenState < 0x10)
+    if (arg->resultScreenState >= 11 && arg->resultScreenState <= 15)
     {
-        local_24 = arg->vms + 0x12;
-        for (local_14 = 0; local_14 < 6; local_14++)
+        vm = &arg->vms[0x12];
+        for (i = 0; i < 6; i++, vm++)
         {
-            g_AnmManager->DrawNoRotation(local_24);
-            local_24++;
+            g_AnmManager->DrawNoRotation(vm);
         }
-        local_38 = arg->vms[0x18].pos;
-        local_24 = arg->vms + 0x19;
-        AsciiManager::AddFormatText(&g_AsciiManager, &local_38,
+        vm = &arg->vms[0x18];
+        pos = vm->pos;
+        vm++;
+        AsciiManager::AddFormatText(&g_AsciiManager, &pos,
                                     // STRING: TH07 0x0049641c
                                     "No.   Name     Date   Player Score");
-        for (local_14 = 0; local_14 < 0xf; local_14++)
+        for (i = 0; i < 0xf; i++)
         {
-            local_38 = local_24->pos;
-            local_24++;
-            if (local_14 == arg->chosenReplayIdx)
+            pos = vm->pos;
+            vm++;
+            if (i == arg->chosenReplayIdx)
             {
                 g_AsciiManager.color = 0xffff8080;
             }
@@ -2560,42 +2459,39 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             {
                 AsciiManager::AddFormatText(
                     // STRING: TH07 0x00496400
-                    &g_AsciiManager, &local_38, "No.%.2d %8s %5s  %7s %9d0",
-                    local_14 + 1, arg->replayName, arg->defaultReplay.data.date,
-                    g_CharactersAndShotTypesStrings[(u32)g_GameManager.shotType +
-                                                    (u32)g_GameManager.character * 2]);
+                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0",
+                    i + 1, arg->replayName, arg->defaultReplay.data.date,
+                    g_CharactersAndShotTypesStrings[(u32)g_GameManager.character * 2 +
+                                                    (u32)g_GameManager.shotType],
+                    arg->defaultReplay.data.score);
                 g_AsciiManager.color = 0xfff0f0ff;
-                strncpy(buf, "        ", 9);
-                if (arg->cursor < 8)
-                {
-                    cursor2 = arg->cursor;
-                }
-                else
-                {
-                    cursor2 = 7;
-                }
-                buf[cursor2] = '_';
+                *(u32 *)&name[0] = *(u32 *)"    ";
+                *(u32 *)&name[4] = *(u32 *)"    ";
+                name[8] = '\0';
+                name[arg->cursor >= 8 ? 7 : arg->cursor] = '_';
                 // STRING: TH07 0x004963f4
-                AsciiManager::AddFormatText(&g_AsciiManager, &local_38, "      %8s",
-                                            buf);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "      %8s",
+                                            name);
             }
-            else if (*(i32 *)&arg->replays[local_14].head.magic ==
-                         *(i32 *)&"T7RP" &&
-                     (arg->replays[local_14].head.version & 0xfff) == 0x100)
+            else if (*(i32 *)&arg->replays[i].head.magic !=
+                         *(i32 *)&"T7RP" ||
+                     (arg->replays[i].head.version & 0xfff) != 0x100)
             {
                 AsciiManager::AddFormatText(
-                    &g_AsciiManager, &local_38, "No.%.2d %8s %5s  %7s %9d0",
-                    local_14 + 1, arg->replays[local_14].data.name,
-                    arg->replays[local_14].data.date,
-                    g_CharactersAndShotTypesStrings[arg->replays[local_14]
-                                                        .data.shotType]);
+                    &g_AsciiManager, &pos,
+                    // STRING: TH07 0x004963c8
+                    "No.%.2d -------- --/--  -------          0",
+                    i + 1);
             }
             else
             {
                 AsciiManager::AddFormatText(
-                    &g_AsciiManager, &local_38,
-                    // STRING: TH07 0x004963c8
-                    "No.%.2d -------- --/--  -------          0");
+                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0",
+                    i + 1, arg->replays[i].data.name,
+                    arg->replays[i].data.date,
+                    g_CharactersAndShotTypesStrings[arg->replays[i]
+                                                        .data.shotType],
+                    arg->replays[i].data.score);
             }
         }
     }
@@ -2604,25 +2500,24 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     if (arg->resultScreenState == 20 || arg->resultScreenState == 21 ||
         arg->resultScreenState == 0x16)
     {
-        local_24 = arg->spellcardListVms;
-        for (local_14 = 0; local_14 < 0xe; local_14++)
+        vm = arg->spellcardListVms;
+        for (i = 0; i < 0xe; i++, vm++)
         {
-            g_AnmManager->DrawNoRotation(local_24);
-            local_24++;
+            g_AnmManager->DrawNoRotation(vm);
         }
     }
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(i, local_c, j, k, local_18, local_1c)
+#pragma var_order(i, vm, j, k, catk, catkIdx)
 // FUNCTION: TH07 0x00449b05
 ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
 {
     i32 k;
     i32 j;
-    i32 local_1c;
-    Catk *local_18;
-    AnmVm *local_c;
+    i32 catkIdx;
+    Catk *catk;
+    AnmVm *vm;
     i32 i;
 
     g_GameManager.HasUnlockedPhantomAndMaxClears();
@@ -2664,24 +2559,24 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         {
             return ZUN_ERROR;
         }
-        local_c = arg->vms;
-        for (i = 0; i < 0x29; i++, local_c++)
+        vm = arg->vms;
+        for (i = 0; i < 0x29; i++, vm++)
         {
-            local_c->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-            local_c->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-            g_AnmManager->SetAnmIdxAndExecuteScript(local_c, i + 0x900);
+            vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            g_AnmManager->SetAnmIdxAndExecuteScript(vm, i + 0x900);
         }
         UselessStack::FourBytes();
         g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 0x910);
-        local_c = arg->spellcardListVms;
-        for (i = 0; i < 0xf; i++, local_c++)
+        vm = arg->spellcardListVms;
+        for (i = 0; i < 0xf; i++, vm++)
         {
             UselessStack::FourBytes();
-            g_AnmManager->InitializeAndSetActiveSprite(local_c, i + 0x715);
-            local_c->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-            local_c->anchor = 3;
-            local_c->fontWidth = 15;
-            local_c->fontHeight = 15;
+            g_AnmManager->InitializeAndSetActiveSprite(vm, i + 0x715);
+            vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            vm->anchor = 3;
+            vm->fontWidth = 15;
+            vm->fontHeight = 15;
         }
     }
     arg->prevCursor = 0;
@@ -2724,15 +2619,15 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     }
     for (i = 0; i < 7; i++)
     {
-        local_18 = g_GameManager.catk;
+        catk = g_GameManager.catk;
         arg->totalPlayCountPerCharacter[i + 1] = 0;
-        for (local_1c = 0; local_1c < 141; local_1c++, local_18++)
+        for (catkIdx = 0; catkIdx < 141; catkIdx++, catk++)
         {
-            if (local_18->magic != CATK_MAGIC || local_18->version != 1)
+            if (catk->magic != CATK_MAGIC || catk->version != 1)
             {
                 continue;
             }
-            if (local_18->numSuccessesPerShot[i] != 0)
+            if (catk->numSuccessesPerShot[i] != 0)
             {
                 arg->totalPlayCountPerCharacter[i + 1]++;
             }
@@ -2785,14 +2680,14 @@ ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)
 }
 
 // FUNCTION: TH07 0x0044a302
-ZunResult ResultScreen::RegisterChain(u32 param_1)
+ZunResult ResultScreen::RegisterChain(u32 type)
 {
     ResultScreen *resultScreen = new ResultScreen;
 
     // STRING: TH07 0x0049635c
     Supervisor::DebugPrint2("Stg.PlayTimeAll = %d\r\n",
                             g_GameManager.playTimeAll);
-    if (param_1 == 1)
+    if (type == 1)
     {
         if (!g_GameManager.practice)
         {
@@ -2803,7 +2698,7 @@ ZunResult ResultScreen::RegisterChain(u32 param_1)
             resultScreen->resultScreenState = 0x12;
         }
     }
-    else if (param_1 == 2)
+    else if (type == 2)
     {
         resultScreen->resultScreenState = 0x13;
         AddedCallback(resultScreen);

@@ -39,7 +39,8 @@ enum TouhouButton
 #define IS_PRESSED_GAME(key) ((g_CurFrameGameInput & (key)) != 0)
 #define WAS_PRESSED_RAW(key) (IS_PRESSED_RAW(key) && ((g_CurFrameRawInput & (key)) != (g_LastFrameRawInput & (key))))
 #define WAS_PRESSED_GAME(key) (IS_PRESSED_GAME(key) && ((g_CurFrameGameInput & (key)) != (g_LastFrameGameInput & (key))))
-#define WAS_PRESSED_RAW_AND_IS_EIGHTH(key) (WAS_PRESSED_RAW(key) || (((g_CurFrameRawInput & (key)) != 0) && (g_IsEighthFrameOfHeldInput != 0)))
+#define IS_EIGHTH(key) (((g_CurFrameRawInput & (key)) != 0) && (g_IsEighthFrameOfHeldInput != 0))
+#define WAS_PRESSED_RAW_AND_IS_EIGHTH(key) (WAS_PRESSED_RAW(key) || IS_EIGHTH(key))
 
 namespace Controller
 {

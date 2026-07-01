@@ -32,7 +32,7 @@ C_ASSERT(sizeof(Th7k) == 0xc);
 struct Catk : Th7k
 {
     u32 highScorePerShot[7];
-    i16 idx;
+    u16 idx;
     u8 nameCsum;
     char name[49];
     u16 numAttemptsPerShot[7];
@@ -123,7 +123,7 @@ struct ScoreDat
 {
     u8 xorseed[2];
     u16 csum;
-    i16 magic;
+    u16 magic;
     u8 unused_6;
     // pad 1
     i32 dataOffset;
@@ -141,12 +141,13 @@ struct ResultScreen
         memset(this, 0, sizeof(ResultScreen));
         this->cursor = 1;
     }
+
     ~ResultScreen()
     {
         ZunMemory::Free(this->scoreDat);
     }
 
-    static ZunResult RegisterChain(u32 param_1);
+    static ZunResult RegisterChain(u32 type);
 
     static ZunResult AddedCallback(ResultScreen *arg);
     static ZunResult DeletedCallback(ResultScreen *arg);
@@ -156,7 +157,7 @@ struct ResultScreen
     ZunResult CheckConfirmButton();
     ZunResult DrawFinalStats();
     i32 DrawStats();
-    static void GetDate(char *out);
+    static void GetDate(char *outDate);
     ZunResult HandleReplaySaveKeyboard();
     ZunResult HandleResultKeyboard();
     static i32 MoveCursor(ResultScreen *screen, i32 max);
@@ -168,15 +169,15 @@ struct ResultScreen
     i32 LinkScoreEx(Hscr *out, i32 difficulty, i32 character);
     static u32 GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
                             u32 character, u32 difficulty, u8 *numRetries);
-    static ZunResult ParseCatk(ScoreDat *scoreDat, Catk *catk);
-    static ZunResult ParseClrd(ScoreDat *scoreDat, Clrd *clrd);
-    static ZunResult ParsePlst(ScoreDat *scoreDat, Plst *plst);
-    static ZunResult ParsePscr(ScoreDat *scoreDat, Pscr *pscr);
+    static ZunResult ParseCatk(ScoreDat *scoreDat, Catk *outCatk);
+    static ZunResult ParseClrd(ScoreDat *scoreDat, Clrd *outClrd);
+    static ZunResult ParsePlst(ScoreDat *scoreDat, Plst *outPlst);
+    static ZunResult ParsePscr(ScoreDat *scoreDat, Pscr *outPscr);
     static ZunResult ParseScores();
     static void ReleaseScoreDat(ScoreDat *scoreDat);
-    void FreeScore(i32 param_1, i32 param_2);
+    void FreeScore(i32 difficulty, i32 character);
     static void FreeAllScores(ScoreListNode *scores);
-    static ZunResult ParseLsnm(ScoreDat *scoreDat, Lsnm *param_2);
+    static i32 ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm);
     void WriteScore();
 
     ScoreDat *scoreDat;

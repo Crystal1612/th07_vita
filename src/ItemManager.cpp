@@ -11,6 +11,7 @@
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
 #include "d3dx8.h"
+#include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ecf8
 i32 g_FullPowerScoreBonus[30] = {10, 20, 30, 40, 50, 60, 70, 80,
@@ -59,6 +60,11 @@ void GameManager::AddCurrentPower(i32 amount)
 // FUNCTION: TH07 0x00432630
 ItemManager::ItemManager()
 {
+    i32 idk;
+
+    UselessStack::FourBytes();
+    UselessStack::FourBytes();
+    UselessStack::FourBytes();
 }
 
 // FUNCTION: TH07 0x00432690
