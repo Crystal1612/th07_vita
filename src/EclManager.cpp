@@ -102,12 +102,12 @@ void EclManager::Unload()
 }
 
 // FUNCTION: TH07 0x0040e530
-ZunResult EclManager::CallEclSub(EnemyEclContext *param_1, i16 subId)
+ZunResult EclManager::CallEclSub(EnemyEclContext *ctx, i16 subId)
 {
-    param_1->curInstr = this->subTable[subId];
-    param_1->time = 0;
-    param_1->timer2 = 0;
-    param_1->subId = subId;
+    ctx->curInstr = this->subTable[subId];
+    ctx->time = 0;
+    ctx->timer2 = 0;
+    ctx->subId = subId;
     return ZUN_SUCCESS;
 }
 

@@ -72,7 +72,7 @@ struct AsciiManager
 
     static void AddFormatText(AsciiManager *manager, D3DXVECTOR3 *position,
                               const char *fmt, ...);
-    void AddString(D3DXVECTOR3 *param_1, const char *text);
+    void AddString(D3DXVECTOR3 *position, const char *text);
     void CreatePopup1(D3DXVECTOR3 *position, i32 value, D3DCOLOR color);
     void CreatePopup2(D3DXVECTOR3 *position, i32 value, D3DCOLOR color);
     void DrawPopups();

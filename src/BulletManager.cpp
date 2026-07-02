@@ -1104,7 +1104,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         laserCenter.x = (laser->endOffset - laser->startOffset) / 2.0f + laser->startOffset + laser->pos.x;
         laserCenter.y = laser->pos.y;
         laser->vm0.scale.x = laser->width / laser->vm0.sprite->widthPx;
-        width = laser->endOffset - laser->startOffset;
+        width = laser->endOffset - laser->startOffset; // width is used as length here
         laser->vm0.scale.y = width / laser->vm0.sprite->heightPx;
         laser->vm0.rotation.z = utils::NormalizeAngle(1.5707964f + laser->angle);
         laser->vm0.flags |= 4;

@@ -1727,7 +1727,10 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
     {
         goto handle_interrupt;
     }
-    while (instr = vm->currentInstruction, instr->time <= vm->currentTimeInScript.GetCurrent())
+
+WHY_NOT_JUST_CONTINUE:
+    instr = vm->currentInstruction;
+    while (instr->time <= vm->currentTimeInScript.GetCurrent())
     {
         switch (instr->opcode)
         {
@@ -1758,7 +1761,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->currentTimeInScript = instr->args[1].i;
             vm->currentInstruction =
                 (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[0].i);
-            continue;
+            goto WHY_NOT_JUST_CONTINUE;
         case ANM_DEC_JUMP:
             (*GET_INT_PTR(0))--;
             if (GET_INT_VALUE(0) > 0)
@@ -1766,7 +1769,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 vm->currentTimeInScript = instr->args[2].i;
                 vm->currentInstruction =
                     (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[1].i);
-                continue;
+                goto WHY_NOT_JUST_CONTINUE;
             }
             break;
         case ANM_FLIP_X:
@@ -1901,11 +1904,11 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 instr = nextInstr;
             }
 
-            vm->currentInstruction =
-                (AnmRawInstr *)((u8 *)instr + instr->size);
+            instr = (AnmRawInstr *)((u8 *)instr + instr->size);
+            vm->currentInstruction = instr;
             vm->currentTimeInScript = vm->currentInstruction->time;
             vm->visible = 1;
-            continue;
+            goto WHY_NOT_JUST_CONTINUE;
         case ANM_SET_VISIBILITY:
             vm->visible = instr->args[0].i;
             break;
@@ -1967,8 +1970,9 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             {
                 vm->posInterpInitial = vm->offset;
             }
-            vm->posInterpFinal =
-                D3DXVECTOR3(GET_FLOAT_VALUE(2), GET_FLOAT_VALUE(3), GET_FLOAT_VALUE(4));
+            vm->posInterpFinal.x = GET_FLOAT_VALUE(2);
+            vm->posInterpFinal.y = GET_FLOAT_VALUE(3);
+            vm->posInterpFinal.z = GET_FLOAT_VALUE(4);
             break;
         case ANM_INTERP_COLOR:
             vm->interpStartTimes[1] = 0;
@@ -2172,11 +2176,12 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         jump:
             vm->currentTimeInScript = instr->args[3].i;
             vm->currentInstruction = (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[2].i);
-            continue;
+            goto WHY_NOT_JUST_CONTINUE;
         default:
             break;
         }
         vm->currentInstruction = (AnmRawInstr *)((u8 *)instr + instr->size);
+        goto WHY_NOT_JUST_CONTINUE;
     }
 
 stop:
@@ -2206,15 +2211,15 @@ stop:
         if (vm->interpEndTimes[i] > 0)
         {
             vm->interpStartTimes[i]++;
-            if (vm->interpStartTimes[i] >= vm->interpEndTimes[i].current)
+            if (vm->interpStartTimes[i] >= vm->interpEndTimes[i].GetCurrent())
             {
                 t = 1.0f;
                 vm->interpEndTimes[i] = 0;
             }
             else
             {
-                t = ((f32)vm->interpStartTimes[i].current + vm->interpStartTimes[i].subFrame) /
-                    ((f32)vm->interpEndTimes[i].current + vm->interpEndTimes[i].subFrame);
+                t = vm->interpStartTimes[i].AsFloat() /
+                    vm->interpEndTimes[i].AsFloat();
             }
             switch (vm->interpModes[i])
             {

@@ -237,7 +237,7 @@ void AsciiManager::CutChain()
 }
 
 // FUNCTION: TH07 0x00401f40
-void AsciiManager::AddString(D3DXVECTOR3 *param_1, const char *text)
+void AsciiManager::AddString(D3DXVECTOR3 *position, const char *text)
 {
     if (this->numStrings >= 0x100)
     {
@@ -251,7 +251,7 @@ void AsciiManager::AddString(D3DXVECTOR3 *param_1, const char *text)
     // the only reason this doesn't cause a problem is because nothing more
     // than 64 chars is passed through this function
     strcpy(curString->text, text);
-    curString->position = *param_1;
+    curString->position = *position;
     curString->color = this->color;
     curString->scale.x = this->scale.x;
     curString->scale.y = this->scale.y;
