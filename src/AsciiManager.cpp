@@ -1188,6 +1188,11 @@ void AsciiManager::DrawPopups()
             }
         }
 
+        // ZUN bug: When Cherry exceeds 1 million, it'll result in overflowing
+        // the display, causing it to no longer display correctly. Strangely,
+        // ZUN actually did fix this bug for displaying CherryMax, and he
+        // totally could have just done the same thing for Cherry, but he
+        // didn't. Weird...
         for (i = 0; i < 6; i++, divisor /= 10)
         {
             j = cherry / divisor;

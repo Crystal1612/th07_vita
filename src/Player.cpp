@@ -1104,23 +1104,23 @@ i32 Player::CalcItemBoxCollision(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
 
 #pragma var_order(playerRelativeTopLeft, laserBottomRight, laserTopLeft, playerRelativeBottomRight)
 // FUNCTION: TH07 0x0043e6b0
-i32 Player::CalcLaserHitbox(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
-                            D3DXVECTOR3 *param_3, f32 param_4, i32 canGraze)
+i32 Player::CalcLaserHitbox(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
+                            D3DXVECTOR3 *origin, f32 rotation, i32 canGraze)
 {
     D3DXVECTOR3 playerRelativeTopLeft;
     D3DXVECTOR3 playerRelativeBottomRight;
     D3DXVECTOR3 laserTopLeft;
     D3DXVECTOR3 laserBottomRight;
 
-    laserTopLeft = this->positionCenter - *param_3;
-    utils::Rotate(&laserBottomRight, &laserTopLeft, param_4);
+    laserTopLeft = this->positionCenter - *origin;
+    utils::Rotate(&laserBottomRight, &laserTopLeft, rotation);
     laserBottomRight.z = 0;
-    laserTopLeft = laserBottomRight + *param_3;
+    laserTopLeft = laserBottomRight + *origin;
     playerRelativeTopLeft = laserTopLeft - this->hitboxSize;
     playerRelativeBottomRight = laserTopLeft + this->hitboxSize;
 
-    laserTopLeft = *param_1 - *param_2 / 2.0f;
-    laserBottomRight = *param_1 + *param_2 / 2.0f;
+    laserTopLeft = *center - *size / 2.0f;
+    laserBottomRight = *center + *size / 2.0f;
     if (!(playerRelativeTopLeft.x > laserBottomRight.x ||
           playerRelativeBottomRight.x < laserTopLeft.x ||
           playerRelativeTopLeft.y > laserBottomRight.y ||

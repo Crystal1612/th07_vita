@@ -128,8 +128,8 @@ struct EnemyLaserShooter
     i32 startTime;
     i32 duration;
     i32 endTime;
-    i32 grazeDelay;
-    i32 aimMode;
+    i32 hitboxStartTime;
+    i32 hitboxEndTime;
     i32 unused_bc;
     u16 type;
     i16 unused_c2;
@@ -151,10 +151,10 @@ struct Laser
     f32 targetWidth;
     f32 speed;
     i32 startTime;
-    i32 grazeDelay;
+    i32 hitboxStartTime;
     i32 duration;
     i32 endTime;
-    i32 grazeInterval;
+    i32 hitboxEndTime;
     i32 inUse;
     ZunTimer timer;
     u16 flags;

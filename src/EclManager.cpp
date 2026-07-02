@@ -1389,8 +1389,8 @@ restart:
                 laserProps->startTime = laserInstrArgs[7].i;
                 laserProps->duration = laserInstrArgs[8].i;
                 laserProps->endTime = laserInstrArgs[9].i;
-                laserProps->grazeDelay = laserInstrArgs[10].i;
-                laserProps->aimMode = laserInstrArgs[11].i;
+                laserProps->hitboxStartTime = laserInstrArgs[10].i;
+                laserProps->hitboxEndTime = laserInstrArgs[11].i;
                 laserProps->flags = laserInstrArgs[12].u;
 
                 if (instr->id == 0x53)

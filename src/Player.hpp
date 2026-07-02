@@ -182,8 +182,8 @@ struct Player
 
     i32 CalcItemBoxCollision(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
     i32 CalcKillboxCollision(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
-    i32 CalcLaserHitbox(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
-                        D3DXVECTOR3 *param_3, f32 param_4, i32 canGraze);
+    i32 CalcLaserHitbox(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
+                        D3DXVECTOR3 *origin, f32 rotation, i32 canGraze);
     i32 CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
     i32 CalcDamageToEnemy(D3DXVECTOR3 *param_1, D3DXVECTOR3 *param_2,
                           i32 *param_3);

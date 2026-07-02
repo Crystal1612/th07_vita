@@ -483,7 +483,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
                 }
             }
         }
-        laser->grazeInterval = 0;
+        laser->hitboxEndTime = 0;
     }
     this->screenClearTime = 10;
 }
@@ -556,7 +556,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
                 }
             }
         }
-        laser->grazeInterval = 0;
+        laser->hitboxEndTime = 0;
     }
     this->screenClearTime = 10;
     return local_c;
@@ -670,8 +670,8 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         laser->startTime = laserShooter->startTime;
         laser->duration = laserShooter->duration;
         laser->endTime = laserShooter->endTime;
-        laser->grazeDelay = laserShooter->grazeDelay;
-        laser->grazeInterval = laserShooter->aimMode;
+        laser->hitboxStartTime = laserShooter->hitboxStartTime;
+        laser->hitboxEndTime = laserShooter->hitboxEndTime;
         laser->hideWarning = 0;
         if (laser->startTime == 0)
         {
@@ -872,21 +872,22 @@ void Bullet::UpdateBulletBounce()
     }
 }
 
-#pragma var_order(local_8, i, local_10, local_14, local_20, bullet, local_24, laser, local_38)
+#pragma var_order(collisionRes, i, width, blockIdx, laserHitbox, bullet, \
+                  alpha, laser, laserCenter)
 // FUNCTION: TH07 0x00425a50
 u32 BulletManager::OnUpdate(BulletManager *arg)
 {
-    i32 local_8;
-    i32 i;
-    f32 local_10;
-    i32 local_14;
-    D3DXVECTOR3 local_20;
-    Bullet *bullet;
-    i32 local_24;
+    D3DXVECTOR3 laserCenter;
     Laser *laser;
-    D3DXVECTOR3 local_38;
+    i32 alpha;
+    Bullet *bullet;
+    D3DXVECTOR3 laserHitbox;
+    i32 blockIdx;
+    f32 width;
+    i32 i;
+    i32 collisionRes;
 
-    local_14 = 0;
+    blockIdx = 0;
     bullet = arg->bullets;
     if (g_GameManager.isTimeStopped)
     {
@@ -989,12 +990,12 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         do_collision:
             if (!bullet->grazed && bullet->timer2.GetCurrent() >= 16)
             {
-                local_8 = g_Player.CheckGraze(&bullet->pos, &bullet->sprites.grazeSize);
-                if (local_8 == 1)
+                collisionRes = g_Player.CheckGraze(&bullet->pos, &bullet->sprites.grazeSize);
+                if (collisionRes == 1)
                 {
                     bullet->grazed = 1;
                 }
-                else if (local_8 == 2)
+                else if (collisionRes == 2)
                 {
                     if ((bullet->moreFlags & 0x1000) == 0)
                     {
@@ -1005,13 +1006,13 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                 }
             }
 
-            local_8 = g_Player.CalcKillboxCollision(&bullet->pos, &bullet->sprites.grazeSize);
-            if (local_8 != 0)
+            collisionRes = g_Player.CalcKillboxCollision(&bullet->pos, &bullet->sprites.grazeSize);
+            if (collisionRes != 0)
             {
-                if (local_8 != 2 || (bullet->moreFlags & 0x1000) == 0)
+                if (collisionRes != 2 || (bullet->moreFlags & 0x1000) == 0)
                 {
                     bullet->state = BULLET_DESPAWN;
-                    if (local_8 == 2)
+                    if (collisionRes == 2)
                     {
                         g_ItemManager.SpawnItem(&bullet->pos, g_Player.itemType, 1);
                     }
@@ -1072,10 +1073,10 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         arg->bulletsPtrs[bullet->sprites.collisionType] = bullet;
 
     bullet_loop_continue:
-        local_14--;
-        if (local_14 < 0)
+        blockIdx--;
+        if (blockIdx < 0)
         {
-            local_14 = 0x3ff;
+            blockIdx = 0x3ff;
             bullet += 0x400;
         }
         bullet--;
@@ -1098,13 +1099,13 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         {
             laser->startOffset = 0.0f;
         }
-        local_20.y = laser->width / 2.0f;
-        local_20.x = laser->endOffset - laser->startOffset;
-        local_38.x = (laser->endOffset - laser->startOffset) / 2.0f + laser->startOffset + laser->pos.x;
-        local_38.y = laser->pos.y;
+        laserHitbox.y = laser->width / 2.0f;
+        laserHitbox.x = laser->endOffset - laser->startOffset;
+        laserCenter.x = (laser->endOffset - laser->startOffset) / 2.0f + laser->startOffset + laser->pos.x;
+        laserCenter.y = laser->pos.y;
         laser->vm0.scale.x = laser->width / laser->vm0.sprite->widthPx;
-        local_10 = laser->endOffset - laser->startOffset;
-        laser->vm0.scale.y = local_10 / laser->vm0.sprite->heightPx;
+        width = laser->endOffset - laser->startOffset;
+        laser->vm0.scale.y = width / laser->vm0.sprite->heightPx;
         laser->vm0.rotation.z = utils::NormalizeAngle(1.5707964f + laser->angle);
         laser->vm0.flags |= 4;
 
@@ -1113,31 +1114,39 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         case LASER_SPAWNING:
             if ((laser->flags & 1) != 0)
             {
-                local_24 = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
-                if (local_24 > 0xff)
+                alpha = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
+                if (alpha > 0xff)
                 {
-                    local_24 = 0xff;
+                    alpha = 0xff;
                 }
-                laser->vm0.color.color = local_24 << 0x18;
+                laser->vm0.color.color = alpha << 0x18;
             }
             else
             {
                 i32 waitTime = laser->startTime > 30 ? 30 : laser->startTime;
                 if (laser->startTime - waitTime < laser->timer.GetCurrent())
                 {
-                    local_10 = laser->timer.AsFloat() * laser->width / (f32)laser->startTime;
+                    width = laser->timer.AsFloat() * laser->width / (f32)laser->startTime;
                 }
                 else
                 {
-                    local_10 = 1.2f;
+                    width = 1.2f;
                 }
-                laser->targetWidth = local_10;
-                laser->vm0.scale.x = local_10 / 16.0f;
-                local_20.x = local_10 / 2.0f;
+                laser->targetWidth = width;
+                laser->vm0.scale.x = width / 16.0f;
+
+                // ZUN bug: ZUN stores width / 2.0f in laserHitbox.x as though
+                // it controlled the width of the hitbox, even though it's
+                // actually the length of the laser as in
+                // laser->endOffset - laser->startOffset. As a result, when a
+                // laser is in its spawning state and its hitbox is set to
+                // start, it'll only have a small hitbox on its midpoint
+                // equal to the halfwidth.
+                laserHitbox.x = width / 2.0f;
             }
-            if (laser->timer >= laser->grazeDelay)
+            if (laser->timer >= laser->hitboxStartTime)
             {
-                g_Player.CalcLaserHitbox(&local_38, &local_20, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
             }
             if (laser->timer < laser->startTime)
             {
@@ -1147,7 +1156,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             laser->state++;
             laser->targetWidth = laser->width;
         case LASER_ACTIVE:
-            g_Player.CalcLaserHitbox(&local_38, &local_20, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+            g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
             if (laser->timer < laser->duration)
             {
                 break;
@@ -1162,25 +1171,28 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         case LASER_DESPAWNING:
             if ((laser->flags & 1) != 0)
             {
-                local_24 = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
-                if (local_24 > 0xff)
+                alpha = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
+                if (alpha > 0xff)
                 {
-                    local_24 = 0xff;
+                    alpha = 0xff;
                 }
-                laser->vm0.color.color = local_24 << 0x18;
+                laser->vm0.color.color = alpha << 0x18;
             }
             else
             {
                 if (laser->endTime > 0)
                 {
-                    local_10 = laser->width - laser->timer.AsFloat() * laser->width / (f32)laser->endTime;
-                    laser->vm0.scale.x = local_10 / 16.0f;
-                    local_20.x = local_10 / 2.0f;
+                    width = laser->width - laser->timer.AsFloat() * laser->width / (f32)laser->endTime;
+                    laser->vm0.scale.x = width / 16.0f;
+
+                    // ZUN bug: Same bug as in the laser spawning. The laser
+                    // will only have a hitbox on its midpoint.
+                    laserHitbox.x = width / 2.0f;
                 }
             }
-            if (laser->timer < laser->grazeInterval)
+            if (laser->timer < laser->hitboxEndTime)
             {
-                g_Player.CalcLaserHitbox(&local_38, &local_20, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
             }
             if (laser->timer < laser->endTime)
             {
