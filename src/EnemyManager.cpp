@@ -729,7 +729,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
 
     collisionOut = 0;
     stageFactor = g_GameManager.currentStage >= 5 ? 10 : g_GameManager.currentStage * 2;
-    if (g_Gui.HasCurrentMsgIdx() == 0)
+    if (!g_Gui.HasCurrentMsgIdx())
     {
         timerLimit = 2400;
         timerLimit -= (i32)g_GameManager.globals->livesRemaining * 4 * 60;
@@ -769,7 +769,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->timer--;
             goto LAB_00421da7;
         }
-
+    HUH:
         if (g_EclManager.RunEcl(enemy) == ZUN_ERROR)
         {
             enemy->active = 0;
@@ -783,6 +783,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
+                UselessStack::ThirtyTwoBytes();
                 enemy->specialEffect->pos1 = enemy->specialEffect->pos1 + (enemy->position - enemy->specialEffect->pos1) / 16.0f;
             }
         }
@@ -838,12 +839,12 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (enemy->HandleLifeCallback())
         {
-            continue;
+            goto HUH;
         }
         if (enemy->timerCallbackThreshold >= 0 &&
             enemy->HandleTimerCallback())
         {
-            continue;
+            goto HUH;
         }
         enemy->primaryVm.color.color = enemy->color.color;
         g_AnmManager->ExecuteScript(&enemy->primaryVm);
@@ -860,24 +861,25 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         playedDamageSound = 0;
         if (!enemy->hasNoCollision && !enemy->invisibleOnBomb)
         {
-            if (enemy->canDie &&
-                (enemy->hasContactHitbox &&
-                 (enemy->CheckBulletPlayerCollision(&enemy->position,
-                                                    &enemy->hitboxSize),
-                  enemy->trailFlags != 0)))
+            if (enemy->canDie && enemy->hasContactHitbox)
             {
-                currentHitbox = enemy->hitboxSize;
-                for (j = 1; j < enemy->trailInterval; j += 6)
+                enemy->CheckBulletPlayerCollision(&enemy->position,
+                                                  &enemy->hitboxSize);
+                if (enemy->trailFlags != 0)
                 {
-                    if ((enemy->trailFlags & 2) != 0)
+                    currentHitbox = enemy->hitboxSize;
+                    for (j = 1; j < enemy->trailInterval; j += 6)
                     {
-                        currentHitbox = enemy->hitboxSize -
-                                        enemy->hitboxSize *
-                                            (f32)j /
-                                            (f32)(i32)enemy->trailInterval;
+                        if ((enemy->trailFlags & 2) != 0)
+                        {
+                            currentHitbox = enemy->hitboxSize -
+                                            enemy->hitboxSize *
+                                                (f32)j /
+                                                (f32)(i32)enemy->trailInterval;
+                        }
+                        enemy->CheckBulletPlayerCollision(
+                            &enemy->enemyHistory[j].position, &currentHitbox);
                     }
-                    enemy->CheckBulletPlayerCollision(
-                        &enemy->enemyHistory[j].position, &currentHitbox);
                 }
             }
             enemy->lastDamage = 0;
@@ -916,28 +918,30 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         {
                             cherryGain = 10;
                         }
-                        if (g_GameManager.GetShotTypeAndCharacter() != SHOT_REIMU_A)
-                        {
-                            goto wtf;
-                        }
-                        if ((cherryGain == 20 || cherryGain == 30) &&
-                            (enemy->timer.GetCurrent() & 1) != 0)
-                        {
-                            cherryGain -= 10;
-                        }
-                        if (g_GameManager.currentStage >= 5 &&
-                            g_GameManager.currentStage <= 6 &&
-                            !enemy->isBoss)
-                        {
-                            damage = damage / 2;
-                        }
-                        if (g_GameManager.currentStage == 4 &&
-                            !enemy->isBoss)
-                        {
-                            damage -= damage / 4 + damage / 16;
-                        }
 
-                    wtf:
+                        // ABSOLUTELY no reason for this to be a switch statement
+                        switch (g_GameManager.shotTypeAndCharacter)
+                        {
+                        default:
+                            break;
+                        case SHOT_REIMU_A:
+                            if ((cherryGain == 20 || cherryGain == 30) &&
+                                (enemy->timer.GetCurrent() & 1) != 0)
+                            {
+                                cherryGain -= 10;
+                            }
+                            if (g_GameManager.currentStage >= 5 &&
+                                g_GameManager.currentStage <= 6 &&
+                                !enemy->isBoss)
+                            {
+                                damage = damage / 2;
+                            }
+                            if (g_GameManager.currentStage == 4 &&
+                                !enemy->isBoss)
+                            {
+                                damage -= damage / 4 + damage / 16;
+                            }
+                        }
                         if (cherryGain != 0)
                         {
                             g_GameManager.AddCherryPlus(cherryGain);
@@ -1000,7 +1004,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     diffToPlayer = g_Player.positionOfLastEnemyHit - g_Player.positionCenter;
                     enemyDiff = enemy->position - g_Player.positionCenter;
 
-                    if (g_Player.targetingEnemy == 0 || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x))
+                    if (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x))
                     {
                         g_Player.positionOfLastEnemyHit = enemy->position;
                     }
@@ -1012,7 +1016,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                                        enemy->position.x - g_Player.positionCenter.x);
 
                         if (angle >= -2.0943952f && angle <= -1.0471976f &&
-                            (g_Player.targetingEnemy == 0 || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
+                            (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
                         {
                             g_Player.sakuyaTargetPosition = enemy->position;
                             g_Player.targetingEnemy = 1;
@@ -1167,7 +1171,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (enemy->isBoss)
         {
-            if (g_Gui.HasCurrentMsgIdx() == 0 && enemy->bossId == 0)
+            if (!g_Gui.HasCurrentMsgIdx() && enemy->bossId == 0)
             {
                 g_Gui.SetBossHealthBar((f32)enemy->life / (f32)enemy->maxLife);
             }

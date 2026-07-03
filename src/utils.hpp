@@ -39,4 +39,9 @@ inline void EightBytes()
 {
     i32 idk[2];
 }
+
+inline void ThirtyTwoBytes()
+{
+    i32 idk[8];
+}
 } // namespace UselessStack

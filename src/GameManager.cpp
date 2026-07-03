@@ -199,7 +199,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     g_AnmManager->SetCameraMode(0xff);
     if (g_GameManager.replay &&
         g_GameManager.replayStage == 1 &&
-        g_Gui.HasCurrentMsgIdx() == 0)
+        !g_Gui.HasCurrentMsgIdx())
     {
         arg->bulletLagTime++;
         if ((g_Supervisor.curFps < 20 && arg->bulletLagTime % 3 != 0) ||
