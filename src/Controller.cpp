@@ -22,8 +22,8 @@ u16 Controller::GetJoystickCaps()
 {
     joyinfoex_tag joyinfo;
 
-    joyinfo.dwSize = 0x34;
-    joyinfo.dwFlags = 0xff;
+    joyinfo.dwSize = 52;
+    joyinfo.dwFlags = 255;
     if (joyGetPosEx(0, &joyinfo))
     {
         // STRING: TH07 0x00497d9c
@@ -85,8 +85,8 @@ u16 Controller::GetControllerInput(u16 buttons)
     if (!g_Supervisor.controller)
     {
         memset(&pji, 0, sizeof(JOYINFOEX));
-        pji.dwSize = 0x34;
-        pji.dwFlags = 0xff;
+        pji.dwSize = 52;
+        pji.dwFlags = 255;
         if (joyGetPosEx(0, &pji))
         {
             return buttons;
@@ -110,9 +110,9 @@ u16 Controller::GetControllerInput(u16 buttons)
             }
             else
             {
-                if (g_AutoFocusTimer > 0xa)
+                if (g_AutoFocusTimer > 10)
                 {
-                    g_AutoFocusTimer = g_AutoFocusTimer - 10;
+                    g_AutoFocusTimer -= 10;
                     buttons |= TH_BUTTON_FOCUS;
                 }
                 else
@@ -216,7 +216,7 @@ u16 Controller::GetControllerInput(u16 buttons)
                 }
                 else
                 {
-                    if (g_AutoFocusTimer > 0xa)
+                    if (g_AutoFocusTimer > 10)
                     {
                         g_AutoFocusTimer -= 10;
                         buttons |= TH_BUTTON_FOCUS;
@@ -280,8 +280,8 @@ u8 *Controller::GetControllerState()
     if (!g_Supervisor.controller)
     {
         memset(&joyinfoex, 0, sizeof(JOYINFOEX));
-        joyinfoex.dwSize = 0x34;
-        joyinfoex.dwFlags = 0xff;
+        joyinfoex.dwSize = 52;
+        joyinfoex.dwFlags = 255;
         if (joyGetPosEx(0, &joyinfoex))
         {
             return g_ControllerData;
@@ -413,7 +413,7 @@ void Controller::ResetKeyboard()
     u8 key_states[256];
 
     GetKeyboardState(key_states);
-    for (i32 i = 0; i < 0x100; i++)
+    for (i32 i = 0; i < 256; i++)
     {
         key_states[i] = key_states[i] & 0x7f;
     }

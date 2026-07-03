@@ -131,7 +131,7 @@ start:
                 }
                 GameWindow::ResetRenderState();
                 g_Supervisor.renderSkipFrames = 3;
-                g_Supervisor.flags = g_Supervisor.flags | 0x10;
+                g_Supervisor.flags = g_Supervisor.flags | 16;
             }
         }
     }

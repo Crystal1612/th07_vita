@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <windef.h>
 
+#include "AnmIdx.hpp"
 #include "ZunColor.hpp"
 #include "ZunMath.hpp"
 #include "ZunResult.hpp"
@@ -22,7 +23,7 @@ struct VertexTex1DiffuseXyz
 {
     D3DXVECTOR3 position;
     ZunColor diffuse;
-    D3DXVECTOR2 textureUV;
+    Float2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1DiffuseXyz) == 0x18);
 extern VertexTex1DiffuseXyz g_Quad3DFallback[4];
@@ -31,19 +32,19 @@ struct VertexTex1Xyzrwh
 {
     D3DXVECTOR3 pos;
     f32 w;
-    D3DXVECTOR2 textureUV;
+    Float2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1Xyzrwh) == 0x18);
 extern VertexTex1Xyzrwh g_QuadTemplate[4];
 
 struct VertexTex1DiffuseXyzrwh
 {
-    /* this is a zunvec3 because for some reason msvc 2002 doesnt like it
-       when its a d3dxvector3 in the inline assembly */
-    ZunVec3 pos;
+    VertexTex1DiffuseXyzrwh() {}
+
+    Float3 pos;
     f32 w;
     ZunColor color;
-    D3DXVECTOR2 textureUV;
+    Float2 textureUV;
 };
 C_ASSERT(sizeof(VertexTex1DiffuseXyzrwh) == 0x1c);
 extern VertexTex1DiffuseXyzrwh g_QuadVertices[4];
@@ -51,7 +52,7 @@ extern VertexTex1DiffuseXyzrwh g_QuadVertices[4];
 struct RenderVertexInfo
 {
     D3DXVECTOR3 position;
-    D3DXVECTOR2 textureUV;
+    Float2 textureUV;
 };
 C_ASSERT(sizeof(RenderVertexInfo) == 0x14);
 
@@ -86,8 +87,8 @@ struct AnmRawScript
 struct AnmRawSprite
 {
     i32 id;
-    D3DXVECTOR2 offset;
-    D3DXVECTOR2 size;
+    Float2 offset;
+    Float2 size;
 };
 
 struct AnmRawEntry
@@ -205,7 +206,7 @@ struct AnmManager
     // FUNCTION: TH07 0x00433f20
     void ReleaseSurfaces()
     {
-        for (i32 i = 0; i < 0x20; i++)
+        for (i32 i = 0; i < 32; i++)
         {
             SAFE_RELEASE(this->surfaces[i]);
         }
@@ -244,10 +245,10 @@ struct AnmManager
         else
         {
             this->screenshotTextureId = 4;
-            this->screenshotSrcLeft = 0x20;
-            this->screenshotSrcTop = 0x10;
-            this->screenshotSrcWidth = 0x180;
-            this->screenshotSrcHeight = 0x1c0;
+            this->screenshotSrcLeft = 32;
+            this->screenshotSrcTop = 16;
+            this->screenshotSrcWidth = 384;
+            this->screenshotSrcHeight = 448;
             this->screenshotDstLeft = x;
             this->screenshotDstTop = y;
 
@@ -358,7 +359,7 @@ struct AnmManager
     i32 scriptTicksThisFrame;
     i32 renderStateChangesThisFrame;
     u32 flushesThisFrame;
-    D3DXVECTOR2 offset;
+    Float2 offset;
     D3DXMATRIX matrix;
     struct AnmLoadedSprite sprites[2560];
     struct AnmVm vm;

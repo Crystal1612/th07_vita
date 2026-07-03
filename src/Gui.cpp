@@ -118,7 +118,7 @@ void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
     dstRect.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
     dstRect.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;
     dstRect.bottom = g_AnmManager->sprites[spriteIdx].endPixelInclusive.y;
-    g_AnmManager->CopyTexture(0x15, 0x16, &srcRect, &dstRect);
+    g_AnmManager->CopyTexture(21, 22, &srcRect, &dstRect);
 }
 
 // FUNCTION: TH07 0x00427e7c
@@ -293,7 +293,7 @@ u32 Gui::OnDraw(Gui *arg)
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
-        g_AsciiManager.fontSpacing = 0xe;
+        g_AsciiManager.fontSpacing = 14;
         break;
     case 3:
         g_AsciiManager.color = 0xffc0b0ff;
@@ -312,7 +312,7 @@ u32 Gui::OnDraw(Gui *arg)
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
-        g_AsciiManager.fontSpacing = 0xe;
+        g_AsciiManager.fontSpacing = 14;
         break;
     }
     if (arg->impl->spellCardBonus.isShown)
@@ -342,16 +342,16 @@ u32 Gui::OnDraw(Gui *arg)
 // FUNCTION: TH07 0x0042868d
 void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
 {
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait, 0x4a1);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait, 1185);
     g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardPortrait, sprite);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorLeft, 0x4a4);
-    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorLeft, 0x4ac);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorRight, 0x4a6);
-    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorRight, 0x4ac);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName, 0x704);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorLeft, 1188);
+    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorLeft, 1196);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorRight, 1190);
+    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorRight, 1196);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName, 1796);
     AnmManager::DrawVmTextFmt(g_AnmManager, &this->impl->bombSpellcardName,
                               0xf0f0ff, 0, name);
-    this->bombNameBarLength = (f32)(u32)(strlen(name) * 0xf) / 2.0f + 16.0f;
+    this->bombNameBarLength = (f32)(u32)(strlen(name) * 15) / 2.0f + 16.0f;
     this->impl->bombSpellcardNameBg.SetInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
     g_Supervisor.renderSkipFrames = 2;
@@ -363,9 +363,9 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
     if (spellcardSprite >= 0)
     {
         g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardPortrait,
-                                                0x4a3);
+                                                1187);
         g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardPortrait,
-                                      spellcardSprite + 0x4ad);
+                                      spellcardSprite + 1197);
         if (this->impl->enemySpellcardPortrait.sprite->widthPx > 256.0f)
         {
             this->impl->enemySpellcardPortrait.offset.x = -288.0f;
@@ -382,15 +382,15 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
             }
         }
     }
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated1, 0x4a5);
-    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated1, 0x4ac);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated2, 0x4a7);
-    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated2, 0x4ac);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName, 0x705);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated1, 1189);
+    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated1, 1196);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated2, 1191);
+    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated2, 1196);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName, 1797);
     g_AnmManager->DrawStringFormat(&this->impl->enemySpellcardName, 0xfff0f0, 0,
                                    spellcardName);
     this->spellcardBarLength =
-        (f32)(u32)(strlen(spellcardName) * 0xf) / 2.0f + 16.0f;
+        (f32)(u32)(strlen(spellcardName) * 15) / 2.0f + 16.0f;
     this->impl->enemySpellcardNameBg.SetInterrupt(1);
     this->impl->spellcardBonusIndicator.SetInterrupt(1);
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB, 0);
@@ -410,7 +410,7 @@ ZunResult Gui::ActualAddedCallback()
     {
         memset(this->impl, 0, sizeof(GuiImpl));
 
-        if (g_AnmManager->LoadAnms(0x15, "data/front.anm", 0x600) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_FRONT, "data/front.anm", ANM_OFFSET_FRONT) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
@@ -418,36 +418,36 @@ ZunResult Gui::ActualAddedCallback()
         switch (g_GameManager.character)
         {
         case CHAR_REIMU:
-            if (g_AnmManager->LoadAnms(0x19, "data/face_rm00.anm", 0x4a0) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_FACE, "data/face_rm00.anm", ANM_OFFSET_FACE) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
-            if (g_AnmManager->LoadAnms(0x17, "data/loading.anm", 0x61e) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_LOADING, "data/loading.anm", ANM_OFFSET_LOADING) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
             break;
         case CHAR_MARISA:
-            if (g_AnmManager->LoadAnms(0x19, "data/face_mr00.anm", 0x4a0) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_FACE, "data/face_mr00.anm", ANM_OFFSET_FACE) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
-            if (g_AnmManager->LoadAnms(0x17, "data/loading2.anm", 0x61e) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_LOADING, "data/loading2.anm", ANM_OFFSET_LOADING) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
             break;
         case CHAR_SAKUYA:
-            if (g_AnmManager->LoadAnms(0x19, "data/face_sk00.anm", 0x4a0) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_FACE, "data/face_sk00.anm", ANM_OFFSET_FACE) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
-            if (g_AnmManager->LoadAnms(0x17, "data/loading3.anm", 0x61e) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_LOADING, "data/loading3.anm", ANM_OFFSET_LOADING) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -460,7 +460,7 @@ ZunResult Gui::ActualAddedCallback()
         ClearActiveSprites();
         g_AnmManager->SetAnmIdxAndExecuteScript(
             &this->impl->stageTransitionSnapshotVm,
-            0x725);
+            1829);
         this->impl->stageTransitionSnapshotVm.pendingInterrupt = 1;
         g_AnmManager->CreateScreenshotTexture(
             this->impl->stageTransitionSnapshotVm.sprite->startPixelInclusive
@@ -469,13 +469,13 @@ ZunResult Gui::ActualAddedCallback()
                 .y,
             this->impl->stageTransitionSnapshotVm.sprite->widthPx,
             this->impl->stageTransitionSnapshotVm.sprite->heightPx);
-        for (i = 0; i < 0xe; i++)
+        for (i = 0; i < 14; i++)
         {
             for (j = 0; j < 12; j++)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(
                     &this->impl->transitionQuads[i * 12 + j],
-                    (i + j & 1) + 0x726);
+                    (i + j & 1) + 1830);
                 this->impl->transitionQuads[i * 12 + j].intVars2[0] =
                     i + j * 2;
                 this->impl->transitionQuads[i * 12 + j].pos.x =
@@ -489,18 +489,18 @@ ZunResult Gui::ActualAddedCallback()
                     (f32)i * 32.0f / 512.0f;
             }
         }
-        this->impl->activeTransitionQuads = 0xa8;
+        this->impl->activeTransitionQuads = 168;
     }
     switch (g_GameManager.currentStage)
     {
     case 1:
-        CopyTemplateSpriteToSprite(0x60e);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_01_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1550);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_01_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std1txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std1txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -511,13 +511,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 2:
-        CopyTemplateSpriteToSprite(0x610);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_02_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1552);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_02_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std2txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std2txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -528,13 +528,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 3:
-        CopyTemplateSpriteToSprite(0x612);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_03_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1554);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_03_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std3txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std3txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -545,13 +545,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 4:
-        CopyTemplateSpriteToSprite(0x614);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_04_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1556);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_04_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std4txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std4txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -562,13 +562,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 5:
-        CopyTemplateSpriteToSprite(0x616);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_05_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1558);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_05_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std5txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std5txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -579,13 +579,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 6:
-        CopyTemplateSpriteToSprite(0x618);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_06_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1560);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_06_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std6txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std6txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -596,13 +596,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 7:
-        CopyTemplateSpriteToSprite(0x61a);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_07_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1562);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_07_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std7txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std7txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -613,13 +613,13 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 8:
-        CopyTemplateSpriteToSprite(0x61c);
-        if (g_AnmManager->LoadAnms(0x1c, "data/face_08_00.anm", 0x4ad) !=
+        CopyTemplateSpriteToSprite(1564);
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_08_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x18, "data/std8txt.anm", 0x800) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_TEXT, "data/std8txt.anm", ANM_OFFSET_STAGE_TEXT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -634,10 +634,10 @@ ZunResult Gui::ActualAddedCallback()
     }
     if (g_Supervisor.curState == 3 || g_Supervisor.curState == 11 || g_Supervisor.curState == 12 ? 0 : 1)
     {
-        for (k = 0; k < 0x21; k++)
+        for (k = 0; k < 33; k++)
         {
             g_AnmManager->SetAnmIdxAndExecuteScript(
-                &this->impl->vms0[k], k + 0x600);
+                &this->impl->vms0[k], k + 1536);
         }
     }
     this->bossPresent = 0;
@@ -645,14 +645,14 @@ ZunResult Gui::ActualAddedCallback()
     this->bossHealthBar = 0.0f;
     this->bossHealthBarEased = 0.0f;
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait,
-                                            0x4a1);
+                                            1185);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardPortrait,
-                                            0x4a3);
+                                            1187);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName,
-                                            0x704);
+                                            1796);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName,
-                                            0x705);
-    g_AnmManager->ExecuteVmsAnms(this->impl->vms1, 0x800, 5);
+                                            1797);
+    g_AnmManager->ExecuteVmsAnms(this->impl->vms1, 2048, 5);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardNameBg,
                                             1);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardNameBg,
@@ -677,10 +677,10 @@ ZunResult Gui::ActualAddedCallback()
     this->impl->enemySpellcardRelated1.visible = 0;
     this->impl->enemySpellcardRelated2.visible = 0;
     this->impl->enemySpellcardName.visible = 0;
-    this->impl->bombSpellcardName.fontWidth = 0xf;
-    this->impl->bombSpellcardName.fontHeight = 0xf;
-    this->impl->enemySpellcardName.fontWidth = 0xf;
-    this->impl->enemySpellcardName.fontHeight = 0xf;
+    this->impl->bombSpellcardName.fontWidth = 15;
+    this->impl->bombSpellcardName.fontHeight = 15;
+    this->impl->enemySpellcardName.fontWidth = 15;
+    this->impl->enemySpellcardName.fontHeight = 15;
     this->impl->msg.currentMsgIdx = -1;
     this->impl->finishedStage = 0;
     this->impl->bonusScore.isShown = 0;
@@ -748,11 +748,11 @@ void GuiImpl::MsgRead(i32 msgIdx)
     this->msg.curInstr = (&this->msg.msgFile->entries)[msgIdx];
     this->msg.dialogueLines[0].anmFileIdx = -1;
     this->msg.dialogueLines[1].anmFileIdx = -1;
-    this->msg.fontSize = 0xf;
-    this->msg.textColorsA[0].color = 0xe8f0ff;
-    this->msg.textColorsA[1].color = 0xffe8f0;
-    this->msg.textColorsB[0].color = 0;
-    this->msg.textColorsB[1].color = 0;
+    this->msg.fontSize = 15;
+    this->msg.textColorsA[0] = 0xe8f0ff;
+    this->msg.textColorsA[1] = 0xffe8f0;
+    this->msg.textColorsB[0] = 0;
+    this->msg.textColorsB[1] = 0;
     this->msg.dialogueSkippable = 1;
     g_BulletManager.RemoveAllBullets(1);
     g_EnemyManager.RemoveAllEnemies(0, 0);
@@ -762,33 +762,33 @@ void GuiImpl::MsgRead(i32 msgIdx)
         switch (g_GameManager.currentStage)
         {
         case 1:
-            Gui::CopyTemplateSpriteToSprite(0x60f);
+            Gui::CopyTemplateSpriteToSprite(1551);
             break;
         case 2:
-            Gui::CopyTemplateSpriteToSprite(0x611);
+            Gui::CopyTemplateSpriteToSprite(1553);
             break;
         case 3:
-            Gui::CopyTemplateSpriteToSprite(0x613);
+            Gui::CopyTemplateSpriteToSprite(1555);
             break;
         case 4:
-            Gui::CopyTemplateSpriteToSprite(0x615);
+            Gui::CopyTemplateSpriteToSprite(1557);
             break;
         case 5:
-            Gui::CopyTemplateSpriteToSprite(0x617);
+            Gui::CopyTemplateSpriteToSprite(1559);
             break;
         case 6:
-            Gui::CopyTemplateSpriteToSprite(0x619);
+            Gui::CopyTemplateSpriteToSprite(1561);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 7:
-            Gui::CopyTemplateSpriteToSprite(0x61b);
+            Gui::CopyTemplateSpriteToSprite(1563);
             g_Stage.spellcardVmsIdx = 1;
             g_Stage.numSpellcardVms = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 8:
-            Gui::CopyTemplateSpriteToSprite(0x61d);
+            Gui::CopyTemplateSpriteToSprite(1565);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
         }
@@ -834,8 +834,8 @@ ZunResult GuiImpl::RunMsg()
                 args->portrait.anmScriptIdx +
                     (args->portrait.portraitIdx !=
                              0
-                         ? 0x4a0 + 2
-                         : 0x4a0));
+                         ? 1184 + 2
+                         : 1184));
             if (this->msg.portraits[args->portrait.portraitIdx]
                     .sprite
                     ->widthPx > 128.0f)
@@ -853,7 +853,7 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.curInstr->args;
             g_AnmManager->SetActiveSprite(
                 &this->msg.portraits[args->portrait.portraitIdx],
-                args->portrait.anmScriptIdx + (args->portrait.portraitIdx == 0 ? 0x4a0 : 0x4ad));
+                args->portrait.anmScriptIdx + (args->portrait.portraitIdx == 0 ? 1184 : 1197));
             if (this->msg.portraits[args->portrait.portraitIdx]
                     .sprite
                     ->widthPx > 256.0f)
@@ -883,15 +883,13 @@ ZunResult GuiImpl::RunMsg()
             {
                 AnmManager::DrawVmTextFmt(
                     g_AnmManager, this->msg.dialogueLines + 1,
-                    this->msg.textColorsA[args->dialogue.textColor]
-                        .color,
-                    this->msg.textColorsB[args->dialogue.textColor]
-                        .color,
+                    this->msg.textColorsA[args->dialogue.textColor],
+                    this->msg.textColorsB[args->dialogue.textColor],
                     " ");
             }
             g_AnmManager->SetAnmIdxAndExecuteScript(
                 &this->msg.dialogueLines[args->dialogue.textLine],
-                args->dialogue.textLine + 0x700);
+                args->dialogue.textLine + 1792);
             this->msg.dialogueLines[args->dialogue.textLine]
                 .fontHeight = (u8)this->msg.fontSize;
             this->msg.dialogueLines[args->dialogue.textLine]
@@ -901,10 +899,8 @@ ZunResult GuiImpl::RunMsg()
             AnmManager::DrawVmTextFmt(
                 g_AnmManager,
                 &this->msg.dialogueLines[args->dialogue.textLine],
-                this->msg.textColorsA[args->dialogue.textColor]
-                    .color,
-                this->msg.textColorsB[args->dialogue.textColor]
-                    .color,
+                this->msg.textColorsA[args->dialogue.textColor],
+                this->msg.textColorsB[args->dialogue.textColor],
                 args->dialogue.text);
             this->msg.framesElapsedDuringPause = 0;
             break;
@@ -944,15 +940,15 @@ ZunResult GuiImpl::RunMsg()
             if (g_GameManager.currentStage != 6)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms1[0],
-                                                        0x804);
+                                                        2052);
             }
             else
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms1[0],
-                                                        0x805);
+                                                        2053);
             }
             g_AnmManager->SetActiveSprite(
-                this->vms1, this->msg.curInstr->args.music.musicIdx + 0x803);
+                this->vms1, this->msg.curInstr->args.music.musicIdx + 2051);
             if (g_Supervisor.PlayLoadedAudio(
                     this->msg.curInstr->args.music.musicIdx) != ZUN_SUCCESS)
             {
@@ -965,13 +961,11 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.curInstr->args;
             g_AnmManager->SetAnmIdxAndExecuteScript(
                 &this->msg.introLines[args->dialogue.textLine],
-                args->dialogue.textLine + 0x702);
+                args->dialogue.textLine + 1794);
             g_AnmManager->DrawStringFormat(
                 this->msg.introLines + args->dialogue.textLine,
-                this->msg.textColorsA[args->dialogue.textColor]
-                    .color,
-                this->msg.textColorsB[args->dialogue.textColor]
-                    .color,
+                this->msg.textColorsA[args->dialogue.textColor],
+                this->msg.textColorsB[args->dialogue.textColor],
                 args->dialogue.text);
             this->msg.framesElapsedDuringPause = 0;
             break;
@@ -985,8 +979,8 @@ ZunResult GuiImpl::RunMsg()
             this->finishedStage = 1;
             if (g_GameManager.currentStage < 6)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearTextVm, 0x61e);
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTransitionSnapshotVm, 0x725);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearTextVm, 1566);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTransitionSnapshotVm, 1829);
                 g_AnmManager->CreateScreenshotTexture(
                     this->stageTransitionSnapshotVm.sprite->startPixelInclusive.x,
                     this->stageTransitionSnapshotVm.sprite->startPixelInclusive.y,
@@ -1027,7 +1021,7 @@ ZunResult GuiImpl::RunMsg()
                 }
 
                 UselessStack::FourBytes();
-                g_AnmManager->InitializeAndSetActiveSprite(&this->stageClearBonusTextVm, 0x10c);
+                g_AnmManager->InitializeAndSetActiveSprite(&this->stageClearBonusTextVm, 268);
                 this->transitionToScoreScreen = 1;
                 this->msg.currentMsgIdx = -2;
             }
@@ -1150,13 +1144,13 @@ ZunResult GuiImpl::DrawDialogue()
     {
         g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
-    g_Supervisor.d3dDevice->SetVertexShader(0x44);
+    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, dialogueBg,
                                             sizeof(VertexDiffuseXyzrhw));
-    g_AnmManager->SetVertexShader(0xff);
-    g_AnmManager->SetColorOp(0xff);
-    g_AnmManager->SetBlendMode(0xff);
-    g_AnmManager->SetZWriteDisable(0xff);
+    g_AnmManager->SetVertexShader(255);
+    g_AnmManager->SetColorOp(255);
+    g_AnmManager->SetBlendMode(255);
+    g_AnmManager->SetZWriteDisable(255);
     if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
@@ -1276,7 +1270,7 @@ void Gui::UpdateGui()
             }
         }
     }
-    g_AnmManager->ExecuteScripts(this->impl->vms0, 0x21);
+    g_AnmManager->ExecuteScripts(this->impl->vms0, 33);
     g_AnmManager->ExecuteScripts(this->impl->vms1, 5);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardPortrait);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardDecorLeft);
@@ -1303,8 +1297,8 @@ void Gui::UpdateGui()
     }
     if (this->impl->activeTransitionQuads != 0)
     {
-        activeTransitionQuads = 0xa8;
-        for (i = 0; i < 0xa8; i++)
+        activeTransitionQuads = 168;
+        for (i = 0; i < 168; i++)
         {
             if (g_AnmManager->ExecuteScript(this->impl->transitionQuads + i))
             {
@@ -1637,13 +1631,13 @@ void Gui::DrawGameScene()
             {
                 g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
             }
-            g_Supervisor.d3dDevice->SetVertexShader(0x44);
+            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
             g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &powerBarVerts,
                                                     sizeof(VertexDiffuseXyzrhw));
-            g_AnmManager->SetVertexShader(0xff);
-            g_AnmManager->SetColorOp(0xff);
-            g_AnmManager->SetBlendMode(0xff);
-            g_AnmManager->SetZWriteDisable(0xff);
+            g_AnmManager->SetVertexShader(255);
+            g_AnmManager->SetColorOp(255);
+            g_AnmManager->SetBlendMode(255);
+            g_AnmManager->SetZWriteDisable(255);
             if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
             {
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
@@ -1759,7 +1753,7 @@ void Gui::DrawStageElements()
             if (leadingZeroSkipped != 0 || digitDivisor == 1)
             {
                 this->impl->captureBonusVm.sprite =
-                    g_AnmManager->GetSprite(digit + 0x84);
+                    g_AnmManager->GetSprite(digit + 132);
                 g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
             }
             this->impl->captureBonusVm.pos.x += 7.0f;
@@ -1775,12 +1769,12 @@ void Gui::DrawStageElements()
         if (digit / 10 != 0)
         {
             this->impl->captureBonusVm.sprite =
-                g_AnmManager->GetSprite(digit / 10 + 0x84);
+                g_AnmManager->GetSprite(digit / 10 + 132);
             g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
         }
         this->impl->captureBonusVm.pos.x += 7.0f;
         this->impl->captureBonusVm.sprite =
-            g_AnmManager->GetSprite(digit % 10 + 0x84);
+            g_AnmManager->GetSprite(digit % 10 + 132);
         g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
 
         digit = catk->numAttemptsPerShot[g_GameManager.shotTypeAndCharacter];
@@ -1792,12 +1786,12 @@ void Gui::DrawStageElements()
         if (digit / 10 != 0)
         {
             this->impl->captureBonusVm.sprite =
-                g_AnmManager->GetSprite(digit / 10 + 0x84);
+                g_AnmManager->GetSprite(digit / 10 + 132);
             g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
         }
         this->impl->captureBonusVm.pos.x += 7.0f;
         this->impl->captureBonusVm.sprite =
-            g_AnmManager->GetSprite(digit % 10 + 0x84);
+            g_AnmManager->GetSprite(digit % 10 + 132);
         g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
     }
     if (this->impl->stageClearTextVm.activeSpriteIdx >= 0)
@@ -1812,7 +1806,7 @@ void Gui::DrawStageElements()
     }
     if (this->impl->activeTransitionQuads != 0)
     {
-        for (i = 0; i < 0xa8; i++)
+        for (i = 0; i < 168; i++)
         {
             g_AnmManager->DrawProjected(&this->impl->transitionQuads[i]);
             g_AnmManager->SetSprite(NULL);
@@ -1825,8 +1819,8 @@ void Gui::DrawStageElements()
         healthBarRect.top = 19.0f;
         healthBarRect.right = this->bossHealthBarEased * 320.0f + 64.0f;
         healthBarRect.bottom = 23.0f;
-        color1 = this->bossHealthBarAlpha << 0x18 | 0xffffff;
-        color2 = this->bossHealthBarAlpha << 0x18 | 0x202060;
+        color1 = this->bossHealthBarAlpha << 24 | 0xffffff;
+        color2 = this->bossHealthBarAlpha << 24 | 0x202060;
         timerPos.x = 48.0f;
         timerPos.y = 16.0f;
         timerPos.z = 0.0f;
@@ -1850,8 +1844,8 @@ void Gui::DrawStageElements()
             healthBarRect.top = 19.0f;
             healthBarRect.right = segmentEndHealth * 320.0f + 64.0f;
             healthBarRect.bottom = 23.0f;
-            color1 = this->bossHealthBarAlpha << 0x18 | (this->bossColor[j] & 0xffffff);
-            color2 = this->bossHealthBarAlpha << 0x18 | ((i32)this->bossColor[j] >> 2 & 0x3f3f3fU);
+            color1 = this->bossHealthBarAlpha << 24 | (this->bossColor[j] & 0xffffff);
+            color2 = this->bossHealthBarAlpha << 24 | ((i32)this->bossColor[j] >> 2 & 0x3f3f3fU);
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }
         g_AnmManager->DrawNoRotation(&this->impl->vms0[11]);
@@ -1866,8 +1860,8 @@ void Gui::DrawStageElements()
             healthBarRect.left = (f32)j * 26.0f / (f32)secondsRemaining + 35.0f;
             healthBarRect.right = (f32)(j + 1) * 26.0f / (f32)secondsRemaining + 35.0f -
                                   (f32)markerGap;
-            color1 = this->bossHealthBarAlpha << 0x18 | 0xffffff - j * 0xff / 9;
-            color2 = this->bossHealthBarAlpha << 0x18 | 0x202020;
+            color1 = this->bossHealthBarAlpha << 24 | 0xffffff - j * 255 / 9;
+            color2 = this->bossHealthBarAlpha << 24 | 0x202020;
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }
         timerPos = D3DXVECTOR3(384.0f, 16.0f, 0.0f);
@@ -1887,7 +1881,7 @@ void Gui::DrawStageElements()
         {
             timeColor = g_SpellcardTimeColors[3];
         }
-        g_AsciiManager.SetColor(this->bossHealthBarAlpha << 0x18 | timeColor);
+        g_AsciiManager.SetColor(this->bossHealthBarAlpha << 24 | timeColor);
         secondsRemaining = this->spellcardSecondsRemaining > 99 ? 99 : this->spellcardSecondsRemaining;
         if (secondsRemaining < 10 && this->lastSpellcardSecondsRemaining !=
                                          this->spellcardSecondsRemaining)
@@ -1909,22 +1903,22 @@ ZunResult Gui::AddedCallback(Gui *arg)
 // FUNCTION: TH07 0x0042d04b
 ZunResult Gui::DeletedCallback(Gui *arg)
 {
-    g_AnmManager->ReleaseAnm(0x18);
-    g_AnmManager->ReleaseAnm(0x1c);
-    g_AnmManager->ReleaseAnm(0x1d);
-    g_AnmManager->ReleaseAnm(0x1e);
-    g_AnmManager->ReleaseAnm(0x1f);
+    g_AnmManager->ReleaseAnm(24);
+    g_AnmManager->ReleaseAnm(28);
+    g_AnmManager->ReleaseAnm(29);
+    g_AnmManager->ReleaseAnm(30);
+    g_AnmManager->ReleaseAnm(31);
     arg->FreeMsgFile();
     if ((u32)(g_Supervisor.curState != 3 &&
               g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {
-        g_AnmManager->ReleaseAnm(0x15);
-        g_AnmManager->ReleaseAnm(0x17);
-        g_AnmManager->ReleaseAnm(0x19);
-        g_AnmManager->ReleaseAnm(0x1a);
-        g_AnmManager->ReleaseAnm(0x1b);
-        g_AnmManager->ReleaseAnm(0x16);
+        g_AnmManager->ReleaseAnm(21);
+        g_AnmManager->ReleaseAnm(23);
+        g_AnmManager->ReleaseAnm(25);
+        g_AnmManager->ReleaseAnm(26);
+        g_AnmManager->ReleaseAnm(27);
+        g_AnmManager->ReleaseAnm(22);
         delete arg->impl;
         arg->impl = NULL;
     }

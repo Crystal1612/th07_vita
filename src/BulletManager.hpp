@@ -138,7 +138,9 @@ struct EnemyLaserShooter
     u32 flags;
     i32 unused_c8;
     i32 soundOverride;
+    i32 unused_d0;
 };
+C_ASSERT(sizeof(EnemyLaserShooter) == 0xd4);
 
 struct Laser
 {

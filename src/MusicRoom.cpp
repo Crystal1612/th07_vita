@@ -15,7 +15,7 @@ ZunResult MusicRoom::CheckInputEnable()
 
     if (this->waitFramesCounter == 0)
     {
-        for (i = 0; i < 0x1f; i++)
+        for (i = 0; i < 31; i++)
         {
             if (this->cursor == i)
             {
@@ -63,7 +63,7 @@ i32 MusicRoom::ProcessInput()
         {
             this->listingOffset = this->cursor;
         }
-        for (i = 0; i < 0x1f; i++)
+        for (i = 0; i < 31; i++)
         {
             if (this->cursor == i)
             {
@@ -90,7 +90,7 @@ i32 MusicRoom::ProcessInput()
                 this->listingOffset = this->cursor - 9;
             }
         }
-        for (i = 0; i < 0x1f; i++)
+        for (i = 0; i < 31; i++)
         {
             if (this->cursor == i)
             {
@@ -115,7 +115,7 @@ i32 MusicRoom::ProcessInput()
             memset(local_54, 0, sizeof(local_54));
             memcpy(local_54,
                    this->trackDescriptors[this->selectedIdx].description[i],
-                   0x40);
+                   64);
             if (local_54[0] != '\0')
             {
                 this->descriptionSprites[i].active = 1;
@@ -171,8 +171,8 @@ recheck:
     {
         arg->waitFramesCounter++;
     }
-    g_AnmManager->ExecuteScript(&arg->vm);
-    for (i = 0; i < 0x1f; i++)
+    g_AnmManager->ExecuteScript(&arg->vm[0]);
+    for (i = 0; i < 31; i++)
     {
         g_AnmManager->ExecuteScript(&arg->titleSprites[i]);
     }
@@ -195,7 +195,7 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
     local_c[1] = 0;
     g_AnmManager->SetTexture(NULL);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
-    g_AnmManager->DrawNoRotation(&arg->vm);
+    g_AnmManager->DrawNoRotation(&arg->vm[0]);
     for (i = arg->listingOffset; i < arg->listingOffset + 10; i++)
     {
         if (i >= arg->numDescriptors)
@@ -205,7 +205,7 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
         g_AsciiManager.SetColor(arg->titleSprites[i].color.color);
         arg->titleSprites[i].pos.x = 93.0f;
         arg->titleSprites[i].pos.y =
-            (f32)((i + 1 - arg->listingOffset) * 0x12) + 104.0f - 20.0f;
+            (f32)((i + 1 - arg->listingOffset) * 18) + 104.0f - 20.0f;
         arg->titleSprites[i].pos.z = 0.0f;
         g_AnmManager->DrawNoRotation(arg->titleSprites + i);
         local_18 = arg->titleSprites[i].pos;
@@ -244,13 +244,13 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
         return ZUN_ERROR;
     }
     // STRING: TH07 0x00496bd8
-    if (g_AnmManager->LoadAnms(0x2e, "data/music00.anm", 0x900) !=
+    if (g_AnmManager->LoadAnms(ANM_FILE_MUSIC, "data/music00.anm", ANM_OFFSET_MUSIC) !=
         ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm, 0x900);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], 2304);
     arg->waitFramesCounter = 0;
     // STRING: TH07 0x00496bc4
     curChar = (char *)FileSystem::OpenFile("data/musiccmt.txt", 0);
@@ -260,7 +260,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
         return ZUN_ERROR;
     }
 
-    arg->trackDescriptors = new TrackDescriptor[0x20];
+    arg->trackDescriptors = new TrackDescriptor[32];
     offset = -1;
     while ((u32)((i32)curChar - (i32)firstChar) < g_LastFileSize)
     {
@@ -346,13 +346,13 @@ LAB_0043b195:
     arg->numDescriptors = offset + 1;
     for (offset = 0; offset < arg->numDescriptors; offset++)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&arg->titleSprites[offset], offset + 0x901);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&arg->titleSprites[offset], offset + 2305);
         AnmManager::DrawVmTextFmt(g_AnmManager, arg->titleSprites + offset,
                                   0xc0e0ff, 0x302080,
                                   arg->trackDescriptors[offset].title);
         arg->titleSprites[offset].pos.x = 93.0f;
         arg->titleSprites[offset].pos.y =
-            (f32)((offset + 1) * 0x12) + 104.0f - 20.0f;
+            (f32)((offset + 1) * 18) + 104.0f - 20.0f;
         arg->titleSprites[offset].pos.z = 0.0f;
         arg->titleSprites[offset].anchor = 3;
     }
@@ -360,11 +360,11 @@ LAB_0043b195:
     {
         g_AnmManager->SetAnmIdxAndExecuteScript(
             &arg->descriptionSprites[offset],
-            offset + 0x707);
+            offset + 1799);
         memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
         memcpy(lineCharBuffer,
                arg->trackDescriptors[arg->selectedIdx].description[offset],
-               0x40);
+               64);
         if (*lineCharBuffer != '\0')
         {
             arg->descriptionSprites[offset].active = 1;
@@ -387,8 +387,8 @@ ZunResult MusicRoom::DeletedCallback(MusicRoom *arg)
     delete arg->trackDescriptors;
     arg->trackDescriptors = NULL;
     g_AnmManager->ReleaseSurface(0);
-    g_AnmManager->ReleaseAnm(0x2e);
-    g_AnmManager->ReleaseAnm(0x2f);
+    g_AnmManager->ReleaseAnm(46);
+    g_AnmManager->ReleaseAnm(47);
     g_Chain.Cut(arg->drawChain);
     arg->drawChain = NULL;
     return ZUN_SUCCESS;

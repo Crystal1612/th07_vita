@@ -242,7 +242,7 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
     case D3DFMT_A8R8G8B8:
         for (i = 3; i < doubleArea; i += 4)
         {
-            bufferRegion[i] ^= 0xff;
+            bufferRegion[i] ^= 255;
         }
         break;
     case D3DFMT_A1R5G5B5:
@@ -364,7 +364,7 @@ bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
 // FUNCTION: TH07 0x0043225b
 void TextHelper::CreateTextBuffer()
 {
-    g_Supervisor.d3dDevice->CreateImageSurface(0x400, 0x40, D3DFMT_A1R5G5B5,
+    g_Supervisor.d3dDevice->CreateImageSurface(1024, 64, D3DFMT_A1R5G5B5,
                                                &g_TextBufferSurface);
 }
 

@@ -61,6 +61,18 @@ struct BombProjectile
 };
 C_ASSERT(sizeof(BombProjectile) == 0x20);
 
+struct BombClearBox
+{
+    Float3 pos;
+    Float3 size;
+    i32 lifetime;
+    union {
+        i32 itemType;
+        i32 damage;
+    };
+};
+C_ASSERT(sizeof(BombClearBox) == 0x20);
+
 struct PlayerBombSubInfo
 {
     i32 state;
@@ -129,8 +141,8 @@ struct PlayerBullet
     D3DXVECTOR3 pos;
     D3DXVECTOR3 posHistory[16];
     D3DXVECTOR3 hitboxSize;
-    D3DXVECTOR2 velocity;
-    D3DXVECTOR2 offset;
+    Float2 velocity;
+    Float2 offset;
     f32 speed;
     f32 angle;
     ZunTimer timer;
@@ -193,9 +205,9 @@ struct Player
     i32 HandlePlayerInputs();
     void Respawn();
     void ScoreGraze(D3DXVECTOR3 *param_1);
-    BombProjectile *SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
+    BombClearBox *SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
                                     i32 lifetime, i32 itemType);
-    BombProjectile *SpawnBombProjectile(D3DXVECTOR3 *centerPosition, f32 posZ,
+    BombClearBox *SpawnBombProjectile(D3DXVECTOR3 *centerPosition, f32 posZ,
                                         f32 size, i32 itemType);
     static void SpawnBullets(Player *player, u32 timer);
     void StartFireBulletTimer();
@@ -250,11 +262,11 @@ struct Player
     D3DXVECTOR3 grazeSize;
     D3DXVECTOR3 grabItemSize;
     D3DXVECTOR3 optionsPosition[2];
-    D3DXVECTOR2 velocity;
+    Float2 velocity;
     i32 unused_9d4;
     Effect *focusEffect;
     BombProjectile bombDamageBoxes[112];
-    BombProjectile bombClearBoxes[96];
+    BombClearBox bombClearBoxes[96];
     i32 isBombing;
     ShtEntry *shtEntries[4];
     f32 horizontalMovementSpeedMultiplierDuringBomb;
@@ -311,8 +323,8 @@ struct ShtEntry
 {
     i16 fireInterval;
     i16 fireOffset;
-    D3DXVECTOR2 offset;
-    D3DXVECTOR2 hitboxSize;
+    Float2 offset;
+    Float2 hitboxSize;
     f32 angle;
     f32 speed;
     i16 damage;

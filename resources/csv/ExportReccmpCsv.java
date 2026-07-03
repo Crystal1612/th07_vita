@@ -115,8 +115,10 @@ public class ExportReccmpCsv extends GhidraScript {
         while (datas.hasNext()) {
             Data data = datas.next();
             if (
-                !(data.getDataType() instanceof TerminatedStringDataType ||
-                    data.getDataType() instanceof StringDataType)
+                !(
+                    data.getDataType() instanceof TerminatedStringDataType ||
+                    data.getDataType() instanceof StringDataType
+                )
             ) continue;
             String address = data.getAddressString(false, false);
             String text = escapeControlChars(data.getValue().toString());

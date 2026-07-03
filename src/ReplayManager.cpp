@@ -23,7 +23,7 @@ u32 ReplayManager::OnUpdateRng(ReplayManager *arg)
     g_Rng.generationCount = 0;
     if (g_GameManager.isPaused)
     {
-        arg->replayEventFlags |= 0x100;
+        arg->replayEventFlags |= 256;
     }
     g_GameManager.isPaused = 0;
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -65,7 +65,7 @@ u32 ReplayManager::OnUpdate(ReplayManager *arg)
     {
         *(u8 *)&arg->stageReplayData->score =
             (u8)g_Supervisor.curFps |
-            ((g_Supervisor.timingErrorCount != 0) ? 0x80 : 0);
+            ((g_Supervisor.timingErrorCount != 0) ? 128 : 0);
         *((u8 *)&arg->stageReplayData->score + 1) = (u8)g_Supervisor.curFps;
         arg->replayDataEndPointers[stage] =
             (i32)((i32)&arg->stageReplayData->score + 2);
@@ -137,7 +137,7 @@ u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
     {
         g_NumOfFramesInputsWereHeld = 0;
     }
-    if (arg->frameId % 0x1e == 0)
+    if (arg->frameId % 30 == 0)
     {
         g_Supervisor.curFps =
             (i16) * (char *)((i32)&arg->stageReplayData->score + 1) & 0x7f;
@@ -168,7 +168,7 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
         arg->data->head.magic = *(u32 *)&"T7RP";
         arg->data->data.shotType = g_GameManager.shotTypeAndCharacter;
         arg->data->head.version = 0x1100;
-        arg->data->data.replayVersion = 0x100;
+        arg->data->data.replayVersion = 256;
         arg->data->data.versionChar1 = 'b';
         // STRING: TH07 0x00497228
         strcpy(arg->data->data.replayStr, "0100b");
@@ -266,14 +266,14 @@ ReplayManager::ValidateReplayData(ReplayHeaderAndData *data, i32 size)
 
     curByte = (u8 *)&curData->head.replaySize;
     obfOffset = curData->head.key;
-    for (i = 0; i < size - 0x10; i++, curByte++)
+    for (i = 0; i < size - 16; i++, curByte++)
     {
         *curByte -= obfOffset;
         obfOffset += 7;
     }
     csumPtr = &curData->head.key;
     csum = 0x3f000318;
-    for (i = 0; i < size - 0xd; i++, csumPtr++)
+    for (i = 0; i < size - 13; i++, csumPtr++)
     {
         csum += (u32)*csumPtr;
     }
@@ -482,7 +482,7 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
             mgr->drawChain = g_Chain.CreateElem(
                 (ChainCallback)EffectManager::UpdateNoOp); // idk either bro
             mgr->calcChain->arg = mgr;
-            if (g_Chain.AddToCalcChain(mgr->calcChain, 0x10))
+            if (g_Chain.AddToCalcChain(mgr->calcChain, 16))
             {
                 return ZUN_ERROR;
             }
@@ -507,12 +507,12 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
             mgr->demoCalcChain =
                 g_Chain.CreateElem((ChainCallback)OnUpdateDemoLowPrio);
             mgr->demoCalcChain->arg = mgr;
-            g_Chain.AddToCalcChain(mgr->demoCalcChain, 0x11);
+            g_Chain.AddToCalcChain(mgr->demoCalcChain, 17);
             mgr->rngCalcChain = NULL;
             break;
         }
         mgr->drawChain->arg = mgr;
-        g_Chain.AddToDrawChain(mgr->drawChain, 0xe);
+        g_Chain.AddToDrawChain(mgr->drawChain, 14);
     }
     else
     {
@@ -548,7 +548,7 @@ void ReplayManager::StopRecording()
 }
 
 #pragma var_order(i, mgr, bytesWritten, lpBuffer, slowdown, compressedSize, \
-                  stageSize, replayData, replayCopy, hFile, replaySize, \
+                  stageSize, replayData, replayCopy, hFile, replaySize,     \
                   csum, csumPtr, obfOffset, curByte)
 // FUNCTION: TH07 0x00443da0
 void ReplayManager::SaveReplay(const char *filename, char *replayName)
@@ -646,12 +646,12 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                 replayCopy.head.replaySize = replaySize;
                 strcpy(replayCopy.data.name, replayName);
                 ResultScreen::GetDate(replayCopy.data.date);
-                replayCopy.head.key = g_Rng.GetRandomU16InRange(0x80) + 0x40;
-                replayCopy.data.rngValue3 = g_Rng.GetRandomU16InRange(0x100);
-                replayCopy.head.rngValue1 = g_Rng.GetRandomU16InRange(0x100);
+                replayCopy.head.key = g_Rng.GetRandomU16InRange(128) + 64;
+                replayCopy.data.rngValue3 = g_Rng.GetRandomU16InRange(256);
+                replayCopy.head.rngValue1 = g_Rng.GetRandomU16InRange(256);
                 replayCopy.data.slowdownRate2 = replayCopy.data.slowdownRate + 1.12f;
                 replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
-                replayCopy.data.magic30 = 0x1e;
+                replayCopy.data.magic30 = 30;
                 memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
                 // STRING: TH07 0x00496a64
                 DebugPrint("info : original size %d\r\n", replaySize);
@@ -685,7 +685,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     *curByte += obfOffset;
                     obfOffset += 7;
                 }
-                hFile = CreateFileA(filename, GENERIC_WRITE, 0, NULL, 2, 0x80, NULL);
+                hFile = CreateFileA(filename, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
                 if (hFile == INVALID_HANDLE_VALUE)
                 {
                     // empty branch
@@ -719,7 +719,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
 }
 
 #pragma var_order(i, mgr, bytesWritten, lpBuffer, compressedSize, stageSize, \
-                  replayData, replayCopy, hFile, replaySize, csum,  \
+                  replayData, replayCopy, hFile, replaySize, csum,           \
                   csumPtr, obfOffset, curByte)
 // FUNCTION: TH07 0x004444d0
 void ReplayManager::SaveReplay2(const char *filename)
@@ -797,12 +797,12 @@ void ReplayManager::SaveReplay2(const char *filename)
             }
             replayCopy.data.score = g_GameManager.globals->guiScore;
             replayCopy.head.replaySize = replaySize;
-            replayCopy.head.key = g_Rng.GetRandomU16InRange(0x80) + 0x40;
-            replayCopy.data.rngValue3 = g_Rng.GetRandomU16InRange(0x100);
-            replayCopy.head.rngValue1 = g_Rng.GetRandomU16InRange(0x100);
+            replayCopy.head.key = g_Rng.GetRandomU16InRange(128) + 64;
+            replayCopy.data.rngValue3 = g_Rng.GetRandomU16InRange(256);
+            replayCopy.head.rngValue1 = g_Rng.GetRandomU16InRange(256);
             replayCopy.data.slowdownRate2 = replayCopy.data.slowdownRate + 1.12f;
             replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
-            replayCopy.data.magic30 = 0x1e;
+            replayCopy.data.magic30 = 30;
             memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
             DebugPrint("info : original size %d\r\n", replaySize);
             replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
@@ -835,7 +835,7 @@ void ReplayManager::SaveReplay2(const char *filename)
                 *curByte += obfOffset;
                 obfOffset += 7;
             }
-            hFile = CreateFileA(filename, GENERIC_WRITE, 0, NULL, 2, 0x80, NULL);
+            hFile = CreateFileA(filename, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
             if (hFile == INVALID_HANDLE_VALUE)
             {
                 // empty branch

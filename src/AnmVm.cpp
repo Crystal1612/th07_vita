@@ -32,5 +32,5 @@ void AnmVm::Initialize()
     this->color.color = 0xffffffff;
     D3DXMatrixIdentity(&this->matrix);
     *(u16 *)&this->flags = 7;
-    this->currentTimeInScript.Initialize(0);
+    this->currentTimeInScript.Initialize();
 }

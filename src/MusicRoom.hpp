@@ -44,7 +44,7 @@ struct MusicRoom
     i32 listingOffset;
     i32 numDescriptors;
     TrackDescriptor *trackDescriptors;
-    AnmVm vm;
+    AnmVm vm[1]; // ZUN quirk: WHY is this an array
     AnmVm titleSprites[31];
     AnmVm descriptionSprites[8];
 };

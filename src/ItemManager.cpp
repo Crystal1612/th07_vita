@@ -93,7 +93,7 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
 
         if (item->isInUse)
         {
-            if (this->nextIndex >= 0x44c)
+            if (this->nextIndex >= 1100)
             {
                 this->nextIndex = 0;
                 item = this->items;
@@ -131,7 +131,7 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
         {
             item->state = 0;
         }
-        g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, itemType + 0x2c4);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, itemType + 708);
         item->sprite.color.color = 0xffffffff;
         item->sprite.zWriteDisable = 1;
         item->autoCollect = 0;
@@ -139,7 +139,7 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
         break;
     }
 
-    return i < 0x44c ? item : &this->items[0x44c];
+    return i < 1100 ? item : &this->items[1100];
 }
 
 #pragma var_order(i, itemTimerSecs, itemScore, playerAngle, local_20, itemAcquired, \
@@ -275,7 +275,7 @@ void ItemManager::OnUpdate()
                         this->DespawnAllItems(i);
                     }
                     g_GameManager.AddScore(10);
-                    g_Gui.flags = (g_Gui.flags & 0xffffffcf) | 0x20;
+                    g_Gui.showPower = 2;
                     while ((i32)g_GameManager.globals->currentPower >= g_PowerLevels[j])
                     {
                         j++;
@@ -316,7 +316,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.AddScore(itemScore);
                 g_GameManager.globals->pointItemsCollectedThisStage++;
                 g_GameManager.globals->pointItemsCollectedForExtend++;
-                g_Gui.flags = (g_Gui.flags & 0xfffffcff) | 0x200;
+                g_Gui.showPoint = 2;
                 if (item->currentPosition.y < 128.0f)
                 {
                     g_GameManager.IncreaseSubrank(10);
@@ -392,7 +392,7 @@ void ItemManager::OnUpdate()
                         g_Gui.ShowFullPowerMode(0, 1);
                         this->DespawnAllItems(i);
                     }
-                    g_Gui.flags = (g_Gui.flags & 0xffffffcf) | 0x20;
+                    g_Gui.showPower = 2;
                     g_GameManager.AddScore(10);
                     while ((i32)g_GameManager.globals->currentPower >= g_PowerLevels[k])
                     {
@@ -413,7 +413,7 @@ void ItemManager::OnUpdate()
                 if ((i32)g_GameManager.globals->bombsRemaining < 8)
                 {
                     g_GameManager.AddBombsRemaining(1);
-                    g_Gui.flags = (g_Gui.flags & 0xfffffff3) | 8;
+                    g_Gui.showBombs = 2;
                 }
                 g_GameManager.IncreaseSubrank(5);
                 break;
@@ -433,7 +433,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.RegenerateGameIntegrityCsum();
                 g_GameManager.AddScore(1000);
                 g_AsciiManager.CreatePopup1(&item->currentPosition, 1000, 0xffffffff);
-                g_Gui.flags = (g_Gui.flags & 0xffffffcf) | 0x20;
+                g_Gui.showPower = 2;
                 break;
             case ITEM_POINT_BULLET:
                 if (!g_Player.isBombing)
@@ -534,7 +534,7 @@ void ItemManager::RemoveAllItems()
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 0x44c; i++, item++)
+    for (i = 0; i < 1100; i++, item++)
     {
         if (!item->isInUse)
         {
@@ -554,7 +554,7 @@ void ItemManager::DespawnAllItems(i32 param_1)
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 0x44c; i++, item++)
+    for (i = 0; i < 1100; i++, item++)
     {
         if (item->isInUse == 0 || i == param_1)
         {
@@ -571,7 +571,7 @@ void ItemManager::DespawnAllItems(i32 param_1)
             }
             g_EffectManager.SpawnParticles(0, &item->currentPosition, 1, 0xffffffff);
             item->itemType = 7;
-            g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, 0x2cb);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, 715);
         }
     }
 }
@@ -584,7 +584,7 @@ void ItemManager::ActivateAllItems()
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 0x44c; i++, item++)
+    for (i = 0; i < 1100; i++, item++)
     {
         if (item->isInUse != 1)
         {
@@ -621,23 +621,23 @@ void ItemManager::OnDraw()
             item->sprite.pos.y = 8.0f + g_GameManager.arcadeRegionTopLeftPos.y;
             if (item->isOnscreen)
             {
-                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 0x2b6);
+                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 694);
                 item->isOnscreen = 0;
                 item->sprite.zWriteDisable = 1;
             }
             local_8 = 255 - (i32)((8.0f - item->currentPosition.y) * 255.0f / 128.0f);
-            if (local_8 < 0x40)
+            if (local_8 < 64)
             {
-                local_8 = 0x40;
+                local_8 = 64;
             }
             item->sprite.color.color =
-                (item->sprite.color.color & 0xffffff) | local_8 << 0x18;
+                (item->sprite.color.color & 0xffffff) | local_8 << 24;
         }
         else
         {
             if (!item->isOnscreen)
             {
-                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 0x2ac);
+                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 684);
                 item->isOnscreen = 1;
                 item->sprite.color.color = 0xffffffff;
                 item->sprite.zWriteDisable = 1;

@@ -71,7 +71,7 @@ u32 Ending::OnDraw(Ending *arg)
 {
     g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x,
                                  (i32)arg->backgroundPos.y, 640, 480);
-    for (i32 i = 0; i < 0xf; i++)
+    for (i32 i = 0; i < 15; i++)
     {
         g_AnmManager->Draw(&arg->sprites[i]);
     }
@@ -115,7 +115,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = 0xff - this->timeFading * 0xff / this->fadeFrames;
+        color = 255 - this->timeFading * 255 / this->fadeFrames;
         this->endingFadeRectColor.color = color * 0x1000000;
         this->timeFading++;
         break;
@@ -126,9 +126,9 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = this->timeFading * 0xff / this->fadeFrames;
+        color = this->timeFading * 255 / this->fadeFrames;
         this->endingFadeRectColor.color =
-            color << 0x18;
+            color << 24;
         this->timeFading++;
         break;
     case 3:
@@ -139,7 +139,7 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = 0xff - this->timeFading * 0xff / this->fadeFrames;
+        color = 255 - this->timeFading * 255 / this->fadeFrames;
         this->endingFadeRectColor.color = color * 0x1000000 | 0xffffff;
         this->timeFading++;
         break;
@@ -150,8 +150,8 @@ void Ending::FadingEffect()
             break;
         }
 
-        color = this->timeFading * 0xff / this->fadeFrames;
-        this->endingFadeRectColor.color = color << 0x18 | 0xffffff;
+        color = this->timeFading * 255 / this->fadeFrames;
+        this->endingFadeRectColor.color = color << 24 | 0xffffff;
         this->timeFading++;
         break;
     case 0:
@@ -205,7 +205,7 @@ ZunResult Ending::ParseEndFile()
         }
         if (this->timer3 <= 0)
         {
-            for (i = 0; i < 0xf; i++)
+            for (i = 0; i < 15; i++)
             {
                 this->sprites[i].pendingInterrupt = 2;
             }
@@ -255,8 +255,8 @@ ZunResult Ending::ParseEndFile()
                 vmIdx = ReadEndFileParameter();
                 anmScriptIdx = ReadEndFileParameter();
                 anmSpriteIdx = ReadEndFileParameter();
-                g_AnmManager->ExecuteAnmIdx(&this->sprites[vmIdx], anmScriptIdx + 0x600);
-                g_AnmManager->SetActiveSprite(&this->sprites[vmIdx], anmSpriteIdx + 0x600);
+                g_AnmManager->ExecuteAnmIdx(&this->sprites[vmIdx], anmScriptIdx + ANM_OFFSET_STAFF);
+                g_AnmManager->SetActiveSprite(&this->sprites[vmIdx], anmSpriteIdx + ANM_OFFSET_STAFF);
                 break;
             case 'V':
                 this->endFileDataPtr++;
@@ -465,11 +465,11 @@ ZunResult Ending::AddedCallback(Ending *arg)
     unusedShotType = g_GameManager.shotTypeAndCharacter;
     g_GameManager.finished = 1;
     g_Supervisor.isInEnding = 1;
-    g_AnmManager->LoadAnms(0x31, "data/staff01.anm", 0x600);
+    g_AnmManager->LoadAnms(ANM_FILE_STAFF, "data/staff01.anm", ANM_OFFSET_STAFF);
     g_AnmManager->SetTexture(NULL);
     g_AnmManager->SetSprite(NULL);
-    g_AnmManager->SetBlendMode(0xff);
-    g_AnmManager->SetVertexShader(0xff);
+    g_AnmManager->SetBlendMode(255);
+    g_AnmManager->SetVertexShader(255);
     shotType = g_GameManager.shotTypeAndCharacter;
     arg->hasSeenEnding = 0;
     if (g_GameManager.globals->numRetries == 0)
@@ -490,9 +490,9 @@ ZunResult Ending::AddedCallback(Ending *arg)
     }
     g_GameManager.clrd[shotType]
         .difficultyClearedWithoutRetries[g_GameManager.difficulty] = 99;
-    for (i = 0; i < 0xf; i++)
+    for (i = 0; i < 15; i++)
     {
-        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 0x70f);
+        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 1807);
         arg->sprites[i].pos =
             D3DXVECTOR3(64.0f, (f32)i * 16.0f + 392.0f, 0.0f);
     }
@@ -516,7 +516,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
 // FUNCTION: TH07 0x0041e790
 ZunResult Ending::DeletedCallback(Ending *arg)
 {
-    g_AnmManager->ReleaseAnm(0x31);
+    g_AnmManager->ReleaseAnm(49);
     g_Supervisor.curState = 6;
     g_AnmManager->ReleaseSurface(0);
     ZunMemory::Free(arg->endFileData);

@@ -36,7 +36,7 @@ AnmManager::AnmManager()
 {
     memset(this, 0, sizeof(AnmManager));
 
-    for (i32 i = 0; i < 0xa00; i++)
+    for (i32 i = 0; i < 2560; i++)
     {
         this->sprites[i].sourceFileIndex = -1;
     }
@@ -71,7 +71,7 @@ AnmManager::AnmManager()
     this->currentColorOp = 0;
     this->currentTextureFactor.color = 1;
     this->currentVertexShader = 0;
-    this->currentCameraMode = 0xff;
+    this->currentCameraMode = 255;
     this->currentZWriteDisable = 0;
     this->screenshotTextureId = -1;
 }
@@ -133,8 +133,8 @@ void AnmManager::SetupVertexBuffer()
     if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
     {
         g_Supervisor.d3dDevice->CreateVertexBuffer(
-            sizeof(this->vertexBufferContents), 0, 0x102, D3DPOOL_MANAGED,
-            &this->vertexBuffer);
+            sizeof(this->vertexBufferContents), 0, D3DFVF_TEX1 | D3DFVF_XYZ,
+            D3DPOOL_MANAGED, &this->vertexBuffer);
         this->vertexBuffer->Lock(0, 0, (u8 **)&local_8, 0);
         memcpy(local_8, this->vertexBufferContents,
                sizeof(this->vertexBufferContents));
@@ -314,7 +314,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
         goto err;
     }
 
-    if (textureSrc->LockRect(0, &lockedRectSrc, NULL, 0x8000))
+    if (textureSrc->LockRect(0, &lockedRectSrc, NULL, D3DLOCK_NO_DIRTY_UPDATE))
     {
         goto err;
     }
@@ -440,7 +440,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
         return ZUN_ERROR;
     }
-    if (textureIdx >= 0x32)
+    if (textureIdx >= 50)
     {
         // STRING: TH07 0x00495c5c
         g_GameErrorContext.Fatal("テクスチャ格納先が足りません\r\n");
@@ -523,7 +523,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             local_8 = rawSprite->id;
         }
-        if (rawSprite->id + spriteIdxOffset >= 0xa00)
+        if (rawSprite->id + spriteIdxOffset >= 2560)
         {
             // STRING: TH07 0x00495b80
             g_GameErrorContext.Fatal("スプライトが格納できません。テーブルが不足しています\r\n");
@@ -533,7 +533,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     }
     for (i = 0; i < data->numScripts; i++, curSprite += 2)
     {
-        if (*curSprite + spriteIdxOffset >= 0xa00)
+        if (*curSprite + spriteIdxOffset >= 2560)
         {
             // STRING: TH07 0x00495b4c
             g_GameErrorContext.Fatal("アニメが格納できません。テーブルが不足しています\r\n");
@@ -563,7 +563,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     i32 spriteIdxOffset;
     i32 *spriteIdx;
 
-    if (anmIdx < 0 || (u32)anmIdx >= 0x32)
+    if (anmIdx < 0 || (u32)anmIdx >= 50)
     {
         return;
     }
@@ -597,9 +597,9 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
             free(rawEntry);
         }
         this->anmFiles[anmIdx].raw = NULL;
-        this->currentBlendMode = 0xff;
-        this->currentColorOp = 0xff;
-        this->currentVertexShader = 0x0;
+        this->currentBlendMode = 255;
+        this->currentColorOp = 255;
+        this->currentVertexShader = 0;
         this->currentTexture = NULL;
         this->anmFiles[anmIdx].childCount = 0;
     }
@@ -608,7 +608,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 // FUNCTION: TH07 0x0044e6f0
 void AnmManager::ReleaseTexture(i32 textureIdx)
 {
-    if (textureIdx < 0 || (u32)textureIdx >= 0x108)
+    if (textureIdx < 0 || (u32)textureIdx >= 264)
     {
         return;
     }
@@ -730,25 +730,25 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
             local_c = (u32)color.bytes.r * this->color.bytes.r >> 7;
             if (local_c >= 256)
             {
-                local_c = 0xff;
+                local_c = 255;
             }
             color.bytes.r = (u8)local_c;
             local_10 = (u32)color.bytes.g * this->color.bytes.g >> 7;
             if (local_10 >= 256)
             {
-                local_10 = 0xff;
+                local_10 = 255;
             }
             color.bytes.g = (u8)local_10;
             uvX = (u32)color.bytes.b * this->color.bytes.b >> 7;
             if (uvX >= 256)
             {
-                uvX = 0xff;
+                uvX = 255;
             }
             color.bytes.b = (u8)uvX;
             local_18 = (u32)color.bytes.a * this->color.bytes.a >> 7;
             if (local_18 >= 256)
             {
-                local_18 = 0xff;
+                local_18 = 255;
             }
             color.bytes.a = (u8)local_18;
         }
@@ -766,25 +766,25 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
             local_1c = (u32)color.bytes.r * this->color.bytes.r >> 7;
             if (local_1c >= 256)
             {
-                local_1c = 0xff;
+                local_1c = 255;
             }
             color.bytes.r = (u8)local_1c;
             local_20 = (u32)color.bytes.g * this->color.bytes.g >> 7;
             if (local_20 >= 256)
             {
-                local_20 = 0xff;
+                local_20 = 255;
             }
             color.bytes.g = (u8)local_20;
             local_24 = (u32)color.bytes.b * this->color.bytes.b >> 7;
             if (local_24 >= 256)
             {
-                local_24 = 0xff;
+                local_24 = 255;
             }
             color.bytes.b = (u8)local_24;
             local_28 = (u32)color.bytes.a * this->color.bytes.a >> 7;
             if (local_28 >= 256)
             {
-                local_28 = 0xff;
+                local_28 = 255;
             }
             color.bytes.a = (u8)local_28;
         }
@@ -1031,7 +1031,8 @@ void AnmManager::Flush()
 
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 0);
-    g_Supervisor.d3dDevice->SetVertexShader(0x144);
+    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
+                                            D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(
         D3DPT_TRIANGLELIST, this->spritesToDraw << 1, this->vertexBufferStartPtr,
         sizeof(VertexTex1DiffuseXyzrwh));
@@ -1562,12 +1563,14 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     {
         if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
         {
-            g_Supervisor.d3dDevice->SetVertexShader(0x102);
+            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_XYZ);
             g_Supervisor.d3dDevice->SetStreamSource(0, this->vertexBuffer, 20);
         }
         else
         {
-            g_Supervisor.d3dDevice->SetVertexShader(0x142);
+            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 |
+                                                    D3DFVF_DIFFUSE |
+                                                    D3DFVF_XYZ);
         }
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
@@ -1594,23 +1597,23 @@ f32 AnmVm::GetFloatVarValue(f32 param_1)
     {
     case 10000:
         return (f32)this->intVars1[0];
-    case 0x2711:
+    case 10001:
         return (f32)this->intVars1[1];
-    case 0x2712:
+    case 10002:
         return (f32)this->intVars1[2];
-    case 0x2713:
+    case 10003:
         return (f32)this->intVars1[3];
-    case 0x2714:
+    case 10004:
         return this->floatVars[0];
-    case 0x2715:
+    case 10005:
         return this->floatVars[1];
-    case 0x2716:
+    case 10006:
         return this->floatVars[2];
-    case 0x2717:
+    case 10007:
         return this->floatVars[3];
-    case 0x2718:
+    case 10008:
         return (f32)this->intVars2[0];
-    case 0x2719:
+    case 10009:
         return (f32)this->intVars2[1];
     default:
         return param_1;
@@ -1624,23 +1627,23 @@ i32 AnmVm::GetVarValue(i32 arg)
     {
     case 10000:
         return this->intVars1[0];
-    case 0x2711:
+    case 10001:
         return this->intVars1[1];
-    case 0x2712:
+    case 10002:
         return this->intVars1[2];
-    case 0x2713:
+    case 10003:
         return this->intVars1[3];
-    case 0x2714:
+    case 10004:
         return this->floatVars[0];
-    case 0x2715:
+    case 10005:
         return this->floatVars[1];
-    case 0x2716:
+    case 10006:
         return this->floatVars[2];
-    case 0x2717:
+    case 10007:
         return this->floatVars[3];
-    case 0x2718:
+    case 10008:
         return this->intVars2[0];
-    case 0x2719:
+    case 10009:
         return this->intVars2[1];
     default:
         return arg;
@@ -1657,13 +1660,13 @@ f32 *AnmVm::GetFloatVar(f32 *param_1, u16 mask, u32 idx)
 
     switch ((u32)*param_1)
     {
-    case 0x2714:
+    case 10004:
         return &this->floatVars[0];
-    case 0x2715:
+    case 10005:
         return &this->floatVars[1];
-    case 0x2716:
+    case 10006:
         return &this->floatVars[2];
-    case 0x2717:
+    case 10007:
         return &this->floatVars[3];
     default:
         return param_1;
@@ -1682,15 +1685,15 @@ i32 *AnmVm::GetVar(i32 *paramId, u16 mask, u32 idx)
     {
     case 10000:
         return &this->intVars1[0];
-    case 0x2711:
+    case 10001:
         return &this->intVars1[1];
-    case 0x2712:
+    case 10002:
         return &this->intVars1[2];
-    case 0x2713:
+    case 10003:
         return &this->intVars1[3];
-    case 0x2718:
+    case 10008:
         return &this->intVars2[0];
-    case 0x2719:
+    case 10009:
         return &this->intVars2[1];
     default:
         return paramId;
@@ -1751,7 +1754,7 @@ WHY_NOT_JUST_CONTINUE:
             vm->updateScale = 1;
             break;
         case ANM_SET_ALPHA:
-            vm->color.bytes.a = instr->args[0].i & 0xff;
+            vm->color.bytes.a = instr->args[0].i & 255;
             break;
         case ANM_SET_COLOR:
             vm->color.color =

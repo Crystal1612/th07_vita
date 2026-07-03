@@ -65,7 +65,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
     }
     // STRING: TH07 0x00497d14
     DebugPrint("%s Load ... \r\n", filepath);
-    hFile = CreateFileA(filepath, GENERIC_READ, 1, NULL, 3, 0x8000080, NULL);
+    hFile = CreateFileA(filepath, GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         // STRING: TH07 0x00497cf8
@@ -93,7 +93,7 @@ i32 FileSystem::CheckFileExists(const char *file)
 {
     HANDLE hObject;
 
-    hObject = CreateFileA(file, GENERIC_READ, 1, NULL, 3, 0x8000080, NULL);
+    hObject = CreateFileA(file, GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
     if (hObject != INVALID_HANDLE_VALUE)
     {
         CloseHandle(hObject);
@@ -110,7 +110,7 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out,
     HANDLE hFile;
     DWORD bytesWritten;
 
-    hFile = CreateFileA(filename, GENERIC_WRITE, 1, NULL, 2, 0x80, NULL);
+    hFile = CreateFileA(filename, GENERIC_WRITE, 1, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hFile == INVALID_HANDLE_VALUE)
     {
         // STRING: TH07 0x00497cdc

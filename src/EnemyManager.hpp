@@ -136,7 +136,6 @@ struct Enemy
     i32 shootInterval;
     ZunTimer shootIntervalTimer;
     EnemyLaserShooter laserProps;
-    i32 unused_2d88;
     Laser *lasers[32];
     i32 laserIdx;
     i32 itemDrop;
@@ -203,8 +202,8 @@ struct Enemy
     i16 anmExLeft;
     i16 anmExRight;
     i16 unused_2e3a;
-    D3DXVECTOR2 lowerMoveLimit;
-    D3DXVECTOR2 upperMoveLimit;
+    Float2 lowerMoveLimit;
+    Float2 upperMoveLimit;
     i32 lastDamage;
     Effect *effects[24];
     Effect *specialEffect;

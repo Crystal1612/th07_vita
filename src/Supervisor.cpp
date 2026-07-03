@@ -135,7 +135,7 @@ void Supervisor::CheckTiming()
         this->checkTiming = 0;
     }
 
-    if (this->maxTimingError >= 0x28 || this->timingBadCount >= 0x10)
+    if (this->maxTimingError >= 40 || this->timingBadCount >= 16)
     {
         this->flags |= 8;
     }
@@ -154,18 +154,18 @@ void AnmManager::ReleaseVertexBuffer()
 // FUNCTION: TH07 0x00437c70
 u32 Supervisor::OnUpdate(Supervisor *arg)
 {
-    g_AnmManager->SetVertexShader(0xff);
+    g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
     g_AnmManager->SetTexture(NULL);
-    g_AnmManager->SetColorOp(0xff);
-    g_AnmManager->SetBlendMode(0xff);
-    g_AnmManager->SetZWriteDisable(0xff);
+    g_AnmManager->SetColorOp(255);
+    g_AnmManager->SetBlendMode(255);
+    g_AnmManager->SetZWriteDisable(255);
     g_AnmManager->ClearFrameState();
-    g_AnmManager->SetCameraMode(0xff);
+    g_AnmManager->SetCameraMode(255);
     g_AnmManager->SetColor(0x80808080);
     g_AnmManager->offset.y = 0.0f;
     g_AnmManager->offset.x = 0.0f;
-    g_Supervisor.fogEnabled = 0xff;
+    g_Supervisor.fogEnabled = 255;
     if (g_SoundPlayer.backgroundMusic)
     {
         g_SoundPlayer.backgroundMusic->UpdateFadeOut();
@@ -437,8 +437,8 @@ i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
 
     if (param_1->dwType & DIDFT_AXIS)
     {
-        local_1c.diph.dwSize = 0x18;
-        local_1c.diph.dwHeaderSize = 0x10;
+        local_1c.diph.dwSize = sizeof(DIPROPRANGE);
+        local_1c.diph.dwHeaderSize = 16;
         local_1c.diph.dwHow = 2;
         local_1c.diph.dwObj = param_1->dwType;
         local_1c.lMin = -1000;
@@ -461,7 +461,7 @@ ZunResult Supervisor::SetupDInput()
         return ZUN_ERROR;
     }
 
-    if (FAILED(DirectInput8Create(hInstance, 0x800, IID_IDirectInput8A,
+    if (FAILED(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8A,
                                   (LPVOID *)&this->directInput, NULL)))
     {
         this->directInput = NULL;
@@ -510,7 +510,7 @@ ZunResult Supervisor::SetupDInput()
                     {
                         this->controller->SetDataFormat(&c_dfDIJoystick2);
                         this->controller->SetCooperativeLevel(this->hwndGameWindow, 10);
-                        g_Supervisor.controllerCaps.dwSize = 0x2c;
+                        g_Supervisor.controllerCaps.dwSize = sizeof(DIDEVCAPS);
                         this->controller->GetCapabilities(&g_Supervisor.controllerCaps);
                         this->controller->EnumObjects(ControllerCallback, NULL, 0);
                         // STRING: TH07 0x0049715c
@@ -577,7 +577,7 @@ i32 Supervisor::CheckVSync()
     timeStart = timeGetTime();
     timeEndPeriod(1);
 
-    while (i < 0x708 && fpsCount < 8)
+    while (i < 1800 && fpsCount < 8)
     {
         g_Supervisor.d3dDevice->BeginScene();
         g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
@@ -710,11 +710,11 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     if (arg->midiOutput)
     {
         // STRING: TH07 0x00497028
-        arg->midiOutput->ReadFileData(0x1e, "bgm/init.mid");
+        arg->midiOutput->ReadFileData(30, "bgm/init.mid");
     }
     g_SoundPlayer.InitSoundBuffers();
     // STRING: TH07 0x00497018
-    if (g_AnmManager->LoadAnms(0, "data/text.anm", 0x700) != ZUN_SUCCESS)
+    if (g_AnmManager->LoadAnms(ANM_FILE_TEXT, "data/text.anm", ANM_OFFSET_TEXT) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -759,7 +759,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     scoreDat = ResultScreen::OpenScore("score.dat");
     memset(&g_GameManager.plst, 0, sizeof(g_GameManager.plst));
     g_GameManager.plst.th7kLen2 = g_GameManager.plst.th7kLen = sizeof(Plst);
-    g_GameManager.plst.magic = 0x54534c50;
+    g_GameManager.plst.magic = PLST_MAGIC;
     g_GameManager.plst.version = 1;
     ResultScreen::ParsePlst(scoreDat, &g_GameManager.plst);
     ResultScreen::ReleaseScoreDat(scoreDat);
@@ -833,7 +833,7 @@ ZunResult Supervisor::RegisterChain()
 
     chain = g_Chain.CreateElem((ChainCallback)OnDraw);
     chain->arg = mgr;
-    g_Chain.AddToDrawChain(chain, 0xf);
+    g_Chain.AddToDrawChain(chain, 15);
     return ZUN_SUCCESS;
 }
 
@@ -1081,7 +1081,7 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
 
     // STRING: TH07 0x00496f98
     local_14.bfType = *(WORD *)&"BM";
-    local_14.bfSize = local_14.bfOffBits = 0x36;
+    local_14.bfSize = local_14.bfOffBits = 54;
     switch (this->presentParameters.BackBufferFormat)
     {
     case D3DFMT_R5G6B5:
@@ -1106,9 +1106,9 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
             break;
         }
 
-        local_14.bfSize += local_24 * 0x1e0;
-        local_1c->bmiHeader.biBitCount = 0x18;
-        local_1c->bmiHeader.biSize = 0x28;
+        local_14.bfSize += local_24 * 480;
+        local_1c->bmiHeader.biBitCount = 24;
+        local_1c->bmiHeader.biSize = 40;
         local_1c->bmiHeader.biWidth = 640;
         local_1c->bmiHeader.biHeight = 480;
         local_1c->bmiHeader.biPlanes = 1;
@@ -1133,15 +1133,15 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
             }
         }
         backBuffer->UnlockRect();
-        hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, 0x80, NULL);
+        hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
         if (hFile == INVALID_HANDLE_VALUE)
         {
             break;
         }
 
-        WriteFile(hFile, &local_14, 0xe, &local_44, NULL);
-        WriteFile(hFile, local_1c, 0x28, &local_44, NULL);
-        WriteFile(hFile, local_18, local_24 * 0x1e0, &local_44, NULL);
+        WriteFile(hFile, &local_14, 14, &local_44, NULL);
+        WriteFile(hFile, local_1c, 40, &local_44, NULL);
+        WriteFile(hFile, local_18, local_24 * 480, &local_44, NULL);
         CloseHandle(hFile);
         break;
     default:
@@ -1176,14 +1176,14 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     init:
         g_Supervisor.cfg.lifeCount = 2;
         g_Supervisor.cfg.bombCount = 3;
-        g_Supervisor.cfg.colorMode16bit = 0xff;
+        g_Supervisor.cfg.colorMode16bit = 255;
         g_Supervisor.cfg.version = 0x70002;
         g_Supervisor.cfg.padAxisX = 600;
         g_Supervisor.cfg.padAxisY = 600;
-        bgm2 = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, 0x8000080, NULL);
+        bgm2 = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
         if (bgm2 != INVALID_HANDLE_VALUE)
         {
-            ReadFile(bgm2, bgm2Data, 0x10, &bytesRead2, NULL);
+            ReadFile(bgm2, bgm2Data, 16, &bytesRead2, NULL);
             CloseHandle(bgm2);
             if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 ||
                 bgm2Data[2] != 0x700)
@@ -1214,10 +1214,10 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.cfg = *(GameConfiguration *)configFile;
         free(configFile);
 
-        bgm = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, 0x8000080, NULL);
+        bgm = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
         if (bgm != INVALID_HANDLE_VALUE)
         {
-            ReadFile(bgm, bgmData, 0x10, &bytesRead, NULL);
+            ReadFile(bgm, bgmData, 16, &bytesRead, NULL);
             CloseHandle(bgm);
             if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
                 bgmData[2] != 0x700)
@@ -1407,7 +1407,7 @@ ZunResult Supervisor::PlayAudio(const char *path)
         {
             // ZUN landmine: the result of strrchr is not checked for NULL.
             strcpy(local_10c, path);
-            local_8 = strrchr(local_10c, 0x2e);
+            local_8 = strrchr(local_10c, '.');
             local_8[1] = 'w';
             local_8[2] = 'a';
             local_8[3] = 'v';

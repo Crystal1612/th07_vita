@@ -201,11 +201,11 @@ MidiOutput::MidiOutput()
     this->unused_2d8 = 0;
     this->fadeOutState = 0;
     this->fadeOutFlag = 0;
-    for (local_14 = 0; local_14 < 0x20; local_14 = local_14 + 1)
+    for (local_14 = 0; local_14 < 32; local_14 = local_14 + 1)
     {
         this->midiFileData[local_14] = NULL;
     }
-    for (local_18 = 0; local_18 < 0x20; local_18 = local_18 + 1)
+    for (local_18 = 0; local_18 < 32; local_18 = local_18 + 1)
     {
         this->midiHeaders[local_18] = NULL;
     }
@@ -218,7 +218,7 @@ MidiOutput::~MidiOutput()
 {
     StopPlayback();
     ClearTracks();
-    for (i32 i = 0; i < 0x20; i++)
+    for (i32 i = 0; i < 32; i++)
     {
         ReleaseFileData(i);
     }
@@ -323,13 +323,13 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 // FUNCTION: TH07 0x004369c0
 ZunResult MidiOutput::LoadFile(const char *path)
 {
-    if (ReadFileData(0x1f, path) != ZUN_SUCCESS)
+    if (ReadFileData(31, path) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    ParseFile(0x1f);
-    ReleaseFileData(0x1f);
+    ParseFile(31);
+    ReleaseFileData(31);
     return ZUN_SUCCESS;
 }
 
@@ -378,7 +378,7 @@ ZunResult MidiOutput::StopPlayback()
         return ZUN_ERROR;
     }
 
-    for (i32 i = 0; i < 0x20; i++)
+    for (i32 i = 0; i < 32; i++)
     {
         if (this->midiHeaders[this->midiHeadersCursor])
         {
@@ -407,7 +407,7 @@ ZunResult MidiOutput::UnprepareHeader(LPMIDIHDR pmh)
         DebugPrint("error :\r\n");
     }
 
-    for (i = 0; i < 0x20; i++)
+    for (i = 0; i < 32; i++)
     {
         if (this->midiHeaders[i] == pmh)
         {
@@ -578,7 +578,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
                 this->tempo = 0;
                 for (i = 0; i < curTrackLength; i++)
                 {
-                    this->tempo += this->tempo * 0x100 + *track->curTrackDataCursor;
+                    this->tempo += this->tempo * 256 + *track->curTrackDataCursor;
                     track->curTrackDataCursor++;
                 }
                 bpm = 60000000 / this->tempo;
@@ -642,10 +642,10 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             this->channels[opcodeLow].modifiedVolume = (u8)volumeClamped;
             arg2 = (u8)volumeClamped;
             break;
-        case 0x5b:
+        case 91:
             this->channels[opcodeLow].effectOneDepth = arg2;
             break;
-        case 0x5d:
+        case 93:
             this->channels[opcodeLow].effectThreeDepth = arg2;
             break;
         case 10:
@@ -699,7 +699,7 @@ void MidiOutput::FadeOutSetVolume(i32 vol)
     }
 
     arg1 = 7;
-    for (i = 0; i < 0x10; i++)
+    for (i = 0; i < 16; i++)
     {
         midiStatus = (u8)(i + 0xb0);
         volumeClamped = (i32)(this->channels[i].channelVolume *

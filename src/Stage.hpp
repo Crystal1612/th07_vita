@@ -34,7 +34,7 @@ struct StdRawQuadBasic
     i16 anmScript;
     i16 vmIndex;
     D3DXVECTOR3 pos;
-    D3DXVECTOR2 size;
+    Float2 size;
 };
 
 struct StdRawObject

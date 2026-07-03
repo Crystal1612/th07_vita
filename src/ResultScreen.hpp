@@ -113,6 +113,15 @@ C_ASSERT(sizeof(Vrsm) == 0x1c);
 
 struct ScoreListNode
 {
+    ScoreListNode()
+    {
+        i32 unused[4];
+
+        prev = NULL;
+        next = NULL;
+        data = NULL;
+    }
+
     ScoreListNode *prev;
     ScoreListNode *next;
     Hscr *data;

@@ -435,9 +435,9 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
     {
         if (bullet->posHistory[i].x >= -900.0f)
         {
-            player->bombDamageBoxes[i + 0x60].pos = bullet->posHistory[i];
-            player->bombDamageBoxes[i + 0x60].lifetime = 1;
-            player->bombDamageBoxes[i + 0x60].size = bullet->hitboxSize;
+            player->bombDamageBoxes[i + 96].pos = bullet->posHistory[i];
+            player->bombDamageBoxes[i + 96].lifetime = 1;
+            player->bombDamageBoxes[i + 96].size = bullet->hitboxSize;
         }
     }
     for (i = 15; 0 < i; i--)
@@ -515,42 +515,42 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet,
         angle = g_Rng.GetRandomFloatInRange(1.5707964f) - 2.3561945f;
         switch (bullet->vm.anmFileIdx)
         {
-        case 0x441:
+        case 1089:
             bullet->hitboxSize.x = 32.0f;
             bullet->hitboxSize.y = 32.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 4.0f);
             break;
-        case 0x442:
+        case 1090:
             bullet->hitboxSize.x = 42.0;
             bullet->hitboxSize.y = 42.0;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 4.0f);
             break;
-        case 0x443:
+        case 1091:
             bullet->hitboxSize.x = 48.0f;
             bullet->hitboxSize.y = 48.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 4.0f);
             break;
-        case 0x444:
+        case 1092:
             bullet->hitboxSize.x = 56.0f;
             bullet->hitboxSize.y = 56.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 4.0f);
             break;
-        case 0x445:
+        case 1093:
             bullet->hitboxSize.x = 48.0f;
             bullet->hitboxSize.y = 48.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 6.0f);
             break;
-        case 0x446:
+        case 1094:
             bullet->hitboxSize.x = 64.0f;
             bullet->hitboxSize.y = 64.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 6.0f);
             break;
-        case 0x447:
+        case 1095:
             bullet->hitboxSize.x = 80.0f;
             bullet->hitboxSize.y = 80.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 6.0f);
             break;
-        case 0x448:
+        case 1096:
             bullet->hitboxSize.x = 96.0f;
             bullet->hitboxSize.y = 96.0f;
             AngleToVector((D3DXVECTOR3 *)&bullet->velocity, angle, 6.0f);
@@ -686,7 +686,7 @@ void Player::UpdateShots()
         if (this->fireBulletTimer.GetCurrent() < 0 &&
             this->timers[i].timer.GetCurrent() > 50)
         {
-            this->timers[i].timer = 0x32;
+            this->timers[i].timer = 50;
         }
         if (this->timers[i].timer.GetCurrent() == 0)
         {
@@ -694,7 +694,7 @@ void Player::UpdateShots()
         }
     }
     bullet = this->bullets;
-    for (i = 0; i < 0x60; i++, bullet++)
+    for (i = 0; i < 96; i++, bullet++)
     {
         if (bullet->bulletState == 0)
         {
@@ -735,7 +735,7 @@ void Player::DrawBullets()
     i32 i;
 
     bullet = this->bullets;
-    for (i = 0; i < 0x60; i++, bullet++)
+    for (i = 0; i < 96; i++, bullet++)
     {
         if (bullet->bulletState != 1)
         {
@@ -766,7 +766,7 @@ void Player::DrawBulletExplosions()
     i32 i;
 
     bullet = this->bullets;
-    for (i = 0; i < 0x60; i++, bullet++)
+    for (i = 0; i < 96; i++, bullet++)
     {
         if (bullet->bulletState != 2)
         {
@@ -849,7 +849,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
     {
         *param_3 = 0;
     }
-    for (i = 0; i < 0x60; i++, bullet++)
+    for (i = 0; i < 96; i++, bullet++)
     {
         if (bullet->bulletState == 0 ||
             (bullet->bulletState != 1 && bullet->bulletState2 != 3))
@@ -904,7 +904,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
             }
         }
     }
-    for (i = 0; i < 0x70; i++)
+    for (i = 0; i < 112; i++)
     {
         if (this->bombDamageBoxes[i].size.x <= 0.0f)
         {
@@ -927,7 +927,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
         this->bombParticleTime++;
         if (this->bombParticleTime % 4 == 0)
         {
-            if (i < 0x60)
+            if (i < 96)
             {
                 g_EffectManager.SpawnParticles(3, center, 1, 0xffffffff);
             }
@@ -948,7 +948,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *center, D3DXVECTOR3 *size,
 // FUNCTION: TH07 0x0043e0a0
 i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
 {
-    BombProjectile *bombProjectile;
+    BombClearBox *bombProjectile;
     i32 i;
     D3DXVECTOR3 bulletBottomRight;
     D3DXVECTOR3 bulletTopLeft;
@@ -962,7 +962,7 @@ i32 Player::CheckBombGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
     bulletTopLeft.y = center->y - size->y / 2.0f;
     bulletBottomRight.x = center->x + size->x / 2.0f;
     bulletBottomRight.y = center->y + size->y / 2.0f;
-    for (i = 0; i < 0x60; i++, bombProjectile++)
+    for (i = 0; i < 96; i++, bombProjectile++)
     {
         if (bombProjectile->pos.z != 0.0f)
         {
@@ -1206,7 +1206,7 @@ void Player::ScoreGraze(D3DXVECTOR3 *param_1)
         g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
     }
     g_GameManager.IncreaseSubrank(6);
-    g_Gui.flags = (g_Gui.flags & 0xffffff3f) | 0x80;
+    g_Gui.showGraze = 2;
     g_SoundPlayer.PlaySoundByIdx(SOUND_GRAZE, 0);
     g_EnemyManager.spellcardInfo.grazeBonusScore =
         g_EnemyManager.spellcardInfo.grazeBonusScore + 2500 +
@@ -1231,8 +1231,8 @@ void Player::ScoreGraze(D3DXVECTOR3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnEffect(0xc, &this->positionCenter, 3, 1, 0xff4040ff);
-    g_EffectManager.SpawnParticles(6, &this->positionCenter, 0x10, 0xffffffff);
+    g_EffectManager.SpawnEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
+    g_EffectManager.SpawnParticles(6, &this->positionCenter, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN, 0);
@@ -1367,20 +1367,20 @@ i32 Player::HandlePlayerInputs()
 
     if (horizontalSpeed < 0.0f && this->previousHorizontalSpeed >= 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 0x401);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1025);
     }
     else if (horizontalSpeed == 0.0f && this->previousHorizontalSpeed < 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 0x402);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1026);
     }
 
     if (horizontalSpeed > 0.0f && this->previousHorizontalSpeed <= 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 0x403);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1027);
     }
     else if (horizontalSpeed == 0.0f && this->previousHorizontalSpeed > 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 0x404);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1028);
     }
 
     this->previousHorizontalSpeed = horizontalSpeed;
@@ -1436,7 +1436,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    0x18, &this->positionCenter, 2, 1, 0xffffffff);
+                    24, &this->positionCenter, 2, 1, 0xffffffff);
             }
             else
             {
@@ -1495,7 +1495,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    0x18, &this->positionCenter, 2, 1, 0xffffffff);
+                    24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
         }
@@ -1519,7 +1519,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    0x18, &this->positionCenter, 2, 1, 0xffffffff);
+                    24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->optionsPosition[0].x -= optionOffsetX;
@@ -1587,7 +1587,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    0x18, &this->positionCenter, 2, 1, 0xffffffff);
+                    24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->focusMovementTimer++;
@@ -1657,15 +1657,15 @@ i32 Player::HandlePlayerInputs()
 // FUNCTION: TH07 0x00440940
 void Player::UpdateBombProjectiles()
 {
-    BombProjectile *bomb;
+    BombClearBox *bomb;
     i32 i;
 
-    for (i = 0; i < 0x70; i++)
+    for (i = 0; i < 112; i++)
     {
         this->bombDamageBoxes[i].size.x = 0.0f;
     }
     bomb = this->bombClearBoxes;
-    for (i = 0; i < 0x60; i++, bomb++)
+    for (i = 0; i < 96; i++, bomb++)
     {
         if (bomb->lifetime <= 0)
         {
@@ -1705,7 +1705,7 @@ void Player::UpdateBorderAndBombState()
             if (this->bombInfo.bombTimer.HasTicked())
             {
                 PlayerBombInfo::SubtractCherryDrain(this->bombInfo.cherryDrain);
-                g_Gui.flags = (g_Gui.flags & 0xfffffcff) | 0x200;
+                g_Gui.showPoint = 2;
             }
             if (!this->bombInfo.isFocus)
             {
@@ -1728,7 +1728,7 @@ void Player::UpdateBorderAndBombState()
                 g_ReplayManager->replayEventFlags |= 1;
                 g_GameManager.AddBombsUsed(1);
                 g_GameManager.AddBombsRemaining(-1);
-                g_Gui.flags = (g_Gui.flags & 0xfffffff3) | 8;
+                g_Gui.showBombs = 2;
                 this->bombInfo.isFocus = (i32)this->isFocus;
                 this->bombInfo.isInUse = 1;
                 this->isBombing = 1;
@@ -1791,7 +1791,7 @@ i32 Player::UpdateDeath()
                 }
                 else
                 {
-                    g_GameManager.AddCurrentPower(-0x10);
+                    g_GameManager.AddCurrentPower(-16);
                 }
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_BIG, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
@@ -1799,7 +1799,7 @@ i32 Player::UpdateDeath()
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_Gui.flags = (g_Gui.flags & 0xffffffcf) | 0x20;
+                g_Gui.showPower = 2;
                 cherryPenalty =
                     (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
                     g_Player.shooterData->cherryPenaltyMultiplier;
@@ -1816,7 +1816,7 @@ i32 Player::UpdateDeath()
                 }
                 cherryPenalty -= cherryPenalty % 10;
                 g_GameManager.cherry -= cherryPenalty;
-                g_Gui.flags = (g_Gui.flags & 0xfffffcff) | 0x200;
+                g_Gui.showPoint = 2;
                 g_ItemManager.ActivateAllItems();
             }
             else
@@ -1828,9 +1828,9 @@ i32 Player::UpdateDeath()
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_Gui.flags = (g_Gui.flags & 0xffffffcf) | 0x20;
+                g_Gui.showPower = 2;
             }
-            g_GameManager.DecreaseSubrank(0x640);
+            g_GameManager.DecreaseSubrank(1600);
         }
     }
     else
@@ -1843,7 +1843,7 @@ i32 Player::UpdateDeath()
             (u32)(255.0f - this->invulnerabilityTimer.AsFloat() *
                                255.0f /
                                30.0f)
-                << 0x18 |
+                << 24 |
             0xffffff;
         this->playerSprite.blendMode = 1;
         this->previousHorizontalSpeed = 0.0f;
@@ -1858,7 +1858,7 @@ i32 Player::UpdateDeath()
             this->playerSprite.scale.x = 3.0f;
             this->playerSprite.scale.y = 3.0f;
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite,
-                                                    0x400);
+                                                    1024);
             if ((i32)g_GameManager.globals->livesRemaining <= 0)
             {
                 g_GameManager.isInPauseMenu = 1;
@@ -1866,10 +1866,10 @@ i32 Player::UpdateDeath()
             else
             {
                 g_GameManager.AddLivesRemaining(-1);
-                g_Gui.flags = (g_Gui.flags & 0xfffffffc) | 2;
+                g_Gui.showLives = 2;
                 g_GameManager.SetBombsRemainingAndComputeCsum(
                     g_Player.shooterData->initialBombs);
-                g_Gui.flags = (g_Gui.flags & 0xfffffff3) | 8;
+                g_Gui.showBombs = 2;
                 return 1;
             }
         }
@@ -1889,7 +1889,7 @@ void Player::Respawn()
     this->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     this->playerSprite.color.color =
-        this->invulnerabilityTimer.GetCurrent() * 0xff / 30 << 0x18 | 0xffffff;
+        this->invulnerabilityTimer.GetCurrent() * 255 / 30 << 24 | 0xffffff;
     this->respawnTimer = 0;
     if (this->invulnerabilityTimer.GetCurrent() >= 30)
     {
@@ -1972,7 +1972,7 @@ void Player::UpdateState()
             {
                 this->playerSprite.color.color = 0xffffffff;
             }
-            color.bytes.a = 0x80;
+            color.bytes.a = 128;
             if (g_Player.invulnerabilityTimer >= 510)
             {
                 color.bytes.r = color.bytes.g = color.bytes.b =
@@ -1989,7 +1989,7 @@ void Player::UpdateState()
             }
             else
             {
-                color.bytes.r = color.bytes.g = color.bytes.b = 0x30;
+                color.bytes.r = color.bytes.g = color.bytes.b = 48;
             }
             g_Stage.SmoothBlendColor(color);
         }
@@ -2024,7 +2024,7 @@ void Player::BreakBorderNaturally()
     }
     this->playerState = PLAYER_STATE_INVULNERABLE;
     this->invulnerabilityTimer = 40;
-    this->borderInvulnerabilityTime = 0x28;
+    this->borderInvulnerabilityTime = 40;
     this->hasBorder = BORDER_NONE;
     if (this->borderEffect)
     {
@@ -2035,10 +2035,10 @@ void Player::BreakBorderNaturally()
 
 #pragma var_order(i, bomb)
 // FUNCTION: TH07 0x00441800
-BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
+BombClearBox *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
                                             f32 posZ, f32 size, i32 itemType)
 {
-    BombProjectile *bomb;
+    BombClearBox *bomb;
     i32 i;
 
     bomb = this->bombClearBoxes;
@@ -2060,10 +2060,10 @@ BombProjectile *Player::SpawnBombProjectile(D3DXVECTOR3 *centerPosition,
 
 #pragma var_order(i, bomb)
 // FUNCTION: TH07 0x004418b0
-BombProjectile *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
+BombClearBox *Player::SpawnBombEffect(D3DXVECTOR3 *pos, f32 sizeY, f32 sizeZ,
                                         i32 lifetime, i32 itemType)
 {
-    BombProjectile *bomb;
+    BombClearBox *bomb;
     i32 i;
 
     bomb = this->bombClearBoxes;
@@ -2123,7 +2123,7 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect = g_EffectManager.SpawnEffect(0x1c, &this->positionCenter, 4, 1,
+        spawnedEffect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1,
                                                     0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
@@ -2156,7 +2156,7 @@ void Player::BreakBorder(u32 unused)
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnEffect(0x1c, &this->positionCenter, 4, 1,
+    effect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1,
                                          0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
@@ -2176,14 +2176,14 @@ void Player::BreakBorder(u32 unused)
     g_EnemyManager.spellcardInfo.isCapturing = 0;
     this->hasBorder = BORDER_NONE;
     this->playerState = PLAYER_STATE_INVULNERABLE;
-    this->invulnerabilityTimer = 0x28;
-    this->borderInvulnerabilityTime = 0x28;
+    this->invulnerabilityTimer = 40;
+    this->borderInvulnerabilityTime = 40;
     g_GameManager.cherryPlus = g_GameManager.globals->cherryStart;
-    SpawnBombEffect(&this->positionCenter, 32.0f, 16.0f, 0x32, 8);
+    SpawnBombEffect(&this->positionCenter, 32.0f, 16.0f, 50, 8);
     angle = -ZUN_PI;
-    for (i = 0; i < 0x20; i++, angle += 0.19634955f)
+    for (i = 0; i < 32; i++, angle += 0.19634955f)
     {
-        effect = g_EffectManager.SpawnParticles(0x1d, &this->positionCenter, 1,
+        effect = g_EffectManager.SpawnParticles(29, &this->positionCenter, 1,
                                                 0xffffffff);
         effect->direction.x = cosf(angle);
         effect->direction.y = sinf(angle);
@@ -2320,7 +2320,7 @@ u32 Player::OnDrawHighPrio(Player *arg)
         {
             arg->playerSprite.color.color = 0xffffffff;
         }
-        color.bytes.a = 0x80;
+        color.bytes.a = 128;
         if (g_Player.invulnerabilityTimer >= 510)
         {
             color.bytes.r = color.bytes.g = color.bytes.b =
@@ -2337,7 +2337,7 @@ u32 Player::OnDrawHighPrio(Player *arg)
         }
         else
         {
-            color.bytes.r = color.bytes.g = color.bytes.b = 0x30;
+            color.bytes.r = color.bytes.g = color.bytes.b = 48;
         }
         g_Stage.SmoothBlendColor(color);
     }
@@ -2398,7 +2398,7 @@ ZunResult Player::AddedCallback(Player *arg)
         {
         case CHAR_REIMU:
             // STRING: TH07 0x00496ad8
-            if (g_AnmManager->LoadAnms(10, "data/player00.anm", 0x400) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player00.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -2406,7 +2406,7 @@ ZunResult Player::AddedCallback(Player *arg)
             break;
         case CHAR_MARISA:
             // STRING: TH07 0x00496ac4
-            if (g_AnmManager->LoadAnms(10, "data/player01.anm", 0x400) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player01.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -2414,20 +2414,20 @@ ZunResult Player::AddedCallback(Player *arg)
             break;
         case CHAR_SAKUYA:
             // STRING: TH07 0x00496ab0
-            if (g_AnmManager->LoadAnms(10, "data/player02.anm", 0x400) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player02.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
         }
     }
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, 0x400);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, 1024);
     arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
     arg->positionCenter.z = 0.49f;
     arg->optionsPosition[0].z = 0.49f;
     arg->optionsPosition[1].z = 0.49f;
-    for (i = 0; i < 0x80; i++)
+    for (i = 0; i < 128; i++)
     {
         arg->bombDamageBoxes[i].size.x = 0.0f;
     }
@@ -2444,10 +2444,10 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->playerState = PLAYER_STATE_SPAWNING;
     arg->invulnerabilityTimer = 120;
     arg->optionState = OPTION_UNFOCUSED;
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[0], 0x480);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[1], 0x481);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[0], 1152);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[1], 1153);
     bullet = arg->bullets;
-    for (i = 0; i < 0x60; i++, bullet++)
+    for (i = 0; i < 96; i++, bullet++)
     {
         bullet->bulletState = 0;
     }

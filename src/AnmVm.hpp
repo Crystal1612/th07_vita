@@ -4,6 +4,7 @@
 #include <d3dx8math.h>
 
 #include "ZunColor.hpp"
+#include "ZunMath.hpp"
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
 #include "utils.hpp"
@@ -100,12 +101,12 @@ typedef enum AnmOpcode
 struct AnmLoadedSprite
 {
     i32 sourceFileIndex;
-    D3DXVECTOR2 startPixelInclusive;
-    D3DXVECTOR2 endPixelInclusive;
+    Float2 startPixelInclusive;
+    Float2 endPixelInclusive;
     f32 textureHeight;
     f32 textureWidth;
-    D3DXVECTOR2 uvStart;
-    D3DXVECTOR2 uvEnd;
+    Float2 uvStart;
+    Float2 uvEnd;
     f32 heightPx;
     f32 widthPx;
     f32 cols;
@@ -127,9 +128,9 @@ struct AnmVmBase
 {
     D3DXVECTOR3 rotation;
     D3DXVECTOR3 angleVel;
-    D3DXVECTOR2 scale;
-    D3DXVECTOR2 scaleGrowth;
-    D3DXVECTOR2 uvScrollPos;
+    Float2 scale;
+    Float2 scaleGrowth;
+    Float2 uvScrollPos;
     ZunTimer currentTimeInScript;
     ZunTimer waitTimer;
     ZunTimer interpStartTimes[5]; /* pos = 0, color, alpha, rotate, scale
@@ -180,7 +181,7 @@ struct AnmVm : AnmVmBase
     i32 intVars1[4];
     f32 floatVars[4];
     i32 intVars2[2];
-    D3DXVECTOR2 uvScrollVel;
+    Float2 uvScrollVel;
     D3DXMATRIX matrix;
     D3DXMATRIX worldTransformMatrix;
     D3DXMATRIX uvMatrix;
@@ -221,8 +222,8 @@ struct AnmVm : AnmVmBase
     D3DXVECTOR3 posInterpFinal;
     D3DXVECTOR3 rotateInterpInitial;
     D3DXVECTOR3 rotateInterpFinal;
-    D3DXVECTOR2 scaleInterpInitial;
-    D3DXVECTOR2 scaleInterpFinal;
+    Float2 scaleInterpInitial;
+    Float2 scaleInterpFinal;
     ZunColor colorInterpInitialColor;
     ZunColor colorInterpFinalColor;
     D3DXVECTOR3 offset;

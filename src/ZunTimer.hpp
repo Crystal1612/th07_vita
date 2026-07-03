@@ -11,12 +11,12 @@ struct ZunTimer
 
     ZunTimer()
     {
-        this->Initialize(0);
+        this->Initialize();
     }
 
-    void Initialize(i32 current)
+    void Initialize()
     {
-        this->current = current;
+        this->current = 0;
         this->previous = -999;
         this->subFrame = 0.0f;
     }

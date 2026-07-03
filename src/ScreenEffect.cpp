@@ -87,15 +87,15 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
-    g_Supervisor.d3dDevice->SetVertexShader(0x44);
+    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
                                             sizeof(VertexDiffuseXyzrhw));
-    g_AnmManager->SetVertexShader(0xff);
+    g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
     g_AnmManager->SetTexture(NULL);
-    g_AnmManager->SetColorOp(0xff);
-    g_AnmManager->SetBlendMode(0xff);
-    g_AnmManager->SetZWriteDisable(0xff);
+    g_AnmManager->SetColorOp(255);
+    g_AnmManager->SetBlendMode(255);
+    g_AnmManager->SetZWriteDisable(255);
     if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
@@ -135,15 +135,15 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
-    g_Supervisor.d3dDevice->SetVertexShader(0x44);
+    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
                                             sizeof(VertexDiffuseXyzrhw));
-    g_AnmManager->SetVertexShader(0xff);
+    g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
     g_AnmManager->SetTexture(NULL);
-    g_AnmManager->SetColorOp(0xff);
-    g_AnmManager->SetBlendMode(0xff);
-    g_AnmManager->SetZWriteDisable(0xff);
+    g_AnmManager->SetColorOp(255);
+    g_AnmManager->SetBlendMode(255);
+    g_AnmManager->SetZWriteDisable(255);
     if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
@@ -165,10 +165,10 @@ u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
     g_AnmManager->Flush();
     g_Supervisor.viewport.X = 0;
     g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 0x280;
-    g_Supervisor.viewport.Height = 0x1e0;
+    g_Supervisor.viewport.Width = 640;
+    g_Supervisor.viewport.Height = 480;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-    ScreenEffect::DrawSquare(&rect, arg->alpha << 0x18 | arg->args[0]);
+    ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | arg->args[0]);
     return 1;
 }
 
@@ -201,7 +201,7 @@ u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
     rect.top = 16.0f;
     rect.right = 416.0f;
     rect.bottom = 464.0f;
-    ScreenEffect::DrawSquare(&rect, arg->alpha << 0x18 | arg->args[0]);
+    ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | arg->args[0]);
     return 1;
 }
 
@@ -210,8 +210,8 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
 {
     if (arg->timer < arg->duration)
     {
-        arg->alpha = ((arg->args[1] >> 24) & 0xff) -
-                     (i32)(((arg->args[1] >> 24) & 0xff) * arg->timer.AsFloat() / arg->duration);
+        arg->alpha = ((arg->args[1] >> 24) & 255) -
+                     (i32)(((arg->args[1] >> 24) & 255) * arg->timer.AsFloat() / arg->duration);
         if (arg->alpha < 0)
         {
             arg->alpha = 0;
@@ -241,7 +241,7 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
     rect.right = 416.0f;
     rect.bottom = 464.0f;
     ScreenEffect::DrawSquare(&rect,
-                             arg->alpha << 0x18 | (arg->args[1] & 0xffffff));
+                             arg->alpha << 24 | (arg->args[1] & 0xffffff));
     return 1;
 }
 
@@ -354,7 +354,7 @@ BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
     bombEffects->args[0] = arg1;
     bombEffects->args[1] = arg2;
     bombEffects->args[2] = arg3;
-    if (g_Chain.AddToCalcChain(local_8, 0xf))
+    if (g_Chain.AddToCalcChain(local_8, 15))
     {
         return NULL;
     }
@@ -362,7 +362,7 @@ BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
     if (local_c)
     {
         local_c->arg = bombEffects;
-        g_Chain.AddToDrawChain(local_c, 0x11);
+        g_Chain.AddToDrawChain(local_c, 17);
     }
     bombEffects->calcChain = local_8;
     bombEffects->drawChain = local_c;

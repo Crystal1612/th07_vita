@@ -152,7 +152,7 @@ RenderResult GameWindow::Render()
         {
             g_Supervisor.d3dDevice->BeginScene();
             g_AnmManager->ResetVertexBuffer();
-            g_Supervisor.fogEnabled = 0xff;
+            g_Supervisor.fogEnabled = 255;
             g_Supervisor.DisableFog();
             g_Chain.RunDrawChain();
             g_AnmManager->Flush();
@@ -261,7 +261,7 @@ RenderResult GameWindow::Render()
 // FUNCTION: TH07 0x00434a40
 i32 GameWindow::InitD3dInterface()
 {
-    g_Supervisor.d3dIface = Direct3DCreate8(0x78);
+    g_Supervisor.d3dIface = Direct3DCreate8(D3D_SDK_VERSION);
     if (!g_Supervisor.d3dIface)
     {
         // STRING: TH07 0x00497bd8
@@ -349,7 +349,7 @@ i32 GameWindow::InitD3dRendering()
             presentParams.BackBufferFormat = D3DFMT_R5G6B5;
             g_Supervisor.cfg.colorMode16bit = 1;
         }
-        else if (g_Supervisor.cfg.colorMode16bit == 0xff)
+        else if (g_Supervisor.cfg.colorMode16bit == 255)
         {
             presentParams.BackBufferFormat = D3DFMT_X8R8G8B8;
             g_Supervisor.cfg.colorMode16bit = 0;
@@ -802,11 +802,11 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, 1);
     if (g_AnmManager)
     {
-        g_AnmManager->SetBlendMode(0xff);
-        g_AnmManager->SetColorOp(0xff);
-        g_AnmManager->SetVertexShader(0xff);
+        g_AnmManager->SetBlendMode(255);
+        g_AnmManager->SetColorOp(255);
+        g_AnmManager->SetVertexShader(255);
         g_AnmManager->SetTexture(NULL);
-        g_AnmManager->SetCameraMode(0xff);
+        g_AnmManager->SetCameraMode(255);
     }
     g_Stage.renderStateWasReset = 1;
 }
@@ -881,10 +881,17 @@ void GameWindow::SetWindowActive(HWND window)
     AttachThreadInput(processId, idAttachTo, 1);
     SystemParametersInfoA(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &param, 0);
     SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, 0);
+
+    // ZUN landmine: ZUN here opts to use SetActiveWindow to bring input focus
+    // onto the game window rather than SetForegroundWindow. This is quite
+    // unusual since it's intended to be used only for already foregrounded
+    // windows, which might not always be the case if the application decides
+    // to launch in the background.
+    // This normally works fine since applications do launch in the foreground,
+    // but for some reason on Wine it doesn't work at all, leading to broken
+    // input.
+    // This is fixed when you use vpatch btw
 #ifdef NON_MATCHING
-    // since the game's input is completely broken on wine when using
-    // setactivewindow, this so i can actually load ingame. this happens in the
-    // original executable as well though
     SetForegroundWindow(window);
 #else
     SetActiveWindow(window);

@@ -84,7 +84,7 @@ void EnemyManager::Initialize()
     {
         enemy->vms[i].anmFileIdx = -1;
     }
-    for (i = 0; i < 0x60; i++)
+    for (i = 0; i < 96; i++)
     {
         enemy->enemyHistory[i].position.x = -999.0f;
     }
@@ -450,11 +450,11 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                 g_EnemyManager.bosses[timeline->timelineInstr->args.args[0].i]
                     ->runInterrupt = timeline->timelineInstr->args.args[1].i;
                 break;
-            case 0xb:
+            case 11:
                 g_GameManager.SetCurrentPower(timeline->timelineInstr->arg0);
                 g_GameManager.RegenerateGameIntegrityCsum();
                 break;
-            case 0xc:
+            case 12:
                 if (g_EnemyManager.bosses[timeline->timelineInstr->arg0] &&
                     g_EnemyManager.bosses[timeline->timelineInstr->arg0]->active)
                 {
@@ -508,7 +508,7 @@ i32 Enemy::HandleLifeCallback()
             this->stackDepth = 0;
             this->bulletProps = g_EnemyManager.enemyTemplate.bulletProps;
             this->shootInterval = 0;
-            for (j = 0; j < 0x1e0; j++, enemy++)
+            for (j = 0; j < 480; j++, enemy++)
             {
                 if (!enemy->active)
                 {
@@ -590,7 +590,7 @@ i32 Enemy::HandleTimerCallback()
             g_GameManager.cherry -= cherryPenalty;
         }
         enemy = g_EnemyManager.enemies;
-        for (j = 0; j < 0x1e0; j++, enemy++)
+        for (j = 0; j < 480; j++, enemy++)
         {
             if (!enemy->active)
             {
@@ -909,9 +909,9 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         {
                             cherryGain = damage / (30 - stageFactor) * 10;
                         }
-                        if (cherryGain > 0x46)
+                        if (cherryGain > 70)
                         {
-                            cherryGain = 0x46;
+                            cherryGain = 70;
                         }
                         if (cherryGain == 0 && (g_Player.isFocus == 0 ||
                                                 (enemy->timer.GetCurrent() & 1) != 0))
@@ -947,9 +947,9 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                             g_GameManager.AddCherryPlus(cherryGain);
                         }
                     }
-                    if (damage >= 0x46)
+                    if (damage >= 70)
                     {
-                        damage = 0x46;
+                        damage = 70;
                     }
                     g_GameManager.AddScore(damage / 5 * 10);
                     if (enemy->canBeDamaged)
@@ -1158,9 +1158,9 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         else if (playedDamageSound != 0)
         {
             g_SoundPlayer.PlaySoundByIdx(SOUND_20, 0);
-            enemy->primaryVm.color2.bytes.r = 0xff;
-            enemy->primaryVm.color2.bytes.g = 0x80;
-            enemy->primaryVm.color2.bytes.b = 0xc0;
+            enemy->primaryVm.color2.bytes.r = 255;
+            enemy->primaryVm.color2.bytes.g = 128;
+            enemy->primaryVm.color2.bytes.b = 192;
             enemy->primaryVm.color2.bytes.a = enemy->primaryVm.color.bytes.a;
             enemy->primaryVm.useColor2 = 1;
             enemy->damageTintTimer = 1;
@@ -1270,7 +1270,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
     AnmVm *vm;
     ZunColor baseColor;
     i32 i;
-    D3DXVECTOR2 scale;
+    Float2 scale;
 
     for (i = first; i < last; i++)
     {
@@ -1304,7 +1304,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
             }
             enemy->primaryVm.pos = enemy->position + enemy->primaryVm.offset;
             enemy->primaryVm.pos.z = 0.29f;
-            if ((enemy->trailFlags & 0x10) == 0 && !enemy->invisibleOnBomb)
+            if ((enemy->trailFlags & 16) == 0 && !enemy->invisibleOnBomb)
             {
                 enemy->primaryVm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
                 enemy->primaryVm.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
@@ -1429,14 +1429,14 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                                 trailVert[0].color.bytes.a = trailVert[1].color.bytes.a;
                             }
 
-                            trailVert[0].pos = *(ZunVec3 *)&enemy->enemyHistory[j].position;
+                            trailVert[0].pos = *(Float3 *)&enemy->enemyHistory[j].position;
                             trailVert[0].pos.x += cosAngle * xOffset - sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset + cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
                             trailVert[0].textureUV.y = enemy->primaryVm.sprite->uvStart.y + enemy->primaryVm.uvScrollPos.y;
                             trailVert++;
 
-                            trailVert[0].pos = *(ZunVec3 *)&enemy->enemyHistory[j].position;
+                            trailVert[0].pos = *(Float3 *)&enemy->enemyHistory[j].position;
                             trailVert[0].pos.x += cosAngle * xOffset + sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset - cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
@@ -1478,13 +1478,13 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 
     enemy = &arg->enemies[0];
     if (arg->stgEnmAnmFilename &&
-        g_AnmManager->LoadAnms(0xf, arg->stgEnmAnmFilename, 0x900) !=
+        g_AnmManager->LoadAnms(ANM_FILE_ENEMY, arg->stgEnmAnmFilename, ANM_OFFSET_ENEMY) !=
             ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
     if (arg->stgEnm2AnmFilename &&
-        g_AnmManager->LoadAnms(0x10, arg->stgEnm2AnmFilename, 0x900) !=
+        g_AnmManager->LoadAnms(ANM_FILE_ENEMY2, arg->stgEnm2AnmFilename, ANM_OFFSET_ENEMY) !=
             ZUN_SUCCESS)
     {
         return ZUN_ERROR;
@@ -1505,8 +1505,8 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 // FUNCTION: TH07 0x00422e70
 ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
 {
-    g_AnmManager->ReleaseAnm(0x10);
-    g_AnmManager->ReleaseAnm(0xf);
+    g_AnmManager->ReleaseAnm(16);
+    g_AnmManager->ReleaseAnm(15);
     D3DXVECTOR3 vec = D3DXVECTOR3(-999.0f, -999.0f, -999.0f);
     g_AsciiManager.GetBossMarker(0)->pos = vec;
     g_AsciiManager.GetBossMarker(1)->pos = vec;
@@ -1576,7 +1576,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
     enemy = this->enemies;
     totalScore = scoreMin;
     popupScore = 2000;
-    for (i = 0; i < 0x1e0; i++, enemy++)
+    for (i = 0; i < 480; i++, enemy++)
     {
         if (!enemy->active)
         {
@@ -1596,7 +1596,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
                                         popupScore >= scoreMax ? 0xffffff00
                                                                : 0xffffffff);
             totalScore += popupScore;
-            popupScore += 0x1e;
+            popupScore += 30;
             if (popupScore > scoreMax)
             {
                 popupScore = scoreMax;
@@ -1611,7 +1611,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
                         &enemy->enemyHistory[j].position, popupScore,
                         popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
                     totalScore += popupScore;
-                    popupScore += 0x1e;
+                    popupScore += 30;
                     if (popupScore > scoreMax)
                     {
                         popupScore = scoreMax;

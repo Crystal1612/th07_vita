@@ -30,7 +30,7 @@ struct GameErrorContext
             if (this->m_ShowMessageBox)
             {
                 // STRING: TH07 0x00497c78
-                MessageBoxA(NULL, this->m_Buffer, "log", 0x10);
+                MessageBoxA(NULL, this->m_Buffer, "log", MB_ICONERROR);
             }
             // STRING: TH07 0x00497c6c
             FileSystem::WriteDataToFile("./log.txt", this->m_Buffer,

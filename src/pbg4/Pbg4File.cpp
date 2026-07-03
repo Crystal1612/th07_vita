@@ -71,7 +71,7 @@ bool Pbg4File::Open(const char *path, const char *mode)
     {
         GetFullPath(local_114, path);
         this->handle = CreateFileA(local_114, this->access, 1, NULL, local_118,
-                                   0x8000080, NULL);
+                                   FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
         if (this->handle == INVALID_HANDLE_VALUE)
         {
             return false;
@@ -185,7 +185,7 @@ HGLOBAL Pbg4File::ReadRemaining(u32 max)
         return NULL;
     }
 
-    hMem = GlobalAlloc(0x40, DVar2);
+    hMem = GlobalAlloc(GMEM_ZEROINIT, DVar2);
     if (!hMem)
     {
         return NULL;

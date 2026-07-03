@@ -178,7 +178,7 @@ i32 EffectManager::UpdateOrbitEffect(Effect *effect)
         }
         fadeOutRatio = 1.0f - (f32)effect->fadeOutTime / 16.0f;
         effect->vm.color.color =
-            (effect->vm.color.color & 0xffffff) | (u32)(fadeOutRatio * 255.0f) << 0x18;
+            (effect->vm.color.color & 0xffffff) | (u32)(fadeOutRatio * 255.0f) << 24;
         effect->vm.scale.y = 2.0f - fadeOutRatio;
         effect->vm.scale.x = effect->vm.scale.y;
     }
@@ -246,7 +246,7 @@ void EffectManager::DoSomethingWithEffects(D3DXVECTOR3 *param_1)
     effect = g_EffectManager.effects;
     for (i = 0; i < 400; i++, effect++)
     {
-        if (effect->effectId == 20 || effect->effectId == 0x1f)
+        if (effect->effectId == 20 || effect->effectId == 31)
         {
             effect->basePosition += *param_1;
         }
@@ -263,7 +263,7 @@ void EffectManager::ModifyEffect1eAcceleration()
     effect = g_EffectManager.effects;
     for (i = 0; i < 400; i++, effect++)
     {
-        if (effect->effectId == 0x1e)
+        if (effect->effectId == 30)
         {
             effect->acceleration.z = -0.01f;
         }
@@ -331,10 +331,10 @@ i32 EffectManager::InitWeatherForward(Effect *effect)
 
     if ((u32)chance >= g_Rng.GetRandomU32InRange(100))
     {
-        g_AnmManager->SetActiveSprite(&effect->vm, 0x2d8);
-        effect->vm.color.bytes.r = 0xff;
-        effect->vm.color.bytes.g = 0xff;
-        effect->vm.color.bytes.b = 0xff;
+        g_AnmManager->SetActiveSprite(&effect->vm, 728);
+        effect->vm.color.bytes.r = 255;
+        effect->vm.color.bytes.g = 255;
+        effect->vm.color.bytes.b = 255;
     }
     return 0;
 }
@@ -361,10 +361,10 @@ i32 EffectManager::InitWeatherVortex(Effect *effect)
 
     if ((u32)chance >= g_Rng.GetRandomU32InRange(100))
     {
-        g_AnmManager->SetActiveSprite(&effect->vm, 0x2d8);
-        effect->vm.color.bytes.r = 0xff;
-        effect->vm.color.bytes.g = 0xff;
-        effect->vm.color.bytes.b = 0xff;
+        g_AnmManager->SetActiveSprite(&effect->vm, 728);
+        effect->vm.color.bytes.r = 255;
+        effect->vm.color.bytes.g = 255;
+        effect->vm.color.bytes.b = 255;
     }
     effect->acceleration.x = 0.0f;
     effect->acceleration.y = 0.0f;
@@ -386,10 +386,10 @@ i32 EffectManager::InitWeatherBackward(Effect *effect)
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
     effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
-    g_AnmManager->SetActiveSprite(&effect->vm, 0x2d8);
-    effect->vm.color.bytes.r = 0xff;
-    effect->vm.color.bytes.g = 0xff;
-    effect->vm.color.bytes.b = 0xff;
+    g_AnmManager->SetActiveSprite(&effect->vm, 728);
+    effect->vm.color.bytes.r = 255;
+    effect->vm.color.bytes.g = 255;
+    effect->vm.color.bytes.b = 255;
     effect->acceleration.x = 0.0f;
     effect->acceleration.y = 0.0f;
     effect->acceleration.z = 0.0f;
@@ -412,10 +412,10 @@ i32 EffectManager::InitWeatherSlow(Effect *effect)
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
     effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
-    g_AnmManager->SetActiveSprite(&effect->vm, 0x2d8);
-    effect->vm.color.bytes.r = 0xff;
-    effect->vm.color.bytes.g = 0xff;
-    effect->vm.color.bytes.b = 0xff;
+    g_AnmManager->SetActiveSprite(&effect->vm, 728);
+    effect->vm.color.bytes.r = 255;
+    effect->vm.color.bytes.g = 255;
+    effect->vm.color.bytes.b = 255;
     effect->acceleration.x = 0.0f;
     effect->acceleration.y = 0.0f;
     effect->acceleration.z = 0.0f;
@@ -438,11 +438,11 @@ i32 EffectManager::InitWeatherFalling(Effect *effect)
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
     effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
-    g_AnmManager->SetActiveSprite(&effect->vm, 0x2d8);
+    g_AnmManager->SetActiveSprite(&effect->vm, 728);
     effect->vm.angleVel.z *= 2;
-    effect->vm.color.bytes.r = 0xff;
-    effect->vm.color.bytes.g = 0xff;
-    effect->vm.color.bytes.b = 0xff;
+    effect->vm.color.bytes.r = 255;
+    effect->vm.color.bytes.g = 255;
+    effect->vm.color.bytes.b = 255;
     effect->acceleration.x = 0.0f;
     effect->acceleration.y = 0.0f;
     effect->acceleration.z = -0.015f;
@@ -562,7 +562,7 @@ Effect *EffectManager::SpawnParticles(i32 effectId, D3DXVECTOR3 *pos,
         }
     }
 
-    return i >= 400 ? &this->effects[0x198] : effect;
+    return i >= 400 ? &this->effects[408] : effect;
 }
 
 #pragma var_order(effect, i)
@@ -627,7 +627,7 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, D3DXVECTOR3 *pos,
         }
     }
 
-    return i >= 400 ? &this->effects[0x198] : effect;
+    return i >= 400 ? &this->effects[408] : effect;
 }
 
 // FUNCTION: TH07 0x0041c610
@@ -668,15 +668,15 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
 
     effect = arg->effects;
     arg->activeEffectsCount = 0;
-    arg->effectLayerPtrs[0] = &arg->effectLayers[0];
-    arg->effectLayerPtrs[1] = &arg->effectLayers[1];
-    arg->effectLayerPtrs[2] = &arg->effectLayers[2];
-    arg->effectLayerPtrs[3] = &arg->effectLayers[3];
-    arg->effectLayers[0].next = NULL;
-    arg->effectLayers[1].next = NULL;
-    arg->effectLayers[2].next = NULL;
-    arg->effectLayers[3].next = NULL;
-    for (i = 0; i < 0x198; i++, effect++)
+    arg->layerPtrs[0] = &arg->layer0;
+    arg->layerPtrs[1] = &arg->layer1;
+    arg->layerPtrs[2] = &arg->layer2;
+    arg->layerPtrs[3] = &arg->layer3;
+    arg->layer0.next = NULL;
+    arg->layer1.next = NULL;
+    arg->layer2.next = NULL;
+    arg->layer3.next = NULL;
+    for (i = 0; i < 408; i++, effect++)
     {
         if (!effect->inUseFlag)
         {
@@ -700,26 +700,26 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
         effect->next = NULL;
         if (effect->is2D == 1 || effect->is2D == 3)
         {
-            arg->effectLayerPtrs[1]->next = effect;
-            arg->effectLayerPtrs[1] = effect;
+            arg->layerPtrs[1]->next = effect;
+            arg->layerPtrs[1] = effect;
         }
         else if (!effect->is2D)
         {
             if (effect->vm.blendMode != 0)
             {
-                arg->effectLayerPtrs[3]->next = effect;
-                arg->effectLayerPtrs[3] = effect;
+                arg->layerPtrs[3]->next = effect;
+                arg->layerPtrs[3] = effect;
             }
             else
             {
-                arg->effectLayerPtrs[0]->next = effect;
-                arg->effectLayerPtrs[0] = effect;
+                arg->layerPtrs[0]->next = effect;
+                arg->layerPtrs[0] = effect;
             }
         }
         else
         {
-            arg->effectLayerPtrs[2]->next = effect;
-            arg->effectLayerPtrs[2] = effect;
+            arg->layerPtrs[2]->next = effect;
+            arg->layerPtrs[2] = effect;
         }
     }
     arg->frameCounter++;
@@ -739,7 +739,7 @@ u32 EffectManager::OnDraw(EffectManager *arg)
 {
     Effect *effect;
 
-    effect = arg->effectLayers[0].next;
+    effect = arg->layer0.next;
     while (effect)
     {
         effect->vm.pos = effect->pos1;
@@ -748,14 +748,14 @@ u32 EffectManager::OnDraw(EffectManager *arg)
         g_AnmManager->Draw(&effect->vm);
         effect = effect->next;
     }
-    effect = arg->effectLayers[2].next;
+    effect = arg->layer2.next;
     while (effect)
     {
         effect->vm.pos = effect->pos1;
         g_AnmManager->DrawBillboard(&effect->vm);
         effect = effect->next;
     }
-    effect = arg->effectLayers[3].next;
+    effect = arg->layer3.next;
     while (effect)
     {
         effect->vm.pos = effect->pos1;
@@ -779,7 +779,7 @@ i32 EffectManager::UpdateSpecialEffect()
     f32 a;
     Effect *effect;
 
-    effect = this->effectLayers[1].next;
+    effect = this->layer1.next;
     counter = 0;
 
     if (g_Supervisor.cfg.effectQuality == QUALITY_WORST)
@@ -852,72 +852,72 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
     case 0:
     case 1:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff01.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff01.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 2:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff02.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 3:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff03.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff03.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 4:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff04.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff04.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x12, "data/eff04b.anm", 0x2dd) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff04b.anm", ANM_OFFSET_EFFECTS2) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 5:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff05.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 6:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff05.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x13, "data/eff06.anm", 0x2de) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff06.anm", ANM_OFFSET_EFFECTS3) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 7:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff02.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x12, "data/eff07.anm", 0x2dd) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff07.anm", ANM_OFFSET_EFFECTS2) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 8:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(0x11, "data/eff07.anm", 0x2dc) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff07.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(0x13, "data/eff08.anm", 0x2de) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff08.anm", ANM_OFFSET_EFFECTS3) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
@@ -928,10 +928,10 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
 // FUNCTION: TH07 0x0041d050
 ZunResult EffectManager::DeletedCallback(EffectManager *arg)
 {
-    g_AnmManager->ReleaseAnm(0x11);
-    g_AnmManager->ReleaseAnm(0x12);
-    g_AnmManager->ReleaseAnm(0x13);
-    g_AnmManager->ReleaseAnm(0x14);
+    g_AnmManager->ReleaseAnm(17);
+    g_AnmManager->ReleaseAnm(18);
+    g_AnmManager->ReleaseAnm(19);
+    g_AnmManager->ReleaseAnm(20);
     return ZUN_SUCCESS;
 }
 
@@ -948,7 +948,7 @@ ZunResult EffectManager::RegisterChain()
     g_EffectManagerCalcChain.deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     g_EffectManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, 0xb))
+    if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, 11))
     {
         return ZUN_ERROR;
     }

@@ -1,10 +1,10 @@
 # th07
 
-<img src="resources/progress.svg" alt="Implemented: 100%. Accuracy: 98.54%" width="50%">
+<img src="resources/progress.svg" alt="Implemented: 100%. Accuracy: 99.02%" width="50%">
 
 A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfect Cherry Blossom 1.00b (md5: 0126afce1e805370d36c3482445e98da) by Team Shanghai Alice.
 
-The game is "playable," as in it is 100% implemented, and you can load into the game and play from start to finish, and the behavior of the program _should_ be mostly identical to the original, but there may be a number of bugs since the game isn't yet fully matching. Perfect byte accuracy is an eventual goal.
+The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect byte accuracy is an eventual goal.
 
 ## Building
 
@@ -39,8 +39,7 @@ uv run scripts/build.py --no-icon
 
 ## Todo
 
-* Clean up this complete mess of code.
-* Start matching (and fixing issues).
+* Improve accuracy and documentation
 * Get a better build system than whatever this is
 
 ## Contributing

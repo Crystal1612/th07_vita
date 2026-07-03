@@ -66,7 +66,7 @@ void BulletManager::Initialize()
 {
     memset(this, 0, sizeof(BulletManager));
     this->bulletsStart = this->bullets;
-    this->bullets[0x400].state = BULLET_END_ARRAY;
+    this->bullets[1024].state = BULLET_END_ARRAY;
     this->itemType = ITEM_POINT_BULLET;
 }
 
@@ -114,7 +114,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
 
     // ZUN bloat: i is assigned twice here for some reason
     i = 0;
-    for (bullet = this->bulletsStart, i = 0; i < 0x400; i++)
+    for (bullet = this->bulletsStart, i = 0; i < 1024; i++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -126,7 +126,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
             bullet = this->bullets;
         }
     }
-    if (i >= 0x400)
+    if (i >= 1024)
     {
         return 1;
     }
@@ -422,7 +422,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     D3DXVECTOR3 local_10;
 
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 0x400; i++, bullet++)
+    for (i = 0; i < 1024; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE || bullet->state == BULLET_DESPAWN)
         {
@@ -446,7 +446,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
         }
     }
     laser = this->lasers;
-    for (i = 0; i < 0x40; i++, laser++)
+    for (i = 0; i < 64; i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -508,7 +508,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     local_8 = 2000;
     unused_10 = 0;
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 0x400; i++, bullet++)
+    for (i = 0; i < 1024; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -530,7 +530,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
         bullet->state = BULLET_DESPAWN;
     }
     laser = this->lasers;
-    for (i = 0; i < 0x40; i++, laser++)
+    for (i = 0; i < 64; i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -572,7 +572,7 @@ void BulletManager::RemoveBulletsInRadius(D3DXVECTOR3 *centerPos, f32 radius)
 
     bullet = g_BulletManager.bullets;
     radius *= radius;
-    for (i = 0; i < 0x400; i++, bullet++)
+    for (i = 0; i < 1024; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE || bullet->state == BULLET_DESPAWN)
         {
@@ -599,7 +599,7 @@ i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
     i32 x;
     i32 y;
 
-    if (g_BulletManager.bulletCount >= 0x400)
+    if (g_BulletManager.bulletCount >= 1024)
     {
         return 0;
     }
@@ -637,19 +637,19 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         return laser;
     }
 
-    for (i = 0; i < 0x40; i++, laser++)
+    for (i = 0; i < 64; i++, laser++)
     {
         if (laser->inUse)
         {
             continue;
         }
 
-        g_AnmManager->SetAnmIdxAndExecuteScript(&laser->vm0, laserShooter->sprite + 0x20a);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&laser->vm0, laserShooter->sprite + 522);
         UselessStack::FourBytes();
         g_AnmManager->SetActiveSprite(&laser->vm0,
                                       (i32)laser->vm0.activeSpriteIdx +
                                           (i32)laserShooter->spriteOffset);
-        g_AnmManager->InitializeAndSetActiveSprite(&laser->vm1, g_BulletSpriteOffset16Px[laserShooter->spriteOffset] + 0x292);
+        g_AnmManager->InitializeAndSetActiveSprite(&laser->vm1, g_BulletSpriteOffset16Px[laserShooter->spriteOffset] + 658);
         laser->vm1.blendMode = 1;
         laser->pos = laserShooter->position;
         laser->color = laserShooter->spriteOffset;
@@ -903,7 +903,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
     arg->bulletsPtrs[1] = NULL;
     arg->bulletsPtrs[0] = NULL;
 
-    for (i = 0; i < 0x400; i++)
+    for (i = 0; i < 1024; i++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -966,7 +966,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                     if ((bullet->exFlags & 0xdc0) != 0)
                     {
                         bullet->outOfBoundsTime++;
-                        if (bullet->outOfBoundsTime >= 0x80)
+                        if (bullet->outOfBoundsTime >= 128)
                         {
                             bullet->Initialize();
                             goto bullet_loop_continue;
@@ -1078,14 +1078,14 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         blockIdx--;
         if (blockIdx < 0)
         {
-            blockIdx = 0x3ff;
-            bullet += 0x400;
+            blockIdx = 1023;
+            bullet += 1024;
         }
         bullet--;
     }
 
     laser = arg->lasers;
-    for (i = 0; i < 0x40; i++, laser++)
+    for (i = 0; i < 64; i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -1117,11 +1117,11 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             if ((laser->flags & 1) != 0)
             {
                 alpha = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
-                if (alpha > 0xff)
+                if (alpha > 255)
                 {
-                    alpha = 0xff;
+                    alpha = 255;
                 }
-                laser->vm0.color.color = alpha << 0x18;
+                laser->vm0.color.color = alpha << 24;
             }
             else
             {
@@ -1148,7 +1148,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             }
             if (laser->timer >= laser->hitboxStartTime)
             {
-                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
             }
             if (laser->timer < laser->startTime)
             {
@@ -1158,7 +1158,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             laser->state++;
             laser->targetWidth = laser->width;
         case LASER_ACTIVE:
-            g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+            g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
             if (laser->timer < laser->duration)
             {
                 break;
@@ -1174,11 +1174,11 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             if ((laser->flags & 1) != 0)
             {
                 alpha = laser->timer.AsFloat() * 255.0f / (f32)laser->startTime;
-                if (alpha > 0xff)
+                if (alpha > 255)
                 {
-                    alpha = 0xff;
+                    alpha = 255;
                 }
-                laser->vm0.color.color = alpha << 0x18;
+                laser->vm0.color.color = alpha << 24;
             }
             else
             {
@@ -1194,7 +1194,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             }
             if (laser->timer < laser->hitboxEndTime)
             {
-                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 0xc == 0);
+                g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
             }
             if (laser->timer < laser->endTime)
             {
@@ -1268,7 +1268,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
     i32 i;
 
     laser = arg->lasers;
-    for (i = 0; i < 0x40; i++, laser++)
+    for (i = 0; i < 64; i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -1328,13 +1328,13 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {
-        if (g_AnmManager->LoadAnms(0xb, "data/etama.anm", 0x200) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_BULLETS, "data/etama.anm", ANM_OFFSET_BULLETS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
     }
 
-    for (i = 0; i < 0xb; i++)
+    for (i = 0; i < 11; i++)
     {
         g_AnmManager->SetAnmIdxAndExecuteScript(
             &arg->bulletTypeTemplates[i].spriteBullet,
@@ -1372,18 +1372,18 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
             {
                 switch (g_BulletTypeInfos[i].anmFileIdx)
                 {
-                case 0x202:
+                case 514:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
                     break;
-                case 0x204:
-                case 0x206:
+                case 516:
+                case 518:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
                     break;
-                case 0x205:
+                case 517:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
@@ -1401,12 +1401,12 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
                 {
                     switch (g_BulletTypeInfos[i].anmFileIdx)
                     {
-                    case 0x208:
+                    case 520:
                         arg->bulletTypeTemplates[i].grazeSize.x = 5.0f;
                         arg->bulletTypeTemplates[i].grazeSize.y = 5.0f;
                         arg->bulletTypeTemplates[i].collisionType = 1;
                         break;
-                    case 0x209:
+                    case 521:
                         arg->bulletTypeTemplates[i].grazeSize.x = 8.0f;
                         arg->bulletTypeTemplates[i].grazeSize.y = 8.0f;
                         arg->bulletTypeTemplates[i].collisionType = 2;
@@ -1436,10 +1436,10 @@ ZunResult BulletManager::DeletedCallback(BulletManager *arg)
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {
-        g_AnmManager->ReleaseAnm(0xb);
-        g_AnmManager->ReleaseAnm(0xc);
-        g_AnmManager->ReleaseAnm(0xd);
-        g_AnmManager->ReleaseAnm(0xe);
+        g_AnmManager->ReleaseAnm(11);
+        g_AnmManager->ReleaseAnm(12);
+        g_AnmManager->ReleaseAnm(13);
+        g_AnmManager->ReleaseAnm(14);
     }
     return ZUN_SUCCESS;
 }
@@ -1459,7 +1459,7 @@ ZunResult BulletManager::RegisterChain(const char *etamaAnmPath)
     g_BulletManagerCalcChain.deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     g_BulletManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_BulletManagerCalcChain, 0xc))
+    if (g_Chain.AddToCalcChain(&g_BulletManagerCalcChain, 12))
     {
         return ZUN_ERROR;
     }
@@ -1488,7 +1488,7 @@ void BulletManager::StopBulletMovement()
     i32 i;
 
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 0x400; i++, bullet++)
+    for (i = 0; i < 1024; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {

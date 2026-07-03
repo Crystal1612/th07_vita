@@ -81,7 +81,7 @@ SoundPlayer g_SoundPlayer;
 SoundPlayer::SoundPlayer()
 {
     memset(this, 0, sizeof(SoundPlayer));
-    for (i32 i = 0; i < 0x80; i++)
+    for (i32 i = 0; i < 128; i++)
     {
         this->unusedSoundVolRelated[i] = -1;
     }
@@ -99,12 +99,12 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     DSBUFFERDESC bufdesc;
 
     memset(this, 0, sizeof(SoundPlayer));
-    for (i32 i = 0; i < 0x80; i++)
+    for (i32 i = 0; i < 128; i++)
     {
         this->unusedSoundVolRelated[i] = -1;
     }
     this->manager = new CSoundManager;
-    if (FAILED(this->manager->Initialize(gameWindow, 2, 2, 0xac44, 0x10)))
+    if (FAILED(this->manager->Initialize(gameWindow, 2, 2, 44100, 16)))
     {
         // STRING: TH07 0x0049604c
         g_GameErrorContext.Log("DirectSound オブジェクトの初期化が失敗したよ\r\n");
@@ -115,17 +115,17 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     this->directSoundHdl = this->manager->GetDirectSound();
     this->backgroundMusicThreadHandle = NULL;
     memset(&bufdesc, 0, sizeof(DSBUFFERDESC));
-    bufdesc.dwSize = 0x24;
-    bufdesc.dwFlags = 0x8008;
+    bufdesc.dwSize = sizeof(DSBUFFERDESC);
+    bufdesc.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
     bufdesc.dwBufferBytes = 0x8000;
     memset(&wavFormat, 0, sizeof(WAVEFORMATEX));
     wavFormat.cbSize = 0;
     wavFormat.wFormatTag = 1;
     wavFormat.nChannels = 2;
-    wavFormat.nSamplesPerSec = 0xac44;
-    wavFormat.nAvgBytesPerSec = 0x2b110;
+    wavFormat.nSamplesPerSec = 44100;
+    wavFormat.nAvgBytesPerSec = 176400;
     wavFormat.nBlockAlign = 4;
-    wavFormat.wBitsPerSample = 0x10;
+    wavFormat.wBitsPerSample = 16;
     bufdesc.lpwfxFormat = &wavFormat;
     if (FAILED(this->directSoundHdl->CreateSoundBuffer(
             &bufdesc, &this->initSoundBuffer, NULL)))
@@ -144,7 +144,7 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     this->initSoundBuffer->Unlock(audioBuffer1Start, audioBuffer1Len,
                                   audioBuffer2Start, audioBuffer2Len);
     this->initSoundBuffer->Play(0, 0, 1);
-    SetTimer(gameWindow, 0, 0xfa, NULL);
+    SetTimer(gameWindow, 0, 250, NULL);
     this->gameWindow = gameWindow;
     // STRING: TH07 0x00496024
     g_GameErrorContext.Log("DirectSound は正常に初期化されました\r\n");
@@ -161,7 +161,7 @@ ZunResult SoundPlayer::Release()
         return ZUN_SUCCESS;
     }
 
-    for (i = 0; i < 0x80; i++)
+    for (i = 0; i < 128; i++)
     {
         SAFE_RELEASE(this->duplicateSoundBuffers[i]);
         SAFE_RELEASE(this->soundBuffers[i]);
@@ -173,7 +173,7 @@ ZunResult SoundPlayer::Release()
     SAFE_RELEASE(this->initSoundBuffer);
     SAFE_DELETE(this->backgroundMusic);
     SAFE_DELETE(this->manager);
-    for (i = 0; i < 0x10; i++)
+    for (i = 0; i < 16; i++)
     {
         SAFE_FREE(this->bgmPreloadData[i]);
     }
@@ -313,8 +313,8 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
     }
 
     memset(&dsBuffer, 0, sizeof(DSBUFFERDESC));
-    dsBuffer.dwSize = 0x24;
-    dsBuffer.dwFlags = 0x8088;
+    dsBuffer.dwSize = sizeof(DSBUFFERDESC);
+    dsBuffer.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_CTRLVOLUME | DSBCAPS_LOCSOFTWARE;
     dsBuffer.dwBufferBytes = formatSize;
     dsBuffer.lpwfxFormat = &wavData;
     if (FAILED(this->directSoundHdl->CreateSoundBuffer(
@@ -384,7 +384,9 @@ ZunResult SoundPlayer::StartBGM(const char *path)
         NULL, 0, BackgroundMusicPlayerThread, g_Supervisor.hwndGameWindow, 0,
         &this->backgroundMusicThreadId);
     if (FAILED(hr = this->manager->CreateStreaming(
-                   &this->backgroundMusic, path, 0x10100, GUID_NULL, 0x10,
+                   &this->backgroundMusic, path,
+                   DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLPOSITIONNOTIFY,
+                   GUID_NULL, 16,
                    notifySize, this->backgroundMusicUpdateEvent, pzwf)))
     {
         // STRING: TH07 0x00495f70
@@ -442,7 +444,7 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
     // STRING: TH07 0x00495f38
     DebugPrint("Streming BGM PreLoad %d\r\n", idx);
     handle = CreateFileA(this->bgmArchivePath, GENERIC_READ, 1, NULL, 3,
-                         0x8000080, NULL);
+                         FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
     if (handle == INVALID_HANDLE_VALUE)
     {
         // STRING: TH07 0x00495f14
@@ -518,8 +520,8 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
     if (FAILED(hr = this->manager->CreateStreamingFromMemory(
                    &this->backgroundMusic, this->bgmPreloadDataCursor[idx],
                    this->bgmPreloadAllocSizes[idx], this->bgmPreloadFmtData[idx],
-                   0x10100, GUID_NULL, 0x10, notifySize,
-                   this->backgroundMusicUpdateEvent)))
+                   DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLPOSITIONNOTIFY,
+                   GUID_NULL, 16, notifySize, this->backgroundMusicUpdateEvent)))
     {
         DebugPrint(
             "error : ストリーミング用サウンドバッファを作成出来ませんでした\r\n");
@@ -542,13 +544,13 @@ void SoundPlayer::StopBGM()
         this->backgroundMusic->Stop();
         if (this->backgroundMusicThreadHandle)
         {
-            PostThreadMessageA(this->backgroundMusicThreadId, 0x12, 0, 0);
+            PostThreadMessageA(this->backgroundMusicThreadId, WM_QUIT, 0, 0);
             // STRING: TH07 0x00495ebc
             DebugPrint("stop m_dwNotifyThreadID\r\n");
-            while (WaitForSingleObject(this->backgroundMusicThreadHandle, 0x100) !=
+            while (WaitForSingleObject(this->backgroundMusicThreadHandle, 256) !=
                    0)
             {
-                PostThreadMessageA(this->backgroundMusicThreadId, 0x12, 0, 0);
+                PostThreadMessageA(this->backgroundMusicThreadId, WM_QUIT, 0, 0);
             }
             // STRING: TH07 0x00495eb0
             DebugPrint("stop comp\r\n");
@@ -797,15 +799,15 @@ loop:
             {
                 break;
             }
-            PostThreadMessageA(this->backgroundMusicThreadId, 0x12, 0, 0);
+            PostThreadMessageA(this->backgroundMusicThreadId, WM_QUIT, 0, 0);
         }
         else if (commandCursor->arg2 == 2)
         {
-            if (WaitForSingleObject(this->backgroundMusicThreadHandle, 0x100))
+            if (WaitForSingleObject(this->backgroundMusicThreadHandle, 256))
             {
                 // STRING: TH07 0x00495d70
                 DebugPrint("Sound : Thread Stop Wait Stage\r\n");
-                PostThreadMessageA(this->backgroundMusicThreadId, 0x12, 0, 0);
+                PostThreadMessageA(this->backgroundMusicThreadId, WM_QUIT, 0, 0);
                 commandCursor->arg2--;
             }
             else
@@ -882,7 +884,7 @@ loop:
     default:
         goto loop_breakout;
     }
-    for (i = 0; i < 0x1f; i++, commandCursor++)
+    for (i = 0; i < 31; i++, commandCursor++)
     {
         if (commandCursor->opcode == 0)
         {
@@ -942,7 +944,9 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
     while (!stopped)
     {
         waitObj = MsgWaitForMultipleObjects(
-            1, &g_SoundPlayer.backgroundMusicUpdateEvent, 0, 0xffffffff, 0xbf);
+            1, &g_SoundPlayer.backgroundMusicUpdateEvent, 0, 0xffffffff,
+            QS_HOTKEY | QS_PAINT | QS_TIMER | QS_POSTMESSAGE |
+            QS_MOUSEBUTTON | QS_MOUSEMOVE | QS_KEY);
         if (!g_SoundPlayer.backgroundMusic)
         {
             stopped = true;
@@ -962,7 +966,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
         case 1:
             while (PeekMessageA(&msg, NULL, 0, 0, 1))
             {
-                if (msg.message == 0x12)
+                if (msg.message == WM_QUIT)
                 {
                     stopped = true;
                 }
@@ -978,7 +982,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
 // FUNCTION: TH07 0x0044d2f0
 void SoundPlayer::PushCommand(AudioOpcode opcode, i32 arg1, const char *arg2)
 {
-    for (i32 i = 0; i < 0x1f; i++)
+    for (i32 i = 0; i < 31; i++)
     {
         if (this->commandQueue[i].opcode != 0)
         {

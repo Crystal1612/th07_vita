@@ -261,9 +261,9 @@ u32 MainMenu::OnUpdatePreInput()
         }
         if (this->vmCount == 0)
         {
-            this->vmCount = 0xa4;
+            this->vmCount = 164;
             this->vmHead = new AnmVm[this->vmCount];
-            g_AnmManager->ExecuteVmsAnms(this->vmHead, 0x900, this->vmCount);
+            g_AnmManager->ExecuteVmsAnms(this->vmHead, 2304, this->vmCount);
         }
         g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 2);
         for (i = 0; i < 8; i++)
@@ -287,7 +287,7 @@ u32 MainMenu::OnUpdatePreInput()
             this->stateTimer = 0;
             this->menuSubState = 0;
             this->idleFrames = 0;
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xd);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 13);
             this->cursorVm->SetInterrupt(2);
             g_GameManager.SetReplay(0);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -441,7 +441,7 @@ u32 MainMenu::OnUpdatePreInput()
                 this->stateTimer = 0;
                 this->menuSubState = 0;
                 this->idleFrames = 0;
-                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xd);
+                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 13);
                 this->cursorVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case 5:
@@ -468,7 +468,7 @@ u32 MainMenu::OnUpdatePreInput()
                 g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 1);
                 if (g_Supervisor.cfg.musicMode == 2)
                 {
-                    g_Supervisor.midiOutput->PlayLoaded(0x1e);
+                    g_Supervisor.midiOutput->PlayLoaded(30);
                 }
                 break;
             }
@@ -574,62 +574,62 @@ u32 MainMenu::OnUpdateOptionsMenu()
     }
     this->selected = this->cursor;
 
-    for (i = 0x12; i <= 0x16; i++)
+    for (i = 18; i <= 22; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.lifeCount + 0x12;
+    i = g_Supervisor.cfg.lifeCount + 18;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
 
-    for (i = 0x17; i <= 0x18; i++)
+    for (i = 23; i <= 24; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.colorMode16bit + 0x17;
+    i = g_Supervisor.cfg.colorMode16bit + 23;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
 
-    for (i = 0x19; i <= 0x1b; i++)
+    for (i = 25; i <= 27; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.musicMode + 0x19;
+    i = g_Supervisor.cfg.musicMode + 25;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
 
-    for (i = 0x1c; i <= 0x1d; i++)
+    for (i = 28; i <= 29; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.playSounds + 0x1c;
+    i = g_Supervisor.cfg.playSounds + 28;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
 
-    for (i = 0x1e; i <= 0x1f; i++)
+    for (i = 30; i <= 31; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.windowed + 0x1e;
+    i = g_Supervisor.cfg.windowed + 30;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
 
-    for (i = 0x20; i <= 0x21; i++)
+    for (i = 32; i <= 33; i++)
     {
         g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                       this->vmHead[i].baseSpriteIdx + 1);
     }
-    i = g_Supervisor.cfg.slowMode + 0x20;
+    i = g_Supervisor.cfg.slowMode + 32;
     g_AnmManager->SetActiveSprite(
         &this->vmHead[i],
         (i32)this->vmHead[i].baseSpriteIdx);
@@ -667,7 +667,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             g_Supervisor.StopAudio();
             if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
             {
-                g_Supervisor.midiOutput->PlayLoaded(0x1e);
+                g_Supervisor.midiOutput->PlayLoaded(30);
             }
             if (g_Supervisor.cfg.musicMode == MUSIC_OFF)
             {
@@ -803,7 +803,7 @@ skip_right_sound:
         this->idleFrames = 0;
     }
 
-    if (this->idleFrames >= 0xe10)
+    if (this->idleFrames >= 3600)
     {
         goto LAB_00456cc0;
     }
@@ -923,22 +923,22 @@ u32 MainMenu::OnUpdateKeyConfig()
         if (this->stateTimer == 0)
         {
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 4);
-            for (i = 0; i < 0xc; i++)
+            for (i = 0; i < 12; i++)
             {
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[i + 0x23],
-                    this->vmHead[i + 0x23].baseSpriteIdx + 1);
+                    &this->vmHead[i + 35],
+                    this->vmHead[i + 35].baseSpriteIdx + 1);
             }
             g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 0x23],
-                (i32)this->vmHead[this->cursor + 0x23].baseSpriteIdx);
+                &this->vmHead[this->cursor + 35],
+                (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             this->controlMapping = g_Supervisor.cfg.controllerMapping;
             g_Supervisor.cfg.controllerMapping.upButton = -1;
             g_Supervisor.cfg.controllerMapping.downButton = -1;
 
-            vm = &this->vmHead[0x2f];
+            vm = &this->vmHead[47];
             UpdateMenuDigits(vm, this->controlMapping.shootButton);
             vm += 2;
             UpdateMenuDigits(vm, this->controlMapping.bombButton);
@@ -960,23 +960,23 @@ u32 MainMenu::OnUpdateKeyConfig()
             this->selected = -1;
         }
         this->menuSubState = 1;
-        for (i = 0; (u32)i < 0xc; i++)
+        for (i = 0; (u32)i < 12; i++)
         {
             g_AnmManager->DrawStringFormat2(&this->vms[i], 0xfff0e0, 0x300000,
                                             g_KeyConfigStrings[i]);
         }
     case 1:
-        if (MoveCursorVertical(0xc))
+        if (MoveCursorVertical(12))
         {
-            for (i = 0; i < 0xc; i++)
+            for (i = 0; i < 12; i++)
             {
-                g_AnmManager->SetActiveSprite(&this->vmHead[i + 0x23],
-                                              this->vmHead[i + 0x23].baseSpriteIdx +
+                g_AnmManager->SetActiveSprite(&this->vmHead[i + 35],
+                                              this->vmHead[i + 35].baseSpriteIdx +
                                                   1);
             }
             g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 0x23],
-                (i32)this->vmHead[this->cursor + 0x23].baseSpriteIdx);
+                &this->vmHead[this->cursor + 35],
+                (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
         }
         if (this->selected != this->cursor)
         {
@@ -987,7 +987,7 @@ u32 MainMenu::OnUpdateKeyConfig()
         }
         this->selected = this->cursor;
 
-        vm = &this->vmHead[0x2f];
+        vm = &this->vmHead[47];
         UpdateMenuDigits(vm, this->controlMapping.shootButton);
         vm += 2;
         UpdateMenuDigits(vm, this->controlMapping.bombButton);
@@ -1006,25 +1006,25 @@ u32 MainMenu::OnUpdateKeyConfig()
         vm += 2;
         UpdateMenuDigits(vm, this->controlMapping.rightButton);
 
-        for (i = 0x41; i <= 0x42; i++)
+        for (i = 65; i <= 66; i++)
         {
             g_AnmManager->SetActiveSprite(&this->vmHead[i],
                                           this->vmHead[i].baseSpriteIdx + 1);
         }
-        i = g_Supervisor.cfg.shotSlow + 0x41;
+        i = g_Supervisor.cfg.shotSlow + 65;
         g_AnmManager->SetActiveSprite(
             &this->vmHead[i],
             (i32)this->vmHead[i].baseSpriteIdx);
 
         controllerState = Controller::GetControllerState();
-        for (btnPressed = 0; btnPressed < 0x20; btnPressed++)
+        for (btnPressed = 0; btnPressed < 32; btnPressed++)
         {
             if (controllerState[btnPressed] & 0x80)
             {
                 break;
             }
         }
-        if (btnPressed < 0x20 && g_LastJoystickInput != btnPressed)
+        if (btnPressed < 32 && g_LastJoystickInput != btnPressed)
         {
             switch (this->cursor)
             {
@@ -1172,12 +1172,12 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             }
             else if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
             {
-                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xc);
+                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 12);
                 this->cursor = 4;
             }
             else
             {
-                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0x16);
+                g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 22);
             }
             if (this->gameState != STATE_EXTRA_SELECT_DIFFICULTY)
             {
@@ -1188,12 +1188,12 @@ u32 MainMenu::OnUpdateSelectDifficulty()
                 for (i = 0; i < 4; i++)
                 {
                     g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 0x43],
-                        this->vmHead[i + 0x43].baseSpriteIdx + 1);
+                        &this->vmHead[i + 67],
+                        this->vmHead[i + 67].baseSpriteIdx + 1);
                 }
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x43],
-                    (i32)this->vmHead[this->cursor + 0x43].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 67],
+                    (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
             }
             else
             {
@@ -1205,12 +1205,12 @@ u32 MainMenu::OnUpdateSelectDifficulty()
                 for (i = 0; i < 2; i++)
                 {
                     g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 0xa2],
-                        this->vmHead[i + 0xa2].baseSpriteIdx + 1);
+                        &this->vmHead[i + 162],
+                        this->vmHead[i + 162].baseSpriteIdx + 1);
                 }
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0xa2],
-                    (i32)this->vmHead[this->cursor + 0xa2].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 162],
+                    (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
             }
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
@@ -1222,7 +1222,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             this->cursor = 0;
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
-        if (this->stateTimer == 0x1e)
+        if (this->stateTimer == 30)
         {
             this->menuSubState = 1;
         }
@@ -1240,24 +1240,24 @@ u32 MainMenu::OnUpdateSelectDifficulty()
                 for (i = 0; i < 4; i++)
                 {
                     g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 0x43],
-                        this->vmHead[i + 0x43].baseSpriteIdx + 1);
+                        &this->vmHead[i + 67],
+                        this->vmHead[i + 67].baseSpriteIdx + 1);
                 }
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x43],
-                    (i32)this->vmHead[this->cursor + 0x43].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 67],
+                    (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
             }
             else if (numDifficulties == 2)
             {
                 for (i = 0; i < 2; i++)
                 {
                     g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 0xa2],
-                        this->vmHead[i + 0xa2].baseSpriteIdx + 1);
+                        &this->vmHead[i + 162],
+                        this->vmHead[i + 162].baseSpriteIdx + 1);
                 }
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0xa2],
-                    (i32)this->vmHead[this->cursor + 0xa2].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 162],
+                    (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
             }
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
@@ -1349,18 +1349,18 @@ u32 MainMenu::OnUpdateSelectCharacter()
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 8);
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
-                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x43]
+                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67]
                     .SetInterrupt(9);
             }
             else
             {
                 if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
                 {
-                    this->vmHead[0xa1].SetInterrupt(9);
+                    this->vmHead[161].SetInterrupt(9);
                 }
                 else
                 {
-                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x9e]
+                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158]
                         .SetInterrupt(9);
                 }
             }
@@ -1391,97 +1391,97 @@ u32 MainMenu::OnUpdateSelectCharacter()
                     }
                 }
             }
-            this->vmHead[0x48].active = 0;
-            this->vmHead[0x49].active = 0;
-            this->vmHead[0x47].active = 0;
-            this->vmHead[0x50].active = 0;
-            this->vmHead[0x53].active = 0;
-            this->vmHead[0x4b].active = 0;
-            this->vmHead[0x4c].active = 0;
-            this->vmHead[0x4a].active = 0;
-            this->vmHead[0x51].active = 0;
-            this->vmHead[0x54].active = 0;
-            this->vmHead[0x4e].active = 0;
-            this->vmHead[0x4f].active = 0;
-            this->vmHead[0x4d].active = 0;
-            this->vmHead[0x52].active = 0;
-            this->vmHead[0x55].active = 0;
+            this->vmHead[72].active = 0;
+            this->vmHead[73].active = 0;
+            this->vmHead[71].active = 0;
+            this->vmHead[80].active = 0;
+            this->vmHead[83].active = 0;
+            this->vmHead[75].active = 0;
+            this->vmHead[76].active = 0;
+            this->vmHead[74].active = 0;
+            this->vmHead[81].active = 0;
+            this->vmHead[84].active = 0;
+            this->vmHead[78].active = 0;
+            this->vmHead[79].active = 0;
+            this->vmHead[77].active = 0;
+            this->vmHead[82].active = 0;
+            this->vmHead[85].active = 0;
             switch (this->cursor)
             {
             case 0:
-                this->vmHead[0x48].active = 1;
-                this->vmHead[0x49].active = 1;
-                this->vmHead[0x47].active = 1;
-                this->vmHead[0x50].active = 1;
-                this->vmHead[0x53].active = 1;
+                this->vmHead[72].active = 1;
+                this->vmHead[73].active = 1;
+                this->vmHead[71].active = 1;
+                this->vmHead[80].active = 1;
+                this->vmHead[83].active = 1;
                 break;
             case 1:
-                this->vmHead[0x4b].active = 1;
-                this->vmHead[0x4c].active = 1;
-                this->vmHead[0x4a].active = 1;
-                this->vmHead[0x51].active = 1;
-                this->vmHead[0x54].active = 1;
+                this->vmHead[75].active = 1;
+                this->vmHead[76].active = 1;
+                this->vmHead[74].active = 1;
+                this->vmHead[81].active = 1;
+                this->vmHead[84].active = 1;
                 break;
             case 2:
-                this->vmHead[0x4e].active = 1;
-                this->vmHead[0x4f].active = 1;
-                this->vmHead[0x4d].active = 1;
-                this->vmHead[0x52].active = 1;
-                this->vmHead[0x55].active = 1;
+                this->vmHead[78].active = 1;
+                this->vmHead[79].active = 1;
+                this->vmHead[77].active = 1;
+                this->vmHead[82].active = 1;
+                this->vmHead[85].active = 1;
                 break;
             }
             switch (this->cursor)
             {
             case 0:
-                this->vmHead[0x47].SetInterrupt(9);
-                this->vmHead[0x4a].SetInterrupt(8);
-                this->vmHead[0x4d].SetInterrupt(8);
-                this->vmHead[0x4a].color.bytes.a = 0;
-                this->vmHead[0x4d].color.bytes.a = 0;
-                this->vmHead[0x50].SetInterrupt(9);
-                this->vmHead[0x51].SetInterrupt(8);
-                this->vmHead[0x52].SetInterrupt(8);
-                this->vmHead[0x51].color.bytes.a = 0;
-                this->vmHead[0x52].color.bytes.a = 0;
-                this->vmHead[0x53].SetInterrupt(9);
-                this->vmHead[0x54].SetInterrupt(8);
-                this->vmHead[0x55].SetInterrupt(8);
-                this->vmHead[0x54].color.bytes.a = 0;
-                this->vmHead[0x55].color.bytes.a = 0;
+                this->vmHead[71].SetInterrupt(9);
+                this->vmHead[74].SetInterrupt(8);
+                this->vmHead[77].SetInterrupt(8);
+                this->vmHead[74].color.bytes.a = 0;
+                this->vmHead[77].color.bytes.a = 0;
+                this->vmHead[80].SetInterrupt(9);
+                this->vmHead[81].SetInterrupt(8);
+                this->vmHead[82].SetInterrupt(8);
+                this->vmHead[81].color.bytes.a = 0;
+                this->vmHead[82].color.bytes.a = 0;
+                this->vmHead[83].SetInterrupt(9);
+                this->vmHead[84].SetInterrupt(8);
+                this->vmHead[85].SetInterrupt(8);
+                this->vmHead[84].color.bytes.a = 0;
+                this->vmHead[85].color.bytes.a = 0;
                 break;
             case 1:
-                this->vmHead[0x47].SetInterrupt(8);
-                this->vmHead[0x4a].SetInterrupt(9);
-                this->vmHead[0x4d].SetInterrupt(8);
-                this->vmHead[0x47].color.bytes.a = 0;
-                this->vmHead[0x4d].color.bytes.a = 0;
-                this->vmHead[0x50].SetInterrupt(8);
-                this->vmHead[0x51].SetInterrupt(9);
-                this->vmHead[0x52].SetInterrupt(8);
-                this->vmHead[0x50].color.bytes.a = 0;
-                this->vmHead[0x52].color.bytes.a = 0;
-                this->vmHead[0x53].SetInterrupt(8);
-                this->vmHead[0x54].SetInterrupt(9);
-                this->vmHead[0x55].SetInterrupt(8);
-                this->vmHead[0x53].color.bytes.a = 0;
-                this->vmHead[0x55].color.bytes.a = 0;
+                this->vmHead[71].SetInterrupt(8);
+                this->vmHead[74].SetInterrupt(9);
+                this->vmHead[77].SetInterrupt(8);
+                this->vmHead[71].color.bytes.a = 0;
+                this->vmHead[77].color.bytes.a = 0;
+                this->vmHead[80].SetInterrupt(8);
+                this->vmHead[81].SetInterrupt(9);
+                this->vmHead[82].SetInterrupt(8);
+                this->vmHead[80].color.bytes.a = 0;
+                this->vmHead[82].color.bytes.a = 0;
+                this->vmHead[83].SetInterrupt(8);
+                this->vmHead[84].SetInterrupt(9);
+                this->vmHead[85].SetInterrupt(8);
+                this->vmHead[83].color.bytes.a = 0;
+                this->vmHead[85].color.bytes.a = 0;
                 break;
             case 2:
-                this->vmHead[0x47].SetInterrupt(8);
-                this->vmHead[0x4a].SetInterrupt(8);
-                this->vmHead[0x4d].SetInterrupt(9);
-                this->vmHead[0x4a].color.bytes.a = 0;
-                this->vmHead[0x47].color.bytes.a = 0;
-                this->vmHead[0x50].SetInterrupt(8);
-                this->vmHead[0x51].SetInterrupt(8);
-                this->vmHead[0x52].SetInterrupt(9);
-                this->vmHead[0x50].color.bytes.a = 0;
-                this->vmHead[0x51].color.bytes.a = 0;
-                this->vmHead[0x53].SetInterrupt(8);
-                this->vmHead[0x54].SetInterrupt(8);
-                this->vmHead[0x55].SetInterrupt(9);
-                this->vmHead[0x53].color.bytes.a = 0;
-                this->vmHead[0x54].color.bytes.a = 0;
+                this->vmHead[71].SetInterrupt(8);
+                this->vmHead[74].SetInterrupt(8);
+                this->vmHead[77].SetInterrupt(9);
+                this->vmHead[74].color.bytes.a = 0;
+                this->vmHead[71].color.bytes.a = 0;
+                this->vmHead[80].SetInterrupt(8);
+                this->vmHead[81].SetInterrupt(8);
+                this->vmHead[82].SetInterrupt(9);
+                this->vmHead[80].color.bytes.a = 0;
+                this->vmHead[81].color.bytes.a = 0;
+                this->vmHead[83].SetInterrupt(8);
+                this->vmHead[84].SetInterrupt(8);
+                this->vmHead[85].SetInterrupt(9);
+                this->vmHead[83].color.bytes.a = 0;
+                this->vmHead[84].color.bytes.a = 0;
                 break;
             }
             this->menuSubState = 0;
@@ -1493,7 +1493,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             this->cursor = 0;
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
-        if (this->stateTimer == 0x1e)
+        if (this->stateTimer == 30)
         {
             this->menuSubState = 1;
         }
@@ -1527,55 +1527,55 @@ u32 MainMenu::OnUpdateSelectCharacter()
                     }
                 }
             }
-            this->vmHead[0x48].flags = this->vmHead[0x48].flags | 2;
-            this->vmHead[0x49].flags = this->vmHead[0x49].flags | 2;
-            this->vmHead[0x47].flags = this->vmHead[0x47].flags | 2;
-            this->vmHead[0x50].flags = this->vmHead[0x50].flags | 2;
-            this->vmHead[0x53].flags = this->vmHead[0x53].flags | 2;
-            this->vmHead[0x4b].flags = this->vmHead[0x4b].flags | 2;
-            this->vmHead[0x4c].flags = this->vmHead[0x4c].flags | 2;
-            this->vmHead[0x4a].flags = this->vmHead[0x4a].flags | 2;
-            this->vmHead[0x51].flags = this->vmHead[0x51].flags | 2;
-            this->vmHead[0x54].flags = this->vmHead[0x54].flags | 2;
-            this->vmHead[0x4e].flags = this->vmHead[0x4e].flags | 2;
-            this->vmHead[0x4f].flags = this->vmHead[0x4f].flags | 2;
-            this->vmHead[0x4d].flags = this->vmHead[0x4d].flags | 2;
-            this->vmHead[0x52].flags = this->vmHead[0x52].flags | 2;
-            this->vmHead[0x55].flags = this->vmHead[0x55].flags | 2;
+            this->vmHead[72].flags = this->vmHead[72].flags | 2;
+            this->vmHead[73].flags = this->vmHead[73].flags | 2;
+            this->vmHead[71].flags = this->vmHead[71].flags | 2;
+            this->vmHead[80].flags = this->vmHead[80].flags | 2;
+            this->vmHead[83].flags = this->vmHead[83].flags | 2;
+            this->vmHead[75].flags = this->vmHead[75].flags | 2;
+            this->vmHead[76].flags = this->vmHead[76].flags | 2;
+            this->vmHead[74].flags = this->vmHead[74].flags | 2;
+            this->vmHead[81].flags = this->vmHead[81].flags | 2;
+            this->vmHead[84].flags = this->vmHead[84].flags | 2;
+            this->vmHead[78].flags = this->vmHead[78].flags | 2;
+            this->vmHead[79].flags = this->vmHead[79].flags | 2;
+            this->vmHead[77].flags = this->vmHead[77].flags | 2;
+            this->vmHead[82].flags = this->vmHead[82].flags | 2;
+            this->vmHead[85].flags = this->vmHead[85].flags | 2;
             switch (this->cursor)
             {
             case 0:
-                this->vmHead[0x47].SetInterrupt(9);
-                this->vmHead[0x4a].SetInterrupt(8);
-                this->vmHead[0x4d].SetInterrupt(8);
-                this->vmHead[0x50].SetInterrupt(9);
-                this->vmHead[0x51].SetInterrupt(8);
-                this->vmHead[0x52].SetInterrupt(8);
-                this->vmHead[0x53].SetInterrupt(9);
-                this->vmHead[0x54].SetInterrupt(8);
-                this->vmHead[0x55].SetInterrupt(8);
+                this->vmHead[71].SetInterrupt(9);
+                this->vmHead[74].SetInterrupt(8);
+                this->vmHead[77].SetInterrupt(8);
+                this->vmHead[80].SetInterrupt(9);
+                this->vmHead[81].SetInterrupt(8);
+                this->vmHead[82].SetInterrupt(8);
+                this->vmHead[83].SetInterrupt(9);
+                this->vmHead[84].SetInterrupt(8);
+                this->vmHead[85].SetInterrupt(8);
                 break;
             case 1:
-                this->vmHead[0x47].SetInterrupt(8);
-                this->vmHead[0x4a].SetInterrupt(9);
-                this->vmHead[0x4d].SetInterrupt(8);
-                this->vmHead[0x50].SetInterrupt(8);
-                this->vmHead[0x51].SetInterrupt(9);
-                this->vmHead[0x52].SetInterrupt(8);
-                this->vmHead[0x53].SetInterrupt(8);
-                this->vmHead[0x54].SetInterrupt(9);
-                this->vmHead[0x55].SetInterrupt(8);
+                this->vmHead[71].SetInterrupt(8);
+                this->vmHead[74].SetInterrupt(9);
+                this->vmHead[77].SetInterrupt(8);
+                this->vmHead[80].SetInterrupt(8);
+                this->vmHead[81].SetInterrupt(9);
+                this->vmHead[82].SetInterrupt(8);
+                this->vmHead[83].SetInterrupt(8);
+                this->vmHead[84].SetInterrupt(9);
+                this->vmHead[85].SetInterrupt(8);
                 break;
             case 2:
-                this->vmHead[0x47].SetInterrupt(8);
-                this->vmHead[0x4a].SetInterrupt(8);
-                this->vmHead[0x4d].SetInterrupt(9);
-                this->vmHead[0x50].SetInterrupt(8);
-                this->vmHead[0x51].SetInterrupt(8);
-                this->vmHead[0x52].SetInterrupt(9);
-                this->vmHead[0x53].SetInterrupt(8);
-                this->vmHead[0x54].SetInterrupt(8);
-                this->vmHead[0x55].SetInterrupt(9);
+                this->vmHead[71].SetInterrupt(8);
+                this->vmHead[74].SetInterrupt(8);
+                this->vmHead[77].SetInterrupt(9);
+                this->vmHead[80].SetInterrupt(8);
+                this->vmHead[81].SetInterrupt(8);
+                this->vmHead[82].SetInterrupt(9);
+                this->vmHead[83].SetInterrupt(8);
+                this->vmHead[84].SetInterrupt(8);
+                this->vmHead[85].SetInterrupt(9);
                 break;
             }
         }
@@ -1644,36 +1644,36 @@ u32 MainMenu::OnUpdateSelectShotType()
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 10);
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
-                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x43]
+                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67]
                     .SetInterrupt(9);
             }
             else
             {
                 if (g_GameManager.HasUnlockedPhantomAndMaxClears() == 0)
                 {
-                    this->vmHead[0xa1].SetInterrupt(9);
+                    this->vmHead[161].SetInterrupt(9);
                 }
                 else
                 {
-                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 0x9e]
+                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158]
                         .SetInterrupt(9);
                 }
             }
-            this->vmHead[0x48].active = 0;
-            this->vmHead[0x49].active = 0;
-            this->vmHead[0x47].active = 0;
-            this->vmHead[0x50].active = 0;
-            this->vmHead[0x53].active = 0;
-            this->vmHead[0x4b].active = 0;
-            this->vmHead[0x4c].active = 0;
-            this->vmHead[0x4a].active = 0;
-            this->vmHead[0x51].active = 0;
-            this->vmHead[0x54].active = 0;
-            this->vmHead[0x4e].active = 0;
-            this->vmHead[0x4f].active = 0;
-            this->vmHead[0x4d].active = 0;
-            this->vmHead[0x52].active = 0;
-            this->vmHead[0x55].active = 0;
+            this->vmHead[72].active = 0;
+            this->vmHead[73].active = 0;
+            this->vmHead[71].active = 0;
+            this->vmHead[80].active = 0;
+            this->vmHead[83].active = 0;
+            this->vmHead[75].active = 0;
+            this->vmHead[76].active = 0;
+            this->vmHead[74].active = 0;
+            this->vmHead[81].active = 0;
+            this->vmHead[84].active = 0;
+            this->vmHead[78].active = 0;
+            this->vmHead[79].active = 0;
+            this->vmHead[77].active = 0;
+            this->vmHead[82].active = 0;
+            this->vmHead[85].active = 0;
             this->cursor = g_GameManager.shotType;
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
@@ -1702,37 +1702,37 @@ u32 MainMenu::OnUpdateSelectShotType()
             switch (g_GameManager.character)
             {
             case CHAR_REIMU:
-                this->vmHead[0x48].active = 1;
-                this->vmHead[0x49].active = 1;
-                this->vmHead[0x47].active = 1;
+                this->vmHead[72].active = 1;
+                this->vmHead[73].active = 1;
+                this->vmHead[71].active = 1;
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x49 - this->cursor],
-                    this->vmHead[0x49 - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[73 - this->cursor],
+                    this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x48],
-                    (i32)this->vmHead[this->cursor + 0x48].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 72],
+                    (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
                 break;
             case CHAR_MARISA:
-                this->vmHead[0x4b].active = 1;
-                this->vmHead[0x4c].active = 1;
-                this->vmHead[0x4a].active = 1;
+                this->vmHead[75].active = 1;
+                this->vmHead[76].active = 1;
+                this->vmHead[74].active = 1;
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x4c - this->cursor],
-                    this->vmHead[0x4c - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[76 - this->cursor],
+                    this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x4b],
-                    (i32)this->vmHead[this->cursor + 0x4b].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 75],
+                    (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
                 break;
             case CHAR_SAKUYA:
-                this->vmHead[0x4e].active = 1;
-                this->vmHead[0x4f].active = 1;
-                this->vmHead[0x4d].active = 1;
+                this->vmHead[78].active = 1;
+                this->vmHead[79].active = 1;
+                this->vmHead[77].active = 1;
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x4f - this->cursor],
-                    this->vmHead[0x4f - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[79 - this->cursor],
+                    this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x4e],
-                    (i32)this->vmHead[this->cursor + 0x4e].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 78],
+                    (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
                 break;
             }
             this->menuSubState = 0;
@@ -1745,7 +1745,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             this->cursor = g_GameManager.currentStage - 1;
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
-        if (this->stateTimer == 0x1e)
+        if (this->stateTimer == 30)
         {
             this->menuSubState = 1;
         }
@@ -1781,27 +1781,27 @@ u32 MainMenu::OnUpdateSelectShotType()
             {
             case CHAR_REIMU:
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x49 - this->cursor],
-                    this->vmHead[0x49 - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[73 - this->cursor],
+                    this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x48],
-                    (i32)this->vmHead[this->cursor + 0x48].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 72],
+                    (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
                 break;
             case CHAR_MARISA:
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x4c - this->cursor],
-                    this->vmHead[0x4c - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[76 - this->cursor],
+                    this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x4b],
-                    (i32)this->vmHead[this->cursor + 0x4b].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 75],
+                    (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
                 break;
             case CHAR_SAKUYA:
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[0x4f - this->cursor],
-                    this->vmHead[0x4f - this->cursor].baseSpriteIdx + 1);
+                    &this->vmHead[79 - this->cursor],
+                    this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
                 g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 0x4e],
-                    (i32)this->vmHead[this->cursor + 0x4e].baseSpriteIdx);
+                    &this->vmHead[this->cursor + 78],
+                    (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
                 break;
             }
         }
@@ -1851,21 +1851,21 @@ u32 MainMenu::OnUpdateSelectShotType()
             {
                 SetGameState(STATE_EXTRA_SELECT_CHARACTER);
             }
-            this->vmHead[0x48].active = 1;
-            this->vmHead[0x49].active = 1;
-            this->vmHead[0x47].active = 1;
-            this->vmHead[0x50].active = 1;
-            this->vmHead[0x53].active = 1;
-            this->vmHead[0x4b].active = 1;
-            this->vmHead[0x4c].active = 1;
-            this->vmHead[0x4a].active = 1;
-            this->vmHead[0x51].active = 1;
-            this->vmHead[0x54].active = 1;
-            this->vmHead[0x4e].active = 1;
-            this->vmHead[0x4f].active = 1;
-            this->vmHead[0x4d].active = 1;
-            this->vmHead[0x52].active = 1;
-            this->vmHead[0x55].active = 1;
+            this->vmHead[72].active = 1;
+            this->vmHead[73].active = 1;
+            this->vmHead[71].active = 1;
+            this->vmHead[80].active = 1;
+            this->vmHead[83].active = 1;
+            this->vmHead[75].active = 1;
+            this->vmHead[76].active = 1;
+            this->vmHead[74].active = 1;
+            this->vmHead[81].active = 1;
+            this->vmHead[84].active = 1;
+            this->vmHead[78].active = 1;
+            this->vmHead[79].active = 1;
+            this->vmHead[77].active = 1;
+            this->vmHead[82].active = 1;
+            this->vmHead[85].active = 1;
             return CHAIN_CALLBACK_RESULT_EXECUTE_AGAIN;
         }
         break;
@@ -1886,45 +1886,45 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     case 0:
         if (this->stateTimer == 0)
         {
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0x12);
-            this->vmHead[0x48].active = 0;
-            this->vmHead[0x49].active = 0;
-            this->vmHead[0x47].active = 0;
-            this->vmHead[0x50].active = 0;
-            this->vmHead[0x53].active = 0;
-            this->vmHead[0x4b].active = 0;
-            this->vmHead[0x4c].active = 0;
-            this->vmHead[0x4a].active = 0;
-            this->vmHead[0x51].active = 0;
-            this->vmHead[0x54].active = 0;
-            this->vmHead[0x4e].active = 0;
-            this->vmHead[0x4f].active = 0;
-            this->vmHead[0x4d].active = 0;
-            this->vmHead[0x52].active = 0;
-            this->vmHead[0x55].active = 0;
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 18);
+            this->vmHead[72].active = 0;
+            this->vmHead[73].active = 0;
+            this->vmHead[71].active = 0;
+            this->vmHead[80].active = 0;
+            this->vmHead[83].active = 0;
+            this->vmHead[75].active = 0;
+            this->vmHead[76].active = 0;
+            this->vmHead[74].active = 0;
+            this->vmHead[81].active = 0;
+            this->vmHead[84].active = 0;
+            this->vmHead[78].active = 0;
+            this->vmHead[79].active = 0;
+            this->vmHead[77].active = 0;
+            this->vmHead[82].active = 0;
+            this->vmHead[85].active = 0;
             switch (g_GameManager.character)
             {
             case CHAR_REIMU:
-                this->vmHead[0x48].active = 1;
-                this->vmHead[0x49].active = 1;
-                this->vmHead[0x47].active = 1;
+                this->vmHead[72].active = 1;
+                this->vmHead[73].active = 1;
+                this->vmHead[71].active = 1;
                 break;
             case CHAR_MARISA:
-                this->vmHead[0x4b].active = 1;
-                this->vmHead[0x4c].active = 1;
-                this->vmHead[0x4a].active = 1;
+                this->vmHead[75].active = 1;
+                this->vmHead[76].active = 1;
+                this->vmHead[74].active = 1;
                 break;
             case CHAR_SAKUYA:
-                this->vmHead[0x4e].active = 1;
-                this->vmHead[0x4f].active = 1;
-                this->vmHead[0x4d].active = 1;
+                this->vmHead[78].active = 1;
+                this->vmHead[79].active = 1;
+                this->vmHead[77].active = 1;
                 break;
             }
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             g_GameManager.practice = 1;
         }
-        if (this->stateTimer == 0x1e)
+        if (this->stateTimer == 30)
         {
             this->menuSubState = 1;
         }
@@ -1965,21 +1965,21 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             this->cursor = g_GameManager.shotType;
             SetGameState(STATE_NORMAL_SELECT_SHOTTYPE);
-            this->vmHead[0x48].active = 1;
-            this->vmHead[0x49].active = 1;
-            this->vmHead[0x47].active = 1;
-            this->vmHead[0x50].active = 1;
-            this->vmHead[0x53].active = 1;
-            this->vmHead[0x4b].active = 1;
-            this->vmHead[0x4c].active = 1;
-            this->vmHead[0x4a].active = 1;
-            this->vmHead[0x51].active = 1;
-            this->vmHead[0x54].active = 1;
-            this->vmHead[0x4e].active = 1;
-            this->vmHead[0x4f].active = 1;
-            this->vmHead[0x4d].active = 1;
-            this->vmHead[0x52].active = 1;
-            this->vmHead[0x55].active = 1;
+            this->vmHead[72].active = 1;
+            this->vmHead[73].active = 1;
+            this->vmHead[71].active = 1;
+            this->vmHead[80].active = 1;
+            this->vmHead[83].active = 1;
+            this->vmHead[75].active = 1;
+            this->vmHead[76].active = 1;
+            this->vmHead[74].active = 1;
+            this->vmHead[81].active = 1;
+            this->vmHead[84].active = 1;
+            this->vmHead[78].active = 1;
+            this->vmHead[79].active = 1;
+            this->vmHead[77].active = 1;
+            this->vmHead[82].active = 1;
+            this->vmHead[85].active = 1;
             return CHAIN_CALLBACK_RESULT_EXECUTE_AGAIN;
         }
         break;
@@ -2013,13 +2013,13 @@ u32 MainMenu::OnUpdateSelectReplay()
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xe);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 14);
             this->cursor = 0;
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             this->cursorVm = NULL;
             local_10 = 0;
-            for (i = 0; i < 0xf; i++)
+            for (i = 0; i < 15; i++)
             {
                 // STRING: TH07 0x004967bc
                 sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
@@ -2048,7 +2048,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             local_c = FindFirstFileA("th7_ud????.rpy", &local_194);
             if (local_c != INVALID_HANDLE_VALUE)
             {
-                for (i = 0; i < 0x2d; i++)
+                for (i = 0; i < 45; i++)
                 {
                     local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(
                         local_194.cFileName, 1);
@@ -2092,11 +2092,11 @@ u32 MainMenu::OnUpdateSelectReplay()
         break;
     case 1:
         MoveCursorVertical(this->replayFilesNum);
-        if (0xf < this->replayFilesNum)
+        if (15 < this->replayFilesNum)
         {
             if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
             {
-                this->cursor = this->cursor - 0xf;
+                this->cursor = this->cursor - 15;
                 if (this->cursor < 0)
                 {
                     this->cursor = this->cursor + this->replayFilesNum;
@@ -2105,7 +2105,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             }
             if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_RIGHT))
             {
-                this->cursor = this->cursor + 0xf;
+                this->cursor = this->cursor + 15;
                 if (this->cursor >= this->replayFilesNum)
                 {
                     this->cursor = this->cursor - this->replayFilesNum;
@@ -2128,8 +2128,8 @@ u32 MainMenu::OnUpdateSelectReplay()
 
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             this->menuSubState = 2;
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xf);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 15);
+            this->vmHead[this->chosenReplay % 15 + 135].SetInterrupt(17);
             this->currentReplay = (ReplayHeaderAndData *)FileSystem::OpenFile(
                 this->replayFilenames[this->chosenReplay], 1);
             this->currentReplay = ReplayManager::ValidateReplayData(
@@ -2164,7 +2164,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             this->menuSubState = 4;
             this->inputDelayTimer = 0;
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0x10);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 16);
         }
         break;
     case 2:
@@ -2198,14 +2198,14 @@ u32 MainMenu::OnUpdateSelectReplay()
         this->selectedStage = this->cursor;
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0x13);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 19);
+            this->vmHead[this->chosenReplay % 15 + 135].SetInterrupt(17);
             this->menuSubState = 3;
             this->cursor = 0;
-            this->vmHead[0x9e].pendingInterrupt = 21;
-            this->vmHead[0x9f].pendingInterrupt = 21;
-            this->vmHead[0xa0].pendingInterrupt = 21;
-            this->vmHead[this->cursor + 0x9e].pendingInterrupt = 20;
+            this->vmHead[158].pendingInterrupt = 21;
+            this->vmHead[159].pendingInterrupt = 21;
+            this->vmHead[160].pendingInterrupt = 21;
+            this->vmHead[this->cursor + 158].pendingInterrupt = 20;
             break;
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
@@ -2214,7 +2214,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->currentReplay = NULL;
             this->menuSubState = 1;
             this->stateTimer = 0;
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xe);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 14);
             this->cursor = this->chosenReplay;
             break;
         }
@@ -2223,10 +2223,10 @@ u32 MainMenu::OnUpdateSelectReplay()
         i = MoveCursorVertical(3);
         if (i != 0)
         {
-            this->vmHead[0x9e].pendingInterrupt = 21;
-            this->vmHead[0x9f].pendingInterrupt = 21;
-            this->vmHead[0xa0].pendingInterrupt = 21;
-            this->vmHead[this->cursor + 0x9e].pendingInterrupt = 20;
+            this->vmHead[158].pendingInterrupt = 21;
+            this->vmHead[159].pendingInterrupt = 21;
+            this->vmHead[160].pendingInterrupt = 21;
+            this->vmHead[this->cursor + 158].pendingInterrupt = 20;
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
@@ -2253,8 +2253,8 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->menuSubState = 2;
             this->stateTimer = 0;
             this->cursor = this->selectedStage;
-            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 0xf);
-            this->vmHead[this->chosenReplay % 0xf + 0x87].SetInterrupt(0x11);
+            g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 15);
+            this->vmHead[this->chosenReplay % 15 + 135].SetInterrupt(17);
             break;
         }
         break;
@@ -2281,7 +2281,7 @@ i32 MainMenu::DrawReplayMenu()
     i32 i;
     AnmVm *vm;
 
-    vm = &this->vmHead[0x86];
+    vm = &this->vmHead[134];
     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
                                 // STRING: TH07 0x0049557c
                                 "No.   Name       Date  Player   Rank");
@@ -2316,12 +2316,12 @@ i32 MainMenu::DrawReplayMenu()
     {
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.isSelected = 0;
-        vm = &this->vmHead[0x85];
+        vm = &this->vmHead[133];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
                                     // STRING: TH07 0x00495554
                                     "       %2.3f%%",
                                     (double)this->currentReplay->data.slowdownRate);
-        vm = &this->vmHead[0x96];
+        vm = &this->vmHead[150];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
                                     // STRING: TH07 0x00495540
                                     "Stage    LastScore");
@@ -2402,7 +2402,7 @@ i32 MainMenu::DrawPracticeMenu()
 
     g_AsciiManager.color = 0xffffffff;
     g_AsciiManager.isSelected = 0;
-    vm = &this->vmHead[0x83];
+    vm = &this->vmHead[131];
     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
                                 // STRING: TH07 0x004954e4
                                 "Stage    HI-Score");
@@ -2598,7 +2598,7 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 3;
     }
-    else if (g_GameManager.plst.gameHours < 0xe)
+    else if (g_GameManager.plst.gameHours < 14)
     {
         g_GameManager.maxRetries = 4;
     }
@@ -2614,14 +2614,14 @@ ZunResult MainMenu::ActualAddedCallback()
         g_AnmManager->LoadSurface(0, "data/title/phantasm.jpg");
         while (frameCount < 900)
         {
-            g_AnmManager->SetVertexShader(0xff);
+            g_AnmManager->SetVertexShader(255);
             g_AnmManager->SetSprite(NULL);
             g_AnmManager->SetTexture(NULL);
-            g_AnmManager->SetColorOp(0xff);
-            g_AnmManager->SetBlendMode(0xff);
-            g_AnmManager->SetZWriteDisable(0xff);
+            g_AnmManager->SetColorOp(255);
+            g_AnmManager->SetBlendMode(255);
+            g_AnmManager->SetZWriteDisable(255);
             g_AnmManager->ClearFrameState();
-            g_AnmManager->SetCameraMode(0xff);
+            g_AnmManager->SetCameraMode(255);
             g_AnmManager->SetColor(0x80808080);
             g_Supervisor.d3dDevice->BeginScene();
             g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
@@ -2631,17 +2631,17 @@ ZunResult MainMenu::ActualAddedCallback()
                 local_1c.top = 0.0f;
                 local_1c.right = 639.0f;
                 local_1c.bottom = 479.0f;
-                local_20.bytes.a = (60 - frameCount) * 0xff / 60;
+                local_20.bytes.a = (60 - frameCount) * 255 / 60;
                 local_20.bytes.r = local_20.bytes.g = local_20.bytes.b = 0;
                 ScreenEffect::DrawSquare(&local_1c, local_20.color);
             }
-            else if (0x348 < frameCount)
+            else if (frameCount > 840)
             {
                 local_34.left = 0.0f;
                 local_34.top = 0.0f;
                 local_34.right = 639.0f;
                 local_34.bottom = 479.0f;
-                local_24.bytes.a = (frameCount - 840) * 0xff / 60;
+                local_24.bytes.a = (frameCount - 840) * 255 / 60;
                 local_24.bytes.r = local_24.bytes.g = local_24.bytes.b = 0;
                 ScreenEffect::DrawSquare(&local_34, local_24.color);
             }
@@ -2694,7 +2694,7 @@ ZunResult MainMenu::ActualAddedCallback()
         GameManager::DrawLoadingSprite();
     }
     // STRING: TH07 0x004954a8
-    if (g_AnmManager->LoadAnms(0x20, "data/title01.anm", 0x900) != ZUN_SUCCESS)
+    if (g_AnmManager->LoadAnms(ANM_FILE_TITLE, "data/title01.anm", ANM_OFFSET_TITLE) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -2707,16 +2707,16 @@ ZunResult MainMenu::ActualAddedCallback()
         }
         if (g_Supervisor.lastTotalPlayTimeUpdate == 0)
         {
-            BombEffects::RegisterChain(0, 0x46, 0xffffff, 0, 0);
+            BombEffects::RegisterChain(0, 70, 0xffffff, 0, 0);
         }
         else
         {
-            BombEffects::RegisterChain(0, 0x46, 0xffffff, 0, 0);
+            BombEffects::RegisterChain(0, 70, 0xffffff, 0, 0);
         }
     }
-    for (i = 0; i < 0xe; i++)
+    for (i = 0; i < 14; i++)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms[i], 0x706);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms[i], 1798);
         g_AnmManager->SetActiveSprite(&this->vms[i],
                                       this->vms[i].activeSpriteIdx + i);
     }
@@ -2749,7 +2749,7 @@ ZunResult MainMenu::Release()
 ZunResult MainMenu::DeletedCallback(MainMenu *arg)
 {
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
-    for (i32 i = 0x20; i <= 0x29; i++)
+    for (i32 i = 32; i <= 41; i++)
     {
         g_AnmManager->ReleaseAnm(i);
     }

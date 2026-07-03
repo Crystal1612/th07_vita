@@ -38,7 +38,7 @@ C_ASSERT(sizeof(PauseMenu) == 0x101c);
 struct AsciiManagerPopup
 {
     u8 digits[8];
-    D3DXVECTOR3 position;
+    Float3 position;
     D3DCOLOR color;
     ZunTimer timer;
     u8 inUse;
@@ -50,9 +50,9 @@ C_ASSERT(sizeof(AsciiManagerPopup) == 0x28);
 struct AsciiManagerString
 {
     char text[64];
-    D3DXVECTOR3 position;
+    Float3 position;
     D3DCOLOR color;
-    D3DXVECTOR2 scale;
+    Float2 scale;
     i32 isSelected;
     i32 isGui;
 };
@@ -127,7 +127,7 @@ struct AsciiManager
     AsciiManagerString strings[256];
     i32 numStrings;
     D3DCOLOR color;
-    D3DXVECTOR2 scale;
+    Float2 scale;
     i32 isGui;
     i32 isSelected;
     i32 uiFadeState;

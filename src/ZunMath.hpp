@@ -31,6 +31,24 @@ inline void sincosf(f32 *outSin, f32 *outCos, f32 angle)
     }
 }
 
+// POD versions of D3DXVECTOR2 and D3DXVECTOR3 that ZUN used for whatever
+// reason
+
+struct Float3
+{
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+struct Float2
+{
+    f32 x;
+    f32 y;
+};
+
+// Stuff that could probably help for making a portable version idk
+
 struct ZunVec2
 {
     f32 x;

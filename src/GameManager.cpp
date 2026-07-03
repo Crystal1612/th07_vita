@@ -150,7 +150,7 @@ void GameManager::ExtendFromPoints()
         AddLivesRemaining(1);
         g_SoundPlayer.PlaySoundByIdx(SOUND_EXTEND, 0);
         IncreaseSubrank(200);
-        g_Gui.flags = (g_Gui.flags & 0xfffffffc) | 2;
+        g_Gui.showLives = 2;
     }
     else
     {
@@ -159,7 +159,7 @@ void GameManager::ExtendFromPoints()
             AddBombsRemaining(1);
             g_SoundPlayer.PlaySoundByIdx(SOUND_EXTEND, 0);
             IncreaseSubrank(200);
-            g_Gui.flags = (g_Gui.flags & 0xfffffff3) | 8;
+            g_Gui.showBombs = 2;
         }
     }
 }
@@ -196,7 +196,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     g_Supervisor.viewport.Height = arg->arcadeRegionSize.y;
     g_Supervisor.viewport.MinZ = 0.0f;
     g_Supervisor.viewport.MaxZ = 1.0f;
-    g_AnmManager->SetCameraMode(0xff);
+    g_AnmManager->SetCameraMode(255);
     if (g_GameManager.replay &&
         g_GameManager.replayStage == 1 &&
         !g_Gui.HasCurrentMsgIdx())
@@ -217,16 +217,16 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_Supervisor.curState = 1;
         }
         arg->demoFrames = arg->demoFrames + 1;
-        if ((arg->demoIdx == 0 && arg->demoFrames == 0x1fa4) ||
-            (arg->demoIdx == 1 && arg->demoFrames == 0x1b6c) ||
-            (arg->demoIdx == 2 && arg->demoFrames == 0x120c))
+        if ((arg->demoIdx == 0 && arg->demoFrames == 8100) ||
+            (arg->demoIdx == 1 && arg->demoFrames == 7020) ||
+            (arg->demoIdx == 2 && arg->demoFrames == 4620))
         {
-            BombEffects::RegisterChain(2, 0x78, 0, 0, 0);
+            BombEffects::RegisterChain(2, 120, 0, 0, 0);
             g_Supervisor.FadeOutMusic(3.0f);
         }
-        if ((arg->demoIdx == 0 && arg->demoFrames >= 0x201c) ||
-            (arg->demoIdx == 1 && arg->demoFrames >= 0x1be4) ||
-            (arg->demoIdx == 2 && arg->demoFrames >= 0x1284))
+        if ((arg->demoIdx == 0 && arg->demoFrames >= 8220) ||
+            (arg->demoIdx == 1 && arg->demoFrames >= 7140) ||
+            (arg->demoIdx == 2 && arg->demoFrames >= 4740))
         {
             g_Supervisor.curState = 1;
             return CHAIN_CALLBACK_RESULT_BREAK;
@@ -237,7 +237,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     g_GameManager.csumFloat = (f32)csum + (f32)g_GameManager.globals->rng2[3];
     for (i = 0; i < 7; i++)
     {
-        if (arg->globals->rng1[i] < 0x198f || arg->globals->rng1[i] > 0x1a02f)
+        if (arg->globals->rng1[i] < 6543 || arg->globals->rng1[i] > 106543)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
@@ -261,7 +261,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     }
     for (i = 0; i < 8; i++)
     {
-        if (arg->globals->rng2[i] < 0x198f || arg->globals->rng2[i] > 0x1a02f)
+        if (arg->globals->rng2[i] < 6543 || arg->globals->rng2[i] > 106543)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
@@ -284,9 +284,9 @@ u32 GameManager::OnUpdate(GameManager *arg)
             arg->globals->score = arg->globals->guiScore;
         }
         scoreIncrement = (arg->globals->score - arg->globals->guiScore) >> 5;
-        if (scoreIncrement >= 0x8d55e)
+        if (scoreIncrement >= 578910)
         {
-            scoreIncrement = 0x8d55e;
+            scoreIncrement = 578910;
         }
         else if (scoreIncrement == 0)
         {
@@ -333,8 +333,8 @@ u32 GameManager::OnUpdate(GameManager *arg)
     }
     for (i = 0; i < 5; i++)
     {
-        if (arg->globals->csumData[i] < 0x198f ||
-            arg->globals->csumData[i] > 0x1a02f)
+        if (arg->globals->csumData[i] < 6543 ||
+            arg->globals->csumData[i] > 106543)
         {
             g_GameManager.csumFloat = -9999.0f;
         }
@@ -343,14 +343,14 @@ u32 GameManager::OnUpdate(GameManager *arg)
     {
         g_GameManager.slowModeSlowActive = 0;
         arg->bulletLagTime = arg->bulletLagTime + 1;
-        if ((g_BulletManager.bulletCount >= 0x140 && arg->bulletLagTime % 3 == 0) ||
-            (g_BulletManager.bulletCount < 0x140 && g_BulletManager.bulletCount >= 0xe0 && arg->bulletLagTime % 4 == 0) ||
-            (g_BulletManager.bulletCount < 0xe0 && g_BulletManager.bulletCount >= 0x80 && arg->bulletLagTime % 5 == 0))
+        if ((g_BulletManager.bulletCount >= 320 && arg->bulletLagTime % 3 == 0) ||
+            (g_BulletManager.bulletCount < 320 && g_BulletManager.bulletCount >= 224 && arg->bulletLagTime % 4 == 0) ||
+            (g_BulletManager.bulletCount < 224 && g_BulletManager.bulletCount >= 128 && arg->bulletLagTime % 5 == 0))
         {
             g_GameManager.slowModeSlowActive = 1;
             return CHAIN_CALLBACK_RESULT_BREAK;
         }
-        if (g_BulletManager.bulletCount < 0x80)
+        if (g_BulletManager.bulletCount < 128)
         {
             arg->bulletLagTime = 0;
         }
@@ -382,7 +382,7 @@ void GameManager::DrawLoadingSprite()
     rect.top = 0.0f;
     rect.right = 640.0f;
     rect.bottom = 480.0f;
-    g_AnmManager->InitializeAndSetActiveSprite(&spriteVm, 0x10c);
+    g_AnmManager->InitializeAndSetActiveSprite(&spriteVm, 268);
     spritePos.x = 528.0f;
     spritePos.y = 448.0f;
     spritePos.z = 0.0f;
@@ -423,14 +423,14 @@ void GameManager::InitializeRngAndCsum()
 {
     u32 i;
 
-    g_GameManager.globals->cherryStart = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+    g_GameManager.globals->cherryStart = g_Rng.GetRandomU32InRange(100000) + 6543;
     for (i = 0; i < 7; i++)
     {
-        g_GameManager.globals->rng1[i] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+        g_GameManager.globals->rng1[i] = g_Rng.GetRandomU32InRange(100000) + 6543;
     }
     for (i = 0; i < 8; i++)
     {
-        g_GameManager.globals->rng2[i] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+        g_GameManager.globals->rng2[i] = g_Rng.GetRandomU32InRange(100000) + 6543;
     }
     for (i = 0; i < 2; i++)
     {
@@ -454,7 +454,7 @@ void GameManager::InitializeRngAndCsum()
     }
     for (i = 0; i < 5; i++)
     {
-        g_GameManager.globals->csumData[i] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+        g_GameManager.globals->csumData[i] = g_Rng.GetRandomU32InRange(100000) + 6543;
     }
     g_GameManager.globals->curCsum = g_GameManager.globals->rng1[2];
     i32 csum = g_GameManager.ComputeGameIntegrityCsum();
@@ -550,7 +550,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         SAFE_DELETE(arg->defaultCfg);
         SAFE_DELETE(arg->globals);
 
-        size = g_Rng.GetRandomU32InRange(0xffff) + 0x10;
+        size = g_Rng.GetRandomU32InRange(65535) + 16;
         arg->tmpBuffer = malloc(size);
         arg->defaultCfg = new GameConfiguration;
         arg->globals = new ZunGlobals;
@@ -593,7 +593,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals->pointItemsCollectedForExtend = 0;
         if (arg->difficulty < 4)
         {
-            arg->globals->nextNeededPointItemsForExtend = 0x32;
+            arg->globals->nextNeededPointItemsForExtend = 50;
         }
         else
         {
@@ -868,7 +868,7 @@ ZunResult GameManager::DeletedCallback(GameManager *arg)
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI &&
         g_Supervisor.midiOutput)
     {
-        g_Supervisor.midiOutput->PlayLoaded(0x1e);
+        g_Supervisor.midiOutput->PlayLoaded(30);
     }
     while (g_SoundPlayer.ProcessQueues())
         ;

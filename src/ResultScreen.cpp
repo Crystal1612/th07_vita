@@ -185,7 +185,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         goto RECREATE_SCORE;
     }
 
-    if (scoreData->magic != 0xb)
+    if (scoreData->magic != 11)
     {
         Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
         goto RECREATE_SCORE;
@@ -646,9 +646,9 @@ void ResultScreen::WriteScore()
     sd = (ScoreDat *)fileBuffer;
     sd->dataOffset = sizeof(ScoreDat);
     sd->csum = 0;
-    sd->xorseed[1] = g_Rng.GetRandomU16InRange(0x100);
-    sd->unused_6 = g_Rng.GetRandomU16InRange(0x100);
-    sd->magic = 0xb;
+    sd->xorseed[1] = g_Rng.GetRandomU16InRange(256);
+    sd->unused_6 = g_Rng.GetRandomU16InRange(256);
+    sd->magic = 11;
     for (remainingSize = 4; remainingSize < (i32)sizeOfFile; remainingSize++)
     {
         sd->csum += ((ScoreDat *)fileBuffer)->xorseed[remainingSize];
@@ -775,17 +775,17 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
 
     switch (arg->resultScreenState)
     {
-    case 0x12:
+    case 18:
         g_Supervisor.curState = 1;
         return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
-    case 0x13:
+    case 19:
         return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
     case 0:
     switchD_00445ddb_caseD_0:
         if (arg->frameTimer == 0)
         {
             vm = arg->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 1;
                 vm->flag6 = 1;
@@ -872,7 +872,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             case 3:
             case 4:
             case 5:
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
                     vm->pendingInterrupt = arg->cursor + 3;
                 }
@@ -885,7 +885,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 arg->lastSpellcardSelected = -1;
                 break;
             case 6:
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
                     vm->pendingInterrupt = 10;
                 }
@@ -898,7 +898,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 arg->lastSpellcardSelected = -1;
                 break;
             case 7:
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
                     vm->pendingInterrupt = 9;
                 }
@@ -910,7 +910,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 break;
             GO_BACK:
             case 8:
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
                     vm->pendingInterrupt = 2;
                 }
@@ -1003,9 +1003,9 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             arg->charUsed = arg->cursor;
             g_AnmManager->DrawStringFormat2(arg->spellcardListVms, 0xffffff, 0,
                                             g_CharacterList[arg->charUsed]);
-            arg->spellcardListVms[0].color.bytes.a = 0xff;
+            arg->spellcardListVms[0].color.bytes.a = 255;
         }
-        if (arg->frameTimer < 0x1e)
+        if (arg->frameTimer < 30)
         {
             break;
         }
@@ -1013,7 +1013,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         {
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = arg->diffPlayed + 3;
             }
@@ -1024,7 +1024,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             arg->resultScreenState = 0;
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 1;
             }
@@ -1061,7 +1061,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                         g_AnmManager, arg->spellcardListVms + vmIdx % 10, 0xffffff, 0,
                         g_GameManager.catk[vmIdx].name);
                 }
-                arg->spellcardListVms[vmIdx % 10].color.bytes.a = 0xff;
+                arg->spellcardListVms[vmIdx % 10].color.bytes.a = 255;
             }
             AnmManager::DrawVmTextFmt(
                 g_AnmManager, arg->spellcardListVms + 10, 0xffffff, 0,
@@ -1069,17 +1069,17 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 "%s %3d–‡’†%3d–‡Žæ“¾iƒLƒƒƒ‰Ø‚è‘Ö‚¦«ªj",
                 g_CharacterList[arg->prevSpellcardListPage], 141,
                 arg->totalPlayCountPerCharacter[arg->spellcardListPage + 1]);
-            arg->spellcardListVms[10].color.bytes.a = 0xff;
+            arg->spellcardListVms[10].color.bytes.a = 255;
         }
-        if (arg->frameTimer < 0x1e)
+        if (arg->frameTimer < 30)
         {
             break;
         }
-        if (MoveCursorHorizontally(arg, 0xf) != 0)
+        if (MoveCursorHorizontally(arg, 15) != 0)
         {
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 10;
             }
@@ -1095,7 +1095,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             arg->resultScreenState = 0;
             arg->frameTimer = 0;
             vm = arg->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 1;
             }
@@ -1107,20 +1107,20 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
     case 10:
         arg->HandleResultKeyboard();
         break;
-    case 0xb:
-    case 0xc:
-    case 0xd:
-    case 0xe:
-    case 0xf:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
         arg->HandleReplaySaveKeyboard();
         break;
-    case 0x10:
-    case 0x11:
+    case 16:
+    case 17:
         arg->CheckConfirmButton();
         break;
-    case 0x14:
-    case 0x15:
-    case 0x16:
+    case 20:
+    case 21:
+    case 22:
         if (arg->DrawStats() != ZUN_SUCCESS)
         {
             goto switchD_00445ddb_caseD_0;
@@ -1128,7 +1128,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         break;
     }
     vm = arg->vms;
-    for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+    for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
     {
         g_AnmManager->ExecuteScript(vm);
     }
@@ -1149,7 +1149,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
     if (g_Supervisor.CanSaveReplay() ||
         (g_Supervisor.flags >> 3 & 1) != 0)
     {
-        this->resultScreenState = 0x10;
+        this->resultScreenState = 16;
         this->frameTimer = 0;
         memcpy(g_GameManager.catk, g_GameManager.catkAgain, 0x4218);
         return ZUN_SUCCESS;
@@ -1160,13 +1160,13 @@ ZunResult ResultScreen::HandleResultKeyboard()
             (u32)g_GameManager.character * 2 + (u32)g_GameManager.shotType;
         this->diffPlayed = g_GameManager.difficulty;
         vm = this->vms;
-        for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+        for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
         {
             vm->pendingInterrupt = this->diffPlayed + 3;
         }
         g_AnmManager->DrawStringFormat2(this->spellcardListVms, 0xffffff, 0,
                                         g_CharacterList[this->charUsed]);
-        this->spellcardListVms[0].color.bytes.a = 0xff;
+        this->spellcardListVms[0].color.bytes.a = 255;
         this->curScore.character = (u8)this->charUsed;
         this->curScore.difficulty = (u8)this->diffPlayed;
         this->curScore.score = g_GameManager.globals->score;
@@ -1202,7 +1202,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
         this->cursor = 0;
         if (this->isClearingReplayName)
         {
-            this->selectedChar = 0x5f;
+            this->selectedChar = 95;
         }
         strcpy(this->replayName, "");
     }
@@ -1273,11 +1273,11 @@ ZunResult ResultScreen::HandleResultKeyboard()
     if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
     {
         cursor = this->cursor >= 8 ? 7 : this->cursor;
-        if (this->selectedChar < 0x5e)
+        if (this->selectedChar < 94)
         {
             this->curScore.name[cursor] = g_AlphabetList[this->selectedChar];
         }
-        else if (this->selectedChar == 0x5e)
+        else if (this->selectedChar == 94)
         {
             this->curScore.name[cursor] = ' ';
         }
@@ -1291,7 +1291,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
             this->cursor++;
             if (this->cursor == 8)
             {
-                this->selectedChar = 0x5f;
+                this->selectedChar = 95;
             }
         }
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
@@ -1312,10 +1312,10 @@ ZunResult ResultScreen::HandleResultKeyboard()
     LAB_004470db:
         g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
     LAB_004470e9:
-        this->resultScreenState = 0x10;
+        this->resultScreenState = 16;
         this->frameTimer = 0;
         vm = this->vms;
-        for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+        for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
         {
             vm->pendingInterrupt = 2;
         }
@@ -1354,34 +1354,34 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
 
     switch (this->resultScreenState)
     {
-    case 0xb:
+    case 11:
         if (this->frameTimer == 60)
         {
             if (g_Supervisor.CanSaveReplay() ||
                 (g_Supervisor.flags >> 3 & 1) != 0)
             {
-                interrupt = 0x13;
+                interrupt = 19;
             }
             else if (g_GameManager.globals->numRetries != 0)
             {
-                interrupt = 0xe;
+                interrupt = 14;
             }
             else
             {
-                interrupt = 0xb;
+                interrupt = 11;
             }
             vm = this->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = (i16)interrupt;
             }
-            if (interrupt != 0xb)
+            if (interrupt != 11)
             {
-                this->resultScreenState = 0xc;
+                this->resultScreenState = 12;
             }
             this->cursor = 0;
         }
-        vm = this->vms + 0x13;
+        vm = this->vms + 19;
         if (this->cursor == 0)
         {
             vm[0].color.color =
@@ -1396,7 +1396,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             vm[1].color.color =
                 (vm[1].color.color & 0xff000000) | 0xff6060;
         }
-        if (this->frameTimer < 0x50)
+        if (this->frameTimer < 80)
         {
             return ZUN_SUCCESS;
         }
@@ -1411,11 +1411,11 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             {
             LAB_004473e3:
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                this->resultScreenState = 0xd;
+                this->resultScreenState = 13;
                 vm = this->vms;
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
-                    vm->pendingInterrupt = 0xc;
+                    vm->pendingInterrupt = 12;
                 }
                 this->frameTimer = 0;
                 goto LAB_0044756a;
@@ -1426,13 +1426,13 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             this->resultScreenState = 2;
             vm = this->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 2;
             }
         }
         break;
-    case 0xc:
+    case 12:
         if (this->frameTimer < 20)
         {
             return ZUN_SUCCESS;
@@ -1443,19 +1443,19 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             this->resultScreenState = 2;
             vm = this->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 2;
             }
         }
         break;
     LAB_0044756a:
-    case 0xd:
+    case 13:
         if (this->frameTimer == 0)
         {
             // STRING: TH07 0x004967d4
             _mkdir("replay");
-            for (vmIdx = 0; vmIdx < 0xf; vmIdx++)
+            for (vmIdx = 0; vmIdx < 15; vmIdx++)
             {
                 sprintf(replayPath, "./replay/th7_%.2d.rpy", vmIdx + 1);
                 replayFile = (ReplayHeaderAndData *)FileSystem::OpenFile(replayPath, 1);
@@ -1477,7 +1477,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             return ZUN_SUCCESS;
         }
 
-        MoveCursor(this, 0xf);
+        MoveCursor(this, 15);
         this->chosenReplayIdx = this->cursor;
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
@@ -1488,48 +1488,48 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             this->defaultReplay.data.score = g_GameManager.globals->score;
             if (*(i32 *)&this->replays[this->cursor].head.magic !=
                     *(i32 *)&"T7RP" ||
-                (this->replays[this->cursor].head.version & 0xfff) != 0x100)
+                (this->replays[this->cursor].head.version & 0xfff) != 256)
             {
                 vm = this->vms;
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
-                    vm->pendingInterrupt = 0x11;
+                    vm->pendingInterrupt = 17;
                 }
-                vm = &this->vms[this->chosenReplayIdx + 0x19];
-                vm->pendingInterrupt = 0x10;
-                this->resultScreenState = 0xe;
+                vm = &this->vms[this->chosenReplayIdx + 25];
+                vm->pendingInterrupt = 16;
+                this->resultScreenState = 14;
             }
             else
             {
                 vm = this->vms;
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
-                    vm->pendingInterrupt = 0xd;
+                    vm->pendingInterrupt = 13;
                 }
-                vm = &this->vms[this->chosenReplayIdx + 0x19];
-                vm->pendingInterrupt = 0x10;
-                this->resultScreenState = 0xf;
+                vm = &this->vms[this->chosenReplayIdx + 25];
+                vm->pendingInterrupt = 16;
+                this->resultScreenState = 15;
             }
             this->cursor = 0;
             this->selectedChar = 0;
             if (this->isClearingReplayName)
             {
-                this->selectedChar = 0x5f;
+                this->selectedChar = 95;
             }
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-            this->resultScreenState = 0xb;
+            this->resultScreenState = 11;
             vm = this->vms;
-            for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+            for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
             {
                 vm->pendingInterrupt = 2;
             }
             this->frameTimer = 0;
         }
         break;
-    case 0xe:
+    case 14:
         if (this->frameTimer < 30)
         {
             return ZUN_SUCCESS;
@@ -1537,10 +1537,10 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_UP))
         {
         WEIRD_ASS_LOOP_WITH_GOTO:
-            this->selectedChar = this->selectedChar - 0x10;
+            this->selectedChar = this->selectedChar - 16;
             if (this->selectedChar < 0)
             {
-                this->selectedChar = this->selectedChar + 0x60;
+                this->selectedChar = this->selectedChar + 96;
             }
             if (g_AlphabetList[this->selectedChar] == ' ')
             {
@@ -1551,10 +1551,10 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_DOWN))
         {
         WEIRD_ASS_LOOP_WITH_GOTO_2:
-            this->selectedChar = this->selectedChar + 0x10;
-            if (this->selectedChar >= 0x60)
+            this->selectedChar = this->selectedChar + 16;
+            if (this->selectedChar >= 96)
             {
-                this->selectedChar = this->selectedChar - 0x60;
+                this->selectedChar = this->selectedChar - 96;
             }
             if (g_AlphabetList[this->selectedChar] == ' ')
             {
@@ -1566,13 +1566,13 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         {
         WEIRD_ASS_LOOP_WITH_GOTO_3:
             this->selectedChar--;
-            if (this->selectedChar % 0x10 == 0xf)
+            if (this->selectedChar % 16 == 15)
             {
-                this->selectedChar = this->selectedChar + 0x10;
+                this->selectedChar = this->selectedChar + 16;
             }
             if (this->selectedChar < 0)
             {
-                this->selectedChar = 0xf;
+                this->selectedChar = 15;
             }
             if (g_AlphabetList[this->selectedChar] == ' ')
             {
@@ -1584,9 +1584,9 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         {
         WEIRD_ASS_LOOP_WITH_GOTO_4:
             this->selectedChar = this->selectedChar + 1;
-            if (this->selectedChar % 0x10 == 0)
+            if (this->selectedChar % 16 == 0)
             {
-                this->selectedChar = this->selectedChar - 0x10;
+                this->selectedChar = this->selectedChar - 16;
             }
             if (g_AlphabetList[this->selectedChar] == ' ')
             {
@@ -1597,11 +1597,11 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_SELECTMENU))
         {
             cursor = this->cursor >= 8 ? 7 : this->cursor;
-            if (this->selectedChar < 0x5e)
+            if (this->selectedChar < 94)
             {
                 this->replayName[cursor] = g_AlphabetList[this->selectedChar];
             }
-            else if (this->selectedChar == 0x5e)
+            else if (this->selectedChar == 94)
             {
                 this->replayName[cursor] = ' ';
             }
@@ -1613,7 +1613,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 this->frameTimer = 0;
                 this->resultScreenState = 2;
                 vm = this->vms;
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
                     vm->pendingInterrupt = 2;
                 }
@@ -1624,7 +1624,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 this->cursor++;
                 if (this->cursor == 8)
                 {
-                    this->selectedChar = 0x5f;
+                    this->selectedChar = 95;
                 }
             }
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
@@ -1645,8 +1645,8 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             goto LAB_004473e3;
         }
         break;
-    case 0xf:
-        vm = this->vms + 0x13;
+    case 15:
+        vm = this->vms + 19;
         if (this->cursor == 0)
         {
             vm[0].color.color =
@@ -1677,15 +1677,15 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             if (this->cursor == 0)
             {
                 vm = this->vms;
-                for (vmIdx = 0; vmIdx < 0x29; vmIdx++, vm++)
+                for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
                 {
-                    vm->pendingInterrupt = 0x11;
+                    vm->pendingInterrupt = 17;
                 }
                 vm = &this->vms[(i32)((i32) & ((StageReplayData *)this->chosenReplayIdx)
-                                                           ->extendsFromPointItems +
-                                                       1)];
-                vm->pendingInterrupt = 0x10;
-                this->resultScreenState = 0xe;
+                                                      ->extendsFromPointItems +
+                                                  1)];
+                vm->pendingInterrupt = 16;
+                this->resultScreenState = 14;
             }
             else
             {
@@ -1705,25 +1705,25 @@ ZunResult ResultScreen::CheckConfirmButton()
 
     switch (this->resultScreenState)
     {
-    case 0x10:
+    case 16:
         if (this->frameTimer <= 30)
         {
-            viewport = &this->vms[0x28];
-            viewport->pendingInterrupt = 0x12;
+            viewport = &this->vms[40];
+            viewport->pendingInterrupt = 18;
         }
         if (this->frameTimer >= 90 && WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            viewport = &this->vms[0x28];
+            viewport = &this->vms[40];
             viewport->pendingInterrupt = 2;
             this->frameTimer = 0;
-            this->resultScreenState = 0x11;
+            this->resultScreenState = 17;
         }
         break;
-    case 0x11:
+    case 17:
         if (this->frameTimer >= 30)
         {
             this->frameTimer = 59;
-            this->resultScreenState = 0xb;
+            this->resultScreenState = 11;
         }
         break;
     }
@@ -2030,7 +2030,7 @@ ZunResult ResultScreen::DrawFinalStats()
     {
     case 16:
     case 17:
-        vm = &this->vms[0x28];
+        vm = &this->vms[40];
         color = vm->color.color;
         g_AsciiManager.color = color;
         rankingProbably = 0.0f;
@@ -2185,18 +2185,18 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_AnmManager->Flush();
     g_Supervisor.viewport.X = 0;
     g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 0x280;
-    g_Supervisor.viewport.Height = 0x1e0;
+    g_Supervisor.viewport.Width = 640;
+    g_Supervisor.viewport.Height = 480;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
-    for (i = 0; i < 0x29; i++, vm++)
+    for (i = 0; i < 41; i++, vm++)
     {
         pos = vm->pos;
         vm->pos += vm->offset;
         g_AnmManager->DrawNoRotation(vm);
         vm->pos = pos;
     }
-    vm = arg->vms + 0x10;
+    vm = arg->vms + 16;
     if (vm->pos.x < 640.0f)
     {
         if (arg->stateStep != 9)
@@ -2360,12 +2360,12 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 else if (arg->frameTimer < 20)
                 {
                     pos[1] +=
-                        (f32)((20 - arg->frameTimer) * 0x21 / 20);
+                        (f32)((20 - arg->frameTimer) * 33 / 20);
                 }
                 else
                 {
                     pos[1] +=
-                        (f32)((arg->frameTimer - 20) * 0x21 / 20);
+                        (f32)((arg->frameTimer - 20) * 33 / 20);
                 }
             }
             if (arg->frameTimer >= 40)
@@ -2374,25 +2374,25 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             }
         }
     }
-    if (arg->resultScreenState == 10 || arg->resultScreenState == 0xe)
+    if (arg->resultScreenState == 10 || arg->resultScreenState == 14)
     {
         pos = D3DXVECTOR3(160.0f, 356.0f, 0.0f);
         for (i = 0; i < 6; i++)
         {
-            for (j = 0; j < 0x10; j++)
+            for (j = 0; j < 16; j++)
             {
                 offsetX = 0.0f;
                 offsetY = 0.0f;
-                if (arg->selectedChar == i * 0x10 + j)
+                if (arg->selectedChar == i * 16 + j)
                 {
                     g_AsciiManager.color = 0xffffffc0;
-                    if (arg->frameTimer % 0x40 < 0x20)
+                    if (arg->frameTimer % 64 < 32)
                     {
-                        offsetX = (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f + 1.2f;
+                        offsetX = (f32)(arg->frameTimer % 32) * 0.8f / 32.0f + 1.2f;
                     }
                     else
                     {
-                        offsetX = 2.0f - (f32)(arg->frameTimer % 0x20) * 0.8f / 32.0f;
+                        offsetX = 2.0f - (f32)(arg->frameTimer % 32) * 0.8f / 32.0f;
                     }
                     g_AsciiManager.scale.x = offsetX;
                     g_AsciiManager.scale.y = offsetX;
@@ -2408,15 +2408,15 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 charPos = pos;
                 charPos.x += offsetX;
                 charPos.y += offsetY;
-                charBuf[0] = g_AlphabetList[i * 0x10 + j];
+                charBuf[0] = g_AlphabetList[i * 16 + j];
                 charBuf[1] = 0;
                 if (i == 5)
                 {
-                    if (j == 0xe)
+                    if (j == 14)
                     {
-                        charBuf[0] = (char)0x80;
+                        charBuf[0] = (char)128;
                     }
-                    else if (j == 0xf)
+                    else if (j == 15)
                     {
                         charBuf[0] = (char)0x81;
                     }
@@ -2432,18 +2432,18 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_AsciiManager.scale.y = 1.0f;
     if (arg->resultScreenState >= 11 && arg->resultScreenState <= 15)
     {
-        vm = &arg->vms[0x12];
+        vm = &arg->vms[18];
         for (i = 0; i < 6; i++, vm++)
         {
             g_AnmManager->DrawNoRotation(vm);
         }
-        vm = &arg->vms[0x18];
+        vm = &arg->vms[24];
         pos = vm->pos;
         vm++;
         AsciiManager::AddFormatText(&g_AsciiManager, &pos,
                                     // STRING: TH07 0x0049641c
                                     "No.   Name     Date   Player Score");
-        for (i = 0; i < 0xf; i++)
+        for (i = 0; i < 15; i++)
         {
             pos = vm->pos;
             vm++;
@@ -2455,7 +2455,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             {
                 g_AsciiManager.color = 0xff808080;
             }
-            if (arg->resultScreenState == 0xe)
+            if (arg->resultScreenState == 14)
             {
                 AsciiManager::AddFormatText(
                     // STRING: TH07 0x00496400
@@ -2475,7 +2475,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             }
             else if (*(i32 *)&arg->replays[i].head.magic !=
                          *(i32 *)&"T7RP" ||
-                     (arg->replays[i].head.version & 0xfff) != 0x100)
+                     (arg->replays[i].head.version & 0xfff) != 256)
             {
                 AsciiManager::AddFormatText(
                     &g_AsciiManager, &pos,
@@ -2498,10 +2498,10 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_AsciiManager.color = 0xffffffff;
     arg->DrawFinalStats();
     if (arg->resultScreenState == 20 || arg->resultScreenState == 21 ||
-        arg->resultScreenState == 0x16)
+        arg->resultScreenState == 22)
     {
         vm = arg->spellcardListVms;
-        for (i = 0; i < 0xe; i++, vm++)
+        for (i = 0; i < 14; i++, vm++)
         {
             g_AnmManager->DrawNoRotation(vm);
         }
@@ -2546,7 +2546,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             }
         }
     }
-    if (arg->resultScreenState != 0x13)
+    if (arg->resultScreenState != 19)
     {
         // STRING: TH07 0x00496394
         if (g_AnmManager->LoadSurface(0, "data/result/result.jpg") != ZUN_SUCCESS)
@@ -2554,25 +2554,25 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             return ZUN_ERROR;
         }
         // STRING: TH07 0x00496380
-        if (g_AnmManager->LoadAnms(0x2a, "data/result00.anm", 0x900) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_RESULT, "data/result00.anm", ANM_OFFSET_RESULT) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         vm = arg->vms;
-        for (i = 0; i < 0x29; i++, vm++)
+        for (i = 0; i < 41; i++, vm++)
         {
             vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
             vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-            g_AnmManager->SetAnmIdxAndExecuteScript(vm, i + 0x900);
+            g_AnmManager->SetAnmIdxAndExecuteScript(vm, i + 2304);
         }
         UselessStack::FourBytes();
-        g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 0x910);
+        g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 2320);
         vm = arg->spellcardListVms;
-        for (i = 0; i < 0xf; i++, vm++)
+        for (i = 0; i < 15; i++, vm++)
         {
             UselessStack::FourBytes();
-            g_AnmManager->InitializeAndSetActiveSprite(vm, i + 0x715);
+            g_AnmManager->InitializeAndSetActiveSprite(vm, i + 1813);
             vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
             vm->anchor = 3;
             vm->fontWidth = 15;
@@ -2595,14 +2595,14 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     // STRING: TH07 0x00496374
     strcpy(arg->lsnmHeader.name, "        ");
     arg->isClearingReplayName = ParseLsnm(arg->scoreDat, &arg->lsnmHeader);
-    if (arg->resultScreenState != 10 && arg->resultScreenState != 0x12)
+    if (arg->resultScreenState != 10 && arg->resultScreenState != 18)
     {
         ParseCatk(arg->scoreDat, g_GameManager.catk);
         ParseClrd(arg->scoreDat, g_GameManager.clrd);
         g_GameManager.HasUnlockedPhantomAndMaxClears();
         ParsePscr(arg->scoreDat, &g_GameManager.pscr[0][0][0]);
     }
-    if (arg->resultScreenState == 0x12)
+    if (arg->resultScreenState == 18)
     {
         if ((u32)g_GameManager
                 .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
@@ -2614,7 +2614,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
                      [g_GameManager.currentStage - 1][g_GameManager.difficulty]
                 .score = g_GameManager.globals->score;
         }
-        arg->resultScreenState = 0xb;
+        arg->resultScreenState = 11;
         strcpy(arg->replayName, arg->lsnmHeader.name);
     }
     for (i = 0; i < 7; i++)
@@ -2637,7 +2637,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     arg->prevSpellcardListPage = 6;
     arg->listScrollAnimState = 0;
     arg->leftArrowVm.activeSpriteIdx = -1;
-    if (arg->resultScreenState == 0x13)
+    if (arg->resultScreenState == 19)
     {
         DeletedCallback(arg);
         return ZUN_ERROR;
@@ -2665,10 +2665,10 @@ ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)
             arg->FreeScore(i, j);
         }
     }
-    g_AnmManager->ReleaseAnm(0x2a);
-    g_AnmManager->ReleaseAnm(0x2b);
-    g_AnmManager->ReleaseAnm(0x2c);
-    g_AnmManager->ReleaseAnm(0x2d);
+    g_AnmManager->ReleaseAnm(42);
+    g_AnmManager->ReleaseAnm(43);
+    g_AnmManager->ReleaseAnm(44);
+    g_AnmManager->ReleaseAnm(45);
     g_AnmManager->ReleaseSurface(0);
     g_Chain.Cut(arg->drawChain);
     arg->drawChain = NULL;
@@ -2695,12 +2695,12 @@ ZunResult ResultScreen::RegisterChain(u32 type)
         }
         else
         {
-            resultScreen->resultScreenState = 0x12;
+            resultScreen->resultScreenState = 18;
         }
     }
     else if (type == 2)
     {
-        resultScreen->resultScreenState = 0x13;
+        resultScreen->resultScreenState = 19;
         AddedCallback(resultScreen);
         return ZUN_SUCCESS;
     }
@@ -2710,14 +2710,14 @@ ZunResult ResultScreen::RegisterChain(u32 type)
     resultScreen->calcChain->deletedCallback =
         (ChainLifecycleCallback)DeletedCallback;
     resultScreen->calcChain->arg = resultScreen;
-    if (g_Chain.AddToCalcChain(resultScreen->calcChain, 0xe))
+    if (g_Chain.AddToCalcChain(resultScreen->calcChain, 14))
     {
         return ZUN_ERROR;
     }
 
     resultScreen->drawChain = g_Chain.CreateElem((ChainCallback)OnDraw);
     resultScreen->drawChain->arg = resultScreen;
-    g_Chain.AddToDrawChain(resultScreen->drawChain, 0xd);
+    g_Chain.AddToDrawChain(resultScreen->drawChain, 13);
 
     return ZUN_SUCCESS;
 }

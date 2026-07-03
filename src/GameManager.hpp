@@ -75,8 +75,8 @@ struct GameManager
     // FUNCTION: TH07 0x004012b0
     void RegenerateGameIntegrityCsum()
     {
-        this->globals->rng1[2] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
-        this->globals->rng2[3] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+        this->globals->rng1[2] = g_Rng.GetRandomU32InRange(100000) + 6543;
+        this->globals->rng2[3] = g_Rng.GetRandomU32InRange(100000) + 6543;
         this->globals->curCsum = this->globals->rng1[2];
 
         this->globals->csumAsSum = ComputeGameIntegrityCsum();
@@ -116,11 +116,11 @@ struct GameManager
     // FUNCTION: TH07 0x0043b5c0
     void RerollRng()
     {
-        this->globals->rng1[0] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
-        this->globals->rng1[1] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
-        this->globals->rng1[2] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
-        this->globals->rng1[3] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
-        this->globals->rng1[4] = g_Rng.GetRandomU32InRange(100000) + 0x198f;
+        this->globals->rng1[0] = g_Rng.GetRandomU32InRange(100000) + 6543;
+        this->globals->rng1[1] = g_Rng.GetRandomU32InRange(100000) + 6543;
+        this->globals->rng1[2] = g_Rng.GetRandomU32InRange(100000) + 6543;
+        this->globals->rng1[3] = g_Rng.GetRandomU32InRange(100000) + 6543;
+        this->globals->rng1[4] = g_Rng.GetRandomU32InRange(100000) + 6543;
         this->globals->rngFloat3[0] = g_Rng.GetRandomFloatInRange(100000.0f) + 6543.0f;
         this->globals->rngFloat3[1] = g_Rng.GetRandomFloatInRange(100000.0f) + 6543.0f;
         this->globals->rngFloat3[2] = g_Rng.GetRandomFloatInRange(100000.0f) + 6543.0f;
@@ -206,11 +206,6 @@ struct GameManager
 
     static void DrawLoadingSprite();
 
-    u8 GetShotTypeAndCharacter()
-    {
-        return this->shotTypeAndCharacter;
-    }
-
     void *tmpBuffer;
     GameConfiguration *defaultCfg;
     ZunGlobals *globals;
@@ -251,10 +246,10 @@ struct GameManager
     i32 framesThisStage;
     i32 currentStage;
     i32 unused_95f0;
-    D3DXVECTOR2 arcadeRegionTopLeftPos;
-    D3DXVECTOR2 arcadeRegionSize;
-    D3DXVECTOR2 playerMovementAreaTopLeftPos;
-    D3DXVECTOR2 playerMovementAreaSize;
+    Float2 arcadeRegionTopLeftPos;
+    Float2 arcadeRegionSize;
+    Float2 playerMovementAreaTopLeftPos;
+    Float2 playerMovementAreaSize;
     f32 csumFloat;
     i32 cherryMax;
     i32 cherry;
