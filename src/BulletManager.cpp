@@ -994,6 +994,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                 if (collisionRes == 1)
                 {
                     bullet->grazed = 1;
+                    goto do_player_collision;
                 }
                 else if (collisionRes == 2)
                 {
@@ -1002,10 +1003,11 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                         bullet->state = BULLET_DESPAWN;
                         g_ItemManager.SpawnItem(&bullet->pos, g_Player.itemType, 1);
                     }
-                    goto do_sprite_anim;
                 }
+                goto do_sprite_anim;
             }
 
+        do_player_collision:
             collisionRes = g_Player.CalcKillboxCollision(&bullet->pos, &bullet->sprites.grazeSize);
             if (collisionRes != 0)
             {
@@ -1106,7 +1108,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         laser->vm0.scale.x = laser->width / laser->vm0.sprite->widthPx;
         width = laser->endOffset - laser->startOffset; // width is used as length here
         laser->vm0.scale.y = width / laser->vm0.sprite->heightPx;
-        laser->vm0.rotation.z = utils::NormalizeAngle(1.5707964f + laser->angle);
+        laser->UpdateRotationZFromAngle();
         laser->vm0.flags |= 4;
 
         switch (laser->state)

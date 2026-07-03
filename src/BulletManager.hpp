@@ -1,7 +1,9 @@
 #pragma once
 
 #include "ItemManager.hpp"
+#include "ZunMath.hpp"
 #include "ZunResult.hpp"
+#include "utils.hpp"
 
 extern D3DCOLOR *g_BulletColor;
 
@@ -140,6 +142,12 @@ struct EnemyLaserShooter
 
 struct Laser
 {
+    void UpdateRotationZFromAngle()
+    {
+        f32 angle = utils::AddNormalizeAngle(ZUN_PI / 2.0f + this->angle, 0.0f);
+        this->vm0.rotation.z = angle;
+    }
+
     struct AnmVm vm0;
     struct AnmVm vm1;
     D3DXVECTOR3 pos;
