@@ -2,349 +2,272 @@
 
 #include <windows.h>
 
+#define LZSS_LOOKAHEAD_SIZE ((1 << LZSS_LENGTH_BITS) + 2)
+#define LZSS_DICTSIZE_MASK (LZSS_DICTSIZE - 1)
+#define LZSS_DICTPOS_MOD(pos, amount) ((pos + amount) & LZSS_DICTSIZE_MASK)
+
 // GLOBAL: TH07 0x0049fe30
 Lzss::LzssNode g_LzssTree[0x2000 + 1];
 
 // GLOBAL: TH07 0x004b7e40
 u8 g_LzssDictionary[8196];
 
-// FUNCTION: TH07 0x0045ead0
-u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *outSize)
-{
-    u32 local_3c;
-    u32 local_38;
-    i32 local_34;
-    i32 local_30;
-    i32 local_28;
-    u8 *local_24;
-    u8 local_1d;
-    i32 local_1c;
-    i32 local_18;
-    u32 local_14;
-    u8 *local_10;
-    u8 *local_c;
-    u32 local_8;
+#define ENC_NEXT_BIT()          \
+    inBitMask >>= 1;            \
+    if (inBitMask == 0)         \
+    {                           \
+        *dstCursor++ = curByte; \
+        checksum += curByte;    \
+        curByte = 0;            \
+        inBitMask = 0x80;       \
+    }
 
-    local_1d = 0x80;
-    local_8 = 0;
-    local_10 = (u8 *)GlobalAlloc(0, dstLen << 1);
-    if (!local_10)
+#define ENC_WRITE_FLAG_BIT(bit) \
+    if (bit)                    \
+    {                           \
+        curByte |= inBitMask;   \
+    }                           \
+    ENC_NEXT_BIT();
+
+#define ENC_WRITE_BITS(bitCount, condition) \
+    bitfieldMask = 0x1 << (bitCount - 1);   \
+    while (bitfieldMask != 0)               \
+    {                                       \
+        if (condition)                      \
+        {                                   \
+            curByte |= inBitMask;           \
+        }                                   \
+        ENC_NEXT_BIT();                     \
+        bitfieldMask >>= 1;                 \
+    }
+
+#pragma var_order(curByte, dst, dstCursor, matchOffset, i, bytesToCopyToDict, inBitMask, srcCursor, matchLength, \
+                  checksum, lookAheadBytes, dictValue, dictHead, bitfieldMask)
+LPBYTE Lzss::Compress(LPBYTE src, i32 dstLen, i32 *srcLen)
+{
+    i32 i;
+    i32 bytesToCopyToDict;
+    i32 lookAheadBytes;
+    i32 dictValue;
+    u32 bitfieldMask;
+
+    u8 inBitMask = 0x80;
+    u32 curByte = 0;
+    u32 checksum = 0;
+
+    LPBYTE dst = (LPBYTE)GlobalAlloc(GMEM_FIXED, dstLen * 2);
+    if (dst == NULL)
     {
         return NULL;
     }
 
-    *outSize = 0;
-    local_c = local_10;
+    LPBYTE srcCursor = src;
+    LPBYTE dstCursor = dst;
+    *srcLen = 0;
+
     InitializeDictionary();
-    local_38 = 1;
-    local_24 = src;
-    for (local_18 = 0; local_18 < 0x12; local_18 = local_18 + 1)
+
+    u32 dictHead = 1;
+    for (i = 0; i < LZSS_LOOKAHEAD_SIZE; i++)
     {
-        if (local_24 - src >= dstLen)
+        if (srcCursor - src >= dstLen)
         {
-            local_34 = -1;
+            dictValue = -1;
         }
         else
         {
-            local_34 = *local_24++;
+            dictValue = *srcCursor++;
         }
-        if (local_34 == -1)
+
+        if (dictValue == -1)
         {
             break;
         }
-        g_LzssDictionary[local_18 + 1] = local_34;
+
+        g_LzssDictionary[dictHead + i] = dictValue;
     }
-    local_30 = local_18;
-    InitializeTree(1);
-    local_28 = 0;
-    local_14 = 0;
-    while (local_30 > 0)
+
+    lookAheadBytes = i;
+    InitializeTree(dictHead);
+    i32 matchLength = 0;
+    i32 matchOffset = 0;
+
+    while (lookAheadBytes > 0)
     {
-        if (local_30 < local_28)
+        if (matchLength > lookAheadBytes)
         {
-            local_28 = local_30;
+            matchLength = lookAheadBytes;
         }
-        if (local_28 <= 2)
+
+        if (matchLength <= 2)
         {
-            local_1c = 1;
-            local_8 = local_8 | local_1d;
-            local_1d = local_1d >> 1;
-            if (local_1d == 0)
-            {
-                *local_10 = (u8)local_8;
-                local_10++;
-                local_8 = 0;
-                local_1d = 0x80;
-            }
-            for (local_3c = 0x80; local_3c != 0; local_3c = local_3c >> 1)
-            {
-                if ((local_3c & g_LzssDictionary[local_38]) != 0)
-                {
-                    local_8 = local_8 | local_1d;
-                }
-                local_1d = local_1d >> 1;
-                if (local_1d == 0)
-                {
-                    *local_10 = (u8)local_8;
-                    local_10++;
-                    local_8 = 0;
-                    local_1d = 0x80;
-                }
-            }
+            bytesToCopyToDict = 1;
+
+            ENC_WRITE_FLAG_BIT(1);
+            ENC_WRITE_BITS(8, (bitfieldMask & g_LzssDictionary[dictHead]) != 0);
         }
         else
         {
-            local_1d = local_1d >> 1;
-            if (local_1d == 0)
-            {
-                *local_10 = (u8)local_8;
-                local_10++;
-                local_8 = 0;
-                local_1d = 0x80;
-            }
-            for (local_3c = 0x1000; local_3c != 0; local_3c = local_3c >> 1)
-            {
-                if ((local_3c & local_14) != 0)
-                {
-                    local_8 = local_8 | local_1d;
-                }
-                local_1d = local_1d >> 1;
-                if (local_1d == 0)
-                {
-                    *local_10 = (u8)local_8;
-                    local_10++;
-                    local_8 = 0;
-                    local_1d = 0x80;
-                }
-            }
-            for (local_3c = 8; local_3c != 0; local_3c = local_3c >> 1)
-            {
-                if ((local_3c & local_28 - 3U) != 0)
-                {
-                    local_8 = local_8 | local_1d;
-                }
-                local_1d = local_1d >> 1;
-                if (local_1d == 0)
-                {
-                    *local_10 = (u8)local_8;
-                    local_10++;
-                    local_8 = 0;
-                    local_1d = 0x80;
-                }
-            }
-            local_1c = local_28;
+            ENC_WRITE_FLAG_BIT(0);
+            ENC_WRITE_BITS(LZSS_OFFSET_BITS, (bitfieldMask & matchOffset) != 0);
+            ENC_WRITE_BITS(LZSS_LENGTH_BITS, (bitfieldMask & (matchLength - 3)) != 0);
+
+            bytesToCopyToDict = matchLength;
         }
-        for (local_18 = 0; local_18 < local_1c; local_18 = local_18 + 1)
+
+        for (i = 0; i < bytesToCopyToDict; i++)
         {
-            DeleteNode(local_38 + 0x12 & 0x1fff);
-            if (local_24 - src >= dstLen)
+            DeleteNode(LZSS_DICTPOS_MOD(dictHead, LZSS_LOOKAHEAD_SIZE));
+
+            if (srcCursor - src >= dstLen)
             {
-                local_34 = -1;
+                dictValue = -1;
             }
             else
             {
-                local_34 = *local_24++;
+                dictValue = *srcCursor++;
             }
-            if (local_34 == -1)
+
+            if (dictValue == -1)
             {
-                local_30--;
+                lookAheadBytes--;
             }
             else
             {
-                g_LzssDictionary[local_38 + 0x12 & 0x1fff] = (u8)local_34;
+                g_LzssDictionary[LZSS_DICTPOS_MOD(dictHead, LZSS_LOOKAHEAD_SIZE)] = dictValue;
             }
-            local_38 = local_38 + 1 & 0x1fff;
-            if (local_30 != 0)
+
+            dictHead = LZSS_DICTPOS_MOD(dictHead, 1);
+
+            if (lookAheadBytes != 0)
             {
-                local_28 = InsertNode(local_38, (i32 *)&local_14);
+                matchLength = InsertNode(dictHead, &matchOffset);
             }
         }
     }
-    local_1d = local_1d >> 1;
-    if (local_1d == 0)
-    {
-        *local_10 = (u8)local_8;
-        local_10++;
-        local_8 = 0;
-        local_1d = 0x80;
-    }
-    for (local_3c = 0x1000; local_3c != 0; local_3c = local_3c >> 1)
-    {
-        local_1d = local_1d >> 1;
-        if (local_1d == 0)
-        {
-            *local_10 = (u8)local_8;
-            local_10++;
-            local_8 = 0;
-            local_1d = 0x80;
-        }
-    }
-    *outSize = (i32)local_10 - (i32)local_c;
-    return local_c;
+
+    ENC_WRITE_FLAG_BIT(0);
+    ENC_WRITE_BITS(LZSS_OFFSET_BITS, FALSE);
+
+    *srcLen = dstCursor - dst;
+    return dst;
 }
 
-// FUNCTION: TH07 0x0045ef00
-u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 dstLen)
-{
-    u8 bVar1;
-    u32 uVar2;
-    u8 bVar3;
-    u32 local_38;
-    u32 local_34;
-    u32 local_20;
-    u8 *local_1c;
-    u8 local_15;
-    i32 local_14;
-    u8 *local_c;
-
-    local_15 = 0x80;
-    bVar1 = 0;
-    if (!dst && (dst = (u8 *)GlobalAlloc(0, dstLen), dst == NULL))
-    {
-        return NULL;
+#define DEC_NEXT_BIT()    \
+    inBitMask >>= 1;      \
+    if (inBitMask == 0)   \
+    {                     \
+        inBitMask = 0x80; \
     }
 
-    local_c = dst;
-    local_38 = 1;
-    local_1c = src;
-    while (true)
+#define DEC_WRITE_BYTE(data)           \
+    *dstCursor++ = data;               \
+    g_LzssDictionary[dictHead] = data; \
+    dictHead = LZSS_DICTPOS_MOD(dictHead, 1);
+
+#define DEC_HANDLE_FETCH_NEW_BYTE()  \
+    if (inBitMask == 0x80)           \
+    {                                \
+        curByte = *srcCursor;        \
+        if (srcCursor - src >= size) \
+        {                            \
+            curByte = 0;             \
+        }                            \
+        else                         \
+        {                            \
+            srcCursor++;             \
+        }                            \
+        checksum += curByte;         \
+    }
+
+#define DEC_READ_FLAG_BIT()       \
+    DEC_HANDLE_FETCH_NEW_BYTE();  \
+    inBits = curByte & inBitMask; \
+    DEC_NEXT_BIT();
+
+#define DEC_READ_BITS(bitsCount)          \
+    outBitMask = 0x01 << (bitsCount - 1); \
+    inBits = 0;                           \
+    while (outBitMask != 0)               \
+    {                                     \
+        DEC_HANDLE_FETCH_NEW_BYTE();      \
+        if ((curByte & inBitMask) != 0)   \
+        {                                 \
+            inBits |= outBitMask;         \
+        }                                 \
+                                          \
+        outBitMask >>= 1;                 \
+        DEC_NEXT_BIT();                   \
+    }
+
+#pragma var_order(curByte, dstCursor, matchOffset, i, inBitMask, srcCursor, inBits, size, matchLength, checksum, \
+                  dictValue, outBitMask, dictHead)
+LPBYTE Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
+{
+    i32 i;
+    u32 matchOffset;
+    u32 inBits;
+    i32 matchLength;
+    u32 dictValue;
+    u32 outBitMask;
+
+    u8 inBitMask = 0x80;
+    u32 curByte = 0;
+    u32 checksum = 0;
+    i32 size = srcLen;
+
+    if (dst == NULL)
     {
-        while (true)
+        dst = (u8 *)GlobalAlloc(GMEM_FIXED, decompressedSize);
+        if (dst == NULL)
         {
-            if (local_15 == 0x80)
-            {
-                bVar1 = *local_1c;
-                if ((i32)local_1c - (i32)src < srcLen)
-                {
-                    local_1c++;
-                }
-                else
-                {
-                    bVar1 = 0;
-                }
-            }
-            bVar3 = bVar1 & local_15;
-            local_15 = local_15 >> 1;
-            if (local_15 == 0)
-            {
-                local_15 = 0x80;
-            }
-            if (bVar3 == 0)
+            return NULL;
+        }
+    }
+
+    LPBYTE srcCursor = src;
+    LPBYTE dstCursor = dst;
+    u32 dictHead = 1;
+
+    for (;;)
+    {
+        DEC_READ_FLAG_BIT();
+
+        // Read literal byte from next 8 bits
+        if (inBits != 0)
+        {
+            DEC_READ_BITS(8);
+            DEC_WRITE_BYTE(inBits);
+        }
+        // Copy from dictionary, 13 bit offset, then 4 bit length
+        else
+        {
+            DEC_READ_BITS(13);
+
+            matchOffset = inBits;
+            if (matchOffset == 0)
             {
                 break;
             }
-            local_34 = 0x80;
-            local_20 = 0;
-            while (local_34 != 0)
+
+            DEC_READ_BITS(4);
+
+            // Value encoded in 4 bit length is 3 less than the actual length
+            matchLength = inBits + 2;
+            for (i = 0; i <= matchLength; i++)
             {
-                if (local_15 == 0x80)
-                {
-                    bVar1 = *local_1c;
-                    if ((i32)local_1c - (i32)src < srcLen)
-                    {
-                        local_1c++;
-                    }
-                    else
-                    {
-                        bVar1 = 0;
-                    }
-                }
-                if ((bVar1 & local_15) != 0)
-                {
-                    local_20 = local_20 | local_34;
-                }
-                local_34 = local_34 >> 1;
-                local_15 = local_15 >> 1;
-                if (local_15 == 0)
-                {
-                    local_15 = 0x80;
-                }
+                dictValue = g_LzssDictionary[LZSS_DICTPOS_MOD(matchOffset, i)];
+                DEC_WRITE_BYTE(dictValue);
             }
-            *local_c = (u8)local_20;
-            local_c++;
-            g_LzssDictionary[local_38] = (u8)local_20;
-            local_38 = local_38 + 1 & 0x1fff;
-        }
-        local_34 = 0x1000;
-        local_20 = 0;
-        while (uVar2 = local_20, local_34 != 0)
-        {
-            if (local_15 == 0x80)
-            {
-                bVar1 = *local_1c;
-                if ((i32)local_1c - (i32)src < srcLen)
-                {
-                    local_1c++;
-                }
-                else
-                {
-                    bVar1 = 0;
-                }
-            }
-            if ((bVar1 & local_15) != 0)
-            {
-                local_20 = local_20 | local_34;
-            }
-            local_34 = local_34 >> 1;
-            local_15 = local_15 >> 1;
-            if (local_15 == 0)
-            {
-                local_15 = 0x80;
-            }
-        }
-        if (local_20 == 0)
-        {
-            break;
-        }
-        local_34 = 8;
-        local_20 = 0;
-        while (local_34 != 0)
-        {
-            if (local_15 == 0x80)
-            {
-                bVar1 = *local_1c;
-                if ((i32)local_1c - (i32)src < srcLen)
-                {
-                    local_1c++;
-                }
-                else
-                {
-                    bVar1 = 0;
-                }
-            }
-            if ((bVar1 & local_15) != 0)
-            {
-                local_20 = local_20 | local_34;
-            }
-            local_34 = local_34 >> 1;
-            local_15 = local_15 >> 1;
-            if (local_15 == 0)
-            {
-                local_15 = 0x80;
-            }
-        }
-        for (local_14 = 0; local_14 <= (i32)(local_20 + 2);
-             local_14 = local_14 + 1)
-        {
-            bVar3 = g_LzssDictionary[uVar2 + local_14 & 0x1fff];
-            *local_c = bVar3;
-            local_c++;
-            g_LzssDictionary[local_38] = bVar3;
-            local_38 = local_38 + 1 & 0x1fff;
         }
     }
-    while (local_15 != 0x80)
+
+    // Read any trailing bits in the data
+    while (inBitMask != 0x80)
     {
-        if (local_15 == 0x80 && (i32)local_1c - (i32)src < srcLen)
-        {
-            local_1c++;
-        }
-        local_15 = local_15 >> 1;
-        if (local_15 == 0)
-        {
-            local_15 = 0x80;
-        }
+        DEC_READ_FLAG_BIT();
     }
+
     return dst;
 }
 

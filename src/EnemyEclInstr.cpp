@@ -230,6 +230,11 @@ void EnemyEclInstr::ExInsCopyMainBossMovement(Enemy *enemy, EclRawInstr *instr)
     enemy->moveInterpStartPos = boss->position;
     enemy->moveRadius = boss->moveRadius;
     enemy->moveAngularVelocity = boss->moveAngularVelocity;
+
+    // ZUN bloat: what??????????????????
+    switch (boss->currentContext.eclContextArgs.intVars2[0])
+    {
+    }
 }
 
 #pragma var_order(bulletProps, i, bullet)

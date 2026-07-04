@@ -173,6 +173,7 @@ cflags = [
     "/GF",
     "/Zi",
     "/DNDEBUG",
+    "/wd4060",
     "/wd4101", # these just got really annoying
     "/wd4244",
     f'/I"{conv_path(VC_PATH / "include")}"',

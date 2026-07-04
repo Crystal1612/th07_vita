@@ -70,6 +70,11 @@ void BulletManager::Initialize()
     this->itemType = ITEM_POINT_BULLET;
 }
 
+BulletManager::BulletManager()
+{
+    Initialize();
+}
+
 // FUNCTION: TH07 0x00423660
 void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
                                                 AnmVm *bulletTypeTemplate,

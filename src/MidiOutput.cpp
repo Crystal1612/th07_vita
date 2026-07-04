@@ -735,3 +735,7 @@ void Supervisor::StopMidiTimer(MidiTimer *timer)
 {
     timer->StopTimer();
 }
+
+void MidiTimer::OnTimerElapsed()
+{
+}

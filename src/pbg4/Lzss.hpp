@@ -2,6 +2,10 @@
 
 #include "../inttypes.hpp"
 
+#define LZSS_OFFSET_BITS 13
+#define LZSS_LENGTH_BITS 4
+#define LZSS_DICTSIZE (1 << LZSS_OFFSET_BITS)
+
 namespace Lzss
 {
 u8 *Compress(u8 *src, i32 dstLen, i32 *outSize);

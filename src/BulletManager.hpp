@@ -241,10 +241,7 @@ C_ASSERT(sizeof(Bullet) == 0xd68);
 
 struct BulletManager
 {
-    BulletManager()
-    {
-        Initialize();
-    }
+    BulletManager();
 
     static ZunResult RegisterChain(const char *etamaAnmPath);
     static void CutChain();

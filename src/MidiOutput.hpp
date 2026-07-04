@@ -24,9 +24,8 @@ struct MidiTimer
     void StartTimerDefault();
     i32 StopTimer();
 
-    virtual void OnTimerElapsed()
-    {
-    }
+    virtual void OnTimerElapsed();
+
     static void CALLBACK DefaultTimerCallback(u32 delay, u32 wPeriodMin,
                                               DWORD_PTR dwUser, DWORD_PTR dw1,
                                               DWORD_PTR dw2);
