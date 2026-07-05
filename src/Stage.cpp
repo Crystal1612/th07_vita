@@ -13,64 +13,40 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049f588
 StageAnms g_EnemyAnmStageFiles[9] = {
     {"dummy", "dummy"},
-    // STRING: TH07 0x00497ffc
     {"data/stg1enm.anm", NULL},
-    // STRING: TH07 0x00497fe8
     {"data/stg2enm.anm", NULL},
-    // STRING: TH07 0x00497fd4
     {"data/stg3enm.anm", NULL},
-    // STRING: TH07 0x00497fc0
     {"data/stg4enm.anm", NULL},
-    // STRING: TH07 0x00497fac
     {"data/stg5enm.anm", NULL},
-    // STRING: TH07 0x00497f98
     {"data/stg6enm.anm", NULL},
-    // STRING: TH07 0x00497f84
     {"data/stg7enm.anm", NULL},
-    // STRING: TH07 0x00497f70
     {"data/stg8enm.anm", NULL},
 };
 
-// GLOBAL: TH07 0x0049f64c
 const char *g_StageFiles[9] = {
     "dummy",
-    // STRING: TH07 0x00498a04
     "data/stage1.std",
-    // STRING: TH07 0x004989f4
     "data/stage2.std",
-    // STRING: TH07 0x004989e4
     "data/stage3.std",
-    // STRING: TH07 0x004989d4
     "data/stage4.std",
-    // STRING: TH07 0x004989c4
     "data/stage5.std",
-    // STRING: TH07 0x004989b4
     "data/stage6.std",
-    // STRING: TH07 0x004989a4
     "data/stage7.std",
-    // STRING: TH07 0x00498994
     "data/stage8.std",
 };
 
-// GLOBAL: TH07 0x01347ac0
 ChainElem g_UnusedChain;
 
-// GLOBAL: TH07 0x01347ae0
 ChainElem g_StageOnDrawHighPrioChain;
 
-// GLOBAL: TH07 0x01347b00
 Stage g_Stage;
 
-// GLOBAL: TH07 0x0134cdb4
 ChainElem g_StageOnDrawLowPrioChain;
 
-// GLOBAL: TH07 0x0134cdd4
 ChainElem g_StageCalcChain;
 
-// FUNCTION: TH07 0x00405080
 Stage::Stage()
 {
     memset(this, NULL, sizeof(Stage));
@@ -82,7 +58,6 @@ Stage::Stage()
     this->camStart = this->cam;
 }
 
-// FUNCTION: TH07 0x004052d0
 f32 InterpCubic(f32 p0, f32 p1, f32 p2, f32 p3, f32 t)
 {
     f32 v[4];
@@ -94,7 +69,6 @@ f32 InterpCubic(f32 p0, f32 p1, f32 p2, f32 p3, f32 t)
     return v[0] * p0 + v[2] * p1 + v[1] * p2 + v[3] * p3;
 }
 
-// FUNCTION: TH07 0x00405370
 void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2,
                                   ZunVec3 *param_3, ZunVec3 *param_4,
                                   ZunVec3 *param_5, ZunVec3 *param_6,
@@ -153,7 +127,6 @@ void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2,
     }
 }
 
-// FUNCTION: TH07 0x00405690
 u32 Stage::OnUpdate(Stage *arg)
 {
     ZunVec3 pos;
@@ -507,7 +480,6 @@ LAB_004061aa: {
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00406930
 void Stage::SmoothBlendColor(ZunColor param_1)
 {
     ZunColor color;
@@ -530,7 +502,6 @@ void Stage::SmoothBlendColor(ZunColor param_1)
     }
 }
 
-// FUNCTION: TH07 0x004069d0
 u32 Stage::OnDrawHighPrio(Stage *arg)
 {
     ZunColor fogColor;
@@ -624,7 +595,6 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00406de0
 u32 Stage::OnDrawLowPrio(Stage *arg)
 {
     i32 i;
@@ -688,7 +658,6 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00407000
 ZunResult Stage::AddedCallback(Stage *arg)
 {
     i32 i;
@@ -794,7 +763,6 @@ ZunResult Stage::AddedCallback(Stage *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00407410
 ZunResult Stage::DeletedCallback(Stage *arg)
 {
     g_AnmManager->ReleaseAnm(5);
@@ -807,7 +775,6 @@ ZunResult Stage::DeletedCallback(Stage *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004074c0
 ZunResult Stage::RegisterChain(i32 stage)
 {
     Stage *mgr = &g_Stage;
@@ -839,7 +806,6 @@ ZunResult Stage::RegisterChain(i32 stage)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004075d0
 void Stage::CutChain()
 {
     g_Chain.Cut(&g_StageCalcChain);
@@ -847,7 +813,6 @@ void Stage::CutChain()
     g_Chain.Cut(&g_StageOnDrawLowPrioChain);
 }
 
-// FUNCTION: TH07 0x00407610
 ZunResult Stage::LoadStageData(const char *stdPath)
 {
     StdRawQuadBasic *quad;
@@ -858,8 +823,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     this->stdData = (StdRawHeader *)FileSystem::OpenFile(stdPath, 0);
     if (!this->stdData)
     {
-        // STRING: TH07 0x0049888c
-        g_GameErrorContext.Log("�X�e�[�W�f�[�^��������܂���B�f�[�^�����Ă��܂�\r\n");
+        g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\r\n");
         return ZUN_ERROR;
     }
 
@@ -892,7 +856,6 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004077f0
 ZunResult Stage::UpdateObjects()
 {
     StdRawQuadBasic *quad;
@@ -938,7 +901,6 @@ ZunResult Stage::UpdateObjects()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00407900
 i32 Stage::RenderObjects(i32 zLevel)
 {
     ZunColor origColor;
@@ -1128,7 +1090,6 @@ i32 Stage::RenderObjects(i32 zLevel)
     return 0;
 }
 
-// FUNCTION: TH07 0x00408180
 void Stage::SetupCameraStageBackground()
 {
     ZunVec3 eyeVec;
@@ -1167,7 +1128,6 @@ void Stage::SetupCameraStageBackground()
                                          g_Supervisor.projectionMatrix.asD3DX());
 }
 
-// FUNCTION: TH07 0x004082b0
 void Stage::UpdateCamera()
 {
     ZunVec3 at = this->cam.lookAt + this->cam.pos;

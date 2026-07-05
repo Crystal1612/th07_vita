@@ -13,19 +13,14 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 
-// GLOBAL: TH07 0x0134cdf4
 ChainElem g_AsciiManagerOnDrawMenusChain;
 
-// GLOBAL: TH07 0x0134ce18
 AsciiManager g_AsciiManager;
 
-// GLOBAL: TH07 0x0135dfac
 ChainElem g_AsciiManagerCalcChain;
 
-// GLOBAL: TH07 0x0135dfcc
 ChainElem g_AsciiManagerOnDrawPopupsChain;
 
-// FUNCTION: TH07 0x00401400
 void AsciiManager::UpdateScripts()
 {
     g_AnmManager->ExecuteScript(&this->cherryGauge);
@@ -49,7 +44,6 @@ PauseMenu::PauseMenu()
 {
 }
 
-// FUNCTION: TH07 0x004017b0
 void IncrementCapped(u32 *param, u32 cap)
 {
     if (*param < 999999)
@@ -58,7 +52,6 @@ void IncrementCapped(u32 *param, u32 cap)
     }
 }
 
-// FUNCTION: TH07 0x004017e0
 u32 AsciiManager::OnUpdate(AsciiManager *arg)
 {
     i32 i;
@@ -106,7 +99,6 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00401970
 u32 AsciiManager::OnDrawMenus(AsciiManager *arg)
 {
     arg->DrawStrings();
@@ -120,14 +112,12 @@ u32 AsciiManager::OnDrawMenus(AsciiManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x004019e0
 u32 AsciiManager::OnDrawPopups(AsciiManager *arg)
 {
     arg->DrawPopups();
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00401a00
 void AsciiManager::InitializeVms()
 {
     memset(&this->vm1, 0, sizeof(AnmVm));
@@ -154,7 +144,6 @@ void AsciiManager::InitializeVms()
     this->SetFadeState(this->uiFadeState);
 }
 
-// FUNCTION: TH07 0x00401ba0
 void AsciiManager::InitializeOtherVms()
 {
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryGauge, ANM_OFFSET_CHERRY_GAUGE);
@@ -166,7 +155,6 @@ void AsciiManager::InitializeOtherVms()
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[3], ANM_OFFSET_BOSS_MARKER);
 }
 
-// FUNCTION: TH07 0x00401d70
 ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
 {
     memset(arg, 0, sizeof(AsciiManager));
@@ -185,7 +173,6 @@ ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00401de0
 ZunResult AsciiManager::DeletedCallback(AsciiManager *arg)
 {
     g_AnmManager->ReleaseAnm(1);
@@ -195,7 +182,6 @@ ZunResult AsciiManager::DeletedCallback(AsciiManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00401e30
 ZunResult AsciiManager::RegisterChain()
 {
     AsciiManager *mgr = &g_AsciiManager;
@@ -225,7 +211,6 @@ ZunResult AsciiManager::RegisterChain()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00401f10
 void AsciiManager::CutChain()
 {
     g_Chain.Cut(&g_AsciiManagerCalcChain);
@@ -233,7 +218,6 @@ void AsciiManager::CutChain()
     // ZUN bug: g_AsciiManagerOnDrawPopupsChain is not cut here
 }
 
-// FUNCTION: TH07 0x00401f40
 void AsciiManager::AddString(ZunVec3 *position, const char *text)
 {
     if (this->numStrings >= 256)
@@ -266,7 +250,6 @@ void AsciiManager::AddString(ZunVec3 *position, const char *text)
     }
 }
 
-// FUNCTION: TH07 0x00402060
 void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position,
                                  const char *fmt, ...)
 {
@@ -280,7 +263,6 @@ void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position,
     va_end(args);
 }
 
-// FUNCTION: TH07 0x004020b0
 void AsciiManager::DrawStrings()
 {
     i32 idk[3];
@@ -385,7 +367,6 @@ void AsciiManager::DrawStrings()
     }
 }
 
-// FUNCTION: TH07 0x004024f0
 void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value,
                                 D3DCOLOR color)
 {
@@ -424,7 +405,6 @@ void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value,
     this->nextPopupIndex1++;
 }
 
-// FUNCTION: TH07 0x00402630
 void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value,
                                 D3DCOLOR color)
 {
@@ -463,7 +443,6 @@ void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value,
     this->nextPopupIndex2++;
 }
 
-// FUNCTION: TH07 0x00402780
 i32 RetryMenu::OnUpdate()
 {
     u32 i;
@@ -685,7 +664,6 @@ i32 RetryMenu::OnUpdate()
             }
             if (g_GameManager.currentStage != 6 || g_Gui.frameCounter >= 300)
             {
-                // STRING: TH07 0x00498a38
                 g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, (char *)"UnPause");
             }
             g_Supervisor.currentTime = timeGetTime();
@@ -811,7 +789,6 @@ i32 RetryMenu::OnUpdate()
     return 0;
 }
 
-// FUNCTION: TH07 0x00403a20
 void RetryMenu::OnDraw()
 {
     u32 i;
@@ -840,7 +817,6 @@ void RetryMenu::OnDraw()
     }
 }
 
-// FUNCTION: TH07 0x00403b60
 i32 PauseMenu::OnUpdate()
 {
     i32 i;
@@ -1037,7 +1013,6 @@ i32 PauseMenu::OnUpdate()
     return 0;
 }
 
-// FUNCTION: TH07 0x00404560
 void PauseMenu::OnDraw()
 {
     i32 i;
@@ -1069,7 +1044,6 @@ void PauseMenu::OnDraw()
     }
 }
 
-// FUNCTION: TH07 0x00404690
 void AsciiManager::DrawPopups()
 {
     i32 divisor;

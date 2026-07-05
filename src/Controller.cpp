@@ -7,17 +7,14 @@
 #include "dsutil.hpp"
 #include "inttypes.hpp"
 
-// GLOBAL: TH07 0x0049fc88
 static JOYCAPSA g_JoystickCaps;
 
-// GLOBAL: TH07 0x0049fe1c
 static u16 g_AutoFocusTimer;
 
 #define KEY_PRESSED(scancode, thButton) \
     ((keyboardState[scancode] & 0x80) != 0 ? thButton : 0)
 #define JOYSTICK_MIDPOINT(min, max) ((min + max) / 2)
 
-// FUNCTION: TH07 0x00430290
 u16 Controller::GetJoystickCaps()
 {
     joyinfoex_tag joyinfo;
@@ -26,15 +23,13 @@ u16 Controller::GetJoystickCaps()
     joyinfo.dwFlags = 255;
     if (joyGetPosEx(0, &joyinfo))
     {
-        // STRING: TH07 0x00497d9c
-        g_GameErrorContext.Log("使えるパッドが存在しないようです、残念\r\n");
+        g_GameErrorContext.Log("菴ｿ縺医ｋ繝代ャ繝峨′蟄伜惠縺励↑縺�繧医≧縺ｧ縺吶∵ｮ句ｿｵ\r\n");
         return 1;
     }
     joyGetDevCapsA(0, &g_JoystickCaps, 0x194);
     return 0;
 }
 
-// FUNCTION: TH07 0x004302f0
 u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons,
                                                  i16 controllerButtonToTest,
                                                  u32 touhouButton,
@@ -52,7 +47,6 @@ u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons,
                                                               : 0;
 }
 
-// FUNCTION: TH07 0x00430370
 u32 Controller::SetButtonFromControllerInputs(u16 *outButtons,
                                               i16 controllerButtonToTest,
                                               u32 touhouButton,
@@ -70,7 +64,6 @@ u32 Controller::SetButtonFromControllerInputs(u16 *outButtons,
     return (inputButtons & mask) != 0 ? (u16)touhouButton : 0;
 }
 
-// FUNCTION: TH07 0x004303f0
 u16 Controller::GetControllerInput(u16 buttons)
 {
     i32 retryCount;
@@ -173,13 +166,11 @@ u16 Controller::GetControllerInput(u16 buttons)
         if (FAILED(hr = g_Supervisor.controller->Poll()))
         {
             retryCount = 0;
-            // STRING: TH07 0x00497d80
             DebugPrint("error : DIERR_INPUTLOST\r\n");
             hr = g_Supervisor.controller->Acquire();
             while (hr == DIERR_INPUTLOST)
             {
                 hr = g_Supervisor.controller->Acquire();
-                // STRING: TH07 0x00497d60
                 DebugPrint("error : DIERR_INPUTLOST %d\r\n", retryCount);
                 retryCount++;
                 if (retryCount >= 400)
@@ -260,10 +251,8 @@ u16 Controller::GetControllerInput(u16 buttons)
     return buttons;
 }
 
-// GLOBAL: TH07 0x0135e218
 static u8 g_ControllerData[32 * 4];
 
-// FUNCTION: TH07 0x004309c0
 u8 *Controller::GetControllerState()
 {
     HRESULT hr;
@@ -329,7 +318,6 @@ u8 *Controller::GetControllerState()
     }
 }
 
-// FUNCTION: TH07 0x00430b50
 u16 Controller::GetInput()
 {
     u8 keyboardState[256];
@@ -403,7 +391,6 @@ u16 Controller::GetInput()
     return GetControllerInput(buttons);
 }
 
-// FUNCTION: TH07 0x004312c0
 void Controller::ResetKeyboard()
 {
     u8 key_states[256];

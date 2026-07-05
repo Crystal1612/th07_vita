@@ -20,7 +20,6 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049f618
 D3DCOLOR g_SpellcardTimeColors[4] = {
     0xa0d0ff,
     0xa080ff,
@@ -28,30 +27,24 @@ D3DCOLOR g_SpellcardTimeColors[4] = {
     0xff4040,
 };
 
-// GLOBAL: TH07 0x0049fbf0
 Gui g_Gui;
 
-// GLOBAL: TH07 0x0062f914
 ChainElem g_GuiCalcChain;
 
-// GLOBAL: TH07 0x0062f8f4
 ChainElem g_GuiDrawChain;
 
-// FUNCTION: TH07 0x00427ae0
 i32 Gui::IsStageFinished()
 {
     return this->impl->stageClearTextVm.activeSpriteIdx >= 0 &&
            this->impl->stageClearTextVm.isStopped;
 }
 
-// FUNCTION: TH07 0x00427b21
 void Gui::EndPlayerSpellcard()
 {
     this->impl->bombSpellcardName.pendingInterrupt = 1;
     this->impl->bombSpellcardNameBg.SetInterrupt(2);
 }
 
-// FUNCTION: TH07 0x00427b54
 void Gui::EndEnemySpellcard()
 {
     this->impl->enemySpellcardName.pendingInterrupt = 1;
@@ -59,7 +52,6 @@ void Gui::EndEnemySpellcard()
     this->impl->spellcardBonusIndicator.SetInterrupt(2);
 }
 
-// FUNCTION: TH07 0x00427ba2
 void Gui::ClearActiveSprites()
 {
     this->impl->stageClearTextVm.activeSpriteIdx = -1;
@@ -68,13 +60,11 @@ void Gui::ClearActiveSprites()
     this->impl->activeTransitionQuads = 0;
 }
 
-// FUNCTION: TH07 0x00427be2
 i32 Gui::IsDialogueSkippable()
 {
     return this->impl->msg.dialogueSkippable;
 }
 
-// FUNCTION: TH07 0x00427bf8
 void Gui::ShowBonusScore(i32 score)
 {
     this->impl->bonusScore.pos = ZunVec3(416.0f, 48.0f, 0.0f);
@@ -84,7 +74,6 @@ void Gui::ShowBonusScore(i32 score)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-// FUNCTION: TH07 0x00427c81
 void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 {
     this->impl->fullPowerMode.pos = ZunVec3(416.0f, 168.0f, 0.0f);
@@ -94,7 +83,6 @@ void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-// FUNCTION: TH07 0x00427d09
 void Gui::ShowSpellcardBonus(i32 fmtArg)
 {
     this->impl->spellCardBonus.pos = ZunVec3(224.0f, 16.0f, 0.0f);
@@ -104,7 +92,6 @@ void Gui::ShowSpellcardBonus(i32 fmtArg)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-// FUNCTION: TH07 0x00427d92
 void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
 {
     RECT srcRect;
@@ -121,7 +108,6 @@ void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
     g_AnmManager->CopyTexture(21, 22, &srcRect, &dstRect);
 }
 
-// FUNCTION: TH07 0x00427e7c
 u32 Gui::OnUpdate(Gui *arg)
 {
     if (g_GameManager.isTimeStopped)
@@ -149,7 +135,6 @@ u32 Gui::OnUpdate(Gui *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00427f22
 u32 Gui::OnDraw(Gui *arg)
 {
     char fmtArg[32];
@@ -338,7 +323,6 @@ u32 Gui::OnDraw(Gui *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0042868d
 void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
 {
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait, 1185);
@@ -356,7 +340,6 @@ void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-// FUNCTION: TH07 0x00428887
 void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
 {
     if (spellcardSprite >= 0)
@@ -396,7 +379,6 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-// FUNCTION: TH07 0x00428b19
 ZunResult Gui::ActualAddedCallback()
 {
     i32 k;
@@ -693,7 +675,6 @@ ZunResult Gui::ActualAddedCallback()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00429935
 ZunResult Gui::LoadMsg(const char *param_1)
 {
     i32 i;
@@ -702,8 +683,7 @@ ZunResult Gui::LoadMsg(const char *param_1)
     this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(param_1, 0);
     if (!this->impl->msg.msgFile)
     {
-        // STRING: TH07 0x00498108
-        g_GameErrorContext.Log("error : メッセージファイル %s が読み込めませんでした\r\n", param_1);
+        g_GameErrorContext.Log("error : 繝｡繝�繧ｻ繝ｼ繧ｸ繝輔ぃ繧､繝ｫ %s 縺瑚ｪｭ縺ｿ霎ｼ繧√∪縺帙ｓ縺ｧ縺励◆\r\n", param_1);
         return ZUN_ERROR;
     }
 
@@ -717,19 +697,16 @@ ZunResult Gui::LoadMsg(const char *param_1)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004299f8
 void Gui::FreeMsgFile()
 {
     SAFE_FREE(this->impl->msg.msgFile);
 }
 
-// FUNCTION: TH07 0x00429a36
 void Gui::MsgRead(i32 param_1)
 {
     this->impl->MsgRead(param_1);
 }
 
-// FUNCTION: TH07 0x00429a4f
 void GuiImpl::MsgRead(i32 msgIdx)
 {
     MsgRawHeader *tmpMsgFile;
@@ -793,7 +770,6 @@ void GuiImpl::MsgRead(i32 msgIdx)
     }
 }
 
-// FUNCTION: TH07 0x00429c42
 ZunResult GuiImpl::RunMsg()
 {
     MsgRawInstrArgs *args;
@@ -1087,7 +1063,6 @@ SKIP_TIME_INCREMENT:
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0042a876
 ZunResult GuiImpl::DrawDialogue()
 {
     ZunVec3 oldPos;
@@ -1161,7 +1136,6 @@ ZunResult GuiImpl::DrawDialogue()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0042ad29
 i32 Gui::MsgWait()
 {
     if (!this->impl)
@@ -1177,7 +1151,6 @@ i32 Gui::MsgWait()
     return this->impl->msg.currentMsgIdx >= 0;
 }
 
-// FUNCTION: TH07 0x0042ad66
 i32 Gui::HasCurrentMsgIdx()
 {
     if (!this->impl)
@@ -1189,7 +1162,6 @@ i32 Gui::HasCurrentMsgIdx()
            this->impl->msg.currentMsgIdx == -2;
 }
 
-// FUNCTION: TH07 0x0042adab
 void Gui::UpdateGui()
 {
     i32 scoreBonus;
@@ -1401,7 +1373,6 @@ void Gui::UpdateGui()
     }
 }
 
-// FUNCTION: TH07 0x0042b603
 void Gui::DrawGameScene()
 {
     ZunVec3 textDrawPos;
@@ -1658,7 +1629,6 @@ void Gui::DrawGameScene()
     }
 }
 
-// FUNCTION: TH07 0x0042c577
 void Gui::DrawStageElements()
 {
     ZunVec3 timerPos;
@@ -1872,13 +1842,11 @@ void Gui::DrawStageElements()
     }
 }
 
-// FUNCTION: TH07 0x0042d03a
 ZunResult Gui::AddedCallback(Gui *arg)
 {
     return arg->ActualAddedCallback();
 }
 
-// FUNCTION: TH07 0x0042d04b
 ZunResult Gui::DeletedCallback(Gui *arg)
 {
     g_AnmManager->ReleaseAnm(24);
@@ -1903,7 +1871,6 @@ ZunResult Gui::DeletedCallback(Gui *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0042d136
 ZunResult Gui::RegisterChain()
 {
     Gui *mgr = &g_Gui;
@@ -1934,17 +1901,14 @@ ZunResult Gui::RegisterChain()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0042d24d
 GuiImpl::GuiImpl()
 {
 }
 
-// FUNCTION: TH07 0x0042d465
 GuiMsgVm::GuiMsgVm()
 {
 }
 
-// FUNCTION: TH07 0x0042d53d
 void Gui::CutChain()
 {
     g_Chain.Cut(&g_GuiCalcChain);

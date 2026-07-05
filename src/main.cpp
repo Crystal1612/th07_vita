@@ -17,7 +17,6 @@
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 
-// FUNCTION: TH07 0x00433f90
 void AnmManager::TakeScreenshotIfRequested()
 {
     if (this->screenshotTextureId >= 0)
@@ -31,7 +30,6 @@ void AnmManager::TakeScreenshotIfRequested()
     }
 }
 
-// FUNCTION: TH07 0x00434020
 i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdline, i32 nCmdShow)
 {
@@ -54,8 +52,6 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     {
         goto stop;
     }
-
-    // STRING: TH07 0x00497c60
     if (g_Supervisor.LoadConfig("th07.cfg") != ZUN_SUCCESS)
     {
         goto stop;
@@ -166,8 +162,7 @@ stop:
     {
         g_GameErrorContext.m_BufferEnd = g_GameErrorContext.m_Buffer;
         *g_GameErrorContext.m_BufferEnd = NULL;
-        // STRING: TH07 0x00497c28
-        g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\r\n");
+        g_GameErrorContext.Log("蜀崎ｵｷ蜍輔ｒ隕√☆繧九が繝励す繝ｧ繝ｳ縺悟､画峩縺輔ｌ縺溘�ｮ縺ｧ蜀崎ｵｷ蜍輔＠縺ｾ縺兔r\n");
         if (!g_Supervisor.cfg.windowed)
         {
             WINNLSEnableIME(0, 1);

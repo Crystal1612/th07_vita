@@ -13,30 +13,24 @@
 #include "d3dx8.h"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049ecf8
 i32 g_FullPowerScoreBonus[30] = {10, 20, 30, 40, 50, 60, 70, 80,
                                  90, 100, 200, 300, 400, 500, 600, 700,
                                  800, 900, 1000, 2000, 3000, 4000, 5000,
                                  6000, 7000, 8000, 9000, 10000, 11000, 12000};
 
-// GLOBAL: TH07 0x0049ed74
 i32 g_PowerLevels[9] = {8, 16, 32, 48, 64, 80, 96, 128, 999};
 
-// GLOBAL: TH07 0x0049efa0
 u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
                           1, 0, 1, 0, 1, 0, 1, 0, 7, 1, 1, 1, 0, 2};
 
-// GLOBAL: TH07 0x00575c70
 ItemManager g_ItemManager;
 
-// FUNCTION: TH07 0x004325c0
 void AngleToVector(ZunVec3 *vec, f32 angle, f32 speed)
 {
     vec->x = cosf(angle) * speed;
     vec->y = sinf(angle) * speed;
 }
 
-// FUNCTION: TH07 0x004325e0
 void GameManager::AddCurrentPower(i32 amount)
 {
     if (CheckGameIntegrity())
@@ -47,17 +41,14 @@ void GameManager::AddCurrentPower(i32 amount)
     RegenerateGameIntegrityCsum();
 }
 
-// FUNCTION: TH07 0x00432630
 ItemManager::ItemManager()
 {
 }
 
-// FUNCTION: TH07 0x00432690
 Item::Item()
 {
 }
 
-// FUNCTION: TH07 0x004326f0
 Item *ItemManager::SpawnItem(ZunVec3 *heading, i32 itemType, i32 state)
 {
     Item *item;
@@ -126,7 +117,6 @@ Item *ItemManager::SpawnItem(ZunVec3 *heading, i32 itemType, i32 state)
     return i < 1100 ? item : &this->items[1100];
 }
 
-// FUNCTION: TH07 0x00432990
 void ItemManager::OnUpdate()
 {
     i32 prevPowerLevel2;
@@ -508,7 +498,6 @@ void ItemManager::OnUpdate()
     }
 }
 
-// FUNCTION: TH07 0x00433a90
 void ItemManager::RemoveAllItems()
 {
     Item *item;
@@ -527,7 +516,6 @@ void ItemManager::RemoveAllItems()
     }
 }
 
-// FUNCTION: TH07 0x00433b20
 void ItemManager::DespawnAllItems(i32 param_1)
 {
     Item *item;
@@ -556,7 +544,6 @@ void ItemManager::DespawnAllItems(i32 param_1)
     }
 }
 
-// FUNCTION: TH07 0x00433c40
 void ItemManager::ActivateAllItems()
 {
     Item *item;
@@ -580,7 +567,6 @@ void ItemManager::ActivateAllItems()
     }
 }
 
-// FUNCTION: TH07 0x00433cd0
 void ItemManager::OnDraw()
 {
     Item *item;

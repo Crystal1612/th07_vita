@@ -4,10 +4,8 @@
 #include <cstdio>
 #include <cstring>
 
-// GLOBAL: TH07 0x00624210
 GameErrorContext g_GameErrorContext;
 
-// FUNCTION: TH07 0x004315f0
 const char *GameErrorContext::Log(const char *fmt, ...)
 {
     char tmp[8192];
@@ -28,7 +26,6 @@ const char *GameErrorContext::Log(const char *fmt, ...)
     return fmt;
 }
 
-// FUNCTION: TH07 0x00431730
 const char *GameErrorContext::Fatal(const char *fmt, ...)
 {
     char tmp[512];

@@ -21,24 +21,18 @@ typedef __w64 long SHANDLE_PTR; // i dont know anymore bro
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 
-// GLOBAL: TH07 0x00575c20
 GameWindow g_GameWindow;
 
-// GLOBAL: TH07 0x0135e1f4
 HANDLE g_Mutex;
 
-// GLOBAL: TH07 0x0135e1f8
 i32 g_FrameCount;
 
-// GLOBAL: TH07 0x0135e200
 f64 g_LastFrameTime;
 
-// GLOBAL: TH07 0x0135e208
 LARGE_INTEGER g_LastPerfCounter;
 
 // winmain should probably be here
 
-// FUNCTION: TH07 0x00434490
 LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
                                          LPARAM lParam)
 {
@@ -90,7 +84,6 @@ LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
     return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 }
 
-// FUNCTION: TH07 0x004345c0
 void GameWindow::Present()
 {
     char snapshotPath[252];
@@ -106,11 +99,9 @@ void GameWindow::Present()
     g_AnmManager->TakeScreenshotIfRequested();
     if (WAS_PRESSED_RAW(TH_BUTTON_HOME))
     {
-        // STRING: TH07 0x00497c1c
         _mkdir("snapshot");
         for (i = 0; i < 1000; i++)
         {
-            // STRING: TH07 0x00497c08
             sprintf(snapshotPath, "snapshot/th%.3d.bmp", i);
             if (FileSystem::CheckFileExists(snapshotPath) == 0)
             {
@@ -128,7 +119,6 @@ void GameWindow::Present()
     }
 }
 
-// FUNCTION: TH07 0x004346e0
 RenderResult GameWindow::Render()
 {
     f64 timeDiff;
@@ -255,21 +245,18 @@ RenderResult GameWindow::Render()
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
-// FUNCTION: TH07 0x00434a40
 i32 GameWindow::InitD3dInterface()
 {
     g_Supervisor.d3dIface = Direct3DCreate8(D3D_SDK_VERSION);
     if (!g_Supervisor.d3dIface)
     {
-        // STRING: TH07 0x00497bd8
-        g_GameErrorContext.Fatal("Direct3D ƒIƒuƒWƒFƒNƒg‚Í‰½ŒÌ‚©ì¬o—ˆ‚È‚©‚Á‚½\r\n");
+        g_GameErrorContext.Fatal("Direct3D ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯ä½•æ•…ã‹ä½œæˆå‡ºæ¥ãªã‹ã£ãŸ\r\n");
         return true;
     }
 
     return false;
 }
 
-// FUNCTION: TH07 0x00434a80
 i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
 {
     WNDCLASSA base_class;
@@ -283,7 +270,6 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     base_class.lpfnWndProc = WindowProc;
     g_GameWindow.isAppActive = 1;
     g_GameWindow.isAppInactive = 0;
-    // STRING: TH07 0x00497bd0
     base_class.lpszClassName = "BASE";
     RegisterClassA(&base_class);
     if (!g_Supervisor.cfg.windowed)
@@ -292,8 +278,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
         height = 480;
         g_GameWindow.window = CreateWindowExA(
             0, "BASE",
-            // STRING: TH07 0x00497b9c
-            "“Œ•û—dX–²@` Perfect Cherry Blossom. ver 1.00b", WS_OVERLAPPEDWINDOW,
+            "æ±æ–¹å¦–ã€…å¤¢ã€€ã€œ Perfect Cherry Blossom. ver 1.00b", WS_OVERLAPPEDWINDOW,
             0, 0, width, height, NULL, NULL, hInstance, NULL);
     }
     else
@@ -301,7 +286,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
         width = GetSystemMetrics(SM_CXFIXEDFRAME) * 2 + 640;
         height = 480 + GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
         g_GameWindow.window = CreateWindowExA(
-            0, "BASE", "“Œ•û—dX–²@` Perfect Cherry Blossom. ver 1.00b",
+            0, "BASE", "æ±æ–¹å¦–ã€…å¤¢ã€€ã€œ Perfect Cherry Blossom. ver 1.00b",
             WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX,
             CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL,
             hInstance, NULL);
@@ -316,7 +301,6 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     return false;
 }
 
-// FUNCTION: TH07 0x00434bd0
 i32 GameWindow::InitD3dRendering()
 {
     ZunVec3 pEye;
@@ -347,8 +331,7 @@ i32 GameWindow::InitD3dRendering()
         {
             presentParams.BackBufferFormat = D3DFMT_X8R8G8B8;
             g_Supervisor.cfg.colorMode16bit = 0;
-            // STRING: TH07 0x00497b70
-            g_GameErrorContext.Log("‰‰ñ‹N“®A‰æ–Ê‚ğ 32Bits ‚Å‰Šú‰»‚µ‚Ü‚µ‚½\r\n");
+            g_GameErrorContext.Log("åˆå›èµ·å‹•ã€ç”»é¢ã‚’ 32Bits ã§åˆæœŸåŒ–ã—ã¾ã—ãŸ\r\n");
         }
         else if (!g_Supervisor.cfg.colorMode16bit)
         {
@@ -366,8 +349,7 @@ i32 GameWindow::InitD3dRendering()
         {
             presentParams.FullScreen_RefreshRateInHz = 60;
             presentParams.FullScreen_PresentationInterval = 1;
-            // STRING: TH07 0x00497b44
-            g_GameErrorContext.Log("ƒŠƒtƒŒƒbƒVƒ…ƒŒ[ƒg‚ğ60Hz‚É•ÏX‚ğ‚İ‚Ü‚·\r\n");
+            g_GameErrorContext.Log("ãƒªãƒ•ãƒ¬ãƒƒã‚·ãƒ¥ãƒ¬ãƒ¼ãƒˆã‚’60Hzã«å¤‰æ›´ã‚’è©¦ã¿ã¾ã™\r\n");
             if (!g_Supervisor.cfg.frameskipConfig)
             {
                 presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
@@ -383,8 +365,7 @@ i32 GameWindow::InitD3dRendering()
             presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
             presentParams.FullScreen_PresentationInterval =
                 D3DPRESENT_INTERVAL_IMMEDIATE;
-            // STRING: TH07 0x00497b20
-            g_GameErrorContext.Log("VSync”ñ“¯Šú‰Â”\‚©‚Ç‚¤‚©‚ğ‚İ‚Ü‚·\r\n");
+            g_GameErrorContext.Log("VSyncéåŒæœŸå¯èƒ½ã‹ã©ã†ã‹ã‚’è©¦ã¿ã¾ã™\r\n");
         }
     }
     else
@@ -414,8 +395,7 @@ i32 GameWindow::InitD3dRendering()
         {
             if (retryWithoutRefreshRate)
             {
-                // STRING: TH07 0x00497afc
-                g_GameErrorContext.Log("T&L HAL ‚Íg—p‚Å‚«‚È‚¢‚æ‚¤‚Å‚·\r\n");
+                g_GameErrorContext.Log("T&L HAL ã¯ä½¿ç”¨ã§ããªã„ã‚ˆã†ã§ã™\r\n");
             }
             if (FAILED(g_Supervisor.d3dIface->CreateDevice(
                     0, D3DDEVTYPE_HAL, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
@@ -423,8 +403,7 @@ i32 GameWindow::InitD3dRendering()
             {
                 if (retryWithoutRefreshRate)
                 {
-                    // STRING: TH07 0x00497adc
-                    g_GameErrorContext.Log("HAL ‚àg—p‚Å‚«‚È‚¢‚æ‚¤‚Å‚·\r\n");
+                    g_GameErrorContext.Log("HAL ã‚‚ä½¿ç”¨ã§ããªã„ã‚ˆã†ã§ã™\r\n");
                 }
             fallback_to_software:
                 if (FAILED(g_Supervisor.d3dIface->CreateDevice(
@@ -434,8 +413,7 @@ i32 GameWindow::InitD3dRendering()
                 {
                     if (!g_Supervisor.vsyncEnabled)
                     {
-                        // STRING: TH07 0x00497ab4
-                        g_GameErrorContext.Log("ƒŠƒtƒŒƒbƒVƒ…ƒŒ[ƒg‚ª•ÏX‚Å‚«‚Ü‚¹‚ñ\r\n");
+                        g_GameErrorContext.Log("ãƒªãƒ•ãƒ¬ãƒƒã‚·ãƒ¥ãƒ¬ãƒ¼ãƒˆãŒå¤‰æ›´ã§ãã¾ã›ã‚“\r\n");
                         presentParams.FullScreen_RefreshRateInHz = 0;
                         g_Supervisor.lockableBackBuffer = 0;
                         retryWithoutRefreshRate = 1;
@@ -444,41 +422,35 @@ i32 GameWindow::InitD3dRendering()
 
                     if (presentParams.FullScreen_PresentationInterval == D3DPRESENT_INTERVAL_IMMEDIATE)
                     {
-                        // STRING: TH07 0x00497a7c
-                        g_GameErrorContext.Log("”ñ“¯ŠúXV‚às‚¦‚Ü‚¹‚ñBˆê”Ô‰˜‚¢ƒ‚[ƒh‚É•ÏX‚µ‚Ü‚·\r\n");
-                        // STRING: TH07 0x00497a3c
-                        g_GameErrorContext.Fatal("*** ƒŠƒtƒŒƒbƒVƒ…ƒŒ[ƒg‚ğ60Hz‚É•ÏX‚·‚é‚±‚Æ‚ğ„§‚µ‚Ü‚· ***\r\n");
+                        g_GameErrorContext.Log("éåŒæœŸæ›´æ–°ã‚‚è¡Œãˆã¾ã›ã‚“ã€‚ä¸€ç•ªæ±šã„ãƒ¢ãƒ¼ãƒ‰ã«å¤‰æ›´ã—ã¾ã™\r\n");
+                        g_GameErrorContext.Fatal("*** ãƒªãƒ•ãƒ¬ãƒƒã‚·ãƒ¥ãƒ¬ãƒ¼ãƒˆã‚’60Hzã«å¤‰æ›´ã™ã‚‹ã“ã¨ã‚’æ¨å¥¨ã—ã¾ã™ ***\r\n");
                         presentParams.FullScreen_PresentationInterval = 1;
                         presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
                         continue;
                     }
                     else
                     {
-                        // STRING: TH07 0x00497a04
-                        g_GameErrorContext.Fatal("Direct3D ‚Ì‰Šú‰»‚É¸”sA‚±‚ê‚Å‚ÍƒQ[ƒ€‚Ío—ˆ‚Ü‚¹‚ñ\r\n");
+                        g_GameErrorContext.Fatal("Direct3D ã®åˆæœŸåŒ–ã«å¤±æ•—ã€ã“ã‚Œã§ã¯ã‚²ãƒ¼ãƒ ã¯å‡ºæ¥ã¾ã›ã‚“\r\n");
                         SAFE_RELEASE(g_Supervisor.d3dIface);
                         return 1;
                     }
                 }
                 else
                 {
-                    // STRING: TH07 0x004979c8
-                    g_GameErrorContext.Log("REF ‚Å“®ì‚µ‚Ü‚·‚ªAd‚·‚¬‚Ä‹°‚ç‚­ƒQ[ƒ€‚É‚È‚è‚Ü‚¹‚ñ...\r\n");
+                    g_GameErrorContext.Log("REF ã§å‹•ä½œã—ã¾ã™ãŒã€é‡ã™ãã¦æã‚‰ãã‚²ãƒ¼ãƒ ã«ãªã‚Šã¾ã›ã‚“...\r\n");
                     g_Supervisor.flags &= 0xfffffffe;
                     usingD3dHal = false;
                 }
             }
             else
             {
-                // STRING: TH07 0x004979b4
-                g_GameErrorContext.Log("HAL ‚Å“®ì‚µ‚Ü‚·\r\n");
+                g_GameErrorContext.Log("HAL ã§å‹•ä½œã—ã¾ã™\r\n");
                 g_Supervisor.flags &= 0xfffffffe;
             }
         }
         else
         {
-            // STRING: TH07 0x00497998
-            g_GameErrorContext.Log("T&L HAL ‚Å“®ì‚µ‚Ü`‚·\r\n");
+            g_GameErrorContext.Log("T&L HAL ã§å‹•ä½œã—ã¾ã€œã™\r\n");
             g_Supervisor.flags |= 1;
         }
         break;
@@ -511,14 +483,12 @@ i32 GameWindow::InitD3dRendering()
     if ((g_Supervisor.cfg.opts & 1) == 0 &&
         (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
-        // STRING: TH07 0x00497948
-        g_GameErrorContext.Log("D3DTEXOPCAPS_ADD ‚ğƒTƒ|[ƒg‚µ‚Ä‚¢‚Ü‚¹‚ñAF‰ÁZƒGƒ~ƒ…ƒŒ[ƒgƒ‚[ƒh‚Å“®ì‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("D3DTEXOPCAPS_ADD ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ã„ã¾ã›ã‚“ã€è‰²åŠ ç®—ã‚¨ãƒŸãƒ¥ãƒ¬ãƒ¼ãƒˆãƒ¢ãƒ¼ãƒ‰ã§å‹•ä½œã—ã¾ã™\r\n");
         g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
     }
     if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
     {
-        // STRING: TH07 0x004978f8
-        g_GameErrorContext.Log("512 ˆÈã‚ÌƒeƒNƒXƒ`ƒƒ‚ğƒTƒ|[ƒg‚µ‚Ä‚¢‚Ü‚¹‚ñB–w‚Ç‚ÌŠG‚ªƒ{ƒP‚Ä•\¦‚³‚ê‚Ü‚·B\r\n");
+        g_GameErrorContext.Log("512 ä»¥ä¸Šã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ã„ã¾ã›ã‚“ã€‚æ®†ã©ã®çµµãŒãƒœã‚±ã¦è¡¨ç¤ºã•ã‚Œã¾ã™ã€‚\r\n");
     }
     FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
     g_GameErrorContext.Log(capsBuffer);
@@ -534,8 +504,7 @@ i32 GameWindow::InitD3dRendering()
         {
             g_Supervisor.flags &= 0xfffffffb;
             g_Supervisor.cfg.opts |= 4;
-            // STRING: TH07 0x004978b0
-            g_GameErrorContext.Log("D3DFMT_A8R8G8B8 ‚ğƒTƒ|[ƒg‚µ‚Ä‚¢‚Ü‚¹‚ñAŒ¸Fƒ‚[ƒh‚Å“®ì‚µ‚Ü‚·\r\n");
+            g_GameErrorContext.Log("D3DFMT_A8R8G8B8 ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ã„ã¾ã›ã‚“ã€æ¸›è‰²ãƒ¢ãƒ¼ãƒ‰ã§å‹•ä½œã—ã¾ã™\r\n");
         }
     }
     ResetRenderState();
@@ -545,162 +514,116 @@ i32 GameWindow::InitD3dRendering()
     return 0;
 }
 
-// FUNCTION: TH07 0x004351c0
 char *GameWindow::FormatCapability(const char *capabilityName,
                                    u32 capabilityFlags, u32 mask, char *buf)
 {
     buf += sprintf(buf, "%s", capabilityName);
     if ((capabilityFlags & mask) == 0)
     {
-        // STRING: TH07 0x004978a4
-        buf += sprintf(buf, "•s‰Â\r\n");
+        buf += sprintf(buf, "ä¸å¯\r\n");
     }
     else
     {
-        // STRING: TH07 0x0049789c
-        buf += sprintf(buf, "‰Â\r\n");
+        buf += sprintf(buf, "å¯\r\n");
     }
     return buf;
 }
 
-// FUNCTION: TH07 0x00435230
 void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
 {
     char *strPos;
 
     strPos = buf;
-    // STRING: TH07 0x0049786c
-    strPos += sprintf(strPos, "Œ»İ‚ÌƒrƒfƒIƒJ[ƒhA‹y‚Ñƒhƒ‰ƒCƒo‚Ì”\—ÍÚ×\r\n");
-    // STRING: TH07 0x00497858
-    strPos = FormatCapability("@‘–¸üæ“¾”\—Í : ", caps->Caps,
+    strPos += sprintf(strPos, "ç¾åœ¨ã®ãƒ“ãƒ‡ã‚ªã‚«ãƒ¼ãƒ‰ã€åŠã³ãƒ‰ãƒ©ã‚¤ãƒã®èƒ½åŠ›è©³ç´°\r\n");
+    strPos = FormatCapability("ã€€èµ°æŸ»ç·šå–å¾—èƒ½åŠ› : ", caps->Caps,
                               D3DCAPS_READ_SCANLINE, strPos);
-    // STRING: TH07 0x00497834
-    strPos = FormatCapability("@ƒEƒBƒ“ƒhƒEƒ‚[ƒh‚ÌƒŒƒ“ƒ_ƒŠƒ“ƒO : ", caps->Caps2,
+    strPos = FormatCapability("ã€€ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ã®ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚° : ", caps->Caps2,
                               D3DCAPS2_CANRENDERWINDOWED, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x00497810
-        "@ƒvƒŒƒ[ƒ“ƒe[ƒVƒ‡ƒ“ŠÔŠui’¼Új: ", caps->PresentationIntervals,
+        "ã€€ãƒ—ãƒ¬ã‚¼ãƒ³ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³é–“éš”ï¼ˆç›´æ¥ï¼‰: ", caps->PresentationIntervals,
         D3DPRESENT_INTERVAL_IMMEDIATE, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x004977e8
-        "@ƒvƒŒƒ[ƒ“ƒe[ƒVƒ‡ƒ“ŠÔŠui‚’¼“¯Šúj: ", caps->PresentationIntervals,
+        "ã€€ãƒ—ãƒ¬ã‚¼ãƒ³ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³é–“éš”ï¼ˆå‚ç›´åŒæœŸï¼‰: ", caps->PresentationIntervals,
         D3DPRESENT_INTERVAL_ONE, strPos);
-    // STRING: TH07 0x004977b4
-    strPos += sprintf(strPos, "@-- ƒfƒoƒCƒX”\—Í ------------------------------\r\n");
+    strPos += sprintf(strPos, "ã€€-- ãƒ‡ãƒã‚¤ã‚¹èƒ½åŠ› ------------------------------\r\n");
     strPos =
-        // STRING: TH07 0x0049778c
-        FormatCapability("@System -> ”ñƒ[ƒJƒ‹VRAMƒuƒŠƒbƒg : ", caps->DevCaps,
+        FormatCapability("ã€€System -> éãƒ­ãƒ¼ã‚«ãƒ«VRAMãƒ–ãƒªãƒƒãƒˆ : ", caps->DevCaps,
                          D3DDEVCAPS_CANBLTSYSTONONLOCAL, strPos);
-    // STRING: TH07 0x00497774
-    strPos = FormatCapability("@ƒn[ƒhƒEƒFƒA T&L : ", caps->DevCaps,
+    strPos = FormatCapability("ã€€ãƒãƒ¼ãƒ‰ã‚¦ã‚§ã‚¢ T&L : ", caps->DevCaps,
                               D3DDEVCAPS_HWTRANSFORMANDLIGHT, strPos);
     strPos =
-        // STRING: TH07 0x0049774c
-        FormatCapability("@”ñƒ[ƒJƒ‹VRAM‚©‚çƒeƒNƒXƒ`ƒƒæ“¾ : ", caps->DevCaps,
+        FormatCapability("ã€€éãƒ­ãƒ¼ã‚«ãƒ«VRAMã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£å–å¾— : ", caps->DevCaps,
                          D3DDEVCAPS_TEXTURENONLOCALVIDMEM, strPos);
     strPos =
-        // STRING: TH07 0x00497724
-        FormatCapability("@ƒVƒXƒeƒ€ƒƒ‚ƒŠ‚©‚çƒeƒNƒXƒ`ƒƒæ“¾ : ", caps->DevCaps,
+        FormatCapability("ã€€ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒ¢ãƒªã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£å–å¾— : ", caps->DevCaps,
                          D3DDEVCAPS_TEXTURESYSTEMMEMORY, strPos);
-    // STRING: TH07 0x00497704
-    strPos = FormatCapability("@VRAM ‚©‚çƒeƒNƒXƒ`ƒƒæ“¾ : ", caps->DevCaps,
+    strPos = FormatCapability("ã€€VRAM ã‹ã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£å–å¾— : ", caps->DevCaps,
                               D3DDEVCAPS_TEXTUREVIDEOMEMORY, strPos);
     strPos =
-        // STRING: TH07 0x004976dc
-        FormatCapability("@’¸“_ƒoƒbƒtƒ@‚ÉƒVƒXƒeƒ€ƒƒ‚ƒŠ‚ğg—p : ", caps->DevCaps,
+        FormatCapability("ã€€é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã«ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒ¢ãƒªã‚’ä½¿ç”¨ : ", caps->DevCaps,
                          D3DDEVCAPS_TLVERTEXSYSTEMMEMORY, strPos);
     strPos =
-        // STRING: TH07 0x004976b4
-        FormatCapability("@’¸“_ƒoƒbƒtƒ@‚ÉƒrƒfƒIƒƒ‚ƒŠ‚ğg—p : ", caps->DevCaps,
+        FormatCapability("ã€€é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ã«ãƒ“ãƒ‡ã‚ªãƒ¡ãƒ¢ãƒªã‚’ä½¿ç”¨ : ", caps->DevCaps,
                          D3DDEVCAPS_TLVERTEXVIDEOMEMORY, strPos);
     strPos +=
-        // STRING: TH07 0x00497680
-        sprintf(strPos, "@-- ƒvƒŠƒ~ƒeƒBƒu”\—Í ---------------------------\r\n");
-    // STRING: TH07 0x00497670
-    strPos = FormatCapability("@”¼“§–¾ˆ— : ", caps->PrimitiveMiscCaps,
+        sprintf(strPos, "ã€€-- ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–èƒ½åŠ› ---------------------------\r\n");
+    strPos = FormatCapability("ã€€åŠé€æ˜å‡¦ç† : ", caps->PrimitiveMiscCaps,
                               D3DPMISCCAPS_BLENDOP, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x00497650
-        "@ƒ|ƒCƒ“ƒg‚ÌƒNƒŠƒbƒsƒ“ƒOˆ— : ", caps->PrimitiveMiscCaps,
+        "ã€€ãƒã‚¤ãƒ³ãƒˆã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°å‡¦ç† : ", caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CLIPPLANESCALEDPOINTS, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x0049762c
-        "@ƒvƒŠƒ~ƒeƒBƒu‚ÌƒNƒŠƒbƒsƒ“ƒOˆ— : ", caps->PrimitiveMiscCaps,
+        "ã€€ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°å‡¦ç† : ", caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CLIPTLVERTS, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x0049760c
-        "@–@üƒNƒŠƒbƒvi”½Œvü‚èj : ", caps->PrimitiveMiscCaps,
+        "ã€€æ³•ç·šã‚¯ãƒªãƒƒãƒ—ï¼ˆåæ™‚è¨ˆå‘¨ã‚Šï¼‰ : ", caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CULLCCW, strPos);
     strPos =
-        // STRING: TH07 0x004975ec
-        FormatCapability("@–@üƒNƒŠƒbƒviŒvü‚èj : ", caps->PrimitiveMiscCaps,
+        FormatCapability("ã€€æ³•ç·šã‚¯ãƒªãƒƒãƒ—ï¼ˆæ™‚è¨ˆå‘¨ã‚Šï¼‰ : ", caps->PrimitiveMiscCaps,
                          D3DPMISCCAPS_CULLCW, strPos);
-    // STRING: TH07 0x004975d4
-    strPos = FormatCapability("@–@üƒNƒŠƒbƒv–³‚µ : ", caps->PrimitiveMiscCaps,
+    strPos = FormatCapability("ã€€æ³•ç·šã‚¯ãƒªãƒƒãƒ—ç„¡ã— : ", caps->PrimitiveMiscCaps,
                               D3DPMISCCAPS_CULLNONE, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x004975b4
-        "@ƒfƒvƒXƒeƒXƒgON/OFFØ‚è‘Ö‚¦ : ", caps->PrimitiveMiscCaps,
+        "ã€€ãƒ‡ãƒ—ã‚¹ãƒ†ã‚¹ãƒˆON/OFFåˆ‡ã‚Šæ›¿ãˆ : ", caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_MASKZ, strPos);
-    // STRING: TH07 0x00497580
-    strPos += sprintf(strPos, "@-- ƒ‰ƒXƒ^”\—Í --------------------------------\r\n");
-    // STRING: TH07 0x00497564
-    strPos = FormatCapability("@ˆÙ•û«ƒtƒBƒ‹ƒ^ƒŠƒ“ƒO : ", caps->RasterCaps,
+    strPos += sprintf(strPos, "ã€€-- ãƒ©ã‚¹ã‚¿èƒ½åŠ› --------------------------------\r\n");
+    strPos = FormatCapability("ã€€ç•°æ–¹æ€§ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ANISOTROPY, strPos);
-    // STRING: TH07 0x00497548
-    strPos = FormatCapability("@ƒAƒ“ƒ`ƒGƒCƒŠƒAƒVƒ“ƒO : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€ã‚¢ãƒ³ãƒã‚¨ã‚¤ãƒªã‚¢ã‚·ãƒ³ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ANTIALIASEDGES, strPos);
-    // STRING: TH07 0x00497538
-    strPos = FormatCapability("@ƒfƒBƒUˆ— : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€ãƒ‡ã‚£ã‚¶å‡¦ç† : ", caps->RasterCaps,
                               D3DPRASTERCAPS_DITHER, strPos);
-    // STRING: TH07 0x00497520
-    strPos = FormatCapability("@”ÍˆÍƒx[ƒX‚ÌƒtƒHƒO : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€ç¯„å›²ãƒ™ãƒ¼ã‚¹ã®ãƒ•ã‚©ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_FOGRANGE, strPos);
-    // STRING: TH07 0x00497508
-    strPos = FormatCapability("@Zƒx[ƒX‚ÌƒtƒHƒO : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€Zãƒ™ãƒ¼ã‚¹ã®ãƒ•ã‚©ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ZFOG, strPos);
-    // STRING: TH07 0x004974f4
-    strPos = FormatCapability("@ƒe[ƒuƒ‹ƒtƒHƒO : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€ãƒ†ãƒ¼ãƒ–ãƒ«ãƒ•ã‚©ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_FOGTABLE, strPos);
-    // STRING: TH07 0x004974e4
-    strPos = FormatCapability("@’¸“_ƒtƒHƒO : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€é ‚ç‚¹ãƒ•ã‚©ã‚° : ", caps->RasterCaps,
                               D3DPRASTERCAPS_FOGVERTEX, strPos);
-    // STRING: TH07 0x004974d0
-    strPos = FormatCapability("@ƒfƒvƒXƒeƒXƒg : ", caps->RasterCaps,
+    strPos = FormatCapability("ã€€ãƒ‡ãƒ—ã‚¹ãƒ†ã‚¹ãƒˆ : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ZTEST, strPos);
-    // STRING: TH07 0x0049749c
-    strPos += sprintf(strPos, "@-- ƒVƒF[ƒfƒBƒ“ƒO”\—Í -----------------------\r\n");
-    // STRING: TH07 0x00497480
-    strPos = FormatCapability("@ƒO[ƒ[ƒVƒF[ƒfƒBƒ“ƒO : ", caps->ShadeCaps,
+    strPos += sprintf(strPos, "ã€€-- ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°èƒ½åŠ› -----------------------\r\n");
+    strPos = FormatCapability("ã€€ã‚°ãƒ¼ãƒ­ãƒ¼ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚° : ", caps->ShadeCaps,
                               D3DPSHADECAPS_COLORGOURAUDRGB, strPos);
-    // STRING: TH07 0x0049745c
-    strPos = FormatCapability("@ƒ¿¬•ª‚ÌƒO[ƒ[ƒVƒF[ƒfƒBƒ“ƒO : ", caps->ShadeCaps,
+    strPos = FormatCapability("ã€€Î±æˆåˆ†ã®ã‚°ãƒ¼ãƒ­ãƒ¼ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚° : ", caps->ShadeCaps,
                               D3DPSHADECAPS_ALPHAGOURAUDBLEND, strPos);
-    // STRING: TH07 0x00497438
-    strPos = FormatCapability("@ƒO[ƒ[ƒVƒF[ƒfƒBƒ“ƒO‚ÅƒtƒHƒO : ", caps->ShadeCaps,
+    strPos = FormatCapability("ã€€ã‚°ãƒ¼ãƒ­ãƒ¼ã‚·ã‚§ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã§ãƒ•ã‚©ã‚° : ", caps->ShadeCaps,
                               D3DPSHADECAPS_FOGGOURAUD, strPos);
-    // STRING: TH07 0x00497404
-    strPos += sprintf(strPos, "@-- ƒeƒNƒXƒ`ƒƒ”\—Í ---------------------------\r\n");
-    // STRING: TH07 0x004973e0
-    strPos += sprintf(strPos, "@Å‘åƒeƒNƒXƒ`ƒƒƒTƒCƒY : (%lu, %lu)\r\n",
+    strPos += sprintf(strPos, "ã€€-- ãƒ†ã‚¯ã‚¹ãƒãƒ£èƒ½åŠ› ---------------------------\r\n");
+    strPos += sprintf(strPos, "ã€€æœ€å¤§ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚µã‚¤ã‚º : (%lu, %lu)\r\n",
                       caps->MaxTextureWidth, caps->MaxTextureHeight);
-    // STRING: TH07 0x004973c8
-    strPos = FormatCapability("@ƒ¿•t‚«ƒeƒNƒXƒ`ƒƒ : ", caps->TextureCaps,
+    strPos = FormatCapability("ã€€Î±ä»˜ããƒ†ã‚¯ã‚¹ãƒãƒ£ : ", caps->TextureCaps,
                               D3DPTEXTURECAPS_ALPHA, strPos);
-    // STRING: TH07 0x004973a8
-    strPos = FormatCapability("@ƒeƒNƒXƒ`ƒƒƒgƒ‰ƒ“ƒXƒtƒH[ƒ€ : ", caps->TextureCaps,
+    strPos = FormatCapability("ã€€ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ  : ", caps->TextureCaps,
                               D3DPTEXTURECAPS_PROJECTED, strPos);
-    // STRING: TH07 0x0049738c
-    strPos = FormatCapability("@ƒoƒCƒŠƒjƒA•âŠÔiŠg‘åj : ", caps->TextureFilterCaps,
+    strPos = FormatCapability("ã€€ãƒã‚¤ãƒªãƒ‹ã‚¢è£œé–“ï¼ˆæ‹¡å¤§ï¼‰ : ", caps->TextureFilterCaps,
                               D3DPTFILTERCAPS_MAGFLINEAR, strPos);
-    // STRING: TH07 0x00497370
-    strPos = FormatCapability("@ƒoƒCƒŠƒjƒA•âŠÔik¬j : ", caps->TextureFilterCaps,
+    strPos = FormatCapability("ã€€ãƒã‚¤ãƒªãƒ‹ã‚¢è£œé–“ï¼ˆç¸®å°ï¼‰ : ", caps->TextureFilterCaps,
                               D3DPTFILTERCAPS_MINFLINEAR, strPos);
-    // STRING: TH07 0x00497340
     strPos += sprintf(strPos, "--------------------------------------------\r\n");
 }
 
-// FUNCTION: TH07 0x004356a0
 void GameWindow::ResetRenderState()
 {
     if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
@@ -804,20 +727,16 @@ void GameWindow::ResetRenderState()
     g_Stage.renderStateWasReset = 1;
 }
 
-// FUNCTION: TH07 0x00435bd0
 ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
 {
     char *ext;
     char resolvedPath[264];
     STARTUPINFO startupInfo;
     char exePath[264];
-
-    // STRING: TH07 0x0049732c
     g_Mutex = CreateMutexA(NULL, 1, "Touhou YouYouMu App");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
     {
-        // STRING: TH07 0x00497314
-        g_GameErrorContext.Fatal("“ñ‚Â‚Í‹N“®‚Å‚«‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Fatal("äºŒã¤ã¯èµ·å‹•ã§ãã¾ã›ã‚“\r\n");
         return ZUN_ERROR;
     }
 
@@ -832,7 +751,6 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
         if (FileSystem::CheckFileExists(startupInfo.lpTitle) &&
             ext)
         {
-            // STRING: TH07 0x0049730c
             if (_stricmp(ext, ".lnk") == 0)
             {
                 do
@@ -860,7 +778,6 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00435e30
 void GameWindow::SetWindowActive(HWND window)
 {
     u32 idAttachTo;
@@ -878,7 +795,6 @@ void GameWindow::SetWindowActive(HWND window)
     AttachThreadInput(processId, idAttachTo, 0);
 }
 
-// FUNCTION: TH07 0x00435ec0
 i32 GameWindow::ChecksumExecutable()
 {
     u32 *dataBase;
@@ -900,7 +816,6 @@ i32 GameWindow::ChecksumExecutable()
         {
             checksum += *dataCursor;
         }
-        // STRING: TH07 0x004972fc
         DebugPrint("main sum %d\r\n", checksum);
         free(dataBase);
         g_Supervisor.exeChecksum = checksum;
@@ -911,7 +826,6 @@ i32 GameWindow::ChecksumExecutable()
     return -1;
 }
 
-// FUNCTION: TH07 0x00435fc0
 i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
                           i32 maxPathLen)
 {

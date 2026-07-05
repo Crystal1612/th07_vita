@@ -13,10 +13,8 @@
 #include "pbg4/Lzss.hpp"
 #include <cstdio>
 
-// GLOBAL: TH07 0x004b9e48
 ReplayManager *g_ReplayManager;
 
-// FUNCTION: TH07 0x00442c60
 u32 ReplayManager::OnUpdateRng(ReplayManager *arg)
 {
     arg->replayEventFlags = 0;
@@ -30,7 +28,6 @@ u32 ReplayManager::OnUpdateRng(ReplayManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00442cd0
 u32 ReplayManager::OnUpdate(ReplayManager *arg)
 {
     u16 curInput;
@@ -77,7 +74,6 @@ u32 ReplayManager::OnUpdate(ReplayManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00442e50
 u32 ReplayManager::OnUpdateDemoLowPrio(ReplayManager *arg)
 {
     if (!g_GameManager.notInMenu)
@@ -101,7 +97,6 @@ u32 ReplayManager::OnUpdateDemoLowPrio(ReplayManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00442ee0
 u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
 {
     if (!g_GameManager.notInMenu)
@@ -151,7 +146,6 @@ u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00443040
 ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
 {
     StageReplayData *prevData;
@@ -164,18 +158,15 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     if (!arg->data)
     {
         arg->data = new ReplayFile;
-        // STRING: TH07 0x00496aa8
         arg->data->head.magic = *(u32 *)&"T7RP";
         arg->data->data.shotType = g_GameManager.shotTypeAndCharacter;
         arg->data->head.version = 0x1100;
         arg->data->data.replayVersion = 256;
         arg->data->data.versionChar1 = 'b';
-        // STRING: TH07 0x00497228
         strcpy(arg->data->data.replayStr, "0100b");
         arg->data->data.exeSize = g_Supervisor.exeSize;
         arg->data->data.exeChecksum = g_Supervisor.exeChecksum;
         arg->data->data.difficulty = g_GameManager.difficulty;
-        // STRING: TH07 0x00496aa0
         memcpy(arg->data->data.name, "NO NAME", 4);
         arg->data->data.cfg = *g_GameManager.defaultCfg;
         for (i = 0; i < 7; i++)
@@ -235,7 +226,6 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004433b0
 ReplayFile *
 ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
 {
@@ -280,7 +270,7 @@ ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
         goto bad;
     }
     dataDecompressed = (ReplayFile *)malloc(curData->head.sizeWithoutHeader +
-                                                               sizeof(ReplayHeader));
+                                            sizeof(ReplayHeader));
     memcpy(dataDecompressed, data, sizeof(ReplayHeader));
     Lzss::Decompress(&curData->data.rngValue3, curData->head.compressedSize,
                      &dataDecompressed->data.rngValue3, curData->head.sizeWithoutHeader);
@@ -300,7 +290,6 @@ bad:
     return NULL;
 }
 
-// FUNCTION: TH07 0x00443550
 ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
 {
     StageReplayData *endData;
@@ -423,7 +412,6 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004439b0
 ZunResult ReplayManager::DeletedCallback(ReplayManager *arg)
 {
     g_Chain.Cut(arg->drawChain);
@@ -450,7 +438,6 @@ ZunResult ReplayManager::DeletedCallback(ReplayManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00443aa0
 ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
 {
     g_LastFrameGameInput = 0;
@@ -518,7 +505,6 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00443d30
 void ReplayManager::StopRecording()
 {
     ReplayManager *mgr = g_ReplayManager;
@@ -536,7 +522,6 @@ void ReplayManager::StopRecording()
     }
 }
 
-// FUNCTION: TH07 0x00443da0
 void ReplayManager::SaveReplay(const char *filename, char *replayName)
 {
     u8 *curByte;
@@ -572,7 +557,6 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
             }
             if (filename)
             {
-                // STRING: TH07 0x00496a80
                 DebugPrint("info : Replay File write %s\r\n", filename);
                 replayData = (u8 *)malloc(0x100000);
                 replayCopy = *mgr->data;
@@ -639,7 +623,6 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                 replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
                 replayCopy.data.magic30 = 30;
                 memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
-                // STRING: TH07 0x00496a64
                 DebugPrint("info : original size %d\r\n", replaySize);
                 replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
                 lpBuffer = Lzss::Compress(replayData, replayCopy.head.sizeWithoutHeader,
@@ -677,7 +660,6 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                     fwrite(lpBuffer, compressedSize, 1, file);
                     fclose(file);
-                    // STRING: TH07 0x00496a4c
                     DebugPrint("info : Size %d -> %d\r\n", replaySize,
                                compressedSize + sizeof(ReplayHeader));
                     free(lpBuffer);
@@ -700,7 +682,6 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
     }
 }
 
-// FUNCTION: TH07 0x004444d0
 void ReplayManager::SaveReplay2(const char *filename)
 {
     u8 *curByte;
@@ -733,7 +714,6 @@ void ReplayManager::SaveReplay2(const char *filename)
         }
         if (filename)
         {
-            // STRING: TH07 0x00496a2c
             DebugPrint("info : Replay File rewrite %s\r\n", filename);
             replayData = (u8 *)malloc(0x100000);
             replayCopy = *mgr->data;

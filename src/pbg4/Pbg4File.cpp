@@ -7,34 +7,27 @@
 
 #include "../inttypes.hpp"
 
-// GLOBAL: TH07 0x00495120
 const u32 g_SeekModes[3] = {0, 1, 2};
 
 // would it really not have been simpler to just type the letter where its used
 // GLOBAL: TH07 0x0049ea70
 const char *g_AccessModes[3] = {
-    // STRING: TH07 0x00495244
     "r",
-    // STRING: TH07 0x00495240
     "w",
-    // STRING: TH07 0x0049523c
     "a",
 };
 
-// FUNCTION: TH07 0x0045e550
 Pbg4File::Pbg4File()
 {
     this->file = NULL;
     this->access = 0;
 }
 
-// FUNCTION: TH07 0x0045e5c0
 Pbg4File::~Pbg4File()
 {
     Close();
 }
 
-// FUNCTION: TH07 0x0045e620
 bool Pbg4File::Open(const char *path, const char *mode)
 {
     u32 local_118;
@@ -88,7 +81,6 @@ bool Pbg4File::Open(const char *path, const char *mode)
     }
 }
 
-// FUNCTION: TH07 0x0045e770
 void Pbg4File::Close()
 {
     if (this->file)
@@ -99,7 +91,6 @@ void Pbg4File::Close()
     }
 }
 
-// FUNCTION: TH07 0x0045e7b0
 u32 Pbg4File::Read(void *data, u32 len)
 {
     u32 local_8;
@@ -114,7 +105,6 @@ u32 Pbg4File::Read(void *data, u32 len)
     return local_8;
 }
 
-// FUNCTION: TH07 0x0045e800
 bool Pbg4File::Write(void *data, u32 len)
 {
     u32 local_8;
@@ -129,7 +119,6 @@ bool Pbg4File::Write(void *data, u32 len)
     return len == local_8;
 }
 
-// FUNCTION: TH07 0x0045e850
 u32 Pbg4File::Tell()
 {
     if (!this->file)
@@ -142,7 +131,6 @@ u32 Pbg4File::Tell()
     }
 }
 
-// FUNCTION: TH07 0x0045e880
 u32 Pbg4File::GetSize()
 {
     if (!this->file)
@@ -159,7 +147,6 @@ u32 Pbg4File::GetSize()
     }
 }
 
-// FUNCTION: TH07 0x0045e8b0
 bool Pbg4File::Seek(u32 offset, u32 seekFrom)
 {
     if (!this->file)
@@ -171,7 +158,6 @@ bool Pbg4File::Seek(u32 offset, u32 seekFrom)
     return true;
 }
 
-// FUNCTION: TH07 0x0045e8f0
 void *Pbg4File::ReadRemaining(u32 max)
 {
     void *hMem;
@@ -215,7 +201,6 @@ void *Pbg4File::ReadRemaining(u32 max)
     return hMem;
 }
 
-// FUNCTION: TH07 0x0045e9d0
 void Pbg4File::GetFullPath(char *out, const char *filename)
 {
     if (strchr(filename, ':') != NULL)

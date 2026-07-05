@@ -5,13 +5,10 @@
 #include "Lzss.hpp"
 #include "Pbg4File.hpp"
 
-// GLOBAL: TH07 0x004b9e68
 Pbg4Archive g_UnusedPbg4ArchiveArray[20];
 
-// GLOBAL: TH07 0x00626258
 Pbg4Archive g_Pbg4Archive;
 
-// FUNCTION: TH07 0x0045f6b0
 Pbg4Archive::Pbg4Archive()
 {
     this->entries = NULL;
@@ -20,17 +17,14 @@ Pbg4Archive::Pbg4Archive()
     this->fileAbstraction = NULL;
 }
 
-// FUNCTION: TH07 0x0045f6f0
 Pbg4Archive::~Pbg4Archive()
 {
     Release();
 }
 
-// FUNCTION: TH07 0x0045f710
 bool Pbg4Archive::Load(const char *filename)
 {
     Release();
-    // STRING: TH07 0x00495100
     DebugPrint("info : %s open arcfile\r\n", filename);
 
     this->fileAbstraction = new Pbg4File();
@@ -48,16 +42,13 @@ bool Pbg4Archive::Load(const char *filename)
             return true;
         }
     }
-    // STRING: TH07 0x004950e8
     DebugPrint("info : %s not found\r\n", filename);
     Release();
     return false;
 }
 
-// FUNCTION: TH07 0x0045f800
 void Pbg4Archive::Release()
 {
-    // STRING: TH07 0x004950cc
     DebugPrint("info : %s close arcfile\r\n", this->filename);
     if (this->filename)
     {
@@ -69,7 +60,6 @@ void Pbg4Archive::Release()
     this->numOfEntries = 0;
 }
 
-// FUNCTION: TH07 0x0045f960
 u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
 {
     SIZE_T dstLen;
@@ -120,7 +110,6 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     }
     return dstBuf;
 err:
-    // STRING: TH07 0x004950b8
     DebugPrint("info : %s error\r\n", this->filename);
     if (srcBuf)
     {
@@ -130,7 +119,6 @@ err:
     return NULL;
 }
 
-// FUNCTION: TH07 0x0045fab0
 u32 Pbg4Archive::GetEntrySize(const char *filename)
 {
     Pbg4Entry *entry = FindEntry(filename);
@@ -142,7 +130,6 @@ u32 Pbg4Archive::GetEntrySize(const char *filename)
     return 0;
 }
 
-// FUNCTION: TH07 0x0045fae0
 Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
 {
     if (!this->entries)
@@ -161,7 +148,6 @@ Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
     return NULL;
 }
 
-// FUNCTION: TH07 0x0045fb50
 bool Pbg4Archive::OpenArchive(const char *path)
 {
     u8 *compressedData;
@@ -267,12 +253,10 @@ err:
         decompressedData = NULL;
     }
     SAFE_DELETE(this->fileAbstraction);
-    // STRING: TH07 0x00495084
-    DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
+    DebugPrint("繝輔ぃ繧､繝ｫ %s 縺ｮ繧ｪ繝ｼ繝励Φ荳ｭ縺ｫ繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆\r\n", path);
     return false;
 }
 
-// FUNCTION: TH07 0x0045fde0
 Pbg4Entry *Pbg4Archive::AllocEntries(void *param_1, i32 count, u32 dataOffset)
 {
     Pbg4Entry *entries = NULL;
@@ -313,7 +297,6 @@ err:
     return NULL;
 }
 
-// FUNCTION: TH07 0x0045ffc0
 char *Pbg4Archive::CopyFileName(const char *filename)
 {
     char *pcVar2;

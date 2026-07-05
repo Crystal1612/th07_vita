@@ -2,15 +2,12 @@
 
 #include <stddef.h>
 
-// GLOBAL: TH07 0x00626218
 Chain g_Chain;
 
-// FUNCTION: TH07 0x0042fa60
 Chain::~Chain()
 {
 }
 
-// FUNCTION: TH07 0x0042fab0
 ChainElem::ChainElem()
 {
     this->prev = NULL;
@@ -23,7 +20,6 @@ ChainElem::ChainElem()
     this->isAllocated = 0;
 }
 
-// FUNCTION: TH07 0x0042fb20
 ChainElem::~ChainElem()
 {
     if (this->deletedCallback)
@@ -37,12 +33,10 @@ ChainElem::~ChainElem()
     this->deletedCallback = NULL;
 }
 
-// FUNCTION: TH07 0x0042fb80
 Chain::Chain()
 {
 }
 
-// FUNCTION: TH07 0x0042fbd0
 ZunResult Chain::AddToCalcChain(ChainElem *elem, i32 priority)
 {
     ZunResult uVar1;
@@ -86,7 +80,6 @@ ZunResult Chain::AddToCalcChain(ChainElem *elem, i32 priority)
     }
 }
 
-// FUNCTION: TH07 0x0042fca0
 ZunResult Chain::AddToDrawChain(ChainElem *elem, i32 priority)
 {
     ChainElem *curElem;
@@ -127,7 +120,6 @@ ZunResult Chain::AddToDrawChain(ChainElem *elem, i32 priority)
     }
 }
 
-// FUNCTION: TH07 0x0042fd60
 i32 Chain::RunCalcChain()
 {
     ChainElem *next;
@@ -170,7 +162,6 @@ restart_from_first_job:
     return updateCount;
 }
 
-// FUNCTION: TH07 0x0042fe20
 i32 Chain::RunDrawChain()
 {
     ChainElem *next;
@@ -210,7 +201,6 @@ i32 Chain::RunDrawChain()
     return updateCount;
 }
 
-// FUNCTION: TH07 0x0042fee0
 void Chain::ReleaseSingleChain(ChainElem *root)
 {
     ChainElem nextRootElem;
@@ -244,14 +234,12 @@ void Chain::ReleaseSingleChain(ChainElem *root)
     }
 }
 
-// FUNCTION: TH07 0x00430060
 void Chain::Release()
 {
     ReleaseSingleChain(&this->calcChain);
     ReleaseSingleChain(&this->drawChain);
 }
 
-// FUNCTION: TH07 0x00430090
 ChainElem *Chain::CreateElem(ChainCallback callback)
 {
     ChainElem *elem = new ChainElem;
@@ -262,7 +250,6 @@ ChainElem *Chain::CreateElem(ChainCallback callback)
     return elem;
 }
 
-// FUNCTION: TH07 0x00430140
 void Chain::Cut(ChainElem *toRemove)
 {
     ChainElem *curElem;

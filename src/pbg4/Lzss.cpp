@@ -6,10 +6,8 @@
 #define LZSS_DICTSIZE_MASK (LZSS_DICTSIZE - 1)
 #define LZSS_DICTPOS_MOD(pos, amount) ((pos + amount) & LZSS_DICTSIZE_MASK)
 
-// GLOBAL: TH07 0x0049fe30
 Lzss::LzssNode g_LzssTree[0x2000 + 1];
 
-// GLOBAL: TH07 0x004b7e40
 u8 g_LzssDictionary[8196];
 
 #define FALSE 0
@@ -269,7 +267,6 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
     return dst;
 }
 
-// FUNCTION: TH07 0x0045f270
 void Lzss::InitializeTree(i32 root)
 {
     g_LzssTree[0x2000].rightChild = root;
@@ -278,7 +275,6 @@ void Lzss::InitializeTree(i32 root)
     g_LzssTree[root].leftChild = 0;
 }
 
-// FUNCTION: TH07 0x0045f2c0
 void Lzss::InitializeDictionary()
 {
     i32 i;
@@ -295,7 +291,6 @@ void Lzss::InitializeDictionary()
     }
 }
 
-// FUNCTION: TH07 0x0045f340
 i32 Lzss::InsertNode(i32 node, i32 *matchPosition)
 {
     i32 delta;
@@ -350,7 +345,6 @@ i32 Lzss::InsertNode(i32 node, i32 *matchPosition)
     }
 }
 
-// FUNCTION: TH07 0x0045f460
 void Lzss::DeleteNode(i32 node)
 {
     if (g_LzssTree[node].parent == 0)
@@ -374,7 +368,6 @@ void Lzss::DeleteNode(i32 node)
     }
 }
 
-// FUNCTION: TH07 0x0045f4f0
 void Lzss::ContractNode(i32 firstNode, i32 secondNode)
 {
     g_LzssTree[secondNode].parent = g_LzssTree[firstNode].parent;
@@ -389,7 +382,6 @@ void Lzss::ContractNode(i32 firstNode, i32 secondNode)
     g_LzssTree[firstNode].parent = 0;
 }
 
-// FUNCTION: TH07 0x0045f580
 void Lzss::ReplaceNode(i32 oldNode, i32 newNode)
 {
     i32 parent = g_LzssTree[oldNode].parent;
@@ -409,7 +401,6 @@ void Lzss::ReplaceNode(i32 oldNode, i32 newNode)
     g_LzssTree[oldNode].parent = 0;
 }
 
-// FUNCTION: TH07 0x0045f640
 i32 Lzss::FindMinNode(i32 startNode)
 {
     i32 node = g_LzssTree[startNode].leftChild;

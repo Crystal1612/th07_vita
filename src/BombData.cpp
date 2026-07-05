@@ -12,7 +12,6 @@
 #include "ZunMath.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049ec50
 BombData g_BombData[6] = {
     {BombData::BombReimuACalc, BombData::BombReimuADraw,
      BombData::BombReimuACalcFocus, BombData::BombReimuADrawFocus},
@@ -27,7 +26,6 @@ BombData g_BombData[6] = {
     {BombData::BombSakuyaBCalc, BombData::BombSakuyaBDraw,
      BombData::BombSakuyaBCalcFocus, BombData::BombSakuyaBDrawFocus}};
 
-// FUNCTION: TH07 0x004083f0
 void BombData::DarkenViewport(Player *player)
 {
     ZunColor color;
@@ -59,7 +57,6 @@ void BombData::DarkenViewport(Player *player)
     g_Stage.isDarkening = 1;
 }
 
-// FUNCTION: TH07 0x004084f0
 void BombData::SpawnBombInvulnEffect(Player *player)
 {
     if (player->effect)
@@ -83,7 +80,6 @@ void BombData::SpawnBombInvulnEffect(Player *player)
     player->effect = effect;
 }
 
-// FUNCTION: TH07 0x00408610
 void BombData::ComputeBombCherryDrain(Player *player, i32 minCost, f32 scale)
 {
     i32 drain = (i32)((g_GameManager.cherry - g_GameManager.globals->cherryStart) * scale);
@@ -111,7 +107,6 @@ void BombData::ComputeBombCherryDrain(Player *player, i32 minCost, f32 scale)
     player->bombInfo.cherryDrain = drain < minCost ? minCost : drain;
 }
 
-// FUNCTION: TH07 0x00408710
 void BombData::BombReimuACalc(Player *player)
 {
     i32 j;
@@ -132,7 +127,7 @@ void BombData::BombReimuACalc(Player *player)
     if (bombInfo->bombTimer.HasTicked() &&
         bombInfo->bombTimer == 0)
     {
-        g_Gui.ShowBombNamePortrait(1185, "—ì•„u–²‘z••ˆó@ŽUv");
+        g_Gui.ShowBombNamePortrait(1185, "éœŠç¬¦ã€Œå¤¢æƒ³å°å°ã€€æ•£ã€");
         bombInfo->bombDuration = 140;
         player->invulnerabilityTimer = 200;
         SpawnBombInvulnEffect(player);
@@ -254,7 +249,6 @@ void BombData::BombReimuACalc(Player *player)
     bombInfo->bombTimer++;
 }
 
-// FUNCTION: TH07 0x00408e10
 void BombData::BombReimuADraw(Player *player)
 {
     PlayerBombSubInfo *subInfo;
@@ -302,7 +296,6 @@ void BombData::BombReimuADraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x004091b0
 void BombData::BombReimuACalcFocus(Player *player)
 {
     i32 j;
@@ -327,7 +320,7 @@ void BombData::BombReimuACalcFocus(Player *player)
     if (bombInfo->bombTimer.HasTicked() &&
         bombInfo->bombTimer == 0)
     {
-        g_Gui.ShowBombNamePortrait(1185, "—ì•„u–²‘z••ˆó@Wv");
+        g_Gui.ShowBombNamePortrait(1185, "éœŠç¬¦ã€Œå¤¢æƒ³å°å°ã€€é›†ã€");
         bombInfo->bombDuration = 300;
         player->invulnerabilityTimer = 360;
         SpawnBombInvulnEffect(player);
@@ -466,7 +459,6 @@ void BombData::BombReimuACalcFocus(Player *player)
     bombInfo->bombTimer++;
 }
 
-// FUNCTION: TH07 0x00409990
 void BombData::BombReimuADrawFocus(Player *player)
 {
     i32 i;
@@ -503,7 +495,6 @@ void BombData::BombReimuADrawFocus(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x00409dd0
 void BombData::BombReimuBCalc(Player *player)
 {
     BombClearBox *projectiles[7];
@@ -521,7 +512,7 @@ void BombData::BombReimuBCalc(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1185, "–²•„u••–‚wv");
+        g_Gui.ShowBombNamePortrait(1185, "å¤¢ç¬¦ã€Œå°é­”é™£ã€");
         player->bombInfo.bombDuration = 140;
         player->invulnerabilityTimer = 200;
         SpawnBombInvulnEffect(player);
@@ -593,7 +584,6 @@ void BombData::BombReimuBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040a280
 void BombData::BombReimuBDraw(Player *player)
 {
     i32 i;
@@ -611,7 +601,6 @@ void BombData::BombReimuBDraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040a3a0
 void BombData::BombReimuBCalcFocus(Player *player)
 {
     i32 unused[3];
@@ -631,7 +620,7 @@ void BombData::BombReimuBCalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1185, "–²•„u“ñdŒ‹ŠEv");
+        g_Gui.ShowBombNamePortrait(1185, "å¤¢ç¬¦ã€ŒäºŒé‡çµç•Œã€");
         player->bombInfo.bombDuration = 190;
         player->invulnerabilityTimer = 250;
         SpawnBombInvulnEffect(player);
@@ -670,7 +659,6 @@ void BombData::BombReimuBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040a6b0
 void BombData::BombReimuBDrawFocus(Player *player)
 {
     i32 i;
@@ -688,7 +676,6 @@ void BombData::BombReimuBDrawFocus(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040a7c0
 void BombData::BombMarisaACalc(Player *player)
 {
     f32 angle;
@@ -707,7 +694,7 @@ void BombData::BombMarisaACalc(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1187, "–‚•„uƒXƒ^[ƒ_ƒXƒgƒŒƒ”ƒ@ƒŠƒGv");
+        g_Gui.ShowBombNamePortrait(1187, "é­”ç¬¦ã€Œã‚¹ã‚¿ãƒ¼ãƒ€ã‚¹ãƒˆãƒ¬ãƒ´ã‚¡ãƒªã‚¨ã€");
         player->bombInfo.bombDuration = 200;
         player->invulnerabilityTimer = 250;
         SpawnBombInvulnEffect(player);
@@ -753,7 +740,6 @@ void BombData::BombMarisaACalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040aba0
 void BombData::BombMarisaADraw(Player *player)
 {
     i32 i;
@@ -792,7 +778,6 @@ void BombData::BombMarisaADraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040af10
 void BombData::BombMarisaACalcFocus(Player *player)
 {
     f32 angle;
@@ -815,7 +800,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1186, "–‚•„uƒ~ƒ‹ƒL[ƒEƒFƒCv");
+        g_Gui.ShowBombNamePortrait(1186, "é­”ç¬¦ã€ŒãƒŸãƒ«ã‚­ãƒ¼ã‚¦ã‚§ã‚¤ã€");
         player->bombInfo.bombDuration = 260;
         player->invulnerabilityTimer = 310;
         SpawnBombInvulnEffect(player);
@@ -894,7 +879,6 @@ void BombData::BombMarisaACalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040b5d0
 void BombData::BombMarisaADrawFocus(Player *player)
 {
     PlayerBombSubInfo *subInfo;
@@ -936,7 +920,6 @@ void BombData::BombMarisaADrawFocus(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040b7d0
 void BombData::BombMarisaBCalc(Player *player)
 {
     f32 accel;
@@ -961,7 +944,7 @@ void BombData::BombMarisaBCalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         player->bombStartPos = player->positionCenter;
-        g_Gui.ShowBombNamePortrait(1185, "—ö•„uƒmƒ“ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒŒ[ƒU[v");
+        g_Gui.ShowBombNamePortrait(1185, "æ‹ç¬¦ã€ŒãƒŽãƒ³ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ¬ãƒ¼ã‚¶ãƒ¼ã€");
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 300;
         SpawnBombInvulnEffect(player);
@@ -1040,7 +1023,6 @@ void BombData::BombMarisaBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040bca0
 void BombData::BombMarisaBDraw(Player *player)
 {
     f32 angle;
@@ -1067,7 +1049,6 @@ void BombData::BombMarisaBDraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040be20
 void BombData::BombMarisaBCalcFocus(Player *player)
 {
     i32 unused[3];
@@ -1087,7 +1068,7 @@ void BombData::BombMarisaBCalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1186, "—ö•„uƒ}ƒXƒ^[ƒXƒp[ƒNv");
+        g_Gui.ShowBombNamePortrait(1186, "æ‹ç¬¦ã€Œãƒžã‚¹ã‚¿ãƒ¼ã‚¹ãƒ‘ãƒ¼ã‚¯ã€");
         player->bombInfo.bombDuration = 340;
         player->invulnerabilityTimer = 390;
         SpawnBombInvulnEffect(player);
@@ -1136,7 +1117,6 @@ void BombData::BombMarisaBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040c160
 void BombData::BombMarisaBDrawFocus(Player *player)
 {
     f32 angle;
@@ -1165,7 +1145,6 @@ void BombData::BombMarisaBDrawFocus(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040c2e0
 void BombData::BombSakuyaACalc(Player *player)
 {
     i32 spawnsRemaining;
@@ -1185,7 +1164,7 @@ void BombData::BombSakuyaACalc(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1185, "Œ¶•„uƒCƒ“ƒfƒBƒXƒNƒŠƒ~ƒlƒCƒgv");
+        g_Gui.ShowBombNamePortrait(1185, "å¹»ç¬¦ã€Œã‚¤ãƒ³ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒŸãƒã‚¤ãƒˆã€");
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 210;
         SpawnBombInvulnEffect(player);
@@ -1267,7 +1246,6 @@ void BombData::BombSakuyaACalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040c970
 void BombData::BombSakuyaADraw(Player *player)
 {
     AnmVm *vm;
@@ -1294,7 +1272,6 @@ void BombData::BombSakuyaADraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040ca50
 void BombData::BombSakuyaACalcFocus(Player *player)
 {
     f32 angle;
@@ -1315,7 +1292,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1185, "Œ¶•„uŽElƒh[ƒ‹v");
+        g_Gui.ShowBombNamePortrait(1185, "å¹»ç¬¦ã€Œæ®ºäººãƒ‰ãƒ¼ãƒ«ã€");
         player->bombInfo.bombDuration = 250;
         player->invulnerabilityTimer = 290;
         SpawnBombInvulnEffect(player);
@@ -1432,7 +1409,6 @@ void BombData::BombSakuyaACalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040d3b0
 void BombData::BombSakuyaADrawFocus(Player *player)
 {
     AnmVm *vm;
@@ -1460,7 +1436,6 @@ void BombData::BombSakuyaADrawFocus(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040d4c0
 void BombData::BombSakuyaBCalc(Player *player)
 {
     i32 unused[3];
@@ -1482,7 +1457,7 @@ void BombData::BombSakuyaBCalc(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1187, "Žž•„uƒp[ƒtƒFƒNƒgƒXƒNƒEƒFƒAv");
+        g_Gui.ShowBombNamePortrait(1187, "æ™‚ç¬¦ã€Œãƒ‘ãƒ¼ãƒ•ã‚§ã‚¯ãƒˆã‚¹ã‚¯ã‚¦ã‚§ã‚¢ã€");
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 260;
         SpawnBombInvulnEffect(player);
@@ -1554,7 +1529,6 @@ void BombData::BombSakuyaBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040d9a0
 void BombData::BombSakuyaBDraw(Player *player)
 {
     PlayerBombSubInfo *subInfo;
@@ -1578,7 +1552,6 @@ void BombData::BombSakuyaBDraw(Player *player)
     }
 }
 
-// FUNCTION: TH07 0x0040da80
 void BombData::BombSakuyaBCalcFocus(Player *player)
 {
     i32 j;
@@ -1605,7 +1578,7 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(1187, "Žž•„uƒvƒ‰ƒCƒx[ƒgƒXƒNƒEƒFƒAv");
+        g_Gui.ShowBombNamePortrait(1187, "æ™‚ç¬¦ã€Œãƒ—ãƒ©ã‚¤ãƒ™ãƒ¼ãƒˆã‚¹ã‚¯ã‚¦ã‚§ã‚¢ã€");
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 420;
         SpawnBombInvulnEffect(player);
@@ -1682,7 +1655,6 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-// FUNCTION: TH07 0x0040e280
 void BombData::BombSakuyaBDrawFocus(Player *player)
 {
     i32 j;

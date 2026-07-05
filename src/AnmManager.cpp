@@ -19,19 +19,14 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x004b9e44
 AnmManager *g_AnmManager;
 
-// GLOBAL: TH07 0x004b9fa8
 VertexTex1DiffuseXyzrhw g_QuadVertices[4];
 
-// GLOBAL: TH07 0x004ba018
 VertexTex1Xyzrhw g_QuadTemplate[4];
 
-// GLOBAL: TH07 0x004ba078
 VertexTex1DiffuseXyz g_Quad3DFallback[4];
 
-// FUNCTION: TH07 0x0044d3e0
 AnmManager::AnmManager()
 {
     memset(this, 0, sizeof(AnmManager));
@@ -81,7 +76,6 @@ AnmManager::~AnmManager()
 {
 }
 
-// FUNCTION: TH07 0x0044d630
 void AnmManager::SetupVertexBuffer()
 {
     RenderVertexInfo *vertexData;
@@ -144,7 +138,6 @@ void AnmManager::SetupVertexBuffer()
     }
 }
 
-// FUNCTION: TH07 0x0044d8f0
 ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
                                   i32 formatIdx, D3DCOLOR colorKey)
 {
@@ -181,7 +174,6 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044d9e0
 ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
                                           ZunImageInfoEmbedded *imageInfo,
                                           D3DCOLOR formatIdx)
@@ -243,7 +235,6 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044dbe0
 ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
                                               const char *texturePath,
                                               i32 formatIdx, D3DCOLOR colorKey)
@@ -294,8 +285,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
         surfaceDesc.Format != D3DFMT_A4R4G4B4 &&
         surfaceDesc.Format != D3DFMT_A1R5G5B5)
     {
-        // STRING: TH07 0x00495cb8
-        g_GameErrorContext.Fatal("error : �C���[�W�����������Ă��܂���\r\n");
+        g_GameErrorContext.Fatal("error : イメージがαを持っていません\r\n");
         goto err;
     }
 
@@ -370,7 +360,6 @@ err:
     return ZUN_ERROR;
 }
 
-// FUNCTION: TH07 0x0044df40
 ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
                                          i32 textureFormat)
 {
@@ -380,7 +369,6 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044df90
 i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 {
     i32 res;
@@ -392,8 +380,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 startIdx = anmIdx;
     if (!entry)
     {
-        // STRING: TH07 0x00495c7c
-        g_GameErrorContext.Fatal("�A�j�����ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n");
+        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
         return ZUN_ERROR;
     }
     while (true)
@@ -416,7 +403,6 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     }
 }
 
-// FUNCTION: TH07 0x0044e070
 i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                         i32 spriteIdxOffset, u32 ownsMemory)
 {
@@ -432,21 +418,19 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     id = 0;
     if (!rawEntry)
     {
-        g_GameErrorContext.Fatal("�A�j�����ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n");
+        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
         return ZUN_ERROR;
     }
     if (textureIdx >= 50)
     {
-        // STRING: TH07 0x00495c5c
-        g_GameErrorContext.Fatal("�e�N�X�`���i�[�悪����܂���\r\n");
+        g_GameErrorContext.Fatal("テクスチャ格納先が足りません\r\n");
         return ZUN_ERROR;
     }
     ReleaseAnm(textureIdx);
     data = rawEntry;
     if (data->version != 2)
     {
-        // STRING: TH07 0x00495c3c
-        g_GameErrorContext.Fatal("�A�j���̃o�[�W�������Ⴂ�܂�\r\n");
+        g_GameErrorContext.Fatal("アニメのバージョンが違います\r\n");
         return ZUN_ERROR;
     }
     data->textureIdx = textureIdx;
@@ -464,8 +448,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
             if (LoadTexture(data->textureIdx, name, data->format, data->color_key) !=
                 ZUN_SUCCESS)
             {
-                // STRING: TH07 0x00495bf8
-                g_GameErrorContext.Fatal("�e�N�X�`�� %s ���ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n", name);
+                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -475,7 +458,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
             if (LoadTextureAlphaChannel(data->textureIdx, name, data->format,
                                         data->color_key) != ZUN_SUCCESS)
             {
-                g_GameErrorContext.Fatal("�e�N�X�`�� %s ���ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n", name);
+                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -487,8 +470,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                 (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
                 data->format) != ZUN_SUCCESS)
         {
-            // STRING: TH07 0x00495bb8
-            g_GameErrorContext.Fatal("�e�N�X�`�����ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n");
+            g_GameErrorContext.Fatal("テクスチャが読み込めません。データが失われてるか壊れています\r\n");
             return ZUN_ERROR;
         }
     }
@@ -520,8 +502,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         }
         if (rawSprite->id + spriteIdxOffset >= 2560)
         {
-            // STRING: TH07 0x00495b80
-            g_GameErrorContext.Fatal("�X�v���C�g���i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
+            g_GameErrorContext.Fatal("スプライトが格納できません。テーブルが不足しています\r\n");
             return ZUN_ERROR;
         }
         LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
@@ -530,8 +511,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     {
         if (*curSprite + spriteIdxOffset >= 2560)
         {
-            // STRING: TH07 0x00495b4c
-            g_GameErrorContext.Fatal("�A�j�����i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
+            g_GameErrorContext.Fatal("アニメが格納できません。テーブルが不足しています\r\n");
             return ZUN_ERROR;
         }
         if (id < *curSprite)
@@ -547,7 +527,6 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     return id + 1;
 }
 
-// FUNCTION: TH07 0x0044e4e0
 void AnmManager::ReleaseAnm(i32 anmIdx)
 {
     AnmRawEntry *rawEntry;
@@ -599,7 +578,6 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     }
 }
 
-// FUNCTION: TH07 0x0044e6f0
 void AnmManager::ReleaseTexture(i32 textureIdx)
 {
     if (textureIdx < 0 || (u32)textureIdx >= 264)
@@ -612,7 +590,6 @@ void AnmManager::ReleaseTexture(i32 textureIdx)
     this->imageDataArray[textureIdx] = NULL;
 }
 
-// FUNCTION: TH07 0x0044e780
 void AnmManager::LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite)
 {
     this->sprites[spriteIdx] = *sprite;
@@ -640,7 +617,6 @@ void AnmManager::LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite)
         sprite->rows;
 }
 
-// FUNCTION: TH07 0x0044e8e0
 ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
 {
     if (this->sprites[spriteIdx].sourceFileIndex < 0)
@@ -662,7 +638,6 @@ ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044ea20
 void AnmManager::SetAndExecuteScript(AnmVm *vm, AnmRawInstr *beginningOfScript)
 {
     i32 idk;
@@ -684,7 +659,6 @@ void AnmManager::SetAndExecuteScript(AnmVm *vm, AnmRawInstr *beginningOfScript)
     }
 }
 
-// FUNCTION: TH07 0x0044eae0
 void AnmManager::SetRenderStateForVm(AnmVm *vm)
 {
     ZunColor color;
@@ -767,7 +741,6 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
     this->renderStateChangesThisFrame++;
 }
 
-// FUNCTION: TH07 0x0044eec0
 void AnmManager::SyncRenderState(AnmVm *vm)
 {
     if ((u32)this->currentBlendMode != vm->blendMode)
@@ -800,7 +773,6 @@ void AnmManager::SyncRenderState(AnmVm *vm)
 
 static const f32 g_ZeroPointFive = 0.5;
 
-// FUNCTION: TH07 0x0044efb0
 ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
 {
     ZunColor color;
@@ -905,7 +877,6 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044f580
 void AnmManager::ResetVertexBuffer()
 {
     this->spritesToDraw = 0;
@@ -913,7 +884,6 @@ void AnmManager::ResetVertexBuffer()
     this->vertexBufferStartPtr = this->vertexBufferCurPtr;
 }
 
-// FUNCTION: TH07 0x0044f5c0
 void AnmManager::Flush()
 {
     if (!this->spritesToDraw)
@@ -933,7 +903,6 @@ void AnmManager::Flush()
     this->flushesThisFrame++;
 }
 
-// FUNCTION: TH07 0x0044f690
 ZunResult AnmManager::PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex)
 {
     this->vertexBufferCurPtr[0] = spriteVertex[0];
@@ -948,7 +917,6 @@ ZunResult AnmManager::PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044f770
 ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
 {
     f32 centerY;
@@ -1012,8 +980,7 @@ ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
     return DrawInner(vm, 1);
 }
 
-// FUNCTION: TH07 0x0044f960
-void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width,
+void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width,
                                    f32 height, f32 sine, f32 cosine,
                                    f32 xOffset, f32 yOffset)
 {
@@ -1021,7 +988,6 @@ void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width,
     vertex->pos.y = width * sine + height * cosine + yOffset;
 }
 
-// FUNCTION: TH07 0x0044f9a0
 ZunResult AnmManager::Draw(AnmVm *vm)
 {
     f32 cosZ;
@@ -1087,7 +1053,6 @@ ZunResult AnmManager::Draw(AnmVm *vm)
     return DrawInner(vm, 0);
 }
 
-// FUNCTION: TH07 0x0044fc10
 ZunResult AnmManager::DrawFacingCamera(AnmVm *vm)
 {
     f32 centerY;
@@ -1147,7 +1112,6 @@ ZunResult AnmManager::DrawFacingCamera(AnmVm *vm)
     return DrawInner(vm, 0);
 }
 
-// FUNCTION: TH07 0x0044fe00
 ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
 {
     f32 halfWidth;
@@ -1224,7 +1188,6 @@ ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00450130
 ZunResult AnmManager::DrawBillboard(AnmVm *vm)
 {
     if (!vm->visible)
@@ -1250,7 +1213,6 @@ ZunResult AnmManager::DrawBillboard(AnmVm *vm)
     return DrawInner(vm, 0);
 }
 
-// FUNCTION: TH07 0x004501a0
 void AnmManager::CalcProjectedTransform(AnmVm *vm)
 {
     ZunMatrix world;
@@ -1321,7 +1283,6 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     this->matrix = world;
 }
 
-// FUNCTION: TH07 0x004504b0
 ZunResult AnmManager::DrawProjected(AnmVm *vm)
 {
     if (!vm->visible)
@@ -1343,7 +1304,6 @@ ZunResult AnmManager::DrawProjected(AnmVm *vm)
     return DrawInner(vm, 0);
 }
 
-// FUNCTION: TH07 0x00450520
 ZunResult AnmManager::Draw3(AnmVm *vm)
 {
     ZunMatrix world;
@@ -1471,7 +1431,6 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00450a50
 f32 AnmVm::GetFloatVarValue(f32 arg)
 {
     switch ((i32)arg)
@@ -1501,7 +1460,6 @@ f32 AnmVm::GetFloatVarValue(f32 arg)
     }
 }
 
-// FUNCTION: TH07 0x00450b20
 i32 AnmVm::GetVarValue(i32 arg)
 {
     switch (arg)
@@ -1531,7 +1489,6 @@ i32 AnmVm::GetVarValue(i32 arg)
     }
 }
 
-// FUNCTION: TH07 0x00450c10
 f32 *AnmVm::GetFloatVar(f32 *paramId, u16 mask, u32 idx)
 {
     if (((u32)mask & 1 << idx) == 0)
@@ -1554,7 +1511,6 @@ f32 *AnmVm::GetFloatVar(f32 *paramId, u16 mask, u32 idx)
     }
 }
 
-// FUNCTION: TH07 0x00450ca0
 i32 *AnmVm::GetVar(i32 *paramId, u16 mask, u32 idx)
 {
     if (((u32)mask & 1 << idx) == 0)
@@ -1581,7 +1537,6 @@ i32 *AnmVm::GetVar(i32 *paramId, u16 mask, u32 idx)
     }
 }
 
-// FUNCTION: TH07 0x00450d60
 i32 AnmManager::ExecuteScript(AnmVm *vm)
 {
     AnmRawInstr *instr;
@@ -2231,7 +2186,6 @@ stop:
     return 0;
 }
 
-// FUNCTION: TH07 0x00454260
 void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width,
                                   i32 height, i32 fontWidth, i32 fontHeight,
                                   D3DCOLOR textColor, u32 outlineType,
@@ -2251,7 +2205,6 @@ void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width,
                                         outlineType, strToPrint, this->textures[spriteDstIdx]);
 }
 
-// FUNCTION: TH07 0x004542d0
 void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
                                D3DCOLOR textColor, u32 outlineType,
                                const char *str, ...)
@@ -2283,7 +2236,6 @@ void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
     vm->visible = 1;
 }
 
-// FUNCTION: TH07 0x004543b0
 void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor,
                                   u32 outlineType, const char *text, ...)
 {
@@ -2313,7 +2265,6 @@ void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor,
     vm->visible = 1;
 }
 
-// FUNCTION: TH07 0x004545b0
 void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor,
                                    u32 outlineType, const char *text, ...)
 {
@@ -2342,7 +2293,6 @@ void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor,
     vm->visible = 1;
 }
 
-// FUNCTION: TH07 0x004547b0
 ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
 {
     IDirect3DSurface8 *surface;
@@ -2354,8 +2304,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
     u8 *data = FileSystem::OpenFile(path, 0);
     if (!data)
     {
-        // STRING: TH07 0x00495b30
-        g_GameErrorContext.Fatal("%s���ǂݍ��߂Ȃ��ł��B\r\n", path);
+        g_GameErrorContext.Fatal("%sが読み込めないです。\r\n", path);
         return ZUN_ERROR;
     }
     if (g_Supervisor.d3dDevice->CreateImageSurface(
@@ -2418,14 +2367,12 @@ err:
     return ZUN_ERROR;
 }
 
-// FUNCTION: TH07 0x00454a10
 void AnmManager::ReleaseSurface(i32 surfaceIdx)
 {
     SAFE_RELEASE(this->surfaces[surfaceIdx]);
     SAFE_RELEASE(this->surfacesBis[surfaceIdx]);
 }
 
-// FUNCTION: TH07 0x00454aa0
 void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
                                          i32 x, i32 y)
 {
@@ -2472,7 +2419,6 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
     dstSurface->Release();
 }
 
-// FUNCTION: TH07 0x00454c60
 void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
                                 i32 rectLeft, i32 rectTop, i32 width,
                                 i32 height)
@@ -2518,7 +2464,6 @@ void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
     backBuffer->Release();
 }
 
-// FUNCTION: TH07 0x00454e10
 void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
                                 i32 srcWidth, i32 srcHeight, i32 dstLeft,
                                 i32 dstTop, i32 dstWidth, i32 dstHeight)
@@ -2567,7 +2512,6 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
     }
 }
 
-// FUNCTION: TH07 0x00454f30
 void AnmManager::CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRect)
 {
     if (!this->textures[dstIdx])
@@ -2605,7 +2549,6 @@ void AnmManager::CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRec
     }
 }
 
-// FUNCTION: TH07 0x00455030
 void AnmManager::SetInterruptActiveVms(AnmVm *vm, i32 vmCount, i16 interrupt)
 {
     i32 shouldSetInterrupt;
@@ -2633,7 +2576,6 @@ void AnmManager::SetInterruptActiveVms(AnmVm *vm, i32 vmCount, i16 interrupt)
     }
 }
 
-// FUNCTION: TH07 0x004550c0
 void AnmManager::ExecuteScripts(AnmVm *startVm, i32 count)
 {
     while (count != 0)
@@ -2647,7 +2589,6 @@ void AnmManager::ExecuteScripts(AnmVm *startVm, i32 count)
     }
 }
 
-// FUNCTION: TH07 0x00455110
 void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
 {
     while (vmCount != 0)
@@ -2660,8 +2601,7 @@ void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
     }
 }
 
-// FUNCTION: TH07 0x00455170
-ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
+ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
                                   i32 count)
 {
     f32 num;
@@ -2704,7 +2644,6 @@ ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004552d0
 ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
                                         VertexTex1DiffuseXyzrhw *vertices,
                                         i32 count)

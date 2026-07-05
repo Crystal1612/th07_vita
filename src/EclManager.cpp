@@ -36,35 +36,23 @@
 #define GET_FLOAT_VALUE_D(enemy, args, argIdx, bitIdx) \
     (((instr->paramMask & (1 << bitIdx)) != 0) ? GetFloatVarValue(enemy, args[argIdx].f) : args[argIdx].f)
 
-// GLOBAL: TH07 0x0049f560
 const char *g_EclPaths[10] = {
     "dummy",
-    // STRING: TH07 0x00497f38
     "data/ecldata1.ecl",
-    // STRING: TH07 0x00497f24
     "data/ecldata2.ecl",
-    // STRING: TH07 0x00497f10
     "data/ecldata3.ecl",
-    // STRING: TH07 0x00497efc
     "data/ecldata4.ecl",
-    // STRING: TH07 0x00497ee8
     "data/ecldata5.ecl",
-    // STRING: TH07 0x00497ed4
     "data/ecldata6.ecl",
-    // STRING: TH07 0x00497ec0
     "data/ecldata7.ecl",
-    // STRING: TH07 0x00497eac
     "data/ecldata8.ecl",
     NULL,
 };
 
-// GLOBAL: TH07 0x01347938
 EclManager g_EclManager;
 
-// GLOBAL: TH07 0x01347aa0
 EclGlobalVars g_GlobalEclVars;
 
-// FUNCTION: TH07 0x0040e420
 ZunResult EclManager::Load(const char *path)
 {
     i32 i;
@@ -72,8 +60,7 @@ ZunResult EclManager::Load(const char *path)
     this->eclFile = (EclRawHeader *)FileSystem::OpenFile(path, 0);
     if (!this->eclFile)
     {
-        // STRING: TH07 0x00498700
-        g_GameErrorContext.Log("“Gƒf[ƒ^‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½Aƒf[ƒ^‚ª‰ó‚ê‚Ä‚é‚©¸‚í‚ê‚Ä‚¢‚Ü‚·\r\n");
+        g_GameErrorContext.Log("æ•µãƒ‡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€ãƒ‡ãƒ¼ã‚¿ãŒå£Šã‚Œã¦ã‚‹ã‹å¤±ã‚ã‚Œã¦ã„ã¾ã™\r\n");
         return ZUN_ERROR;
     }
 
@@ -91,7 +78,6 @@ ZunResult EclManager::Load(const char *path)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0040e4f0
 void EclManager::Unload()
 {
     if (this->eclFile)
@@ -101,7 +87,6 @@ void EclManager::Unload()
     this->eclFile = NULL;
 }
 
-// FUNCTION: TH07 0x0040e530
 ZunResult EclManager::CallEclSub(EnemyEclContext *ctx, i16 subId)
 {
     ctx->curInstr = this->subTable[subId];
@@ -111,7 +96,6 @@ ZunResult EclManager::CallEclSub(EnemyEclContext *ctx, i16 subId)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0040e5b0
 i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
 {
     switch (eclVar)
@@ -263,7 +247,6 @@ i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
     }
 }
 
-// FUNCTION: TH07 0x0040ec00
 i32 *EclManager::GetVar(Enemy *enemy, i32 *eclVar, u16 paramMask, i32 param_4)
 {
     if (param_4 >= 0 && ((u32)paramMask & 1 << param_4) == 0)
@@ -322,7 +305,6 @@ i32 *EclManager::GetVar(Enemy *enemy, i32 *eclVar, u16 paramMask, i32 param_4)
     }
 }
 
-// FUNCTION: TH07 0x0040edf0
 f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
 {
     switch ((i32)eclVar)
@@ -481,7 +463,6 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
     }
 }
 
-// FUNCTION: TH07 0x0040f3c0
 f32 *EclManager::GetFloatVar(Enemy *enemy, f32 *eclVar, u16 paramMask,
                              i32 param_4)
 {
@@ -571,7 +552,6 @@ f32 *EclManager::GetFloatVar(Enemy *enemy, f32 *eclVar, u16 paramMask,
     }
 }
 
-// FUNCTION: TH07 0x0040f6b0
 void EclManager::MoveDirTime(Enemy *enemy, EclRawInstr *instr)
 {
     f32 fVar2;
@@ -593,7 +573,6 @@ void EclManager::MoveDirTime(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-// FUNCTION: TH07 0x0040f8f0
 void EclManager::MovePosTime(Enemy *enemy, EclRawInstr *instr)
 {
     ZunVec3 newPos;
@@ -613,7 +592,6 @@ void EclManager::MovePosTime(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-// FUNCTION: TH07 0x0040fb30
 void EclManager::MathLerp(Enemy *enemy, EclInterp *interp, f32 t)
 {
     f32 a = GetFloatVarValue(enemy, interp->args[3].f);
@@ -622,7 +600,6 @@ void EclManager::MathLerp(Enemy *enemy, EclInterp *interp, f32 t)
     *GetFloatVar(enemy, &interp->args[7].f, 0, -1) = (b - a) * t + a;
 }
 
-// FUNCTION: TH07 0x0040fb90
 void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
 {
     float h11;
@@ -650,7 +627,6 @@ void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
                                                      h11 * m1;
 }
 
-// FUNCTION: TH07 0x0040fc90
 void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
 {
     i32 newCsum;
@@ -746,7 +722,6 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-// FUNCTION: TH07 0x004101a0
 void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
 {
     i32 j;
@@ -844,7 +819,6 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
     g_Stage.spellCardState = 0;
 }
 
-// FUNCTION: TH07 0x00410520
 ZunResult EclManager::RunEcl(Enemy *enemy)
 {
     EclInterp *interp2;
@@ -1170,7 +1144,6 @@ restart:
             case 42:
                 if (enemy->noStackRet)
                 {
-                    // STRING: TH07 0x004986e4
                     DebugPrint("error : no Stack Ret\r\n");
                 }
                 enemy->stackDepth--;
@@ -1188,7 +1161,6 @@ restart:
             case 97:
                 if (GET_INT_VALUE(enemy, 0) >= 2)
                 {
-                    // STRING: TH07 0x004986c8
                     DebugPrint("error : sub anim overflow\r\n");
                 }
                 if (GET_INT_VALUE(enemy, 1) >= 0)

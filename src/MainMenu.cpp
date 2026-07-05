@@ -18,158 +18,91 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049ea7c
 const char *g_DemoReplayPaths[3] = {
-    // STRING: TH07 0x00495ae8
     "data/demo/demorpy0.rpy",
-    // STRING: TH07 0x00495ad0
     "data/demo/demorpy1.rpy",
-    // STRING: TH07 0x00495ab8
     "data/demo/demorpy2.rpy",
 };
 
-// GLOBAL: TH07 0x0049f40c
 const char *g_StagePracticeStrings[6] = {
-    // STRING: TH07 0x00495520
     "Stage1",
-    // STRING: TH07 0x00495518
     "Stage2",
-    // STRING: TH07 0x00495510
     "Stage3",
-    // STRING: TH07 0x00495508
     "Stage4",
-    // STRING: TH07 0x00495500
     "Stage5",
-    // STRING: TH07 0x004954f8
     "Stage6",
 };
 
-// GLOBAL: TH07 0x0049f424
 const char *g_StageReplayStrings[7] = {
-    // STRING: TH07 0x004955e0
     "Stage1  ",
-    // STRING: TH07 0x004955d4
     "Stage2  ",
-    // STRING: TH07 0x004955c8
     "Stage3  ",
-    // STRING: TH07 0x004955bc
     "Stage4  ",
-    // STRING: TH07 0x004955b0
     "Stage5  ",
-    // STRING: TH07 0x004955a4
     "Stage6  ",
-    // STRING: TH07 0x004955f8
     "Extra   ",
 };
 
-// GLOBAL: TH07 0x0049f440
-// STRING: TH07 0x004955ec
 const char *g_PhantasmReplayString = "Phantasm";
 
-// GLOBAL: TH07 0x0049f444
 const char *g_DifficultyStrings[6] = {
-    // STRING: TH07 0x00495628
     "Easy    ",
-    // STRING: TH07 0x0049561c
     "Normal  ",
-    // STRING: TH07 0x00495610
     "Hard    ",
-    // STRING: TH07 0x00495604
     "Lunatic ",
     "Extra   ",
     "Phantasm",
 };
 
-// GLOBAL: TH07 0x0049f45c
 const char *g_CharacterAndShottypeReplayStrings[6] = {
-    // STRING: TH07 0x00495b28
     "ReimuA ",
-    // STRING: TH07 0x00495b20
     "ReimuB ",
-    // STRING: TH07 0x00495b18
     "MarisaA",
-    // STRING: TH07 0x00495b10
     "MarisaB",
-    // STRING: TH07 0x00495b08
     "SakuyaA",
-    // STRING: TH07 0x00495b00
     "SakuyaB",
 };
 
-// GLOBAL: TH07 0x0049f474
 i16 g_LastJoystickInput = 32;
 
-// GLOBAL: TH07 0x0049f478
 const char *g_KeyConfigStrings[12] = {
-    // STRING: TH07 0x004957e8
-    "�V���b�g�A����{�^����ݒ肵�܂�",
-    // STRING: TH07 0x004957c4
-    "�{���A�L�����Z���{�^����ݒ肵�܂�",
-    // STRING: TH07 0x004957a8
-    "�ᑬ�ړ��{�^����ݒ肵�܂�",
-    // STRING: TH07 0x00495780
-    "���b�Z�[�W�X�L�b�v�{�^����ݒ肵�܂�",
-    // STRING: TH07 0x00495764
-    "�|�[�Y�{�^����ݒ肵�܂�",
-    // STRING: TH07 0x00495748
-    "��ړ��{�^����ݒ肵�܂�",
-    // STRING: TH07 0x0049572c
-    "���ړ��{�^����ݒ肵�܂�",
-    // STRING: TH07 0x00495710
-    "���ړ��{�^����ݒ肵�܂�",
-    // STRING: TH07 0x004956f4
-    "�E�ړ��{�^����ݒ肵�܂�",
-    // STRING: TH07 0x004956c0
-    "�V���b�g�������ςȂ��Œᑬ�ړ��ɂȂ�悤�ɂ��܂�",
-    // STRING: TH07 0x004956ac
-    "�����ݒ�ɖ߂��܂�",
-    // STRING: TH07 0x00495698
-    "�����悻�I�����܂�",
+    "ショット、決定ボタンを設定します",
+    "ボム、キャンセルボタンを設定します",
+    "低速移動ボタンを設定します",
+    "メッセージスキップボタンを設定します",
+    "ポーズボタンを設定します",
+    "上移動ボタンを設定します",
+    "下移動ボタンを設定します",
+    "左移動ボタンを設定します",
+    "右移動ボタンを設定します",
+    "ショット押しっぱなしで低速移動になるようにします",
+    "初期設定に戻します",
+    "おおよそ終了します",
 };
 
-// GLOBAL: TH07 0x0049f4a8
 const char *g_OptionsStrings[9] = {
-    // STRING: TH07 0x0049596c
-    "�v���C���[�̏�������ύX���܂��B�i�����ݒ�@�R�j",
-    // STRING: TH07 0x0049592c
-    "��ʂ̐F����ύX���܂��B�R�Q�a�h�s���ƍł��Y��ɕ\������܂��B",
-    // STRING: TH07 0x004958f8
-    "�a�f�l�̍Đ����@��ύX���܂��B�i�����ݒ�@�v�`�u�j",
-    // STRING: TH07 0x004958d8
-    "���ʉ����Đ����邩�I�����܂�",
-    // STRING: TH07 0x004958b0
-    "�E�B���h�E���t���X�N���[�����I�����܂�",
-    // STRING: TH07 0x00495870
-    "�e��������ʂł킴�Ə������������܂�(�X�R�A�A���v���C�L�^�s��)",
-    // STRING: TH07 0x00495858
-    "�S�ď����ݒ�ɂ��܂�",
-    // STRING: TH07 0x00495834
-    "�p�b�h����̃{�^���z�u��ύX���܂�",
-    // STRING: TH07 0x0049581c
-    "��������ƏI�����܂�",
+    "プレイヤーの初期数を変更します。（初期設定　３）",
+    "画面の色数を変更します。３２ＢＩＴだと最も綺麗に表示されます。",
+    "ＢＧＭの再生方法を変更します。（初期設定　ＷＡＶ）",
+    "効果音を再生するか選択します",
+    "ウィンドウかフルスクリーンか選択します",
+    "弾が多い場面でわざと処理落ちさせます(スコア、リプレイ記録不可)",
+    "全て初期設定にします",
+    "パッド操作のボタン配置を変更します",
+    "おいそれと終了します",
 };
 
-// GLOBAL: TH07 0x0049f4cc
 const char *g_MainMenuStrings[8] = {
-    // STRING: TH07 0x00495aa4
-    "�Q�[�����J�n���܂�",
-    // STRING: TH07 0x00495a84
-    "�G�L�X�g���X�e�[�W���J�n���܂�",
-    // STRING: TH07 0x00495a60
-    "�X�e�[�W��I�����A���K���J�n���܂�",
-    // STRING: TH07 0x00495a48
-    "���v���C���ӏ܂ł��܂�",
-    // STRING: TH07 0x00495a18
-    "�ߋ��̃X�R�A��X�y���J�[�h�̎擾���������܂�",
-    // STRING: TH07 0x00495a08
-    "���y�𒮂��܂�",
-    // STRING: TH07 0x004959f4
-    "�e��ݒ�ł��܂�",
-    // STRING: TH07 0x004959dc
-    "���낢��ƏI�����܂�",
+    "ゲームを開始します",
+    "エキストラステージを開始します",
+    "ステージを選択し、練習を開始します",
+    "リプレイを鑑賞できます",
+    "過去のスコアやスペルカードの取得歴を見られます",
+    "音楽を聴けます",
+    "各種設定できます",
+    "いろいろと終了します",
 };
 
-// FUNCTION: TH07 0x004553fa
 void InitializeTimingVars(Supervisor *arg)
 {
     arg->timingErrorCount = 0;
@@ -179,7 +112,6 @@ void InitializeTimingVars(Supervisor *arg)
     arg->timingBadCount = 0;
 }
 
-// FUNCTION: TH07 0x00455435
 void MainMenu::SetGameState(GameState gameState)
 {
     this->prevGameState = this->gameState;
@@ -190,7 +122,6 @@ void MainMenu::SetGameState(GameState gameState)
     this->idleFrames = 0;
 }
 
-// FUNCTION: TH07 0x004554d6
 u32 MainMenu::OnUpdate(MainMenu *arg)
 {
     u32 result;
@@ -236,7 +167,6 @@ u32 MainMenu::OnUpdate(MainMenu *arg)
     return result;
 }
 
-// FUNCTION: TH07 0x004555dd
 u32 MainMenu::OnUpdatePreInput()
 {
     i32 i;
@@ -519,7 +449,6 @@ u32 MainMenu::OnUpdatePreInput()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0045624d
 u32 MainMenu::OnUpdateOptionsMenu()
 {
     i32 i;
@@ -865,7 +794,6 @@ LAB_00456e08:
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00456e40
 void MainMenu::SwapMapping(i16 btnPressed, i16 oldMapping, i16 idk)
 {
     if (this->controlMapping.shootButton == btnPressed)
@@ -906,7 +834,6 @@ void MainMenu::SwapMapping(i16 btnPressed, i16 oldMapping, i16 idk)
     }
 }
 
-// FUNCTION: TH07 0x00456f6b
 u32 MainMenu::OnUpdateKeyConfig()
 {
     AnmVm *vm;
@@ -1123,7 +1050,6 @@ u32 MainMenu::OnUpdateKeyConfig()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x004578cc
 ZunResult MainMenu::UpdateMenuDigits(AnmVm *param_1, i16 param_2)
 {
     if (param_2 < 0)
@@ -1143,7 +1069,6 @@ ZunResult MainMenu::UpdateMenuDigits(AnmVm *param_1, i16 param_2)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0045798b
 u32 MainMenu::OnUpdateSelectDifficulty()
 {
     i32 oldGameState;
@@ -1335,7 +1260,6 @@ u32 MainMenu::OnUpdateSelectDifficulty()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00457fe5
 u32 MainMenu::OnUpdateSelectCharacter()
 {
     switch (this->menuSubState)
@@ -1630,7 +1554,6 @@ u32 MainMenu::OnUpdateSelectCharacter()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00459518
 u32 MainMenu::OnUpdateSelectShotType()
 {
     switch (this->menuSubState)
@@ -1873,7 +1796,6 @@ u32 MainMenu::OnUpdateSelectShotType()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0045a1dd
 u32 MainMenu::OnUpdateSelectPracticeStage()
 {
     i32 local_8;
@@ -1987,7 +1909,6 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0045a924
 u32 MainMenu::OnUpdateSelectReplay()
 {
     _WIN32_FIND_DATAA local_194;
@@ -2003,7 +1924,6 @@ u32 MainMenu::OnUpdateSelectReplay()
         if (this->stateTimer == 0)
         {
             if (this->prevGameState != STATE_SELECT_REPLAY &&
-                // STRING: TH07 0x00495680
                 g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
                     ZUN_SUCCESS)
             {
@@ -2017,7 +1937,6 @@ u32 MainMenu::OnUpdateSelectReplay()
             local_10 = 0;
             for (i = 0; i < 15; i++)
             {
-                // STRING: TH07 0x004967bc
                 sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
                 file = (ReplayFile *)FileSystem::OpenFile(local_54, 1);
                 if (!file)
@@ -2031,16 +1950,13 @@ u32 MainMenu::OnUpdateSelectReplay()
                 {
                     this->replays[local_10] = *file;
                     strcpy(this->replayFilenames[local_10], local_54);
-                    // STRING: TH07 0x00496460
                     sprintf(this->replayLabels[local_10], "No.%.2d", i + 1);
                     local_10++;
                     free(file);
                 }
             }
-            // STRING: TH07 0x00495674
             _mkdir("./replay");
             _chdir("./replay");
-            // STRING: TH07 0x00495664
             local_c = FindFirstFileA("th7_ud????.rpy", &local_194);
             if (local_c != INVALID_HANDLE_VALUE)
             {
@@ -2059,10 +1975,8 @@ u32 MainMenu::OnUpdateSelectReplay()
                         if (file)
                         {
                             this->replays[local_10] = *file;
-                            // STRING: TH07 0x00495658
                             sprintf(this->replayFilenames[local_10], "./replay/%s",
                                     local_194.cFileName);
-                            // STRING: TH07 0x00495650
                             sprintf(this->replayLabels[local_10], "User ");
                             free(file);
                             local_10++;
@@ -2075,7 +1989,6 @@ u32 MainMenu::OnUpdateSelectReplay()
                 }
             }
             FindClose(local_c);
-            // STRING: TH07 0x0049564c
             _chdir("../");
             this->replayFilesNum = local_10;
             this->replayPage = 0;
@@ -2148,8 +2061,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 this->cursor++;
                 if (this->cursor >= 7)
                 {
-                    // STRING: TH07 0x00495634
-                    g_GameErrorContext.Fatal("���v���C�f�[�^���ُ�\r\n");
+                    g_GameErrorContext.Fatal("リプレイデータが異常\r\n");
                     return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
                 }
             }
@@ -2269,7 +2181,6 @@ u32 MainMenu::OnUpdateSelectReplay()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0045b5ef
 i32 MainMenu::DrawReplayMenu()
 {
     i32 replayAmount;
@@ -2278,7 +2189,6 @@ i32 MainMenu::DrawReplayMenu()
 
     vm = &this->vmHead[134];
     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                // STRING: TH07 0x0049557c
                                 "No.   Name       Date  Player   Rank");
     replayAmount = this->chosenReplay - this->chosenReplay % 15;
     for (i = replayAmount + 15; replayAmount < i; replayAmount++)
@@ -2298,7 +2208,6 @@ i32 MainMenu::DrawReplayMenu()
             g_AsciiManager.color = 0xff808080;
         }
         AsciiManager::AddFormatText(
-            // STRING: TH07 0x00495564
             &g_AsciiManager, &vm->pos, "%s %8s  %6s %7s  %8s",
             this->replayLabels + replayAmount,
             this->replays[replayAmount].data.name,
@@ -2313,12 +2222,10 @@ i32 MainMenu::DrawReplayMenu()
         g_AsciiManager.isSelected = 0;
         vm = &this->vmHead[133];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                    // STRING: TH07 0x00495554
                                     "       %2.3f%%",
                                     (double)this->currentReplay->data.slowdownRate);
         vm = &this->vmHead[150];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                    // STRING: TH07 0x00495540
                                     "Stage    LastScore");
         replayAmount = this->chosenReplay - this->chosenReplay % 15;
         for (i = 0; i < 7; i++, replayAmount++)
@@ -2351,7 +2258,6 @@ i32 MainMenu::DrawReplayMenu()
             {
                 if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
-                    // STRING: TH07 0x00495538
                     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
                                                 g_StageReplayStrings[i],
                                                 this->currentReplay->head.stageReplayData[i].data->score);
@@ -2367,7 +2273,6 @@ i32 MainMenu::DrawReplayMenu()
             {
                 if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
-                    // STRING: TH07 0x00495528
                     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
                                                 "%s ----------",
                                                 g_StageReplayStrings[i]);
@@ -2386,7 +2291,6 @@ i32 MainMenu::DrawReplayMenu()
     return 1;
 }
 
-// FUNCTION: TH07 0x0045b9ad
 i32 MainMenu::DrawPracticeMenu()
 {
     ZunVec3 local_1c;
@@ -2398,7 +2302,6 @@ i32 MainMenu::DrawPracticeMenu()
     g_AsciiManager.isSelected = 0;
     vm = &this->vmHead[131];
     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                // STRING: TH07 0x004954e4
                                 "Stage    HI-Score");
     local_1c = vm->pos;
     local_1c.y += 16.0f;
@@ -2422,7 +2325,6 @@ i32 MainMenu::DrawPracticeMenu()
             g_AsciiManager.color = 0xff404040;
         }
         AsciiManager::AddFormatText(
-            // STRING: TH07 0x004954d4
             &g_AsciiManager, &local_1c, "%s %9d0 (%3d)",
             g_StagePracticeStrings[i],
             g_GameManager
@@ -2440,7 +2342,6 @@ i32 MainMenu::DrawPracticeMenu()
     return 1;
 }
 
-// FUNCTION: TH07 0x0045bb4a
 i32 MainMenu::MoveCursorVertical(i32 max)
 {
     if (max == 0)
@@ -2478,7 +2379,6 @@ i32 MainMenu::MoveCursorVertical(i32 max)
     return 0;
 }
 
-// FUNCTION: TH07 0x0045bc63
 i32 MainMenu::MoveCursorHorizontal(i32 max)
 {
     if (max == 0)
@@ -2508,7 +2408,6 @@ i32 MainMenu::MoveCursorHorizontal(i32 max)
     return 0;
 }
 
-// FUNCTION: TH07 0x0045bd6c
 u32 MainMenu::OnDraw(MainMenu *arg)
 {
     ZunVec3 savedPos;
@@ -2551,7 +2450,6 @@ u32 MainMenu::OnDraw(MainMenu *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0045bf15
 ZunResult MainMenu::ActualAddedCallback()
 {
     i32 i;
@@ -2597,7 +2495,6 @@ ZunResult MainMenu::ActualAddedCallback()
         g_GameManager.HasUnlockedPhantomAndMaxClears())
     {
         frameCount = 0;
-        // STRING: TH07 0x004954bc
         g_AnmManager->LoadSurface(0, "data/title/phantasm.jpg");
         while (frameCount < 900)
         {
@@ -2680,7 +2577,6 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         GameManager::DrawLoadingSprite();
     }
-    // STRING: TH07 0x004954a8
     if (g_AnmManager->LoadAnms(ANM_FILE_TITLE, "data/title01.anm", ANM_OFFSET_TITLE) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
@@ -2713,13 +2609,11 @@ ZunResult MainMenu::ActualAddedCallback()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0045c4c8
 ZunResult MainMenu::AddedCallback(MainMenu *arg)
 {
     return arg->ActualAddedCallback();
 }
 
-// FUNCTION: TH07 0x0045c4d9
 ZunResult MainMenu::Release()
 {
     SAFE_FREE(this->currentReplay);
@@ -2731,7 +2625,6 @@ ZunResult MainMenu::Release()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0045c546
 ZunResult MainMenu::DeletedCallback(MainMenu *arg)
 {
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
@@ -2749,7 +2642,6 @@ ZunResult MainMenu::DeletedCallback(MainMenu *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0045c5d0
 ZunResult MainMenu::RegisterChain(u32 param_1)
 {
     MainMenu *mgr = new MainMenu;

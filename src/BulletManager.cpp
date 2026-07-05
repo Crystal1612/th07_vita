@@ -12,7 +12,6 @@
 #include "ZunMath.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x00495160
 const BulletTypeInfo g_BulletTypeInfos[11] = {
     {0x200, 0x212, 0x213, 0x214, 0x20f},
     {0x201, 0x215, 0x216, 0x217, 0x210},
@@ -27,7 +26,6 @@ const BulletTypeInfo g_BulletTypeInfos[11] = {
     {0x2a8, 0x2aa, 0x2aa, 0x2aa, 0x2a9},
 };
 
-// GLOBAL: TH07 0x0049ee58
 D3DCOLOR g_BulletColorsArray[28] = {
     0xFF000000, 0xFF303030, 0xFF606060, 0xFF500000, 0xFF900000, 0xFFFF2020,
     0xFF400040, 0xFF800080, 0xFFFF30FF, 0xFF000050, 0xFF000090, 0xFF2020FF,
@@ -35,7 +33,6 @@ D3DCOLOR g_BulletColorsArray[28] = {
     0xFF206000, 0xFF409010, 0xFF80FF20, 0xFF505000, 0xFF909000, 0xFFFFFF20,
     0xFF603000, 0xFF904010, 0xFFF08020, 0xFFFFFFFF};
 
-// GLOBAL: TH07 0x0049eec8
 D3DCOLOR g_DefaultBulletColors[28] = {
     0xFFF0F0F0, 0xFFF0F0F0, 0xFFFFFFFF, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFE0E0,
     0xFFFFE0FF, 0xFFFFE0FF, 0xFFFFE0FF, 0xFFE0E0FF, 0xFFE0E0FF, 0xFFE0E0FF,
@@ -43,23 +40,17 @@ D3DCOLOR g_DefaultBulletColors[28] = {
     0xFFE0FFE0, 0xFFE0FFE0, 0xFFE0FFE0, 0xFFFFFFE0, 0xFFFFFFE0, 0xFFFFFFE0,
     0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFFFFF};
 
-// GLOBAL: TH07 0x0049ef38
 D3DCOLOR *g_BulletColor = g_BulletColorsArray;
 
-// GLOBAL: TH07 0x0049ef40
 i32 g_BulletSpriteOffset16Px[16] = {0, 1, 1, 1, 1, 2, 2, 2,
                                     2, 3, 3, 3, 4, 4, 4, 0};
 
-// GLOBAL: TH07 0x0049ef80
 i32 g_BulletSpriteOffset32Px[8] = {0, 1, 1, 2, 2, 3, 4, 0};
 
-// GLOBAL: TH07 0x0062f934
 ChainElem g_BulletManagerDrawChain;
 
-// GLOBAL: TH07 0x0062f958
 BulletManager g_BulletManager;
 
-// GLOBAL: TH07 0x009a9abc
 ChainElem g_BulletManagerCalcChain;
 
 void BulletManager::Initialize()
@@ -75,7 +66,6 @@ BulletManager::BulletManager()
     Initialize();
 }
 
-// FUNCTION: TH07 0x00423660
 void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
                                                 AnmVm *bulletTypeTemplate,
                                                 Bullet *bullet,
@@ -106,7 +96,6 @@ void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
     }
 }
 
-// FUNCTION: TH07 0x00423730
 i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
                                      i32 y, f32 angle)
 {
@@ -312,7 +301,6 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
     return 0;
 }
 
-// FUNCTION: TH07 0x00424290
 void Bullet::RunCommands()
 {
     BulletCommand *cmd;
@@ -411,7 +399,6 @@ void Bullet::RunCommands()
     }
 }
 
-// FUNCTION: TH07 0x00424740
 void BulletManager::RemoveAllBullets(i32 param_1)
 {
     f32 local_28;
@@ -489,7 +476,6 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     this->screenClearTime = 10;
 }
 
-// FUNCTION: TH07 0x004249a0
 i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
 {
     f32 local_34;
@@ -558,7 +544,6 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     return local_c;
 }
 
-// FUNCTION: TH07 0x00424c00
 void BulletManager::RemoveBulletsInRadius(ZunVec3 *centerPos, f32 radius)
 {
     ZunVec3 diff;
@@ -586,7 +571,6 @@ void BulletManager::RemoveBulletsInRadius(ZunVec3 *centerPos, f32 radius)
     }
 }
 
-// FUNCTION: TH07 0x00424d20
 i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
 {
     f32 angle;
@@ -618,7 +602,6 @@ stop:
     return 0;
 }
 
-// FUNCTION: TH07 0x00424e00
 Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
 {
     Laser *laser;
@@ -676,7 +659,6 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
     return laser;
 }
 
-// FUNCTION: TH07 0x004250d0
 void Bullet::UpdateBulletBurstSpeed()
 {
     if (this->commandStates[0].timer <= 16)
@@ -692,7 +674,6 @@ void Bullet::UpdateBulletBurstSpeed()
     this->commandStates[0].timer++;
 }
 
-// FUNCTION: TH07 0x004251a0
 void Bullet::UpdateBulletTargetVelocity()
 {
     if (this->commandStates[1].timer >= this->commandStates[1].duration)
@@ -711,7 +692,6 @@ void Bullet::UpdateBulletTargetVelocity()
     this->commandStates[1].timer++;
 }
 
-// FUNCTION: TH07 0x00425310
 void Bullet::UpdateBulletTargetAngle()
 {
     if (this->commandStates[2].timer >= this->commandStates[2].duration)
@@ -731,7 +711,6 @@ void Bullet::UpdateBulletTargetAngle()
     this->commandStates[2].timer++;
 }
 
-// FUNCTION: TH07 0x00425400
 void Bullet::UpdateBulletDirChangeAndResume()
 {
     f32 local_8;
@@ -763,7 +742,6 @@ void Bullet::UpdateBulletDirChangeAndResume()
     this->commandStates[3].timer++;
 }
 
-// FUNCTION: TH07 0x00425580
 void Bullet::UpdateBulletDirChangeAbsoluteAndResume()
 {
     f32 local_8;
@@ -795,7 +773,6 @@ void Bullet::UpdateBulletDirChangeAbsoluteAndResume()
     this->commandStates[3].timer++;
 }
 
-// FUNCTION: TH07 0x00425700
 void Bullet::UpdateBulletDirChangeAimAtPlayer()
 {
     f32 local_8;
@@ -828,7 +805,6 @@ void Bullet::UpdateBulletDirChangeAimAtPlayer()
     this->commandStates[3].timer++;
 }
 
-// FUNCTION: TH07 0x004258a0
 void Bullet::UpdateBulletBounce()
 {
     f32 speed;
@@ -864,7 +840,6 @@ void Bullet::UpdateBulletBounce()
     }
 }
 
-// FUNCTION: TH07 0x00425a50
 u32 BulletManager::OnUpdate(BulletManager *arg)
 {
     ZunVec3 laserCenter;
@@ -1211,7 +1186,6 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00426b00
 void Bullet::Draw()
 {
     AnmVm *vm;
@@ -1246,7 +1220,6 @@ void Bullet::Draw()
     g_AnmManager->Draw(vm);
 }
 
-// FUNCTION: TH07 0x00426c40
 u32 BulletManager::OnDraw(BulletManager *arg)
 {
     Bullet *bullet;
@@ -1309,7 +1282,6 @@ u32 BulletManager::OnDraw(BulletManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00426f60
 ZunResult BulletManager::AddedCallback(BulletManager *arg)
 {
     u32 i;
@@ -1419,7 +1391,6 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00427620
 ZunResult BulletManager::DeletedCallback(BulletManager *arg)
 {
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
@@ -1433,7 +1404,6 @@ ZunResult BulletManager::DeletedCallback(BulletManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004276a0
 ZunResult BulletManager::RegisterChain(const char *etamaAnmPath)
 {
     BulletManager *mgr = &g_BulletManager;
@@ -1461,7 +1431,6 @@ ZunResult BulletManager::RegisterChain(const char *etamaAnmPath)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00427760
 void BulletManager::CutChain()
 {
     g_Chain.Cut(&g_BulletManagerCalcChain);
@@ -1469,7 +1438,6 @@ void BulletManager::CutChain()
     memset(&g_BulletManager, 0, sizeof(BulletManager));
 }
 
-// FUNCTION: TH07 0x004277a0
 void BulletManager::StopBulletMovement()
 {
     Bullet *bullet;
@@ -1496,7 +1464,6 @@ void BulletManager::StopBulletMovement()
     }
 }
 
-// FUNCTION: TH07 0x004278b0
 BulletCommand *Bullet::AddCommand(i32 command, i32 flag, u32 type)
 {
     BulletCommand *bulletCommand = &this->commands[command];
@@ -1507,7 +1474,6 @@ BulletCommand *Bullet::AddCommand(i32 command, i32 flag, u32 type)
     return bulletCommand;
 }
 
-// FUNCTION: TH07 0x00427910
 BulletCommand *EnemyBulletShooter::AddCommand(i32 command, i32 flag, u32 type)
 {
     BulletCommand *bulletCommand = &this->commands[command];
@@ -1517,7 +1483,6 @@ BulletCommand *EnemyBulletShooter::AddCommand(i32 command, i32 flag, u32 type)
     return bulletCommand;
 }
 
-// FUNCTION: TH07 0x00427960
 void Bullet::AddAngleAccelCommand(i32 command, i32 flag, i32 duration,
                                   f32 angle, f32 speed)
 {
@@ -1529,7 +1494,6 @@ void Bullet::AddAngleAccelCommand(i32 command, i32 flag, i32 duration,
     bulletCommand->angle = angle;
 }
 
-// FUNCTION: TH07 0x004279a0
 void Bullet::AddTargetVelocityCommand(i32 command, i32 flag, i32 duration,
                                       f32 speed, f32 angle)
 {
@@ -1541,7 +1505,6 @@ void Bullet::AddTargetVelocityCommand(i32 command, i32 flag, i32 duration,
     bulletCommand->angle = angle;
 }
 
-// FUNCTION: TH07 0x004279e0
 void EnemyBulletShooter::AddAngleAccelCommand(i32 command, i32 flag,
                                               i32 duration, f32 angle,
                                               f32 speed)
@@ -1552,7 +1515,6 @@ void EnemyBulletShooter::AddAngleAccelCommand(i32 command, i32 flag,
     bulletCommand->angle = angle;
 }
 
-// FUNCTION: TH07 0x00427a20
 void EnemyBulletShooter::AddDirChangeCommand(i32 command, i32 flag,
                                              i32 duration, i32 loopCount,
                                              f32 speed, f32 angle)
@@ -1564,7 +1526,6 @@ void EnemyBulletShooter::AddDirChangeCommand(i32 command, i32 flag,
     bulletCommand->angle = angle;
 }
 
-// FUNCTION: TH07 0x00427a70
 void EnemyBulletShooter::AddTargetVelocityCommand(i32 command, i32 flag,
                                                   i32 duration, f32 speed,
                                                   f32 angle)
@@ -1575,7 +1536,6 @@ void EnemyBulletShooter::AddTargetVelocityCommand(i32 command, i32 flag,
     bulletCommand->angle = angle;
 }
 
-// FUNCTION: TH07 0x00427ab0
 void EnemyBulletShooter::AddSpawnDelayCommand(i32 command, i32 flag,
                                               i32 duration)
 {

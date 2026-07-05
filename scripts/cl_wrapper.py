@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 env = os.environ.copy()
-env["LANG"] = "ja_JP.UTF-8"
+env["LANG"] = "en_US.UTF-8"
 env["WINEDEBUG"] = "fixme-all"
 
 proc = subprocess.run(

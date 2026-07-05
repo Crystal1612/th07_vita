@@ -211,8 +211,6 @@ HRESULT CSoundManager::CreateStreamingFromMemory(
     u32 dwNotifyCount, u32 dwNotifySize, HANDLE hNotifyEvent)
 {
     HRESULT hr;
-
-    // STRING: TH07 0x0049548c
     DebugPrint("StreamingSound Create \r\n");
     if (!this->pDS)
     {
@@ -280,7 +278,6 @@ HRESULT CSoundManager::CreateStreamingFromMemory(
     (*ppStreamingSound)->m_pSoundManager = this;
     (*ppStreamingSound)->m_hNotifyEvent = hNotifyEvent;
     (*ppStreamingSound)->m_bIsLocked = FALSE;
-    // STRING: TH07 0x00495480
     DebugPrint("Success \r\n");
 
     return S_OK;
@@ -774,7 +771,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
          this->m_dwNextWriteOffset >=
              this->m_dwDSBufferSize - this->m_dwNotifySize))
     {
-        // STRING: TH07 0x00495470
         DebugPrint("Stream Skip\n");
         return CO_E_NOTINITIALIZED;
     }
@@ -782,7 +778,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
     BOOL bRestored;
     if (FAILED(hr = RestoreBuffer(this->m_apDSBuffer[0], &bRestored)))
     {
-        // STRING: TH07 0x00495438
         DebugPrint("error : RestoreBuffer in HandleWaveStreamNotification\r\n");
         return hr;
     }
@@ -791,7 +786,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
     {
         if (FAILED(hr = FillBufferWithSound(this->m_apDSBuffer[0], FALSE)))
         {
-            // STRING: TH07 0x004953f8
             DebugPrint("error : FillBufferWithSound in HandleWaveStreamNotification\r\n");
             return hr;
         }
@@ -806,7 +800,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
                    &pDSLockedBuffer, (LPDWORD)&dwDSLockedBufferSize, &pDSLockedBuffer2,
                    (LPDWORD)&dwDSLockedBufferSize2, 0L)))
     {
-        // STRING: TH07 0x004953c0
         DebugPrint("error : Buffer->Lock in HandleWaveStreamNotification\r\n");
         return hr;
     }
@@ -822,7 +815,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
                                                 dwDSLockedBufferSize,
                                                 &dwBytesWrittenToBuffer)))
         {
-            // STRING: TH07 0x00495384
             DebugPrint("error : m_pWaveFile->Read in HandleWaveStreamNotification\r\n");
             return hr;
         }
@@ -854,7 +846,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
             {
                 if (FAILED(hr = this->m_pWaveFile->ResetFile(true)))
                 {
-                    // STRING: TH07 0x00495340
                     DebugPrint("error : m_pWaveFile->ResetFile in HandleWaveStreamNotification\r\n");
                     return hr;
                 }
@@ -864,7 +855,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
                                dwDSLockedBufferSize - dwReadSoFar,
                                &dwBytesWrittenToBuffer)))
                 {
-                    // STRING: TH07 0x00495300
                     DebugPrint("error : m_pWaveFile->Read(+) in HandleWaveStreamNotification\r\n");
                     return hr;
                 }
@@ -879,7 +869,6 @@ HRESULT CStreamingSound::HandleWaveStreamNotification(i32 bLoopedPlay)
     if (FAILED(hr = this->m_apDSBuffer[0]->GetCurrentPosition((LPDWORD)&dwCurrentPlayPos2,
                                                               NULL)))
     {
-        // STRING: TH07 0x004952b0
         DebugPrint("error : m_apDSBuffer[0]->GetCurrentPosition in HandleWaveStreamNotification\r\n");
         return hr;
     }
@@ -985,8 +974,6 @@ HRESULT CWaveFile::Open(LPCSTR strFileName, ThBgmFormat *pzwf, u32 dwFlags)
         {
             return E_INVALIDARG;
         }
-
-        // STRING: TH07 0x00495294
         DebugPrint("Streaming File Open %s\r\n", strFileName);
         this->m_hWaveFile = CreateFileA(
             strFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
@@ -1186,7 +1173,6 @@ HRESULT CWaveFile::Close()
     return S_OK;
 }
 
-// FUNCTION: TH07 0x0045e4f0
 void DebugPrint(const char *fmt, ...)
 {
 } // why is this here

@@ -5,7 +5,6 @@
 #include "Rng.hpp"
 #include "Supervisor.hpp"
 
-// FUNCTION: TH07 0x0044a460
 void ScreenEffect::Clear(D3DCOLOR color)
 {
     g_Supervisor.d3dDevice->Clear(0, NULL, 3, color, 1.0f, 0);
@@ -15,7 +14,6 @@ void ScreenEffect::Clear(D3DCOLOR color)
     }
 }
 
-// FUNCTION: TH07 0x0044a520
 void ScreenEffect::SetViewport(D3DCOLOR color)
 {
     if (g_AnmManager)
@@ -32,7 +30,6 @@ void ScreenEffect::SetViewport(D3DCOLOR color)
     Clear(color);
 }
 
-// FUNCTION: TH07 0x0044a5a0
 u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
 {
     if (arg->duration != 0)
@@ -53,7 +50,6 @@ u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044a650
 void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
 {
     g_AnmManager->Flush();
@@ -99,7 +95,6 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
 }
 
-// FUNCTION: TH07 0x0044aa20
 void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
                                    D3DCOLOR param_3, D3DCOLOR param_4,
                                    D3DCOLOR param_5)
@@ -147,7 +142,6 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
 }
 
-// FUNCTION: TH07 0x0044adf0
 u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
 {
     ZunRect rect;
@@ -166,7 +160,6 @@ u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044ae90
 u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
 {
     if (arg->duration != 0)
@@ -186,7 +179,6 @@ u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044af30
 u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
 {
     ZunRect rect;
@@ -199,7 +191,6 @@ u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044af80
 u32 BombEffects::OnUpdatePulse(BombEffects *arg)
 {
     if (arg->timer < arg->duration)
@@ -225,7 +216,6 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044b090
 u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
 {
     ZunRect rect;
@@ -239,7 +229,6 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044b0e0
 u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
 {
     if (g_GameManager.isTimeStopped)
@@ -286,14 +275,12 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
     return 1;
 }
 
-// FUNCTION: TH07 0x0044b280
 ZunResult BombEffects::AddedCallback(BombEffects *arg)
 {
     arg->timer = 0;
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044b2c0
 ZunResult BombEffects::DeletedCallback(BombEffects *arg)
 {
     arg->calcChain->deletedCallback = NULL;
@@ -304,7 +291,6 @@ ZunResult BombEffects::DeletedCallback(BombEffects *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0044b310
 BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
                                         u32 arg2, u32 arg3)
 {

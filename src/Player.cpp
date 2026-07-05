@@ -18,7 +18,6 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049ecb0
 ShtFunc1 g_ShtFireFuncs[6] = {
     NULL,
     ShtData::FireBulletDefault,
@@ -28,7 +27,6 @@ ShtFunc1 g_ShtFireFuncs[6] = {
     ShtData::FireRotatingOrbBullet,
 };
 
-// GLOBAL: TH07 0x0049ecc8
 ShtFunc2 g_ShtUpdateFuncs[6] = {
     NULL,
     ShtData::UpdateHomingBullet,
@@ -38,13 +36,11 @@ ShtFunc2 g_ShtUpdateFuncs[6] = {
     ShtData::UpdatePlayerLaser,
 };
 
-// GLOBAL: TH07 0x0049ece0
 ShtFunc3 g_ShtDrawFuncs[2] = {
     NULL,
     ShtData::DrawBulletWithTrail,
 };
 
-// GLOBAL: TH07 0x0049ece8
 ShtFunc4 g_ShtHitFuncs[4] = {
     NULL,
     ShtData::OnMissileHit,
@@ -52,42 +48,26 @@ ShtFunc4 g_ShtHitFuncs[4] = {
     NULL,
 };
 
-// GLOBAL: TH07 0x0049f530
 const char *g_ShooterTable[6] = {
-    // STRING: TH07 0x00496bb4
     "data/ply00a.sht",
-    // STRING: TH07 0x00496ba4
     "data/ply00b.sht",
-    // STRING: TH07 0x00496b94
     "data/ply01a.sht",
-    // STRING: TH07 0x00496b84
     "data/ply01b.sht",
-    // STRING: TH07 0x00496b74
     "data/ply02a.sht",
-    // STRING: TH07 0x00496b64
     "data/ply02b.sht",
 };
 
-// GLOBAL: TH07 0x0049f548
 const char *g_ShooterTableFocus[6] = {
-    // STRING: TH07 0x00496b50
     "data/ply00as.sht",
-    // STRING: TH07 0x00496b3c
     "data/ply00bs.sht",
-    // STRING: TH07 0x00496b28
     "data/ply01as.sht",
-    // STRING: TH07 0x00496b14
     "data/ply01bs.sht",
-    // STRING: TH07 0x00496b00
     "data/ply02as.sht",
-    // STRING: TH07 0x00496aec
     "data/ply02bs.sht",
 };
 
-// GLOBAL: TH07 0x004bdad8
 Player g_Player;
 
-// FUNCTION: TH07 0x0043bbd0
 void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
                                ShtEntry *shtEntry)
 {
@@ -119,7 +99,6 @@ void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
     g_AnmManager->SetAnmIdxAndExecuteScript(&bullet->vm, shtEntry->anmFileIdx);
 }
 
-// FUNCTION: TH07 0x0043bdc0
 i32 ShtData::FireBulletDefault(Player *player, PlayerBullet *bullet,
                                i32 fireTime, ShtEntry *shtEntry)
 {
@@ -131,7 +110,6 @@ i32 ShtData::FireBulletDefault(Player *player, PlayerBullet *bullet,
     return 0;
 }
 
-// FUNCTION: TH07 0x0043be10
 i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
                                     i32 fireTime, ShtEntry *shtEntry)
 {
@@ -163,7 +141,6 @@ i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
     return 1;
 }
 
-// FUNCTION: TH07 0x0043bf50
 i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
                                   i32 fireTime, ShtEntry *shtEntry)
 {
@@ -201,7 +178,6 @@ i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
     return 1;
 }
 
-// FUNCTION: TH07 0x0043c0d0
 i32 ShtData::FireHomingBullet(Player *player, PlayerBullet *bullet,
                               i32 fireTime, ShtEntry *shtEntry)
 {
@@ -227,7 +203,6 @@ i32 ShtData::FireHomingBullet(Player *player, PlayerBullet *bullet,
     return 0;
 }
 
-// FUNCTION: TH07 0x0043c1c0
 i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
                                    i32 fireTime, ShtEntry *shtEntry)
 {
@@ -346,7 +321,6 @@ i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
     return 0;
 }
 
-// FUNCTION: TH07 0x0043c6b0
 i32 ShtData::UpdateUpwardAcceleratingBullet(Player *player,
                                             PlayerBullet *bullet)
 {
@@ -358,7 +332,6 @@ i32 ShtData::UpdateUpwardAcceleratingBullet(Player *player,
     return 0;
 }
 
-// FUNCTION: TH07 0x0043c700
 i32 ShtData::UpdateOrbLaser(Player *player, PlayerBullet *bullet)
 {
     if (player->timers[bullet->timerIdx].bullet != bullet &&
@@ -400,7 +373,6 @@ i32 ShtData::UpdateOrbLaser(Player *player, PlayerBullet *bullet)
     }
 }
 
-// FUNCTION: TH07 0x0043c940
 i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
 {
     i32 i;
@@ -457,7 +429,6 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
     }
 }
 
-// FUNCTION: TH07 0x0043ccb0
 i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
 {
     i32 i;
@@ -486,7 +457,6 @@ i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
     return 0;
 }
 
-// FUNCTION: TH07 0x0043cde0
 i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet,
                           ZunVec3 *pos)
 {
@@ -559,7 +529,6 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet,
     return 0;
 }
 
-// FUNCTION: TH07 0x0043d0e0
 i32 ShtData::SpawnHitParticles(Player *player, PlayerBullet *bullet,
                                ZunVec3 *pos)
 {
@@ -575,7 +544,6 @@ i32 ShtData::SpawnHitParticles(Player *player, PlayerBullet *bullet,
     return 0;
 }
 
-// FUNCTION: TH07 0x0043d160
 void Player::SpawnBullets(Player *player, u32 timer)
 {
     ShtEntry *entry;
@@ -632,7 +600,6 @@ void Player::SpawnBullets(Player *player, u32 timer)
     }
 }
 
-// FUNCTION: TH07 0x0043d2f0
 void Player::UpdateShots()
 {
     PlayerBullet *bullet;
@@ -722,7 +689,6 @@ void Player::UpdateShots()
     }
 }
 
-// FUNCTION: TH07 0x0043d690
 void Player::DrawBullets()
 {
     PlayerBullet *bullet;
@@ -753,7 +719,6 @@ void Player::DrawBullets()
     }
 }
 
-// FUNCTION: TH07 0x0043d790
 void Player::DrawBulletExplosions()
 {
     PlayerBullet *bullet;
@@ -780,7 +745,6 @@ void Player::DrawBulletExplosions()
     }
 }
 
-// FUNCTION: TH07 0x0043d880
 i32 Player::UpdateFireBulletTimer()
 {
     if (this->fireBulletTimer.GetCurrent() < 0)
@@ -805,7 +769,6 @@ i32 Player::UpdateFireBulletTimer()
     return 0;
 }
 
-// FUNCTION: TH07 0x0043d990
 void Player::StartFireBulletTimer()
 {
     if (this->fireBulletTimer.GetCurrent() < 0)
@@ -814,7 +777,6 @@ void Player::StartFireBulletTimer()
     }
 }
 
-// FUNCTION: TH07 0x0043d9e0
 i32 Player::CalcDamageToEnemy(ZunVec3 *center, ZunVec3 *size,
                               i32 *param_3)
 {
@@ -937,7 +899,6 @@ i32 Player::CalcDamageToEnemy(ZunVec3 *center, ZunVec3 *size,
     return damage;
 }
 
-// FUNCTION: TH07 0x0043e0a0
 i32 Player::CheckBombGraze(ZunVec3 *center, ZunVec3 *size)
 {
     BombClearBox *bombProjectile;
@@ -986,7 +947,6 @@ i32 Player::CheckBombGraze(ZunVec3 *center, ZunVec3 *size)
     return 0;
 }
 
-// FUNCTION: TH07 0x0043e260
 i32 Player::CalcKillboxCollision(ZunVec3 *center, ZunVec3 *size)
 {
     ZunVec3 killboxBottomRight;
@@ -1026,7 +986,6 @@ i32 Player::CalcKillboxCollision(ZunVec3 *center, ZunVec3 *size)
     return 1;
 }
 
-// FUNCTION: TH07 0x0043e3b0
 i32 Player::CheckGraze(ZunVec3 *center, ZunVec3 *size)
 {
     ZunVec3 bulletBottomRight;
@@ -1060,7 +1019,6 @@ i32 Player::CheckGraze(ZunVec3 *center, ZunVec3 *size)
     return 1;
 }
 
-// FUNCTION: TH07 0x0043e4e0
 i32 Player::CalcItemBoxCollision(ZunVec3 *center, ZunVec3 *size)
 {
     ZunVec3 itemBottomRight;
@@ -1087,7 +1045,6 @@ i32 Player::CalcItemBoxCollision(ZunVec3 *center, ZunVec3 *size)
     return 1;
 }
 
-// FUNCTION: TH07 0x0043e6b0
 i32 Player::CalcLaserHitbox(ZunVec3 *center, ZunVec3 *size,
                             ZunVec3 *origin, f32 rotation, i32 canGraze)
 {
@@ -1157,7 +1114,6 @@ LASER_COLLISION:
     return 1;
 }
 
-// FUNCTION: TH07 0x0043eb90
 void Player::ScoreGraze(ZunVec3 *param_1)
 {
     ZunVec3 grazePos;
@@ -1211,7 +1167,6 @@ void Player::ScoreGraze(ZunVec3 *param_1)
     }
 }
 
-// FUNCTION: TH07 0x0043edc0
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
@@ -1222,7 +1177,6 @@ void Player::Die()
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN, 0);
 }
 
-// FUNCTION: TH07 0x0043ee50
 i32 Player::HandlePlayerInputs()
 {
     f32 angleStep;
@@ -1635,7 +1589,6 @@ i32 Player::HandlePlayerInputs()
     return 0;
 }
 
-// FUNCTION: TH07 0x00440940
 void Player::UpdateBombProjectiles()
 {
     BombClearBox *bomb;
@@ -1661,7 +1614,6 @@ void Player::UpdateBombProjectiles()
     }
 }
 
-// FUNCTION: TH07 0x004409f0
 void Player::UpdateBorderAndBombState()
 {
     if (this->hasBorder != BORDER_NONE && !this->bombInfo.isInUse &&
@@ -1742,7 +1694,6 @@ void Player::UpdateBorderAndBombState()
     }
 }
 
-// FUNCTION: TH07 0x00440cf0
 i32 Player::UpdateDeath()
 {
     f32 invulnScale;
@@ -1858,7 +1809,6 @@ i32 Player::UpdateDeath()
     return 0;
 }
 
-// FUNCTION: TH07 0x004411c0
 void Player::Respawn()
 {
     this->bulletGracePeriod = 60;
@@ -1884,7 +1834,6 @@ void Player::Respawn()
     }
 }
 
-// FUNCTION: TH07 0x00441330
 void Player::UpdateState()
 {
     ZunColor color;
@@ -1981,7 +1930,6 @@ void Player::UpdateState()
     }
 }
 
-// FUNCTION: TH07 0x00441670
 void Player::BreakBorderNaturally()
 {
     i32 cherryDiff;
@@ -2014,7 +1962,6 @@ void Player::BreakBorderNaturally()
     }
 }
 
-// FUNCTION: TH07 0x00441800
 BombClearBox *Player::SpawnBombProjectile(ZunVec3 *centerPosition,
                                           f32 posZ, f32 size, i32 itemType)
 {
@@ -2038,7 +1985,6 @@ BombClearBox *Player::SpawnBombProjectile(ZunVec3 *centerPosition,
     return bomb;
 }
 
-// FUNCTION: TH07 0x004418b0
 BombClearBox *Player::SpawnBombEffect(ZunVec3 *pos, f32 sizeY, f32 sizeZ,
                                       i32 lifetime, i32 itemType)
 {
@@ -2062,7 +2008,6 @@ BombClearBox *Player::SpawnBombEffect(ZunVec3 *pos, f32 sizeY, f32 sizeZ,
     return bomb;
 }
 
-// FUNCTION: TH07 0x00441960
 void Player::ActivateBorder()
 {
     Effect *spawnedEffect;
@@ -2122,7 +2067,6 @@ void Player::ActivateBorder()
     }
 }
 
-// FUNCTION: TH07 0x00441bd0
 void Player::BreakBorder(u32 unused)
 {
     f32 angle;
@@ -2171,7 +2115,6 @@ void Player::BreakBorder(u32 unused)
     g_ReplayManager->replayEventFlags = g_ReplayManager->replayEventFlags | 0x10;
 }
 
-// FUNCTION: TH07 0x00441e80
 void Player::UpdateUI()
 {
     this->positionOfLastEnemyHit = ZunVec3(-999.0f, -999.0f, 0.0f);
@@ -2199,7 +2142,6 @@ void Player::UpdateUI()
     }
 }
 
-// FUNCTION: TH07 0x00441fb0
 u32 Player::OnUpdate(Player *arg)
 {
     if (g_GameManager.isTimeStopped)
@@ -2243,7 +2185,6 @@ WHY:
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x004420b0
 u32 Player::OnDrawHighPrio(Player *arg)
 {
     ZunColor color;
@@ -2322,14 +2263,12 @@ u32 Player::OnDrawHighPrio(Player *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00442350
 u32 Player::OnDrawLowPrio(Player *arg)
 {
     arg->DrawBulletExplosions();
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00442370
 f32 Player::AngleToPlayer(ZunVec3 *pos)
 {
     f32 y;
@@ -2347,7 +2286,6 @@ f32 Player::AngleToPlayer(ZunVec3 *pos)
     }
 }
 
-// FUNCTION: TH07 0x004423e0
 ZunResult Player::AddedCallback(Player *arg)
 {
     PlayerBullet *bullet;
@@ -2374,7 +2312,6 @@ ZunResult Player::AddedCallback(Player *arg)
         switch (g_GameManager.character)
         {
         case CHAR_REIMU:
-            // STRING: TH07 0x00496ad8
             if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player00.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
@@ -2382,7 +2319,6 @@ ZunResult Player::AddedCallback(Player *arg)
             }
             break;
         case CHAR_MARISA:
-            // STRING: TH07 0x00496ac4
             if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player01.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
@@ -2390,7 +2326,6 @@ ZunResult Player::AddedCallback(Player *arg)
             }
             break;
         case CHAR_SAKUYA:
-            // STRING: TH07 0x00496ab0
             if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER, "data/player02.anm", ANM_OFFSET_PLAYER) !=
                 ZUN_SUCCESS)
             {
@@ -2462,7 +2397,6 @@ ZunResult Player::AddedCallback(Player *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004428e0
 ZunResult Player::DeletedCallback(Player *arg)
 {
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
@@ -2480,7 +2414,6 @@ ZunResult Player::DeletedCallback(Player *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x004429d0
 ZunResult Player::RegisterChain(u32 param_1)
 {
     Player *mgr = &g_Player;
@@ -2505,7 +2438,6 @@ ZunResult Player::RegisterChain(u32 param_1)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00442b10
 void Player::CutChain()
 {
     g_Chain.Cut(g_Player.calcChain);
@@ -2516,7 +2448,6 @@ void Player::CutChain()
     g_Player.drawChain2 = NULL;
 }
 
-// FUNCTION: TH07 0x00442b70
 ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
 {
     ShtEntry *entry;

@@ -11,7 +11,6 @@
 #include "ZunResult.hpp"
 #include "utils.hpp"
 
-// GLOBAL: TH07 0x0049f1b8
 u32 g_SpellcardScore[141] = {
     0x1E8480, 0x1E8480, 0x2191C0, 0x2191C0, 0x249F00, 0x249F00, 0x249F00,
     0x249F00, 0x249F00, 0x249F00, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40,
@@ -35,19 +34,14 @@ u32 g_SpellcardScore[141] = {
     0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x3D0900, 0x7A1200,
     0x3D0900};
 
-// GLOBAL: TH07 0x009a9adc
 ChainElem g_EnemyManagerDrawChain1;
 
-// GLOBAL: TH07 0x009a9b00
 EnemyManager g_EnemyManager;
 
-// GLOBAL: TH07 0x012fe210
 ChainElem g_EnemyManagerCalcChain;
 
-// GLOBAL: TH07 0x012fe230
 ChainElem g_EnemyManagerDrawChain2;
 
-// FUNCTION: TH07 0x0041e920
 void Enemy::Move()
 {
     this->deltaPos = this->position - this->prevPos;
@@ -68,7 +62,6 @@ void Enemy::Move()
         g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
 }
 
-// FUNCTION: TH07 0x0041ea60
 void EnemyManager::Initialize()
 {
     Enemy *enemy;
@@ -137,7 +130,6 @@ void EnemyManager::Initialize()
     enemy->bulletProps.soundOverride = SOUND_25;
 }
 
-// FUNCTION: TH07 0x0041ee70
 EnemyManager::EnemyManager()
 {
     i32 idk[8];
@@ -145,17 +137,14 @@ EnemyManager::EnemyManager()
     Initialize();
 }
 
-// FUNCTION: TH07 0x0041ef70
 Enemy::Enemy()
 {
 }
 
-// FUNCTION: TH07 0x0041f220
 EnemyEclContext::EnemyEclContext()
 {
 }
 
-// FUNCTION: TH07 0x0041f2e0
 Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life,
                                 i32 itemDrop, i32 score, u8 mirror)
 {
@@ -197,7 +186,6 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life,
     return enemy;
 }
 
-// FUNCTION: TH07 0x0041f430
 Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life,
                                   i32 itemDrop, i32 score, EclContextArgs *args)
 {
@@ -243,7 +231,6 @@ Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life,
     return enemy;
 }
 
-// FUNCTION: TH07 0x0041f580
 void Enemy::UpdateEffects()
 {
     Effect *effect;
@@ -267,7 +254,6 @@ void Enemy::UpdateEffects()
     }
 }
 
-// FUNCTION: TH07 0x0041f670
 void Enemy::ResetEffectArray()
 {
     for (i32 i = 0; i < this->effectsNum; i++)
@@ -283,7 +269,6 @@ void Enemy::ResetEffectArray()
     this->effectsNum = 0;
 }
 
-// FUNCTION: TH07 0x0041f6f0
 void EnemyManager::RunEclTimeline(EclTimeline *timeline)
 {
     ZunVec3 pos4;
@@ -472,7 +457,6 @@ stop:
     timeline->timelineTime++;
 }
 
-// FUNCTION: TH07 0x0041fd70
 i32 Enemy::HandleLifeCallback()
 {
     i32 j;
@@ -530,7 +514,6 @@ i32 Enemy::HandleLifeCallback()
     return 0;
 }
 
-// FUNCTION: TH07 0x0041ff80
 i32 Enemy::HandleTimerCallback()
 {
     i32 j;
@@ -623,7 +606,6 @@ i32 Enemy::HandleTimerCallback()
     }
 }
 
-// FUNCTION: TH07 0x004202d0
 void Enemy::Despawn()
 {
     if (this->deathType == 0)
@@ -649,7 +631,6 @@ void Enemy::Despawn()
     g_ReplayManager->replayEventFlags |= 0x20;
 }
 
-// FUNCTION: TH07 0x004203b0
 void Enemy::ClampPos()
 {
     if (this->hasMovementBounds)
@@ -674,7 +655,6 @@ void Enemy::ClampPos()
     }
 }
 
-// FUNCTION: TH07 0x00420490
 void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
                                        ZunVec3 *bulletSize)
 {
@@ -696,7 +676,6 @@ void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
     }
 }
 
-// FUNCTION: TH07 0x00420620
 u32 EnemyManager::OnUpdate(EnemyManager *arg)
 {
     ZunVec3 bossMarkerPos;
@@ -1176,7 +1155,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 bossMarkerPos.y = 472.0f;
                 bossMarkerPos.z = 0.0f;
-    
+
                 g_AsciiManager.SetBossMarkerPos(enemy->bossId, &bossMarkerPos);
                 g_AsciiManager.SetBossDamageTint(enemy->bossId, enemy->primaryVm.useColor2);
             }
@@ -1206,7 +1185,6 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x004220f0
 f32 AngleLerp(f32 start, f32 target, f32 t)
 {
     f32 direct;
@@ -1230,7 +1208,6 @@ f32 AngleLerp(f32 start, f32 target, f32 t)
     return wrapped * t + start;
 }
 
-// FUNCTION: TH07 0x00422170
 u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
 {
     f32 uvDiff;
@@ -1437,19 +1414,16 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x00422ca0
 u32 EnemyManager::OnDraw1(EnemyManager *arg)
 {
     return ActualOnDraw(arg, 0, 2);
 }
 
-// FUNCTION: TH07 0x00422cc0
 u32 EnemyManager::OnDraw2(EnemyManager *arg)
 {
     return ActualOnDraw(arg, 2, 4);
 }
 
-// FUNCTION: TH07 0x00422ce0
 ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 {
     Enemy *enemy;
@@ -1480,7 +1454,6 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00422e70
 ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
 {
     g_AnmManager->ReleaseAnm(16);
@@ -1493,7 +1466,6 @@ ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00422f40
 ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
 {
     EnemyManager *mgr = &g_EnemyManager;
@@ -1533,7 +1505,6 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x00423050
 void EnemyManager::CutChain()
 {
     g_Chain.Cut(&g_EnemyManagerCalcChain);
@@ -1541,7 +1512,6 @@ void EnemyManager::CutChain()
     g_Chain.Cut(&g_EnemyManagerDrawChain2);
 }
 
-// FUNCTION: TH07 0x00423090
 i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
 {
     i32 j;
@@ -1606,7 +1576,6 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
     return totalScore;
 }
 
-// FUNCTION: TH07 0x004232a0
 i32 EnemyManager::HasActiveBoss()
 {
     for (i32 i = 0; i < 8; i++)

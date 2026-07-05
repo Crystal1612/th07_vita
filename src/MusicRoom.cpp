@@ -8,7 +8,6 @@
 #include "SoundPlayer.hpp"
 #include "Supervisor.hpp"
 
-// FUNCTION: TH07 0x0043a760
 ZunResult MusicRoom::CheckInputEnable()
 {
     i32 i;
@@ -38,7 +37,6 @@ ZunResult MusicRoom::CheckInputEnable()
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0043a801
 i32 MusicRoom::ProcessInput()
 {
     char local_54[66];
@@ -138,7 +136,6 @@ i32 MusicRoom::ProcessInput()
     return 0;
 }
 
-// FUNCTION: TH07 0x0043ab60
 u32 MusicRoom::OnUpdate(MusicRoom *arg)
 {
     i32 iVar1;
@@ -182,7 +179,6 @@ recheck:
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0043ac4c
 u32 MusicRoom::OnDraw(MusicRoom *arg)
 {
     ZunVec3 local_18;
@@ -213,7 +209,6 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
             g_AsciiManager.AddString(&local_18, local_c);
         }
         local_18.x += 15.0f;
-        // STRING: TH07 0x00496c04
         AsciiManager::AddFormatText(&g_AsciiManager, &local_18, "%2d.", i + 1);
     }
     i++;
@@ -225,7 +220,6 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0043ae20
 ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
 {
     char lineCharBuffer[66];
@@ -234,13 +228,10 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
     char *curChar;
     i32 lineIdx;
     i32 offset;
-
-    // STRING: TH07 0x00496bec
     if (g_AnmManager->LoadSurface(0, "data/result/music.jpg") != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    // STRING: TH07 0x00496bd8
     if (g_AnmManager->LoadAnms(ANM_FILE_MUSIC, "data/music00.anm", ANM_OFFSET_MUSIC) !=
         ZUN_SUCCESS)
     {
@@ -249,7 +240,6 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
 
     g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], 2304);
     arg->waitFramesCounter = 0;
-    // STRING: TH07 0x00496bc4
     curChar = (char *)FileSystem::OpenFile("data/musiccmt.txt", 0);
     firstChar = curChar;
     if ((u8 *)curChar == NULL)
@@ -378,7 +368,6 @@ LAB_0043b195:
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0043b478
 ZunResult MusicRoom::DeletedCallback(MusicRoom *arg)
 {
     delete arg->trackDescriptors;
@@ -391,7 +380,6 @@ ZunResult MusicRoom::DeletedCallback(MusicRoom *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0043b4db
 ZunResult MusicRoom::RegisterChain()
 {
     static MusicRoom g_MusicRoom;

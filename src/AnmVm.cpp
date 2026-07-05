@@ -2,7 +2,6 @@
 
 #include <stddef.h>
 
-// GLOBAL: TH07 0x0049512c
 const D3DFORMAT g_TextureFormatD3D8Mapping[6] = {
     D3DFMT_UNKNOWN,
     D3DFMT_A8R8G8B8,
@@ -12,7 +11,6 @@ const D3DFORMAT g_TextureFormatD3D8Mapping[6] = {
     D3DFMT_A4R4G4B4,
 };
 
-// GLOBAL: TH07 0x00495144
 const i32 g_TextureBytesPerPixel[7] = {4, 4, 2, 2, 3, 2, 0};
 
 // this is here i guess? but why
@@ -23,7 +21,6 @@ i32 ZunTimer::NextTick()
     return this->current;
 }
 
-// FUNCTION: TH07 0x004010f0
 void AnmVm::Initialize()
 {
     memset(this, 0, offsetof(AnmVm, pos));

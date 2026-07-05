@@ -9,33 +9,21 @@
 #include "ScreenEffect.hpp"
 #include "Supervisor.hpp"
 
-// GLOBAL: TH07 0x0049f628
 const char *g_BadEndingPaths[3] = {
-    // STRING: TH07 0x004985b4
     "data/end00b.end",
-    // STRING: TH07 0x004985a4
     "data/end10b.end",
-    // STRING: TH07 0x00498594
     "data/end20b.end",
 };
 
-// GLOBAL: TH07 0x0049f634
 const char *g_NormalEndingPaths[6] = {
-    // STRING: TH07 0x00498584
     "data/end00.end",
-    // STRING: TH07 0x00498574
     "data/end01.end",
-    // STRING: TH07 0x00498564
     "data/end10.end",
-    // STRING: TH07 0x00498554
     "data/end11.end",
-    // STRING: TH07 0x00498544
     "data/end20.end",
-    // STRING: TH07 0x00498534
     "data/end21.end",
 };
 
-// FUNCTION: TH07 0x0041d2f0
 u32 Ending::OnUpdate(Ending *arg)
 {
     i32 i;
@@ -65,7 +53,6 @@ u32 Ending::OnUpdate(Ending *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0041d380
 u32 Ending::OnDraw(Ending *arg)
 {
     g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x,
@@ -78,7 +65,6 @@ u32 Ending::OnDraw(Ending *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-// FUNCTION: TH07 0x0041d410
 i32 Ending::ReadEndFileParameter()
 {
     long cur = atol(this->endFileDataPtr);
@@ -93,7 +79,6 @@ i32 Ending::ReadEndFileParameter()
     return cur;
 }
 
-// FUNCTION: TH07 0x0041d490
 void Ending::FadingEffect()
 {
     ZunRect rect;
@@ -162,7 +147,6 @@ void Ending::FadingEffect()
     }
 }
 
-// FUNCTION: TH07 0x0041d700
 ZunResult Ending::ParseEndFile()
 {
     f32 musicFadeFrames;
@@ -423,7 +407,6 @@ stop:
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0041e4b0
 ZunResult Ending::LoadEnding(const char *endFilePath)
 {
     char *endFileDat;
@@ -432,8 +415,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     this->endFileData = (char *)FileSystem::OpenFile(endFilePath, 0);
     if (!this->endFileData)
     {
-        // STRING: TH07 0x004985d8
-        g_GameErrorContext.Log("error : �G���f�B���O�t�@�C�����ǂݍ��߂Ȃ��A�t�@�C�����j�󂳂�Ă��܂�\r\n");
+        g_GameErrorContext.Log("error : エンディングファイルが読み込めない、ファイルが破壊されています\r\n");
         return ZUN_ERROR;
     }
 
@@ -448,7 +430,6 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0041e590
 ZunResult Ending::AddedCallback(Ending *arg)
 {
     i32 i;
@@ -507,7 +488,6 @@ ZunResult Ending::AddedCallback(Ending *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0041e790
 ZunResult Ending::DeletedCallback(Ending *arg)
 {
     g_AnmManager->ReleaseAnm(49);
@@ -523,7 +503,6 @@ ZunResult Ending::DeletedCallback(Ending *arg)
     return ZUN_SUCCESS;
 }
 
-// FUNCTION: TH07 0x0041e820
 ZunResult Ending::RegisterChain()
 {
     Ending *ending = new Ending;
