@@ -1,16 +1,10 @@
 # th07
 
-<img src="resources/progress.svg" alt="Implemented: 100%. Accuracy: 99.38%" width="50%">
+A cross-platform port of 東方妖々夢　～ Perfect Cherry Blossom 1.00b by Team Shanghai Alice.
 
-A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfect Cherry Blossom 1.00b (md5: 0126afce1e805370d36c3482445e98da) by Team Shanghai Alice.
-
-The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect byte accuracy is an eventual goal.
-
-This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead.
+This is the portable branch of the Touhou 7 decompilation. Currently, this will not produce a playable game on any platform other than Windows. Work is currently being done to transition the game over to being more platform-independent.
 
 ## Building
-
-This project requires the original th07.exe 1.00b executable for extracting the icon. Copy it to the resources directory of the repository.
 
 ### Dependencies
 
@@ -26,23 +20,6 @@ uv run scripts/build.py
 ```
 
 The resulting build can be found at `build/th07.exe`.
-
-This executable _will_ crash after some time (specifically after 3999 Supervisor cycles). It'll fail the integrity check due to the executable not (yet?) being completely byte accurate (including checksum) to the original. In that case, you can try building a nonmatching build instead, which will disable this integrity check:
-
-```
-uv run scripts/build.py --no-matching
-```
-
-If you don't have the original executable, you can still build the program without the icon.
-
-```
-uv run scripts/build.py --no-icon
-```
-
-## Todo
-
-* Improve accuracy and documentation
-* Get a better build system than whatever this is
 
 ## Contributing
 

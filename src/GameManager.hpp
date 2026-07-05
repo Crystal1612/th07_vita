@@ -58,7 +58,6 @@ struct ZunGlobals
     i32 csumAsSum;
     i32 csumData[5];
 };
-C_ASSERT(sizeof(ZunGlobals) == 0xc8);
 
 struct Rank
 {
@@ -71,7 +70,6 @@ struct GameManager
 {
     GameManager();
 
-#pragma var_order(local_10, local_c)
     // FUNCTION: TH07 0x004012b0
     void RegenerateGameIntegrityCsum()
     {
@@ -96,19 +94,7 @@ struct GameManager
     // FUNCTION: TH07 0x00404fe0
     i32 CheckGameIntegrity()
     {
-#ifdef NON_MATCHING
         return 0;
-#else
-        // This is incredibly ugly but its the only way to get a match on this function
-        return (this->globals->curCsum ==
-                this->globals->rng1[2] + this->globals->csumData[2] *
-                                             ((i32) & this->globals->curCsum - (i32)this->globals->rng1 +
-                                                          sizeof(this->globals->csumData) + sizeof(GameConfiguration) * 2)) &&
-                       (this->globals->csumAsSum + this->globals->rng2[3] ==
-                        (i32)this->csumFloat)
-                   ? 0
-                   : 1;
-#endif
     }
 
     void AddCurrentPower(i32 amount);
@@ -261,5 +247,5 @@ struct GameManager
     Rank rank;
     i32 subrank;
 };
-C_ASSERT(sizeof(GameManager) == 0x9644);
+
 extern GameManager g_GameManager;

@@ -1,7 +1,7 @@
 #include "MainMenu.hpp"
 
 #include <direct.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -14,7 +14,6 @@
 #include "ScreenEffect.hpp"
 #include "SoundPlayer.hpp"
 #include "Supervisor.hpp"
-#include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 #include "utils.hpp"
@@ -103,71 +102,71 @@ i16 g_LastJoystickInput = 32;
 // GLOBAL: TH07 0x0049f478
 const char *g_KeyConfigStrings[12] = {
     // STRING: TH07 0x004957e8
-    "ƒVƒ‡ƒbƒgAŒˆ’èƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½Vï¿½ï¿½ï¿½bï¿½gï¿½Aï¿½ï¿½ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x004957c4
-    "ƒ{ƒ€AƒLƒƒƒ“ƒZƒ‹ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½{ï¿½ï¿½ï¿½Aï¿½Lï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x004957a8
-    "’á‘¬ˆÚ“®ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½á‘¬ï¿½Ú“ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495780
-    "ƒƒbƒZ[ƒWƒXƒLƒbƒvƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½bï¿½Zï¿½[ï¿½Wï¿½Xï¿½Lï¿½bï¿½vï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495764
-    "ƒ|[ƒYƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½|ï¿½[ï¿½Yï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495748
-    "ãˆÚ“®ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½ï¿½Ú“ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x0049572c
-    "‰ºˆÚ“®ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½Ú“ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495710
-    "¶ˆÚ“®ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½Ú“ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x004956f4
-    "‰EˆÚ“®ƒ{ƒ^ƒ“‚ðÝ’è‚µ‚Ü‚·",
+    "ï¿½Eï¿½Ú“ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ï¿½Ý’è‚µï¿½Ü‚ï¿½",
     // STRING: TH07 0x004956c0
-    "ƒVƒ‡ƒbƒg‰Ÿ‚µ‚Á‚Ï‚È‚µ‚Å’á‘¬ˆÚ“®‚É‚È‚é‚æ‚¤‚É‚µ‚Ü‚·",
+    "ï¿½Vï¿½ï¿½ï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï‚È‚ï¿½ï¿½Å’á‘¬ï¿½Ú“ï¿½ï¿½É‚È‚ï¿½æ‚¤ï¿½É‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x004956ac
-    "‰ŠúÝ’è‚É–ß‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½É–ß‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495698
-    "‚¨‚¨‚æ‚»I—¹‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½ï¿½ï¿½æ‚»ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
 };
 
 // GLOBAL: TH07 0x0049f4a8
 const char *g_OptionsStrings[9] = {
     // STRING: TH07 0x0049596c
-    "ƒvƒŒƒCƒ„[‚Ì‰Šú”‚ð•ÏX‚µ‚Ü‚·Bi‰ŠúÝ’è@‚Rj",
+    "ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏXï¿½ï¿½ï¿½Ü‚ï¿½ï¿½Bï¿½iï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½@ï¿½Rï¿½j",
     // STRING: TH07 0x0049592c
-    "‰æ–Ê‚ÌF”‚ð•ÏX‚µ‚Ü‚·B‚R‚Q‚a‚h‚s‚¾‚ÆÅ‚àãY—í‚É•\Ž¦‚³‚ê‚Ü‚·B",
+    "ï¿½ï¿½Ê‚ÌFï¿½ï¿½ï¿½ï¿½ÏXï¿½ï¿½ï¿½Ü‚ï¿½ï¿½Bï¿½Rï¿½Qï¿½aï¿½hï¿½sï¿½ï¿½ï¿½ÆÅ‚ï¿½ï¿½Yï¿½ï¿½É•\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B",
     // STRING: TH07 0x004958f8
-    "‚a‚f‚l‚ÌÄ¶•û–@‚ð•ÏX‚µ‚Ü‚·Bi‰ŠúÝ’è@‚v‚`‚uj",
+    "ï¿½aï¿½fï¿½lï¿½ÌÄï¿½ï¿½ï¿½ï¿½@ï¿½ï¿½ÏXï¿½ï¿½ï¿½Ü‚ï¿½ï¿½Bï¿½iï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½@ï¿½vï¿½`ï¿½uï¿½j",
     // STRING: TH07 0x004958d8
-    "Œø‰Ê‰¹‚ðÄ¶‚·‚é‚©‘I‘ð‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½Ê‰ï¿½ï¿½ï¿½ï¿½Äï¿½ï¿½ï¿½ï¿½é‚©ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x004958b0
-    "ƒEƒBƒ“ƒhƒE‚©ƒtƒ‹ƒXƒNƒŠ[ƒ“‚©‘I‘ð‚µ‚Ü‚·",
+    "ï¿½Eï¿½Bï¿½ï¿½ï¿½hï¿½Eï¿½ï¿½ï¿½tï¿½ï¿½ï¿½Xï¿½Nï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495870
-    "’e‚ª‘½‚¢ê–Ê‚Å‚í‚´‚Æˆ——Ž‚¿‚³‚¹‚Ü‚·(ƒXƒRƒAAƒŠƒvƒŒƒC‹L˜^•s‰Â)",
+    "ï¿½eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê‚Å‚í‚´ï¿½Æï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½(ï¿½Xï¿½Rï¿½Aï¿½Aï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½Lï¿½^ï¿½sï¿½ï¿½)",
     // STRING: TH07 0x00495858
-    "‘S‚Ä‰ŠúÝ’è‚É‚µ‚Ü‚·",
+    "ï¿½Sï¿½Äï¿½ï¿½ï¿½ï¿½Ý’ï¿½É‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495834
-    "ƒpƒbƒh‘€ì‚Ìƒ{ƒ^ƒ“”z’u‚ð•ÏX‚µ‚Ü‚·",
+    "ï¿½pï¿½bï¿½hï¿½ï¿½ï¿½ï¿½Ìƒ{ï¿½^ï¿½ï¿½ï¿½zï¿½uï¿½ï¿½ÏXï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x0049581c
-    "‚¨‚¢‚»‚ê‚ÆI—¹‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÆIï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
 };
 
 // GLOBAL: TH07 0x0049f4cc
 const char *g_MainMenuStrings[8] = {
     // STRING: TH07 0x00495aa4
-    "ƒQ[ƒ€‚ðŠJŽn‚µ‚Ü‚·",
+    "ï¿½Qï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495a84
-    "ƒGƒLƒXƒgƒ‰ƒXƒe[ƒW‚ðŠJŽn‚µ‚Ü‚·",
+    "ï¿½Gï¿½Lï¿½Xï¿½gï¿½ï¿½ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495a60
-    "ƒXƒe[ƒW‚ð‘I‘ð‚µA—ûK‚ðŠJŽn‚µ‚Ü‚·",
+    "ï¿½Xï¿½eï¿½[ï¿½Wï¿½ï¿½Iï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495a48
-    "ƒŠƒvƒŒƒC‚ðŠÓÜ‚Å‚«‚Ü‚·",
+    "ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ÓÜ‚Å‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495a18
-    "‰ß‹Ž‚ÌƒXƒRƒA‚âƒXƒyƒ‹ƒJ[ƒh‚ÌŽæ“¾—ð‚ðŒ©‚ç‚ê‚Ü‚·",
+    "ï¿½ß‹ï¿½ï¿½ÌƒXï¿½Rï¿½Aï¿½ï¿½Xï¿½yï¿½ï¿½ï¿½Jï¿½[ï¿½hï¿½ÌŽæ“¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x00495a08
-    "‰¹Šy‚ð’®‚¯‚Ü‚·",
+    "ï¿½ï¿½ï¿½yï¿½ð’®‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x004959f4
-    "ŠeŽíÝ’è‚Å‚«‚Ü‚·",
+    "ï¿½eï¿½ï¿½Ý’ï¿½Å‚ï¿½ï¿½Ü‚ï¿½",
     // STRING: TH07 0x004959dc
-    "‚¢‚ë‚¢‚ë‚ÆI—¹‚µ‚Ü‚·",
+    "ï¿½ï¿½ï¿½ë‚¢ï¿½ï¿½ÆIï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½",
 };
 
 // FUNCTION: TH07 0x004553fa
@@ -363,7 +362,7 @@ u32 MainMenu::OnUpdatePreInput()
                 }
 
                 g_GameManager.currentStage = i;
-                ZunMemory::Free(this->currentReplay);
+                free(this->currentReplay);
                 this->currentReplay = NULL;
                 g_Supervisor.curState = 2;
                 g_GameManager.replayStage = 0;
@@ -907,7 +906,6 @@ void MainMenu::SwapMapping(i16 btnPressed, i16 oldMapping, i16 idk)
     }
 }
 
-#pragma var_order(vm, i, btnPressed, controllerState, cursorVmTmp)
 // FUNCTION: TH07 0x00456f6b
 u32 MainMenu::OnUpdateKeyConfig()
 {
@@ -1145,7 +1143,6 @@ ZunResult MainMenu::UpdateMenuDigits(AnmVm *param_1, i16 param_2)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(numDifficulties, i, oldGameState)
 // FUNCTION: TH07 0x0045798b
 u32 MainMenu::OnUpdateSelectDifficulty()
 {
@@ -1990,7 +1987,6 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(i, local_c, local_10, file, local_54, local_194)
 // FUNCTION: TH07 0x0045a924
 u32 MainMenu::OnUpdateSelectReplay()
 {
@@ -2153,7 +2149,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 if (this->cursor >= 7)
                 {
                     // STRING: TH07 0x00495634
-                    g_GameErrorContext.Fatal("ƒŠƒvƒŒƒCƒf[ƒ^‚ªˆÙí\r\n");
+                    g_GameErrorContext.Fatal("ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Cï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Ùï¿½\r\n");
                     return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
                 }
             }
@@ -2210,7 +2206,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
-            ZunMemory::Free(this->currentReplay);
+            free(this->currentReplay);
             this->currentReplay = NULL;
             this->menuSubState = 1;
             this->stateTimer = 0;
@@ -2237,7 +2233,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_GameManager.character = this->currentReplay->data.shotType / 2;
             g_GameManager.shotType = this->currentReplay->data.shotType % 2;
             g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
-            ZunMemory::Free(this->currentReplay);
+            free(this->currentReplay);
             this->currentReplay = NULL;
             g_GameManager.currentStage =
                 g_GameManager.difficulty >= 5 ? 7 : this->selectedStage;
@@ -2273,7 +2269,6 @@ u32 MainMenu::OnUpdateSelectReplay()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(vm, i, replayAmount)
 // FUNCTION: TH07 0x0045b5ef
 i32 MainMenu::DrawReplayMenu()
 {
@@ -2391,11 +2386,10 @@ i32 MainMenu::DrawReplayMenu()
     return 1;
 }
 
-#pragma var_order(vm, i, local_10, local_1c)
 // FUNCTION: TH07 0x0045b9ad
 i32 MainMenu::DrawPracticeMenu()
 {
-    D3DXVECTOR3 local_1c;
+    ZunVec3 local_1c;
     i32 local_10;
     i32 i;
     AnmVm *vm;
@@ -2412,11 +2406,6 @@ i32 MainMenu::DrawPracticeMenu()
         g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
             .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
 
-    // ZUN bloat: this is always false, since difficultyClearedWithoutRetries is unsigned
-    if (local_10 < 0)
-    {
-        local_10 = 1;
-    }
     for (i = 0; i < 6; i++)
     {
         g_AsciiManager.isSelected = IsSelected(i);
@@ -2519,11 +2508,10 @@ i32 MainMenu::MoveCursorHorizontal(i32 max)
     return 0;
 }
 
-#pragma var_order(i, local_c, savedPos)
 // FUNCTION: TH07 0x0045bd6c
 u32 MainMenu::OnDraw(MainMenu *arg)
 {
-    D3DXVECTOR3 savedPos;
+    ZunVec3 savedPos;
     AnmVm *local_c;
     i32 i;
 
@@ -2563,7 +2551,6 @@ u32 MainMenu::OnDraw(MainMenu *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(local_8, frameCount, local_1c, local_20, local_24, local_34, i)
 // FUNCTION: TH07 0x0045bf15
 ZunResult MainMenu::ActualAddedCallback()
 {
@@ -2740,7 +2727,6 @@ ZunResult MainMenu::Release()
     {
         delete[] this->vmHead;
         this->vmHead = NULL;
-        this->vmHead = NULL; // ZUN bloat: this is the same exact thing twice
     }
     return ZUN_SUCCESS;
 }
@@ -2768,9 +2754,6 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
 {
     MainMenu *mgr = new MainMenu;
 
-    // ZUN bloat: memset it twice just to be nice
-    memset(mgr, 0, sizeof(MainMenu));
-
     g_GameManager.isInRetryMenu = 0;
     mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
     mgr->calcChain->arg = mgr;
@@ -2786,6 +2769,5 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     mgr->drawChain->arg = mgr;
     g_Chain.AddToDrawChain(mgr->drawChain, 0);
 
-    UselessStack::EightBytes();
     return ZUN_SUCCESS;
 }

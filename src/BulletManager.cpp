@@ -106,7 +106,6 @@ void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
     }
 }
 
-#pragma var_order(bulletSpeed, i, bullet, bulletAngle, unused)
 // FUNCTION: TH07 0x00423730
 i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
                                      i32 y, f32 angle)
@@ -117,8 +116,6 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
     i32 i;
     f32 bulletSpeed;
 
-    // ZUN bloat: i is assigned twice here for some reason
-    i = 0;
     for (bullet = this->bulletsStart, i = 0; i < 1024; i++)
     {
         if (bullet->state == BULLET_INACTIVE)
@@ -414,7 +411,6 @@ void Bullet::RunCommands()
     }
 }
 
-#pragma var_order(local_10, i, local_18, bullet, laser, local_24, local_28)
 // FUNCTION: TH07 0x00424740
 void BulletManager::RemoveAllBullets(i32 param_1)
 {
@@ -424,7 +420,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     Bullet *bullet;
     f32 local_18;
     i32 i;
-    D3DXVECTOR3 local_10;
+    ZunVec3 local_10;
 
     bullet = g_BulletManager.bullets;
     for (i = 0; i < 1024; i++, bullet++)
@@ -493,25 +489,21 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     this->screenClearTime = 10;
 }
 
-#pragma var_order(local_8, local_c, unused_10, i, local_18, bullet, local_28, \
-                  laser, local_30, local_34)
 // FUNCTION: TH07 0x004249a0
 i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
 {
     f32 local_34;
     f32 local_30;
     Laser *laser;
-    D3DXVECTOR3 local_28;
+    ZunVec3 local_28;
     Bullet *bullet;
     f32 local_18;
     i32 i;
-    i32 unused_10; // ZUN bloat
     i32 local_c;
     i32 local_8;
 
     local_c = 0;
     local_8 = 2000;
-    unused_10 = 0;
     bullet = g_BulletManager.bullets;
     for (i = 0; i < 1024; i++, bullet++)
     {
@@ -526,7 +518,6 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
                                         ? 0xFFFFFF00
                                         : 0xFFFFFFFF);
         local_c += local_8;
-        unused_10++;
         local_8 += 20;
         if (local_8 > param_1)
         {
@@ -567,11 +558,10 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     return local_c;
 }
 
-#pragma var_order(diff, i, bullet)
 // FUNCTION: TH07 0x00424c00
-void BulletManager::RemoveBulletsInRadius(D3DXVECTOR3 *centerPos, f32 radius)
+void BulletManager::RemoveBulletsInRadius(ZunVec3 *centerPos, f32 radius)
 {
-    D3DXVECTOR3 diff;
+    ZunVec3 diff;
     Bullet *bullet;
     i32 i;
 
@@ -586,7 +576,7 @@ void BulletManager::RemoveBulletsInRadius(D3DXVECTOR3 *centerPos, f32 radius)
 
         diff = bullet->pos - *centerPos;
 
-        if (D3DXVec3LengthSq(&diff) > radius)
+        if (diff.LengthSq() > radius)
         {
             continue;
         }
@@ -596,7 +586,6 @@ void BulletManager::RemoveBulletsInRadius(D3DXVECTOR3 *centerPos, f32 radius)
     }
 }
 
-#pragma var_order(y, angle, x)
 // FUNCTION: TH07 0x00424d20
 i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
 {
@@ -629,7 +618,6 @@ stop:
     return 0;
 }
 
-#pragma var_order(i, laser)
 // FUNCTION: TH07 0x00424e00
 Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
 {
@@ -650,7 +638,6 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         }
 
         g_AnmManager->SetAnmIdxAndExecuteScript(&laser->vm0, laserShooter->sprite + 522);
-        UselessStack::FourBytes();
         g_AnmManager->SetActiveSprite(&laser->vm0,
                                       (i32)laser->vm0.activeSpriteIdx +
                                           (i32)laserShooter->spriteOffset);
@@ -877,16 +864,14 @@ void Bullet::UpdateBulletBounce()
     }
 }
 
-#pragma var_order(collisionRes, i, width, blockIdx, laserHitbox, bullet, \
-                  alpha, laser, laserCenter)
 // FUNCTION: TH07 0x00425a50
 u32 BulletManager::OnUpdate(BulletManager *arg)
 {
-    D3DXVECTOR3 laserCenter;
+    ZunVec3 laserCenter;
     Laser *laser;
     i32 alpha;
     Bullet *bullet;
-    D3DXVECTOR3 laserHitbox;
+    ZunVec3 laserHitbox;
     i32 blockIdx;
     f32 width;
     i32 i;
@@ -1261,7 +1246,6 @@ void Bullet::Draw()
     g_AnmManager->Draw(vm);
 }
 
-#pragma var_order(i, local_c, laser, local_14, local_18, bullet)
 // FUNCTION: TH07 0x00426c40
 u32 BulletManager::OnDraw(BulletManager *arg)
 {
@@ -1485,7 +1469,6 @@ void BulletManager::CutChain()
     memset(&g_BulletManager, 0, sizeof(BulletManager));
 }
 
-#pragma var_order(i, bullet)
 // FUNCTION: TH07 0x004277a0
 void BulletManager::StopBulletMovement()
 {
@@ -1500,8 +1483,8 @@ void BulletManager::StopBulletMovement()
             continue;
         }
 
-        bullet->velocity = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-        bullet->unused_ba4 = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+        bullet->velocity = ZunVec3(0.0f, 0.0f, 0.0f);
+        bullet->unused_ba4 = ZunVec3(0.0f, 0.0f, 0.0f);
         bullet->angularVelocity = 0.0f;
         bullet->acceleration = 0.0f;
         bullet->speed = 0.0f;

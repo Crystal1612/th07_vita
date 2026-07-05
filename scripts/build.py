@@ -1,4 +1,3 @@
-import argparse
 import os
 import shutil
 import subprocess
@@ -6,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import List
 
-from download_deps import conv_path, download_dx8, download_msvc, install_hackery
+from download_deps import conv_path, download_dx8, download_msvc
 
 SCRIPT_PATH = Path(os.path.abspath(__file__))
 PROJ_DIR = Path(os.path.dirname(SCRIPT_PATH)).parent
@@ -15,10 +14,8 @@ os.chdir(PROJ_DIR)
 
 SRC_DIR = PROJ_DIR / "src"
 BUILD_DIR = PROJ_DIR / "build"
-RESOURCE_DIR = PROJ_DIR / "resources"
 MSVC_PATH = PROJ_DIR / "thirdparty" / "msvc"
 DX8_PATH = PROJ_DIR / "thirdparty" / "dx8"
-EXE_PATH = RESOURCE_DIR / "th07.exe"
 BUILD_PATH = BUILD_DIR / "th07.exe"
 
 VS_PATH = MSVC_PATH / "Program Files" / "Microsoft Visual Studio .NET"
@@ -97,69 +94,11 @@ SMALL_NON_INTRINSIC_SOURCES: List[Path] = list(
     )
 )
 
-parser = argparse.ArgumentParser()
-_ = parser.add_argument(
-    "--no-icon",
-    action="store_true",
-    help="build without requiring an icon from the original executable",
-)
-_ = parser.add_argument(
-    "--no-matching", action="store_true", help="build without attempting matching"
-)
-subparsers = parser.add_subparsers(dest="command")
-
-parser_reccmp = subparsers.add_parser("reccmp", help="output reccmp output")
-parser_stackcmp = subparsers.add_parser(
-    "stackcmp", help="compare stack layout with stackcmp"
-)
-parser_datacmp = subparsers.add_parser("datacmp", help="compare globals with datacmp")
-parser_roadmap = subparsers.add_parser(
-    "roadmap", help="compare symbol locations with roadmap"
-)
-
-_ = parser_reccmp.add_argument(
-    "address",
-    nargs="?",
-    default=None,
-    help="optional function address for displaying diff",
-)
-_ = parser_reccmp.add_argument(
-    "--init",
-    action="store_true",
-    help="initialize reccmp project",
-)
-_ = parser_reccmp.add_argument(
-    "--svg", action="store_true", help="generate progress svg"
-)
-_ = parser_stackcmp.add_argument(
-    "address", help="function address for displaying stack layout"
-)
-args = parser.parse_args()
-
-
-def extract_icon(path: Path) -> Path:
-    """Extract the icon from a PE file located at path"""
-    ico_path = BUILD_DIR / path.with_suffix(".ico").name
-
-    # icoextract doesn't have an actual scripting API, so it has to be shelled out to instead.
-    # should be fine since you're running this through uv anyways which puts the venv in PATH
-    cmd = ["icoextract", str(path), ico_path]
-    _ = subprocess.check_call(cmd)
-    return ico_path
-
-
-if not EXE_PATH.exists():
-    if args.command:
-        sys.exit("th07.exe should exist when using any reccmp tools")
-    elif not args.no_icon:
-        sys.exit("th07.exe should exist when building with icon")
-
 if not shutil.which("ninja"):
     sys.exit("ninja must be installed when building")
 
 download_dx8(DX8_PATH)
 download_msvc(MSVC_PATH, VS_PATH, VC_PATH)
-install_hackery(CL_PATH, MSVC_PATH, VC_PATH)
 
 cflags = [
     "/nologo",
@@ -180,9 +119,6 @@ cflags = [
     f'/I"{conv_path(VC_PATH / "PlatformSDK" / "include")}"',
     f'/I"{conv_path(DX8_PATH / "include")}"',
 ]
-
-if args.no_matching:
-    cflags.append("/DNON_MATCHING")
 
 lflags = [
     f'/LIBPATH:"{conv_path(VC_PATH / "lib")}"',
@@ -237,12 +173,8 @@ with open("build.ninja", "w") as f:
     f.write("  description = cxx $out\n")
     f.write("  deps = msvc\n\n")
 
-    f.write("rule rc\n")
-    f.write("  command = $rc /fo$out $in\n")
-    f.write("  description = rc $out\n\n")
-
     f.write("rule link\n")
-    f.write("  command = $link $in $lflags $libs /order:@$order /OUT:$out\n")
+    f.write("  command = $link $in $lflags $libs /OUT:$out\n")
     f.write("  description = link $out\n\n")
 
     objects = []
@@ -261,87 +193,6 @@ with open("build.ninja", "w") as f:
         objects.append(obj_name)
     f.write("\n")
 
-    if not args.no_icon:
-        icon_path = extract_icon(EXE_PATH)
-        try:
-            with open("resources.rc", "x") as g:
-                g.write(f'1 ICON "{icon_path.name}"\n')
-        except FileExistsError:
-            pass
-
-        f.write("build resources.res: rc resources.rc\n\n")
-        objects.append("resources.res")
-
     f.write(f"build th07.exe: link {' '.join(objects)}\n")
-    f.write(f"  order = {conv_path(RESOURCE_DIR / 'order.txt')}\n")
 
 _ = subprocess.check_call(["ninja"])
-
-match args.command:
-    case "reccmp":
-        if args.init:
-            os.chdir(PROJ_DIR)
-            _ = subprocess.check_call(
-                ["reccmp-project", "detect", "--search-path", RESOURCE_DIR]
-            )
-            os.chdir(BUILD_DIR)
-            _ = subprocess.check_call(
-                ["reccmp-project", "detect", "--what", "recompiled"]
-            )
-        elif args.svg:
-            _ = subprocess.check_call(
-                [
-                    "reccmp-reccmp",
-                    "--target",
-                    "TH07",
-                    "--svg",
-                    RESOURCE_DIR / "progress.svg",
-                    "--svg-icon",
-                    RESOURCE_DIR / "svgicon.png",
-                    "--nolib",
-                ]
-            )
-        elif args.address:
-            _ = subprocess.check_call(
-                [
-                    "reccmp-reccmp",
-                    "--target",
-                    "TH07",
-                    "--html",
-                    "index.html",
-                    "--nolib",
-                    "--verbose",
-                    args.address,
-                ]
-            )
-        else:
-            _ = subprocess.check_call(
-                ["reccmp-reccmp", "--target", "TH07", "--html", "index.html", "--nolib"]
-            )
-    case "stackcmp":
-        _ = subprocess.call(
-            [
-                "reccmp-stackcmp",
-                "--target",
-                "TH07",
-                args.address,
-            ]
-        )
-    case "datacmp":
-        _ = subprocess.call(
-            [
-                "reccmp-datacmp",
-                "--target",
-                "TH07",
-            ]
-        )
-    case "roadmap":
-        _ = subprocess.call(
-            [
-                "reccmp-roadmap",
-                "--target",
-                "TH07",
-            ]
-        )
-    case _:
-        pass

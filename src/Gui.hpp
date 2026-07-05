@@ -76,7 +76,7 @@ struct MsgRawHeader
 
 struct GuiImplChildB
 {
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     i32 fmtArg;
     i32 isShown;
     ZunTimer timer;
@@ -143,7 +143,6 @@ struct GuiImpl
     i32 clearCherryMax;
     i32 clearGraze;
 };
-C_ASSERT(sizeof(GuiImpl) == 0x20a30);
 
 struct Gui
 {
@@ -226,5 +225,5 @@ struct Gui
     f32 bossHealthEased[8];
     u32 bossColor[8];
 };
-C_ASSERT(sizeof(Gui) == 0x94);
+
 extern Gui g_Gui;

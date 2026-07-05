@@ -1,6 +1,6 @@
 #include "EclManager.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -96,7 +96,7 @@ void EclManager::Unload()
 {
     if (this->eclFile)
     {
-        ZunMemory::Free(this->eclFile);
+        free(this->eclFile);
     }
     this->eclFile = NULL;
 }
@@ -257,7 +257,7 @@ i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
     case VAR_ANGLE_TO_PLAYER:
         return g_Player.AngleToPlayer(&enemy->position);
     case VAR_DISTANCE_FROM_PLAYER:
-        return D3DXVec3Length(&(g_Player.positionCenter - enemy->position));
+        return (g_Player.positionCenter - enemy->position).Length();
     default:
         return eclVar;
     }
@@ -475,7 +475,7 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
     case VAR_LAST_DAMAGE:
         return (f32)enemy->lastDamage;
     case VAR_DISTANCE_FROM_PLAYER:
-        return D3DXVec3Length(&(g_Player.positionCenter - enemy->position));
+        return (g_Player.positionCenter - enemy->position).Length();
     default:
         return eclVar;
     }
@@ -596,7 +596,7 @@ void EclManager::MoveDirTime(Enemy *enemy, EclRawInstr *instr)
 // FUNCTION: TH07 0x0040f8f0
 void EclManager::MovePosTime(Enemy *enemy, EclRawInstr *instr)
 {
-    D3DXVECTOR3 newPos;
+    ZunVec3 newPos;
     newPos.x = GET_FLOAT_VALUE(enemy, 2);
     newPos.y = GET_FLOAT_VALUE(enemy, 3);
     newPos.z = GET_FLOAT_VALUE(enemy, 4);
@@ -606,7 +606,7 @@ void EclManager::MovePosTime(Enemy *enemy, EclRawInstr *instr)
     enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
     enemy->interpEasing = (u8)GET_INT_VALUE(enemy, 1);
     enemy->moveMode = 2;
-    enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
     if (enemy->mirror)
     {
         enemy->moveInterp.x = -enemy->moveInterp.x;
@@ -614,7 +614,6 @@ void EclManager::MovePosTime(Enemy *enemy, EclRawInstr *instr)
 }
 
 // FUNCTION: TH07 0x0040fb30
-#pragma var_order(b, a)
 void EclManager::MathLerp(Enemy *enemy, EclInterp *interp, f32 t)
 {
     f32 a = GetFloatVarValue(enemy, interp->args[3].f);
@@ -623,7 +622,6 @@ void EclManager::MathLerp(Enemy *enemy, EclInterp *interp, f32 t)
     *GetFloatVar(enemy, &interp->args[7].f, 0, -1) = (b - a) * t + a;
 }
 
-#pragma var_order(h11, m1, h01, m0, p1, h10, h00, p0)
 // FUNCTION: TH07 0x0040fb90
 void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
 {
@@ -652,7 +650,6 @@ void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
                                                      h11 * m1;
 }
 
-#pragma var_order(i, spellcardName, catk, j, nameCsum, newCsum)
 // FUNCTION: TH07 0x0040fc90
 void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
 {
@@ -749,7 +746,6 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-#pragma var_order(score, catk, i, nameCsum, newCsum, j)
 // FUNCTION: TH07 0x004101a0
 void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
 {
@@ -848,12 +844,6 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
     g_Stage.spellCardState = 0;
 }
 
-#pragma var_order(local_8, instr, lerpDelta, interpIdx, interp, bulletInstrArgs,                              \
-                  bulletProps, bulletCommand, laserProps, laserInstrArgs, laserIdx, effectInstrArgs,          \
-                  exitAngle, healthIdx, bossIdx, particleVel, numDrops, itemDropIdx,                          \
-                  itemDropPos, numPointItems, pointItemIdx, pointItemPos, unusedEnemyAbs, absSpawnInstrArgs,  \
-                  absEnemySpawnPos, unusedEnemyRel, relSpawnInstrArgs, relEnemySpawnPos, local_d8, unused_e4, \
-                  t1, anmDirection, interpIdx2, t2, local_f8, interp2)
 // FUNCTION: TH07 0x00410520
 ZunResult EclManager::RunEcl(Enemy *enemy)
 {
@@ -863,21 +853,21 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
     i32 interpIdx2;
     u32 anmDirection;
     f32 t1;
-    D3DXVECTOR3 unused_e4;
-    D3DXVECTOR3 local_d8;
-    D3DXVECTOR3 relEnemySpawnPos;
+    ZunVec3 unused_e4;
+    ZunVec3 local_d8;
+    ZunVec3 relEnemySpawnPos;
     AnyArg relSpawnInstrArgs[7];
     Enemy *unusedEnemyRel;
-    D3DXVECTOR3 absEnemySpawnPos;
+    ZunVec3 absEnemySpawnPos;
     AnyArg absSpawnInstrArgs[7];
     Enemy *unusedEnemyAbs;
-    D3DXVECTOR3 pointItemPos;
+    ZunVec3 pointItemPos;
     i32 pointItemIdx;
     i32 numPointItems;
-    D3DXVECTOR3 itemDropPos;
+    ZunVec3 itemDropPos;
     i32 itemDropIdx;
     i32 numDrops;
-    D3DXVECTOR3 particleVel;
+    ZunVec3 particleVel;
     i32 bossIdx;
     i32 healthIdx;
     f32 exitAngle;
@@ -1528,7 +1518,7 @@ restart:
                 effectInstrArgs = instr->args;
                 enemy->effects[enemy->effectsNum] = g_EffectManager.SpawnParticles(
                     13, &enemy->position, 1, g_BulletColor[effectInstrArgs->i]);
-                enemy->effects[enemy->effectsNum]->direction = *(D3DXVECTOR3 *)&effectInstrArgs[1];
+                enemy->effects[enemy->effectsNum]->direction = *(ZunVec3 *)&effectInstrArgs[1];
                 enemy->effectDistance = effectInstrArgs[4].f;
                 enemy->effectsNum++;
                 break;
@@ -1767,8 +1757,8 @@ restart:
                 for (itemDropIdx = 0; itemDropIdx < numDrops; itemDropIdx++)
                 {
                     itemDropPos = enemy->position;
-                    itemDropPos[0] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
-                    itemDropPos[1] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    itemDropPos.x += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    itemDropPos.y += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     if ((i32)g_GameManager.globals->currentPower < 128)
                     {
                         g_ItemManager.SpawnItem(&itemDropPos,
@@ -1785,8 +1775,8 @@ restart:
                 for (pointItemIdx = 0; pointItemIdx < numPointItems; pointItemIdx++)
                 {
                     pointItemPos = enemy->position;
-                    pointItemPos[0] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
-                    pointItemPos[1] += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    pointItemPos.x += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
+                    pointItemPos.y += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     g_ItemManager.SpawnItem(&pointItemPos, ITEM_POINT, 0);
                 }
                 break;
@@ -2085,7 +2075,7 @@ restart:
                 {
                     enemy->moveMode = 0;
                     enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
-                    enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
                 }
                 break;
             }
@@ -2170,7 +2160,7 @@ restart:
                 }
                 local_f8 = false;
                 interp2 = enemy->currentContext.interps;
-                D3DXVECTOR3 local_104 = enemy->position;
+                ZunVec3 local_104 = enemy->position;
                 for (interpIdx2 = 0; interpIdx2 < 8; interpIdx2++, interp2++)
                 {
                     if (interp2->fn)

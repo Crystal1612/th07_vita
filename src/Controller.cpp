@@ -70,7 +70,6 @@ u32 Controller::SetButtonFromControllerInputs(u16 *outButtons,
     return (inputButtons & mask) != 0 ? (u16)touhouButton : 0;
 }
 
-#pragma var_order(pji, distance, DVar1, DVar2, hr, js, retryCount)
 // FUNCTION: TH07 0x004303f0
 u16 Controller::GetControllerInput(u16 buttons)
 {
@@ -264,8 +263,6 @@ u16 Controller::GetControllerInput(u16 buttons)
 // GLOBAL: TH07 0x0135e218
 static u8 g_ControllerData[32 * 4];
 
-#pragma var_order(joyinfoex, joyButtonBit, joyButtonIndex, hr, dijoystate2, \
-                  diRetryCount)
 // FUNCTION: TH07 0x004309c0
 u8 *Controller::GetControllerState()
 {
@@ -318,10 +315,9 @@ u8 *Controller::GetControllerState()
         }
         else
         {
-            g_Supervisor.controller->GetDeviceState(sizeof(DIJOYSTATE2),
-                                                    &dijoystate2);
-            // ZUN landmine: hr holds the result of Poll, not GetDeviceState
-            if (FAILED(hr))
+            if (FAILED(hr = g_Supervisor.controller->GetDeviceState(
+                           sizeof(DIJOYSTATE2),
+                           &dijoystate2)))
             {
                 return g_ControllerData;
             }

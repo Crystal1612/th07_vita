@@ -1,6 +1,6 @@
 #include "Gui.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -77,7 +77,7 @@ i32 Gui::IsDialogueSkippable()
 // FUNCTION: TH07 0x00427bf8
 void Gui::ShowBonusScore(i32 score)
 {
-    this->impl->bonusScore.pos = D3DXVECTOR3(416.0f, 48.0f, 0.0f);
+    this->impl->bonusScore.pos = ZunVec3(416.0f, 48.0f, 0.0f);
     this->impl->bonusScore.isShown = 1;
     this->impl->bonusScore.timer = 0;
     this->impl->bonusScore.fmtArg = score;
@@ -87,7 +87,7 @@ void Gui::ShowBonusScore(i32 score)
 // FUNCTION: TH07 0x00427c81
 void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 {
-    this->impl->fullPowerMode.pos = D3DXVECTOR3(416.0f, 168.0f, 0.0f);
+    this->impl->fullPowerMode.pos = ZunVec3(416.0f, 168.0f, 0.0f);
     this->impl->fullPowerMode.isShown = isShown;
     this->impl->fullPowerMode.timer = 0;
     this->impl->fullPowerMode.fmtArg = fmtArg;
@@ -97,7 +97,7 @@ void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 // FUNCTION: TH07 0x00427d09
 void Gui::ShowSpellcardBonus(i32 fmtArg)
 {
-    this->impl->spellCardBonus.pos = D3DXVECTOR3(224.0f, 16.0f, 0.0f);
+    this->impl->spellCardBonus.pos = ZunVec3(224.0f, 16.0f, 0.0f);
     this->impl->spellCardBonus.isShown = 1;
     this->impl->spellCardBonus.timer = 0;
     this->impl->spellCardBonus.fmtArg = fmtArg;
@@ -149,12 +149,11 @@ u32 Gui::OnUpdate(Gui *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(stringPos, fmtArg)
 // FUNCTION: TH07 0x00427f22
 u32 Gui::OnDraw(Gui *arg)
 {
     char fmtArg[32];
-    D3DXVECTOR3 stringPos;
+    ZunVec3 stringPos;
 
     g_AnmManager->offset.y = 0.0f;
     g_AnmManager->offset.x = 0.0f;
@@ -397,7 +396,6 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
     g_Supervisor.renderSkipFrames = 2;
 }
 
-#pragma var_order(i, j, k)
 // FUNCTION: TH07 0x00428b19
 ZunResult Gui::ActualAddedCallback()
 {
@@ -1020,7 +1018,6 @@ ZunResult GuiImpl::RunMsg()
                     goto SKIP_TIME_INCREMENT;
                 }
 
-                UselessStack::FourBytes();
                 g_AnmManager->InitializeAndSetActiveSprite(&this->stageClearBonusTextVm, 268);
                 this->transitionToScoreScreen = 1;
                 this->msg.currentMsgIdx = -2;
@@ -1090,11 +1087,10 @@ SKIP_TIME_INCREMENT:
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(height, dialogueBg, oldPos)
 // FUNCTION: TH07 0x0042a876
 ZunResult GuiImpl::DrawDialogue()
 {
-    D3DXVECTOR3 oldPos;
+    ZunVec3 oldPos;
     f32 height;
 
     if (this->msg.currentMsgIdx < 0)
@@ -1120,10 +1116,10 @@ ZunResult GuiImpl::DrawDialogue()
     }
 
     VertexDiffuseXyzrhw dialogueBg[4];
-    dialogueBg[0].pos = D3DXVECTOR3(g_GameManager.arcadeRegionTopLeftPos.x + 16.0f, 384.0f, 0.0f);
-    dialogueBg[1].pos = D3DXVECTOR3(g_GameManager.arcadeRegionTopLeftPos.x + 384.0f - 16.0f, 384.0f, 0.0f);
-    dialogueBg[2].pos = D3DXVECTOR3(g_GameManager.arcadeRegionTopLeftPos.x + 16.0f, 384.0f + height, 0.0f);
-    dialogueBg[3].pos = D3DXVECTOR3(g_GameManager.arcadeRegionTopLeftPos.x + 384.0f - 16.0f, 384.0f + height, 0.0f);
+    dialogueBg[0].pos = ZunVec3(g_GameManager.arcadeRegionTopLeftPos.x + 16.0f, 384.0f, 0.0f);
+    dialogueBg[1].pos = ZunVec3(g_GameManager.arcadeRegionTopLeftPos.x + 384.0f - 16.0f, 384.0f, 0.0f);
+    dialogueBg[2].pos = ZunVec3(g_GameManager.arcadeRegionTopLeftPos.x + 16.0f, 384.0f + height, 0.0f);
+    dialogueBg[3].pos = ZunVec3(g_GameManager.arcadeRegionTopLeftPos.x + 384.0f - 16.0f, 384.0f + height, 0.0f);
     dialogueBg[0].diffuse.color = dialogueBg[1].diffuse.color = 0xd0000000;
     dialogueBg[2].diffuse.color = dialogueBg[3].diffuse.color = 0x90000000;
     dialogueBg[0].w = dialogueBg[1].w = dialogueBg[2].w = dialogueBg[3].w = 1.0f;
@@ -1193,7 +1189,6 @@ i32 Gui::HasCurrentMsgIdx()
            this->impl->msg.currentMsgIdx == -2;
 }
 
-#pragma var_order(activeTransitionQuads, i, scoreBonus)
 // FUNCTION: TH07 0x0042adab
 void Gui::UpdateGui()
 {
@@ -1401,30 +1396,15 @@ void Gui::UpdateGui()
         }
         this->impl->stageClearBonus = scoreBonus;
 
-        // ZUN bloat:
-        // To add the score, in full without divide
-        // It would be simple if we multiplied
-        // But ZUN said "we must copy paste ten times"
-        // And so we got whatever the hell this is. Perchance
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
-        g_GameManager.AddScore(scoreBonus);
+        g_GameManager.AddScore(scoreBonus * 10);
         this->impl->finishedStage++;
     }
 }
 
-#pragma var_order(y, x, i, vm, textDrawPos)
 // FUNCTION: TH07 0x0042b603
 void Gui::DrawGameScene()
 {
-    D3DXVECTOR3 textDrawPos;
+    ZunVec3 textDrawPos;
     AnmVm *vm;
     i32 i;
     f32 x;
@@ -1443,23 +1423,23 @@ void Gui::DrawGameScene()
     {
         for (y = 0.0f; y < 464.0f; y = y + 32.0f)
         {
-            vm->pos = D3DXVECTOR3(0.0f, y, 0.49f);
+            vm->pos = ZunVec3(0.0f, y, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         for (x = 416.0f; x < 624.0f; x = x + 32.0f)
         {
             for (y = 16.0f; y < 464.0f; y = y + 32.0f)
             {
-                vm->pos = D3DXVECTOR3(x, y, 0.49f);
+                vm->pos = ZunVec3(x, y, 0.49f);
                 g_AnmManager->DrawNoRotation(vm);
             }
         }
         vm = &this->impl->vms0[13];
         for (x = 0.0f; x < 624.0f; x = x + 128.0f)
         {
-            vm->pos = D3DXVECTOR3(x, 0.0f, 0.49f);
+            vm->pos = ZunVec3(x, 0.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
-            vm->pos = D3DXVECTOR3(x, 464.0f, 0.49f);
+            vm->pos = ZunVec3(x, 464.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         g_AnmManager->DrawNoRotation(this->impl->vms0);
@@ -1481,36 +1461,36 @@ void Gui::DrawGameScene()
     {
         vm = &this->impl->vms0[13];
         x = 496.0f;
-        vm->pos = D3DXVECTOR3(x, 48.0f, 0.49f);
+        vm->pos = ZunVec3(x, 48.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
-        vm->pos = D3DXVECTOR3(x, 64.0f, 0.49f);
+        vm->pos = ZunVec3(x, 64.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
         if (this->showLives)
         {
-            vm->pos = D3DXVECTOR3(x, 96.0f, 0.48f);
+            vm->pos = ZunVec3(x, 96.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->showBombs)
         {
-            vm->pos = D3DXVECTOR3(x, 112.0f, 0.48f);
+            vm->pos = ZunVec3(x, 112.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->showPower)
         {
-            vm->pos = D3DXVECTOR3(x, 144.0f, 0.48f);
+            vm->pos = ZunVec3(x, 144.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->showGraze)
         {
-            vm->pos = D3DXVECTOR3(x, 160.0f, 0.48f);
+            vm->pos = ZunVec3(x, 160.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->showPoint)
         {
-            vm->pos = D3DXVECTOR3(x, 176.0f, 0.48f);
+            vm->pos = ZunVec3(x, 176.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        vm->pos = D3DXVECTOR3(512.0f, 464.0f, 0.48f);
+        vm->pos = ZunVec3(512.0f, 464.0f, 0.48f);
         g_AnmManager->DrawNoRotation(vm);
     }
     if (this->showLives)
@@ -1520,7 +1500,7 @@ void Gui::DrawGameScene()
              i < (i32)g_GameManager.globals->livesRemaining;
              i++, x += 16.0f)
         {
-            vm->pos = D3DXVECTOR3(x, 96.0f, 0.46f);
+            vm->pos = ZunVec3(x, 96.0f, 0.46f);
             g_AnmManager->DrawNoRotation(vm);
         }
     }
@@ -1531,14 +1511,14 @@ void Gui::DrawGameScene()
              i < (i32)g_GameManager.globals->bombsRemaining;
              i++, x += 16.0f)
         {
-            vm->pos = D3DXVECTOR3(x, 112.0f, 0.46f);
+            vm->pos = ZunVec3(x, 112.0f, 0.46f);
             g_AnmManager->DrawNoRotation(vm);
         }
     }
     vm = &this->impl->vms0[13];
     for (x = 32.0f; x < 368.0f; x = x + 128.0f)
     {
-        vm->pos = D3DXVECTOR3(x, 464.0f, 0.49f);
+        vm->pos = ZunVec3(x, 464.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
     }
     textDrawPos.x = 496.0f;
@@ -1564,7 +1544,7 @@ void Gui::DrawGameScene()
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
     }
-    textDrawPos = D3DXVECTOR3(496.0f, 48.0f, 0.0f);
+    textDrawPos = ZunVec3(496.0f, 48.0f, 0.0f);
     if (g_GameManager.globals->highScore < 100000000)
     {
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%.8d",
@@ -1590,14 +1570,14 @@ void Gui::DrawGameScene()
     if (this->showGraze ||
         (g_Supervisor.cfg.opts >> 4 & 1) != 0)
     {
-        textDrawPos = D3DXVECTOR3(496.0f, 160.0f, 0.0f);
+        textDrawPos = ZunVec3(496.0f, 160.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d",
                                     g_GameManager.globals->grazeInTotal);
     }
     if (this->showPoint ||
         (g_Supervisor.cfg.opts >> 4 & 1) != 0)
     {
-        textDrawPos = D3DXVECTOR3(496.0f, 176.0f, 0.0f);
+        textDrawPos = ZunVec3(496.0f, 176.0f, 0.0f);
         AsciiManager::AddFormatText(
             &g_AsciiManager, &textDrawPos, "%d/%d",
             g_GameManager.globals->pointItemsCollectedForExtend,
@@ -1611,11 +1591,11 @@ void Gui::DrawGameScene()
 
         if (0 < (i32)g_GameManager.globals->currentPower)
         {
-            powerBarVerts[0].pos = D3DXVECTOR3(496.0f, 144.0f, 0.1f);
+            powerBarVerts[0].pos = ZunVec3(496.0f, 144.0f, 0.1f);
             powerBarVerts[1].pos =
-                D3DXVECTOR3((f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 144.0f, 0.1f);
-            powerBarVerts[2].pos = D3DXVECTOR3(496.0f, 160.0f, 0.1f);
-            powerBarVerts[3].pos = D3DXVECTOR3((f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 160.0f, 0.1f);
+                ZunVec3((f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 144.0f, 0.1f);
+            powerBarVerts[2].pos = ZunVec3(496.0f, 160.0f, 0.1f);
+            powerBarVerts[3].pos = ZunVec3((f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 160.0f, 0.1f);
             powerBarVerts[0].diffuse.color = powerBarVerts[2].diffuse.color = 0xe0e0e0ff;
             powerBarVerts[1].diffuse.color = powerBarVerts[3].diffuse.color = 0x80e0e0ff;
 
@@ -1646,17 +1626,18 @@ void Gui::DrawGameScene()
             g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
             g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
         }
+
+        ZunVec3 pos;
         if ((i32)g_GameManager.globals->currentPower < 128)
         {
-            AsciiManager::AddFormatText(&g_AsciiManager,
-                                        &D3DXVECTOR3(496.0f, 144.0f, 0.0f),
-                                        "%d",
+            pos = ZunVec3(496.0f, 144.0f, 0.0f);
+            AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%d",
                                         (i32)g_GameManager.globals->currentPower);
         }
         else
         {
-            AsciiManager::AddFormatText(&g_AsciiManager,
-                                        &D3DXVECTOR3(496.0f, 144.0f, 0.0f), "MAX");
+            pos = ZunVec3(496.0f, 144.0f, 0.0f);
+            AsciiManager::AddFormatText(&g_AsciiManager, &pos, "MAX");
         }
     }
     if (this->showLives)
@@ -1677,13 +1658,10 @@ void Gui::DrawGameScene()
     }
 }
 
-#pragma var_order(i, oldPos, remainingBonus, catk, digit, digitDivisor, leadingZeroSkipped,        \
-                  color2, color1, healthBarRect, secondsRemaining, j, segmentEndHealth, timeColor, \
-                  markerGap, timerPos)
 // FUNCTION: TH07 0x0042c577
 void Gui::DrawStageElements()
 {
-    D3DXVECTOR3 timerPos;
+    ZunVec3 timerPos;
     i32 markerGap;
     D3DCOLOR timeColor;
     f32 segmentEndHealth;
@@ -1697,7 +1675,7 @@ void Gui::DrawStageElements()
     i32 digit;
     Catk *catk;
     i32 remainingBonus;
-    D3DXVECTOR3 oldPos;
+    ZunVec3 oldPos;
     i32 i;
 
     for (i = 0; i < 5; i++)
@@ -1800,7 +1778,7 @@ void Gui::DrawStageElements()
         g_AnmManager->DrawNoRotation(&this->impl->stageTransitionSnapshotVm);
         if (this->impl->stageClearBonusTextVm.activeSpriteIdx >= 0)
         {
-            this->impl->stageClearBonusTextVm.pos = D3DXVECTOR3(304.0f, 448.0f, 0.0f);
+            this->impl->stageClearBonusTextVm.pos = ZunVec3(304.0f, 448.0f, 0.0f);
             g_AnmManager->DrawNoRotation(&this->impl->stageClearBonusTextVm);
         }
     }
@@ -1864,7 +1842,7 @@ void Gui::DrawStageElements()
             color2 = this->bossHealthBarAlpha << 24 | 0x202020;
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }
-        timerPos = D3DXVECTOR3(384.0f, 16.0f, 0.0f);
+        timerPos = ZunVec3(384.0f, 16.0f, 0.0f);
         if (this->spellcardSecondsRemaining >= 20)
         {
             timeColor = g_SpellcardTimeColors[0];

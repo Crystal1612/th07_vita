@@ -5,6 +5,7 @@
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
 #include "dxutil.hpp"
+#include <cstdio>
 
 // GLOBAL: TH07 0x0049ea88
 SoundBufferIdxVolume SOUND_BUFFER_IDX_VOL[38] = {
@@ -87,14 +88,13 @@ SoundPlayer::SoundPlayer()
     }
 }
 
-#pragma var_order(bufdesc, audioBuffer2Start, audioBuffer2Len, audioBuffer1Len, audioBuffer1Start, wavFormat)
 // FUNCTION: TH07 0x0044b560
 ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
 {
     WAVEFORMATEX wavFormat;
     LPVOID audioBuffer1Start;
-    DWORD audioBuffer1Len;
-    DWORD audioBuffer2Len;
+    u32 audioBuffer1Len;
+    u32 audioBuffer2Len;
     LPVOID audioBuffer2Start;
     DSBUFFERDESC bufdesc;
 
@@ -134,8 +134,8 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     }
 
     if (FAILED(this->initSoundBuffer->Lock(
-            0, 0x8000, &audioBuffer1Start, &audioBuffer1Len,
-            &audioBuffer2Start, &audioBuffer2Len, 0)))
+            0, 0x8000, &audioBuffer1Start, (LPDWORD)&audioBuffer1Len,
+            &audioBuffer2Start, (LPDWORD)&audioBuffer2Len, 0)))
     {
         return ZUN_ERROR;
     }
@@ -179,7 +179,7 @@ ZunResult SoundPlayer::Release()
     }
     if (this->bgmFmtData)
     {
-        ZunMemory::Free(this->bgmFmtData);
+        free(this->bgmFmtData);
     }
     return ZUN_SUCCESS;
 }
@@ -203,7 +203,6 @@ WAVEFORMATEX *SoundPlayer::GetWavFormatData(u8 *soundData,
     return NULL;
 }
 
-#pragma var_order(local_8, local_c, local_8c)
 // FUNCTION: TH07 0x0044baf0
 i32 SoundPlayer::GetFmtIndexByName(const char *param_1)
 {
@@ -240,16 +239,14 @@ i32 SoundPlayer::GetFmtIndexByName(const char *param_1)
     return local_c;
 }
 
-#pragma var_order(cursor, dsBuffer, wavDataPtr, formatSize, audioPtr2, audioSize2, \
-                  audioSize1, audioPtr1, soundFileDat, wavData, fileSize)
 // FUNCTION: TH07 0x0044bd00
 ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
 {
     u8 *soundFileDat;
     WAVEFORMATEX wavData;
     WAVEFORMATEX *audioPtr1;
-    DWORD audioSize1;
-    DWORD audioSize2;
+    u32 audioSize1;
+    u32 audioSize2;
     WAVEFORMATEX *audioPtr2;
     i32 formatSize;
     WAVEFORMATEX *wavDataPtr;
@@ -325,8 +322,8 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
     }
 
     if (FAILED(this->soundBuffers[idx]->Lock(
-            0, formatSize, (LPVOID *)&audioPtr1, &audioSize1,
-            (LPVOID *)&audioPtr2, &audioSize2, 0)))
+            0, formatSize, (LPVOID *)&audioPtr1, (LPDWORD)&audioSize1,
+            (LPVOID *)&audioPtr2, (LPDWORD)&audioSize2, 0)))
     {
         free(soundFileDat);
         return ZUN_ERROR;
@@ -350,15 +347,14 @@ ZunResult SoundPlayer::LoadFmt(const char *param_1)
     return this->bgmFmtData != NULL ? ZUN_SUCCESS : ZUN_ERROR;
 }
 
-#pragma var_order(notifySize, pzwf, hr, samplesPerSec, blockAlign)
 // FUNCTION: TH07 0x0044c020
 ZunResult SoundPlayer::StartBGM(const char *path)
 {
-    DWORD blockAlign;
-    DWORD samplesPerSec;
+    u32 blockAlign;
+    u32 samplesPerSec;
     HRESULT hr;
     ThBgmFormat *pzwf;
-    DWORD notifySize;
+    u32 notifySize;
 
     strcpy(this->bgmArchivePath, path);
     if (!this->manager)
@@ -382,7 +378,7 @@ ZunResult SoundPlayer::StartBGM(const char *path)
     this->backgroundMusicUpdateEvent = CreateEventA(NULL, 0, 0, NULL);
     this->backgroundMusicThreadHandle = CreateThread(
         NULL, 0, BackgroundMusicPlayerThread, g_Supervisor.hwndGameWindow, 0,
-        &this->backgroundMusicThreadId);
+        (LPDWORD)&this->backgroundMusicThreadId);
     if (FAILED(hr = this->manager->CreateStreaming(
                    &this->backgroundMusic, path,
                    DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLPOSITIONNOTIFY,
@@ -413,13 +409,12 @@ ZunResult SoundPlayer::ReopenBGM(const char *name)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(fmtIdx, bytesRead, handle, lpBuffer)
 // FUNCTION: TH07 0x0044c220
 ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
 {
     LPBYTE lpBuffer;
-    HANDLE handle;
-    DWORD bytesRead;
+    FILE *file;
+    u32 bytesRead;
     i32 fmtIdx;
 
     if (this->bgmPreloadData[idx])
@@ -443,9 +438,8 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
     SAFE_FREE(this->bgmPreloadData[idx]);
     // STRING: TH07 0x00495f38
     DebugPrint("Streming BGM PreLoad %d\r\n", idx);
-    handle = CreateFileA(this->bgmArchivePath, GENERIC_READ, 1, NULL, 3,
-                         FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-    if (handle == INVALID_HANDLE_VALUE)
+    file = fopen(this->bgmArchivePath, "rb");
+    if (!file)
     {
         // STRING: TH07 0x00495f14
         DebugPrint("error : bgmfile is not find %s\r\n", this->bgmArchivePath);
@@ -453,18 +447,17 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
     }
 
     fmtIdx = GetFmtIndexByName(path);
-    SetFilePointer(handle, this->bgmFmtData[fmtIdx].startOffset, NULL, 0);
-    lpBuffer = (LPBYTE)ZunMemory::Alloc(this->bgmFmtData[fmtIdx].preloadAllocSize);
+    fseek(file, this->bgmFmtData[fmtIdx].startOffset, SEEK_SET);
+    lpBuffer = (LPBYTE)malloc(this->bgmFmtData[fmtIdx].preloadAllocSize);
     if (!lpBuffer)
     {
-        CloseHandle(handle);
+        fclose(file);
         DebugPrint("error : bgmfile is not find %s\r\n", this->bgmArchivePath);
         return ZUN_ERROR;
     }
 
-    ReadFile(handle, lpBuffer, this->bgmFmtData[fmtIdx].preloadAllocSize,
-             &bytesRead, NULL);
-    CloseHandle(handle);
+    fread(lpBuffer, this->bgmFmtData[fmtIdx].preloadAllocSize, 1, file);
+    fclose(file);
     this->bgmPreloadFmtData[idx] = this->bgmFmtData + fmtIdx;
     this->bgmPreloadData[idx] = lpBuffer;
     this->bgmPreloadDataCursor[idx] = lpBuffer;
@@ -473,14 +466,13 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(notifySize, hr, samplesPerSec, blockAlign)
 // FUNCTION: TH07 0x0044c4d0
 ZunResult SoundPlayer::LoadBGM(i32 idx)
 {
-    DWORD blockAlign;
-    DWORD samplesPerSec;
+    u32 blockAlign;
+    u32 samplesPerSec;
     HRESULT hr;
-    DWORD notifySize;
+    u32 notifySize;
 
     if (!this->manager)
     {
@@ -516,7 +508,7 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
     this->backgroundMusicUpdateEvent = CreateEventA(NULL, 0, 0, NULL);
     this->backgroundMusicThreadHandle = CreateThread(
         NULL, 0, BackgroundMusicPlayerThread, g_Supervisor.hwndGameWindow, 0,
-        &this->backgroundMusicThreadId);
+        (LPDWORD)&this->backgroundMusicThreadId);
     if (FAILED(hr = this->manager->CreateStreamingFromMemory(
                    &this->backgroundMusic, this->bgmPreloadDataCursor[idx],
                    this->bgmPreloadAllocSizes[idx], this->bgmPreloadFmtData[idx],
@@ -631,7 +623,6 @@ void SoundPlayer::PlaySoundByIdx(i32 idx, u32 param_2)
     this->unusedSoundVolRelated[idx] = iVar1;
 }
 
-#pragma var_order(loopAgain, i, commandCursor, curSound, buffer, name, fmtIdx, buffer2)
 // FUNCTION: TH07 0x0044c9c0
 i32 SoundPlayer::ProcessQueues()
 {
@@ -927,18 +918,14 @@ loop_breakout:
     }
 }
 
-#pragma var_order(msg, looped, lpThreadParameterCopy, waitObj, hr, stopped)
 // FUNCTION: TH07 0x0044d200
 DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParameter)
 {
     u32 stopped;
-    HRESULT hr;
-    DWORD waitObj;
-    LPVOID lpThreadParameterCopy;
+    u32 waitObj;
     u32 looped;
     MSG msg;
 
-    lpThreadParameterCopy = lpThreadParameter;
     stopped = false;
     looped = true;
     while (!stopped)
@@ -959,7 +946,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
                 g_SoundPlayer.backgroundMusic->m_bIsPlaying)
             {
                 g_SoundPlayer.backgroundMusic->m_bIsLocked = 1;
-                hr = g_SoundPlayer.backgroundMusic->HandleWaveStreamNotification(looped);
+                g_SoundPlayer.backgroundMusic->HandleWaveStreamNotification(looped);
                 g_SoundPlayer.backgroundMusic->m_bIsLocked = 0;
             }
             break;

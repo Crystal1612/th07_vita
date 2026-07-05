@@ -2,9 +2,8 @@
 
 #include <d3d8.h>
 #include <direct.h>
-#include <io.h>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 typedef __w64 long SHANDLE_PTR; // i dont know anymore bro
 
@@ -91,7 +90,6 @@ LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
     return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 }
 
-#pragma var_order(i, snapshotPath)
 // FUNCTION: TH07 0x004345c0
 void GameWindow::Present()
 {
@@ -130,7 +128,6 @@ void GameWindow::Present()
     }
 }
 
-#pragma var_order(chainRes, perfCounter, perfDiff, curTime, timeDiff)
 // FUNCTION: TH07 0x004346e0
 RenderResult GameWindow::Render()
 {
@@ -319,15 +316,12 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     return false;
 }
 
-#pragma var_order(retryWithoutRefreshRate, usingD3dHal, displayMode, presentParams, halfCameraDistance, \
-                  halfHeight, halfWidth, aspectRatio, fov, capsBuffer, pUp,                             \
-                  pAt, pEye)
 // FUNCTION: TH07 0x00434bd0
 i32 GameWindow::InitD3dRendering()
 {
-    D3DXVECTOR3 pEye;
-    D3DXVECTOR3 pAt;
-    D3DXVECTOR3 pUp;
+    ZunVec3 pEye;
+    ZunVec3 pAt;
+    ZunVec3 pUp;
     char capsBuffer[8192];
     f32 fov;
     f32 aspectRatio;
@@ -505,14 +499,13 @@ i32 GameWindow::InitD3dRendering()
     pEye.x = halfWidth;
     pEye.y = -halfHeight;
     pEye.z = -halfCameraDistance;
-    D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix, &pEye, &pAt, &pUp);
-    D3DXMatrixPerspectiveFovLH(&g_Supervisor.projectionMatrix, fov,
-                               aspectRatio, 100.0f, 10000.0f);
+    g_Supervisor.viewMatrix.LookAtLH(&pEye, &pAt, &pUp);
+    g_Supervisor.projectionMatrix.PerspectiveFovLH(fov, aspectRatio, 100.0f, 10000.0f);
 
     g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW,
-                                         &g_Supervisor.viewMatrix);
+                                         g_Supervisor.viewMatrix.asD3DX());
     g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
-                                         &g_Supervisor.projectionMatrix);
+                                         g_Supervisor.projectionMatrix.asD3DX());
     g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
     if ((g_Supervisor.cfg.opts & 1) == 0 &&
@@ -556,7 +549,7 @@ i32 GameWindow::InitD3dRendering()
 char *GameWindow::FormatCapability(const char *capabilityName,
                                    u32 capabilityFlags, u32 mask, char *buf)
 {
-    buf += sprintf(buf, capabilityName);
+    buf += sprintf(buf, "%s", capabilityName);
     if ((capabilityFlags & mask) == 0)
     {
         // STRING: TH07 0x004978a4
@@ -689,7 +682,7 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
     // STRING: TH07 0x00497404
     strPos += sprintf(strPos, "　-- テクスチャ能力 ---------------------------\r\n");
     // STRING: TH07 0x004973e0
-    strPos += sprintf(strPos, "　最大テクスチャサイズ : (%d, %d)\r\n",
+    strPos += sprintf(strPos, "　最大テクスチャサイズ : (%lu, %lu)\r\n",
                       caps->MaxTextureWidth, caps->MaxTextureHeight);
     // STRING: TH07 0x004973c8
     strPos = FormatCapability("　α付きテクスチャ : ", caps->TextureCaps,
@@ -744,15 +737,15 @@ void GameWindow::ResetRenderState()
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, 0);
     }
     f32 fogDensity = 1.0f;
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)&fogDensity);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGDENSITY, *(u32 *)&fogDensity);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGTABLEMODE, 0);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGVERTEXMODE, 3);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGCOLOR, 0xffa0a0a0);
 
     f32 fog = 1000.0f;
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD *)&fog);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGSTART, *(u32 *)&fog);
     fog = 5000.0f;
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGEND, *(DWORD *)&fog);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGEND, *(u32 *)&fog);
     if ((g_Supervisor.d3dCaps.RasterCaps | 0x1000) != 0)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_EDGEANTIALIAS, 0);
@@ -811,7 +804,6 @@ void GameWindow::ResetRenderState()
     g_Stage.renderStateWasReset = 1;
 }
 
-#pragma var_order(exePath, startupInfo, resolvedPath, ext)
 // FUNCTION: TH07 0x00435bd0
 ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
 {
@@ -868,13 +860,12 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(processId, param, idAttachTo)
 // FUNCTION: TH07 0x00435e30
 void GameWindow::SetWindowActive(HWND window)
 {
-    DWORD idAttachTo;
+    u32 idAttachTo;
     void *param;
-    DWORD processId;
+    u32 processId;
 
     idAttachTo = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
     processId = GetWindowThreadProcessId(window, NULL);
@@ -882,25 +873,11 @@ void GameWindow::SetWindowActive(HWND window)
     SystemParametersInfoA(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &param, 0);
     SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, 0);
 
-    // ZUN landmine: ZUN here opts to use SetActiveWindow to bring input focus
-    // onto the game window rather than SetForegroundWindow. This is quite
-    // unusual since it's intended to be used only for already foregrounded
-    // windows, which might not always be the case if the application decides
-    // to launch in the background.
-    // This normally works fine since applications do launch in the foreground,
-    // but for some reason on Wine it doesn't work at all, leading to broken
-    // input.
-    // This is fixed when you use vpatch btw
-#ifdef NON_MATCHING
     SetForegroundWindow(window);
-#else
-    SetActiveWindow(window);
-#endif
     SystemParametersInfoA(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, &param, 0);
     AttachThreadInput(processId, idAttachTo, 0);
 }
 
-#pragma var_order(filename, i, dataCursor, checksum, dataBase)
 // FUNCTION: TH07 0x00435ec0
 i32 GameWindow::ChecksumExecutable()
 {
@@ -934,7 +911,6 @@ i32 GameWindow::ChecksumExecutable()
     return -1;
 }
 
-#pragma var_order(hr, ret, psl, ppf, wPath, wfd)
 // FUNCTION: TH07 0x00435fc0
 i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
                           i32 maxPathLen)

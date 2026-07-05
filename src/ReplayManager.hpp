@@ -30,7 +30,6 @@ struct StageReplayData
     i32 unused_28;
     ReplayDataInput replayInputs[115189];
 };
-C_ASSERT(sizeof(StageReplayData) == 0x70800);
 
 union StageReplayDataUnion {
     StageReplayData *data;
@@ -52,7 +51,6 @@ struct ReplayHeader
     StageReplayDataUnion stageReplayData[7];
     StageReplayDataUnion stageEndData[7];
 };
-C_ASSERT(sizeof(ReplayHeader) == 0x54);
 
 struct ReplayData
 {
@@ -76,14 +74,12 @@ struct ReplayData
     i16 versionChar2;
     // pad 3
 };
-C_ASSERT(sizeof(ReplayData) == 0x94);
 
 struct ReplayFile
 {
     ReplayHeader head;
     ReplayData data;
 };
-C_ASSERT(sizeof(ReplayFile) == 0xe8);
 
 struct ReplayManager
 {
@@ -137,5 +133,5 @@ struct ReplayManager
     u16 rngSeed;
     u16 replayEventFlags;
 };
-C_ASSERT(sizeof(ReplayManager) == 0xd8);
+
 extern ReplayManager *g_ReplayManager;

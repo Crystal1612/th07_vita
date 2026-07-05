@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string.h>
+#include <cstring>
 
 #include "AnmVm.hpp"
 #include "Chain.hpp"
@@ -16,7 +16,6 @@ struct TrackDescriptor
     char title[66];
     char description[8][66];
 };
-C_ASSERT(sizeof(TrackDescriptor) == 0x292);
 
 struct MusicRoom
 {
@@ -48,4 +47,3 @@ struct MusicRoom
     AnmVm titleSprites[31];
     AnmVm descriptionSprites[8];
 };
-C_ASSERT(sizeof(MusicRoom) == 0x5c04);

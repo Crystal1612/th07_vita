@@ -1,6 +1,8 @@
 #include "GameErrorContext.hpp"
 
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
 
 // GLOBAL: TH07 0x00624210
 GameErrorContext g_GameErrorContext;

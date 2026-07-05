@@ -9,7 +9,6 @@
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
 #include "ZunResult.hpp"
-#include "d3dx8.h"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f1b8
@@ -69,7 +68,6 @@ void Enemy::Move()
         g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
 }
 
-#pragma var_order(i, enemy)
 // FUNCTION: TH07 0x0041ea60
 void EnemyManager::Initialize()
 {
@@ -91,8 +89,8 @@ void EnemyManager::Initialize()
     enemy->active = 1;
     enemy->timer = 0;
     enemy->isInBounds = 0;
-    enemy->hitboxSize = D3DXVECTOR3(12.0f, 12.0f, 12.0f);
-    enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+    enemy->hitboxSize = ZunVec3(12.0f, 12.0f, 12.0f);
+    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
     enemy->angularVelocity = 0.0f;
     enemy->angle = 0.0f;
     enemy->moveAcceleration = 0.0f;
@@ -109,7 +107,7 @@ void EnemyManager::Initialize()
     enemy->deathAnm3 = 0;
     enemy->shootInterval = 0;
     enemy->shootIntervalTimer = 0;
-    enemy->shootOffset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+    enemy->shootOffset = ZunVec3(0.0f, 0.0f, 0.0f);
     enemy->anmExLeft = -1;
     enemy->anmExRight = -1;
     enemy->anmExDefaults = -1;
@@ -157,9 +155,8 @@ EnemyEclContext::EnemyEclContext()
 {
 }
 
-#pragma var_order(i, enemy)
 // FUNCTION: TH07 0x0041f2e0
-Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
+Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life,
                                 i32 itemDrop, i32 score, u8 mirror)
 {
     Enemy *enemy;
@@ -200,9 +197,8 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
     return enemy;
 }
 
-#pragma var_order(i, enemy)
 // FUNCTION: TH07 0x0041f430
-Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life,
+Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life,
                                   i32 itemDrop, i32 score, EclContextArgs *args)
 {
     Enemy *enemy;
@@ -287,15 +283,14 @@ void Enemy::ResetEffectArray()
     this->effectsNum = 0;
 }
 
-#pragma var_order(enemy, args1, args2, args3, pos1, pos2, args4, pos3, pos4)
 // FUNCTION: TH07 0x0041f6f0
 void EnemyManager::RunEclTimeline(EclTimeline *timeline)
 {
-    D3DXVECTOR3 pos4;
-    D3DXVECTOR3 pos3;
+    ZunVec3 pos4;
+    ZunVec3 pos3;
     EclTimelineInstrArgs *args4;
-    D3DXVECTOR3 pos2;
-    D3DXVECTOR3 pos1;
+    ZunVec3 pos2;
+    ZunVec3 pos1;
     EclTimelineInstrArgs *args3;
     EclTimelineInstrArgs *args2;
     EclTimelineInstrArgs *args1;
@@ -477,7 +472,6 @@ stop:
     timeline->timelineTime++;
 }
 
-#pragma var_order(enemy, i, j)
 // FUNCTION: TH07 0x0041fd70
 i32 Enemy::HandleLifeCallback()
 {
@@ -536,7 +530,6 @@ i32 Enemy::HandleLifeCallback()
     return 0;
 }
 
-#pragma var_order(i, max, maxIdx, cherryPenalty, enemy, j)
 // FUNCTION: TH07 0x0041ff80
 i32 Enemy::HandleTimerCallback()
 {
@@ -682,10 +675,10 @@ void Enemy::ClampPos()
 }
 
 // FUNCTION: TH07 0x00420490
-void Enemy::CheckBulletPlayerCollision(D3DXVECTOR3 *bulletCenter,
-                                       D3DXVECTOR3 *bulletSize)
+void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
+                                       ZunVec3 *bulletSize)
 {
-    D3DXVECTOR3 grazeSize;
+    ZunVec3 grazeSize;
 
     grazeSize = *bulletSize / 0.7f;
     if (this->isProjectile &&
@@ -703,31 +696,27 @@ void Enemy::CheckBulletPlayerCollision(D3DXVECTOR3 *bulletCenter,
     }
 }
 
-#pragma var_order(enemyDiff, stageFactor, collisionOut, damage, i, angle,   \
-                  currentHitbox, grazeDamage, j, playedDamageSound, enemy,  \
-                  cherryGain, diffToPlayer, timerLimit, k, removedScore, l, \
-                  bossMarkerPos)
 // FUNCTION: TH07 0x00420620
 u32 EnemyManager::OnUpdate(EnemyManager *arg)
 {
-    D3DXVECTOR3 bossMarkerPos;
+    ZunVec3 bossMarkerPos;
     i32 l;
     i32 removedScore;
     i32 k;
     i32 timerLimit;
-    D3DXVECTOR3 diffToPlayer;
+    ZunVec3 diffToPlayer;
     i32 cherryGain;
     Enemy *enemy;
     i32 playedDamageSound;
     i32 j;
     i32 grazeDamage;
-    D3DXVECTOR3 currentHitbox;
+    ZunVec3 currentHitbox;
     f32 angle;
     i32 i;
     i32 damage;
     i32 collisionOut;
     i32 stageFactor;
-    D3DXVECTOR3 enemyDiff;
+    ZunVec3 enemyDiff;
 
     collisionOut = 0;
     stageFactor = g_GameManager.currentStage >= 5 ? 10 : g_GameManager.currentStage * 2;
@@ -785,7 +774,6 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
-                UselessStack::ThirtyTwoBytes();
                 enemy->specialEffect->pos1 = enemy->specialEffect->pos1 + (enemy->position - enemy->specialEffect->pos1) / 16.0f;
             }
         }
@@ -1050,8 +1038,6 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (enemy->life <= 0 && enemy->canDie)
         {
-            // ZUN bloat: ?
-            k = 0;
             for (k = 0; k < 4; k++)
             {
                 enemy->lifeCallbackThreshold[k] = -1;
@@ -1178,9 +1164,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 g_Gui.SetBossHealthBar((f32)enemy->life / (f32)enemy->maxLife);
             }
 
-            // ZUN landmine: This is always true
-            // ZUN probably meant to check bossId instead
-            if (enemy->isBoss < 4)
+            if (enemy->bossId < 4)
             {
                 if (!enemy->hasNoCollision)
                 {
@@ -1192,10 +1176,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 bossMarkerPos.y = 472.0f;
                 bossMarkerPos.z = 0.0f;
-
-                // ZUN landmine: There's no earlier check for bossId, since ZUN
-                // instead opted to use isBoss, meaning that if bossId >= 4,
-                // there will be an OOB array access.
+    
                 g_AsciiManager.SetBossMarkerPos(enemy->bossId, &bossMarkerPos);
                 g_AsciiManager.SetBossDamageTint(enemy->bossId, enemy->primaryVm.useColor2);
             }
@@ -1225,7 +1206,6 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(wrapped, direct)
 // FUNCTION: TH07 0x004220f0
 f32 AngleLerp(f32 start, f32 target, f32 t)
 {
@@ -1250,9 +1230,6 @@ f32 AngleLerp(f32 start, f32 target, f32 t)
     return wrapped * t + start;
 }
 
-#pragma var_order(scale, i, baseColor, vm, j, enemy, yOffset, xOffset,             \
-                  vertexCount, sinAngle, currentUvX, prevAngle, trailVert, uvStep, \
-                  angle1, cosAngle, uvDiff)
 // FUNCTION: TH07 0x00422170
 u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
 {
@@ -1431,14 +1408,14 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                                 trailVert[0].color.bytes.a = trailVert[1].color.bytes.a;
                             }
 
-                            trailVert[0].pos = *(Float3 *)&enemy->enemyHistory[j].position;
+                            trailVert[0].pos = enemy->enemyHistory[j].position;
                             trailVert[0].pos.x += cosAngle * xOffset - sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset + cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
                             trailVert[0].textureUV.y = enemy->primaryVm.sprite->uvStart.y + enemy->primaryVm.uvScrollPos.y;
                             trailVert++;
 
-                            trailVert[0].pos = *(Float3 *)&enemy->enemyHistory[j].position;
+                            trailVert[0].pos = enemy->enemyHistory[j].position;
                             trailVert[0].pos.x += cosAngle * xOffset + sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset - cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
@@ -1472,7 +1449,6 @@ u32 EnemyManager::OnDraw2(EnemyManager *arg)
     return ActualOnDraw(arg, 2, 4);
 }
 
-#pragma var_order(enemy, vec)
 // FUNCTION: TH07 0x00422ce0
 ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 {
@@ -1496,7 +1472,7 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
     arg->randomItemTableIdx = g_Rng.GetRandomU16InRange(8);
     arg->spellcardInfo.isActive = 0;
 
-    D3DXVECTOR3 vec = D3DXVECTOR3(-999.0f, -999.0f, -999.0f);
+    ZunVec3 vec = ZunVec3(-999.0f, -999.0f, -999.0f);
     g_AsciiManager.GetBossMarker(0)->pos = vec;
     g_AsciiManager.GetBossMarker(1)->pos = vec;
     g_AsciiManager.GetBossMarker(2)->pos = vec;
@@ -1509,7 +1485,7 @@ ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
 {
     g_AnmManager->ReleaseAnm(16);
     g_AnmManager->ReleaseAnm(15);
-    D3DXVECTOR3 vec = D3DXVECTOR3(-999.0f, -999.0f, -999.0f);
+    ZunVec3 vec = ZunVec3(-999.0f, -999.0f, -999.0f);
     g_AsciiManager.GetBossMarker(0)->pos = vec;
     g_AsciiManager.GetBossMarker(1)->pos = vec;
     g_AsciiManager.GetBossMarker(2)->pos = vec;
@@ -1565,7 +1541,6 @@ void EnemyManager::CutChain()
     g_Chain.Cut(&g_EnemyManagerDrawChain2);
 }
 
-#pragma var_order(popupScore, totalScore, enemy, i, j)
 // FUNCTION: TH07 0x00423090
 i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
 {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <windows.h>
-
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
@@ -52,5 +50,5 @@ struct Chain
     ChainElem calcChain;
     ChainElem drawChain;
 };
-C_ASSERT(sizeof(Chain) == 0x40);
+
 extern Chain g_Chain;

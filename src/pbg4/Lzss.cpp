@@ -1,6 +1,6 @@
 #include "Lzss.hpp"
 
-#include <windows.h>
+#include <cstdlib>
 
 #define LZSS_LOOKAHEAD_SIZE ((1 << LZSS_LENGTH_BITS) + 2)
 #define LZSS_DICTSIZE_MASK (LZSS_DICTSIZE - 1)
@@ -11,6 +11,8 @@ Lzss::LzssNode g_LzssTree[0x2000 + 1];
 
 // GLOBAL: TH07 0x004b7e40
 u8 g_LzssDictionary[8196];
+
+#define FALSE 0
 
 #define ENC_NEXT_BIT()          \
     inBitMask >>= 1;            \
@@ -41,9 +43,7 @@ u8 g_LzssDictionary[8196];
         bitfieldMask >>= 1;                 \
     }
 
-#pragma var_order(curByte, dst, dstCursor, matchOffset, i, bytesToCopyToDict, inBitMask, srcCursor, matchLength, \
-                  checksum, lookAheadBytes, dictValue, dictHead, bitfieldMask)
-LPBYTE Lzss::Compress(LPBYTE src, i32 dstLen, i32 *srcLen)
+u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *srcLen)
 {
     i32 i;
     i32 bytesToCopyToDict;
@@ -55,14 +55,14 @@ LPBYTE Lzss::Compress(LPBYTE src, i32 dstLen, i32 *srcLen)
     u32 curByte = 0;
     u32 checksum = 0;
 
-    LPBYTE dst = (LPBYTE)GlobalAlloc(GMEM_FIXED, dstLen * 2);
+    u8 *dst = (u8 *)malloc(dstLen * 2);
     if (dst == NULL)
     {
         return NULL;
     }
 
-    LPBYTE srcCursor = src;
-    LPBYTE dstCursor = dst;
+    u8 *srcCursor = src;
+    u8 *dstCursor = dst;
     *srcLen = 0;
 
     InitializeDictionary();
@@ -200,9 +200,7 @@ LPBYTE Lzss::Compress(LPBYTE src, i32 dstLen, i32 *srcLen)
         DEC_NEXT_BIT();                   \
     }
 
-#pragma var_order(curByte, dstCursor, matchOffset, i, inBitMask, srcCursor, inBits, size, matchLength, checksum, \
-                  dictValue, outBitMask, dictHead)
-LPBYTE Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
+u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
 {
     i32 i;
     u32 matchOffset;
@@ -218,15 +216,15 @@ LPBYTE Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
 
     if (dst == NULL)
     {
-        dst = (u8 *)GlobalAlloc(GMEM_FIXED, decompressedSize);
+        dst = (u8 *)malloc(decompressedSize);
         if (dst == NULL)
         {
             return NULL;
         }
     }
 
-    LPBYTE srcCursor = src;
-    LPBYTE dstCursor = dst;
+    u8 *srcCursor = src;
+    u8 *dstCursor = dst;
     u32 dictHead = 1;
 
     for (;;)
@@ -297,7 +295,6 @@ void Lzss::InitializeDictionary()
     }
 }
 
-#pragma var_order(i, child, testNode, matchLength, delta)
 // FUNCTION: TH07 0x0045f340
 i32 Lzss::InsertNode(i32 node, i32 *matchPosition)
 {

@@ -8,30 +8,14 @@
 #define ZUN_PI ((f32)(3.14159265358979323846))
 #define ZUN_2PI ((f32)(ZUN_PI * 2.0f))
 
-#define sincosf_macro(outSin, outCos, angle) \
-    {                                        \
-        __asm { \
-    __asm fld angle \
-    __asm fsincos \
-    __asm fstp outCos \
-    __asm fstp outSin                            \
-        }                                    \
-    }
-
 // FUNCTION: TH07 0x00417af0
 inline void sincosf(f32 *outSin, f32 *outCos, f32 angle)
 {
-    __asm {
-          fld [angle]
-          fsincos
-          mov eax, [outCos]
-          fstp float ptr [eax]
-          mov eax, [outSin]
-          fstp float ptr [eax]
-    }
+    *outCos = cosf(angle);
+    *outSin = sinf(angle);
 }
 
-// POD versions of D3DXVECTOR2 and D3DXVECTOR3 that ZUN used for whatever
+// POD versions of D3DXVECTOR2 and ZunVec3 that ZUN used for whatever
 // reason
 
 struct Float3
@@ -86,7 +70,6 @@ struct ZunVec2
         return ZunVec2(x * f, y * f);
     }
 };
-C_ASSERT(sizeof(ZunVec2) == 0x8);
 
 __forceinline ZunVec2 operator*(f32 f, const ZunVec2 &v)
 {
@@ -128,6 +111,11 @@ struct ZunVec3
         return (ZunVec3 *)D3DXVec3Normalize(this->asD3DX(), pV->asD3DX());
     }
 
+    __forceinline f32 Dot(ZunVec3 *pV)
+    {
+        return D3DXVec3Dot(this->asD3DX(), pV->asD3DX());
+    }
+
     __forceinline ZunVec3 *Cross(ZunVec3 *pV1, ZunVec3 *pV2)
     {
         return (ZunVec3 *)D3DXVec3Cross(this->asD3DX(), pV1->asD3DX(),
@@ -139,6 +127,11 @@ struct ZunVec3
     __forceinline f32 Length()
     {
         return D3DXVec3Length(this->asD3DX());
+    }
+
+    __forceinline f32 LengthSq()
+    {
+        return D3DXVec3LengthSq(this->asD3DX());
     }
 
     __forceinline ZunVec3 operator-()
@@ -161,9 +154,29 @@ struct ZunVec3
         return ZunVec3(x * v.x, y * v.y, z * v.z);
     }
 
+    __forceinline ZunVec3 operator/(const ZunVec3 &v)
+    {
+        return ZunVec3(x / v.x, y / v.y, z / v.z);
+    }
+
+    __forceinline ZunVec3 operator+(f32 f)
+    {
+        return ZunVec3(x + f, y + f, z + f);
+    }
+
+    __forceinline ZunVec3 operator-(f32 f)
+    {
+        return ZunVec3(x - f, y - f, z - f);
+    }
+
     __forceinline ZunVec3 operator*(f32 f)
     {
         return ZunVec3(x * f, y * f, z * f);
+    }
+
+    __forceinline ZunVec3 operator/(f32 f)
+    {
+        return ZunVec3(x / f, y / f, z / f);
     }
 
     __forceinline void operator+=(const ZunVec3 &v)
@@ -201,7 +214,6 @@ struct ZunVec3
         z *= f;
     }
 };
-C_ASSERT(sizeof(ZunVec3) == 0xc);
 
 __forceinline ZunVec3 operator*(f32 f, const ZunVec3 &v)
 {
@@ -220,7 +232,6 @@ struct ZunQuaternion
         return (D3DXQUATERNION *)this;
     }
 };
-C_ASSERT(sizeof(ZunQuaternion) == 0x10);
 
 struct ZunMatrix
 {
@@ -276,7 +287,6 @@ struct ZunMatrix
                                                          pQ->asD3DX());
     }
 };
-C_ASSERT(sizeof(ZunMatrix) == 0x40);
 
 __forceinline ZunVec3 *ZunVec3::Project(ZunVec3 *pV, D3DVIEWPORT8 *pViewport,
                                         ZunMatrix *pProjection,

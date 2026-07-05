@@ -10,8 +10,8 @@ extern u32 g_SpellcardScore[141];
 
 struct EnemyHistory
 {
-    D3DXVECTOR3 position;
-    D3DXVECTOR3 axisSpeed;
+    ZunVec3 position;
+    ZunVec3 axisSpeed;
     f32 angle;
 };
 
@@ -31,7 +31,6 @@ struct EnemyEclContext
     i16 subId;
     // pad 2
 };
-C_ASSERT(sizeof(EnemyEclContext) == 0x218);
 
 struct SpellcardInfo
 {
@@ -48,8 +47,8 @@ struct Enemy
 {
     Enemy();
 
-    void CheckBulletPlayerCollision(D3DXVECTOR3 *bulletCenter,
-                                    D3DXVECTOR3 *bulletSize);
+    void CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
+                                    ZunVec3 *bulletSize);
     void ClampPos();
     void Despawn();
     i32 HandleLifeCallback();
@@ -102,12 +101,12 @@ struct Enemy
     i32 deathCallbackSub;
     i32 interrupts[32];
     i32 runInterrupt;
-    D3DXVECTOR3 position;
-    D3DXVECTOR3 axisSpeed;
-    D3DXVECTOR3 prevPos;
-    D3DXVECTOR3 deltaPos;
-    D3DXVECTOR3 hitboxSize;
-    D3DXVECTOR3 grazeSize;
+    ZunVec3 position;
+    ZunVec3 axisSpeed;
+    ZunVec3 prevPos;
+    ZunVec3 deltaPos;
+    ZunVec3 hitboxSize;
+    ZunVec3 grazeSize;
     f32 angle;
     f32 angularVelocity;
     f32 moveAngle;
@@ -116,9 +115,9 @@ struct Enemy
     f32 moveAcceleration;
     f32 moveRadius;
     f32 moveRadialVelocity;
-    D3DXVECTOR3 shootOffset;
-    D3DXVECTOR3 moveInterp;
-    D3DXVECTOR3 moveInterpStartPos;
+    ZunVec3 shootOffset;
+    ZunVec3 moveInterp;
+    ZunVec3 moveInterpStartPos;
     ZunTimer moveInterpTimer;
     i32 moveInterpStartTime;
     f32 bulletRankSpeedLow;
@@ -239,7 +238,6 @@ struct Enemy
     ZunTimer invincibilityTimer;
     Enemy *next;
 };
-C_ASSERT(sizeof(Enemy) == 0x4f48);
 
 struct EnemyManager
 {
@@ -260,9 +258,9 @@ struct EnemyManager
     i32 HasActiveBoss();
     i32 RemoveAllEnemies(i32 scoreMax, i32 scoreMin);
     static void RunEclTimeline(EclTimeline *timeline);
-    Enemy *SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
+    Enemy *SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop,
                       i32 score, u8 param_6);
-    Enemy *SpawnEnemyEx(i32 eclSubId, D3DXVECTOR3 *pos, i32 life, i32 itemDrop,
+    Enemy *SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop,
                         i32 score, EclContextArgs *args);
 
     const char *stgEnmAnmFilename;
@@ -282,5 +280,5 @@ struct EnemyManager
     ZunTimer timelineTime;
     Enemy *enemyHead[4];
 };
-C_ASSERT(sizeof(EnemyManager) == 0x954710);
+
 extern EnemyManager g_EnemyManager;

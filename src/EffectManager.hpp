@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AnmVm.hpp"
+#include "ZunMath.hpp"
 #include "ZunResult.hpp"
 
 typedef i32 (*EffectCallback)(struct Effect *);
@@ -8,14 +9,14 @@ typedef i32 (*EffectCallback)(struct Effect *);
 struct Effect
 {
     AnmVm vm;
-    D3DXVECTOR3 pos1;
-    D3DXVECTOR3 custom;
-    D3DXVECTOR3 velocity;
-    D3DXVECTOR3 acceleration;
-    D3DXVECTOR3 basePosition;
-    D3DXVECTOR3 emitterPosition;
-    D3DXVECTOR3 direction;
-    D3DXQUATERNION rotationQuat;
+    ZunVec3 pos1;
+    ZunVec3 custom;
+    ZunVec3 velocity;
+    ZunVec3 acceleration;
+    ZunVec3 basePosition;
+    ZunVec3 emitterPosition;
+    ZunVec3 direction;
+    ZunQuaternion rotationQuat;
     f32 radius;
     f32 angularVelocity;
     ZunTimer timer;
@@ -29,7 +30,6 @@ struct Effect
     // pad 3
     Effect *next;
 };
-C_ASSERT(sizeof(Effect) == 0x2d8);
 
 struct EffectTypeInfo
 {
@@ -72,16 +72,16 @@ struct EffectManager
     static i32 InitWeatherSlow(Effect *effect);
     static i32 InitWeatherFalling(Effect *effect);
 
-    static void DoSomethingWithEffects(D3DXVECTOR3 *param_1);
+    static void DoSomethingWithEffects(ZunVec3 *param_1);
     static void ModifyEffect1eAcceleration();
     static i32 UpdateNoOp(Effect *effect);
 
-    Effect *SpawnParticles(i32 effectId, D3DXVECTOR3 *pos, i32 numParticles,
+    Effect *SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles,
                            D3DCOLOR color);
-    Effect *SpawnEffect(i32 effectId, D3DXVECTOR3 *pos, i32 param_3, i32 param_4,
+    Effect *SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4,
                         D3DCOLOR color);
-    Effect *SpawnMovingParticles(i32 effectId, D3DXVECTOR3 *pos,
-                                 D3DXVECTOR3 *velocity, i32 numParticles,
+    Effect *SpawnMovingParticles(i32 effectId, ZunVec3 *pos,
+                                 ZunVec3 *velocity, i32 numParticles,
                                  D3DCOLOR color);
     i32 UpdateSpecialEffect();
 
@@ -100,5 +100,5 @@ struct EffectManager
     Effect *layerPtrs[4];
     i32 frameCounter;
 };
-C_ASSERT(sizeof(EffectManager) == 0x496a8);
+
 extern EffectManager g_EffectManager;

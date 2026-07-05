@@ -61,7 +61,7 @@ void Pbg4Archive::Release()
     DebugPrint("info : %s close arcfile\r\n", this->filename);
     if (this->filename)
     {
-        GlobalFree(this->filename);
+        free(this->filename);
         this->filename = NULL;
     }
     SAFE_DELETE_ARRAY(this->entries);
@@ -69,7 +69,6 @@ void Pbg4Archive::Release()
     this->numOfEntries = 0;
 }
 
-#pragma var_order(entry, dstLen, dstBuf, srcBuf, dwBytes)
 // FUNCTION: TH07 0x0045f960
 u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
 {
@@ -98,7 +97,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
 
     dwBytes = entry[1].dataOffset - entry->dataOffset;
     dstLen = entry->decompressedSize;
-    srcBuf = (u8 *)GlobalAlloc(0, dwBytes);
+    srcBuf = (u8 *)malloc(dwBytes);
     if (!srcBuf)
     {
         goto err;
@@ -116,7 +115,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     dstBuf = Lzss::Decompress(srcBuf, dwBytes, buf, dstLen);
     if (srcBuf)
     {
-        GlobalFree(srcBuf);
+        free(srcBuf);
         srcBuf = NULL;
     }
     return dstBuf;
@@ -125,7 +124,7 @@ err:
     DebugPrint("info : %s error\r\n", this->filename);
     if (srcBuf)
     {
-        GlobalFree(srcBuf);
+        free(srcBuf);
         srcBuf = NULL;
     }
     return NULL;
@@ -162,8 +161,6 @@ Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
     return NULL;
 }
 
-#pragma var_order(decompressedData, decompressedSize, magic, fileSize, \
-                  headerSize, compressedData)
 // FUNCTION: TH07 0x0045fb50
 bool Pbg4Archive::OpenArchive(const char *path)
 {
@@ -222,7 +219,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
     }
 
     this->fileAbstraction->Seek(headerSize, g_SeekModes[0]);
-    compressedData = (u8 *)GlobalAlloc(0, fileSize);
+    compressedData = (u8 *)malloc(fileSize);
     if (!compressedData)
     {
         goto err;
@@ -249,35 +246,32 @@ bool Pbg4Archive::OpenArchive(const char *path)
 
     if (compressedData)
     {
-        GlobalFree(compressedData);
+        free(compressedData);
         compressedData = NULL;
     }
     if (decompressedData)
     {
-        GlobalFree(decompressedData);
+        free(decompressedData);
         decompressedData = NULL;
     }
     return true;
 err:
     if (compressedData)
     {
-        GlobalFree(compressedData);
+        free(compressedData);
         compressedData = NULL;
     }
     if (decompressedData)
     {
-        GlobalFree(decompressedData);
+        free(decompressedData);
         decompressedData = NULL;
     }
     SAFE_DELETE(this->fileAbstraction);
     // STRING: TH07 0x00495084
     DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
-    while (false)
-        ; // ZUN bloat: ??????
     return false;
 }
 
-#pragma var_order(entryData, i, entries)
 // FUNCTION: TH07 0x0045fde0
 Pbg4Entry *Pbg4Archive::AllocEntries(void *param_1, i32 count, u32 dataOffset)
 {
@@ -324,7 +318,7 @@ char *Pbg4Archive::CopyFileName(const char *filename)
 {
     char *pcVar2;
 
-    pcVar2 = (char *)GlobalAlloc(0, strlen(filename) + 1);
+    pcVar2 = (char *)malloc(strlen(filename) + 1);
     if (pcVar2)
     {
         strcpy(pcVar2, filename);

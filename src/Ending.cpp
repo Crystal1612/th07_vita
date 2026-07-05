@@ -8,7 +8,6 @@
 #include "GameManager.hpp"
 #include "ScreenEffect.hpp"
 #include "Supervisor.hpp"
-#include "d3dx8.h"
 
 // GLOBAL: TH07 0x0049f628
 const char *g_BadEndingPaths[3] = {
@@ -94,7 +93,6 @@ i32 Ending::ReadEndFileParameter()
     return cur;
 }
 
-#pragma var_order(rect, color)
 // FUNCTION: TH07 0x0041d490
 void Ending::FadingEffect()
 {
@@ -164,9 +162,6 @@ void Ending::FadingEffect()
     }
 }
 
-#pragma var_order(lineDisplayed, local_54, local_58, i, anmScriptIdx, vmIdx,   \
-                  anmSpriteIdx, scrollBGDistance, scrollBGDuration, execOuter, \
-                  execInner, j, musicFadeFrames)
 // FUNCTION: TH07 0x0041d700
 ZunResult Ending::ParseEndFile()
 {
@@ -453,7 +448,6 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(endingPath, unusedShotType, shotType, i)
 // FUNCTION: TH07 0x0041e590
 ZunResult Ending::AddedCallback(Ending *arg)
 {
@@ -494,7 +488,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
     {
         g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 1807);
         arg->sprites[i].pos =
-            D3DXVECTOR3(64.0f, (f32)i * 16.0f + 392.0f, 0.0f);
+            ZunVec3(64.0f, (f32)i * 16.0f + 392.0f, 0.0f);
     }
     if (g_GameManager.globals->numRetries != 0)
     {
@@ -519,7 +513,7 @@ ZunResult Ending::DeletedCallback(Ending *arg)
     g_AnmManager->ReleaseAnm(49);
     g_Supervisor.curState = 6;
     g_AnmManager->ReleaseSurface(0);
-    ZunMemory::Free(arg->endFileData);
+    free(arg->endFileData);
     g_Chain.Cut(arg->drawChain);
     arg->drawChain = NULL;
     delete arg;

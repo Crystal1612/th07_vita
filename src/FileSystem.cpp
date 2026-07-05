@@ -1,24 +1,22 @@
 #include "FileSystem.hpp"
 
+#include <cstdio>
+
 #include "GameErrorContext.hpp"
-#include "ZunMemory.hpp"
 #include "dsutil.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
 // GLOBAL: TH07 0x004b9e64
 u32 g_LastFileSize;
 
-#pragma var_order(entryIdx, filename, fsize, buf, hFile)
 // FUNCTION: TH07 0x00431330
 u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
 {
-    HANDLE hFile;
+    FILE *file;
     u8 *buf;
-    DWORD fsize;
+    u32 fsize;
     const char *filename;
-    i32 entryIdx;
 
-    entryIdx = -1;
     if (!isExternalResource)
     {
         filename = strrchr(filepath, '\\');
@@ -53,7 +51,7 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
         {
             // STRING: TH07 0x00497d24
             DebugPrint("%s Decode ... \r\n", filename);
-            buf = (u8 *)ZunMemory::Alloc(fsize);
+            buf = (u8 *)malloc(fsize);
             if (!buf)
             {
                 return NULL;
@@ -65,66 +63,71 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
     }
     // STRING: TH07 0x00497d14
     DebugPrint("%s Load ... \r\n", filepath);
-    hFile = CreateFileA(filepath, GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hFile == INVALID_HANDLE_VALUE)
+    file = fopen(filepath, "rb");
+    if (!file)
     {
         // STRING: TH07 0x00497cf8
         DebugPrint("error : %s is not found.\r\n", filepath);
         return NULL;
     }
 
-    fsize = GetFileSize(hFile, NULL);
-    buf = (u8 *)ZunMemory::Alloc(fsize);
+    fseek(file, 0, SEEK_END);
+    fsize = ftell(file);
+    buf = (u8 *)malloc(fsize);
     if (!buf)
     {
-        CloseHandle(hFile);
+        fclose(file);
         return NULL;
     }
 
-    // ZUN landmine: ReadFile is not checked for failure.
-    ReadFile(hFile, buf, fsize, &fsize, NULL);
+    fseek(file, 0, SEEK_SET);
+    if (fread(buf, 1, fsize, file) != fsize)
+    {
+        fclose(file);
+        return NULL;
+    }
     g_LastFileSize = fsize;
-    CloseHandle(hFile);
+    fclose(file);
     return buf;
 }
 
 // FUNCTION: TH07 0x004314f0
 i32 FileSystem::CheckFileExists(const char *file)
 {
-    HANDLE hObject;
+    FILE *fp;
 
-    hObject = CreateFileA(file, GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hObject != INVALID_HANDLE_VALUE)
+    fp = fopen(file, "rb");
+    if (fp)
     {
-        CloseHandle(hObject);
+        fclose(fp);
         return true;
     }
     return false;
 }
 
-#pragma var_order(bytesWritten, hFile)
 // FUNCTION: TH07 0x00431540
 i32 FileSystem::WriteDataToFile(const char *filename, const void *out,
-                                DWORD bytesToWrite)
+                                u32 bytesToWrite)
 {
-    HANDLE hFile;
-    DWORD bytesWritten;
+    FILE *file;
+    u32 bytesWritten;
 
-    hFile = CreateFileA(filename, GENERIC_WRITE, 1, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hFile == INVALID_HANDLE_VALUE)
+    file = fopen(filename, "wb");
+    if (!file)
     {
         // STRING: TH07 0x00497cdc
         DebugPrint("error : %s write error\r\n", filename);
         return -1;
     }
-    WriteFile(hFile, out, bytesToWrite, &bytesWritten, NULL);
+
+    bytesWritten = fwrite(out, 1, bytesToWrite, file);
     if (bytesToWrite != bytesWritten)
     {
-        CloseHandle(hFile);
+        fclose(file);
         DebugPrint("error : %s write error\r\n", filename);
         return -2;
     }
-    CloseHandle(hFile);
+    fclose(file);
     // STRING: TH07 0x00497ccc
     DebugPrint("%s write ...\r\n", filename);
     return 0;

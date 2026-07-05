@@ -1,6 +1,6 @@
 #include "GameManager.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -15,7 +15,6 @@
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "Supervisor.hpp"
-#include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 
@@ -112,7 +111,6 @@ i32 GameManager::IsInBounds(f32 x, f32 y, f32 widthPx, f32 heightPx)
     return 1;
 }
 
-#pragma var_order(i, local_c)
 // FUNCTION: TH07 0x0042d75a
 i32 GameManager::ByteCsumAccumulator(u8 *param_1, i32 param_2)
 {
@@ -164,7 +162,6 @@ void GameManager::ExtendFromPoints()
     }
 }
 
-#pragma var_order(csum, i, scoreIncrement)
 // FUNCTION: TH07 0x0042d8d5
 u32 GameManager::OnUpdate(GameManager *arg)
 {
@@ -369,12 +366,11 @@ u32 GameManager::OnDraw(GameManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(rect, spriteVm, spritePos, unused)
 // FUNCTION: TH07 0x0042e1f8
 void GameManager::DrawLoadingSprite()
 {
     i32 unused[3];
-    D3DXVECTOR3 spritePos;
+    ZunVec3 spritePos;
     AnmVm spriteVm;
     ZunRect rect;
 
@@ -386,18 +382,7 @@ void GameManager::DrawLoadingSprite()
     spritePos.x = 528.0f;
     spritePos.y = 448.0f;
     spritePos.z = 0.0f;
-    memcpy(&spriteVm.pos, spritePos, sizeof(D3DXVECTOR3));
-    g_Supervisor.d3dDevice->BeginScene();
-
-    // ZUN bloat: This is doing the exact same thing twice
-    ScreenEffect::DrawSquare(&rect, 0xa0000000);
-    g_AnmManager->DrawNoRotation(&spriteVm);
-    g_AnmManager->Flush();
-    g_Supervisor.d3dDevice->EndScene();
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
+    spriteVm.pos = spritePos;
     g_Supervisor.d3dDevice->BeginScene();
     ScreenEffect::DrawSquare(&rect, 0xa0000000);
     g_AnmManager->DrawNoRotation(&spriteVm);
@@ -417,7 +402,6 @@ void GameManager::InitializeRank()
     this->rank.maxRank = g_RankArray[g_GameManager.difficulty][2];
 }
 
-#pragma var_order(csum, i)
 // FUNCTION: TH07 0x0042e3da
 void GameManager::InitializeRngAndCsum()
 {
@@ -463,7 +447,6 @@ void GameManager::InitializeRngAndCsum()
                               (f32)g_GameManager.globals->rng2[3];
 }
 
-#pragma var_order(local_8, local_c, scoreDat, local_14)
 // FUNCTION: TH07 0x0042e634
 ZunResult ResultScreen::ParseScores()
 {
@@ -531,7 +514,6 @@ void IncrementCappedAgain(u32 *param, u32 cap)
     }
 }
 
-#pragma var_order(size, shotTypeAndChar, oldSeed)
 // FUNCTION: TH07 0x0042e83e
 ZunResult GameManager::AddedCallback(GameManager *arg)
 {
@@ -556,7 +538,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals = new ZunGlobals;
         InitializeRngAndCsum();
         *arg->defaultCfg = g_Supervisor.cfg;
-        ZunMemory::Free(arg->tmpBuffer);
+        free(arg->tmpBuffer);
         arg->powerItemCountForScore = 0;
         arg->cherry = arg->globals->cherryStart;
         arg->cherryPlus = arg->globals->cherryStart;
@@ -1060,7 +1042,6 @@ i32 GameManager::HasReachedMaxClearsAllShotTypes()
                : 1;
 }
 
-#pragma var_order(spellCardsCaptured, i, j)
 // FUNCTION: TH07 0x0042f94c
 i32 GameManager::HasUnlockedPhantomAndMaxClears()
 {

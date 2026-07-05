@@ -41,13 +41,12 @@ struct BulletTypeSprites
     AnmVm spriteSpawnEffectNormal;
     AnmVm spriteSpawnEffectSlow;
     AnmVm spriteSpawnEffectDonut;
-    D3DXVECTOR3 grazeSize;
+    ZunVec3 grazeSize;
     u8 unused_b88;
     u8 bulletHeight;
     u8 collisionType;
     // pad 1
 };
-C_ASSERT(sizeof(BulletTypeSprites) == 0xb8c);
 
 struct BulletCommand
 {
@@ -64,7 +63,7 @@ struct BulletCommandState
     ZunTimer timer;
     f32 speed;
     f32 angle;
-    D3DXVECTOR3 vec3;
+    ZunVec3 vec3;
     i32 duration;
     i32 maxTimes;
     i32 minTimes;
@@ -89,7 +88,7 @@ struct EnemyBulletShooter
 
     i16 sprite;
     i16 spriteOffset;
-    D3DXVECTOR3 position;
+    ZunVec3 position;
     f32 angle1;
     f32 angle2;
     f32 speed1;
@@ -105,7 +104,6 @@ struct EnemyBulletShooter
     i32 soundOverride;
     BulletTypeSprites *sprites;
 };
-C_ASSERT(sizeof(EnemyBulletShooter) == 0xd4);
 
 struct EnemyLaserShooter
 {
@@ -117,7 +115,7 @@ struct EnemyLaserShooter
 
     i16 sprite;
     i16 spriteOffset;
-    D3DXVECTOR3 position;
+    ZunVec3 position;
     f32 angle1;
     f32 angle2;
     f32 speed1;
@@ -140,7 +138,6 @@ struct EnemyLaserShooter
     i32 soundOverride;
     i32 unused_d0;
 };
-C_ASSERT(sizeof(EnemyLaserShooter) == 0xd4);
 
 struct Laser
 {
@@ -152,7 +149,7 @@ struct Laser
 
     struct AnmVm vm0;
     struct AnmVm vm1;
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     f32 angle;
     f32 startOffset;
     f32 endOffset;
@@ -173,7 +170,6 @@ struct Laser
     u8 hideWarning;
     // pad 2
 };
-C_ASSERT(sizeof(Laser) == 0x4ec);
 
 struct Bullet
 {
@@ -208,9 +204,9 @@ struct Bullet
     }
 
     BulletTypeSprites sprites;
-    D3DXVECTOR3 pos;
-    D3DXVECTOR3 velocity;
-    D3DXVECTOR3 unused_ba4;
+    ZunVec3 pos;
+    ZunVec3 velocity;
+    ZunVec3 unused_ba4;
     f32 speed;
     f32 acceleration;
     f32 angularVelocity;
@@ -237,7 +233,6 @@ struct Bullet
     BulletCommand commands[5];
     BulletCommandState commandStates[5];
 };
-C_ASSERT(sizeof(Bullet) == 0xd68);
 
 struct BulletManager
 {
@@ -255,7 +250,7 @@ struct BulletManager
 
     i32 DespawnBullets(i32 param_1, i32 turnIntoItem);
     void RemoveAllBullets(i32 param_1);
-    void RemoveBulletsInRadius(D3DXVECTOR3 *centerPos, f32 radius);
+    void RemoveBulletsInRadius(ZunVec3 *centerPos, f32 radius);
     static void SetActiveSpriteByResolution(AnmVm *sprite,
                                             AnmVm *bulletTypeTemplate,
                                             Bullet *bullet, i32 spriteOffset);
@@ -277,5 +272,5 @@ struct BulletManager
     Bullet *bulletsStart;
     ItemType itemType;
 };
-C_ASSERT(sizeof(BulletManager) == 0x37a164);
+
 extern BulletManager g_BulletManager;

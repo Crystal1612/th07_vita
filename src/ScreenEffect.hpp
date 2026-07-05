@@ -47,4 +47,3 @@ struct BombEffects
     u32 args[3];
     ZunTimer timer;
 };
-C_ASSERT(sizeof(BombEffects) == 0x30);

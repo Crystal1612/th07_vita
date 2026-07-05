@@ -126,8 +126,8 @@ struct AnmRawInstr
 
 struct AnmVmBase
 {
-    D3DXVECTOR3 rotation;
-    D3DXVECTOR3 angleVel;
+    ZunVec3 rotation;
+    ZunVec3 angleVel;
     Float2 scale;
     Float2 scaleGrowth;
     Float2 uvScrollPos;
@@ -182,9 +182,9 @@ struct AnmVm : AnmVmBase
     f32 floatVars[4];
     i32 intVars2[2];
     Float2 uvScrollVel;
-    D3DXMATRIX matrix;
-    D3DXMATRIX worldTransformMatrix;
-    D3DXMATRIX uvMatrix;
+    ZunMatrix matrix;
+    ZunMatrix worldTransformMatrix;
+    ZunMatrix uvMatrix;
     ZunColor color;
     ZunColor color2;
     union {
@@ -210,7 +210,7 @@ struct AnmVm : AnmVmBase
     };
     i16 autoRotate;
     i16 pendingInterrupt;
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     i16 activeSpriteIdx;
     i16 baseSpriteIdx;
     i16 anmFileIdx;
@@ -218,18 +218,18 @@ struct AnmVm : AnmVmBase
     AnmRawInstr *beginningOfScript;
     AnmRawInstr *currentInstruction;
     AnmLoadedSprite *sprite;
-    D3DXVECTOR3 posInterpInitial;
-    D3DXVECTOR3 posInterpFinal;
-    D3DXVECTOR3 rotateInterpInitial;
-    D3DXVECTOR3 rotateInterpFinal;
+    ZunVec3 posInterpInitial;
+    ZunVec3 posInterpFinal;
+    ZunVec3 rotateInterpInitial;
+    ZunVec3 rotateInterpFinal;
     Float2 scaleInterpInitial;
     Float2 scaleInterpFinal;
     ZunColor colorInterpInitialColor;
     ZunColor colorInterpFinalColor;
-    D3DXVECTOR3 offset;
+    ZunVec3 offset;
     i32 timeOfLastSpriteSet;
     u8 fontWidth;
     u8 fontHeight;
     u8 unused_242[10];
 };
-C_ASSERT(sizeof(AnmVm) == 0x24c);
+

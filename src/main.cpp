@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <windows.h>
 #include <winnls32.h>
 
@@ -31,7 +31,6 @@ void AnmManager::TakeScreenshotIfRequested()
     }
 }
 
-#pragma var_order(d3dDeviceStatus, msg, res, i)
 // FUNCTION: TH07 0x00434020
 i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdline, i32 nCmdShow)

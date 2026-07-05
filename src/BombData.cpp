@@ -111,7 +111,6 @@ void BombData::ComputeBombCherryDrain(Player *player, i32 minCost, f32 scale)
     player->bombInfo.cherryDrain = drain < minCost ? minCost : drain;
 }
 
-#pragma var_order(angle, bombInfo, i, subInfo, vm, unused, j)
 // FUNCTION: TH07 0x00408710
 void BombData::BombReimuACalc(Player *player)
 {
@@ -147,8 +146,7 @@ void BombData::BombReimuACalc(Player *player)
         player->SpawnBombEffect(&player->positionCenter, 32.0f, 8.0f, 16,
                                 ITEM_POINT_BULLET);
 
-        // ZUN landmine: What a strange way to access player->bombStartPos
-        *(D3DXVECTOR3 *)(bombInfo + 1) = player->positionCenter;
+        player->bombStartPos = player->positionCenter;
         ComputeBombCherryDrain(player, 4000, 0.2f);
     }
     if (bombInfo->bombTimer.HasTicked() &&
@@ -162,7 +160,7 @@ void BombData::BombReimuACalc(Player *player)
         subInfo->speed = 15.0f;
         subInfo->bombRegionPositions = player->positionCenter;
 
-        if ((*(D3DXVECTOR3 *)(bombInfo + 1)).x < 192.0f)
+        if ((*(ZunVec3 *)(bombInfo + 1)).x < 192.0f)
         {
             angle = (f32)i * ZUN_2PI / 8.0f - 1.5707964f;
         }
@@ -256,7 +254,6 @@ void BombData::BombReimuACalc(Player *player)
     bombInfo->bombTimer++;
 }
 
-#pragma var_order(vm, i, subInfo)
 // FUNCTION: TH07 0x00408e10
 void BombData::BombReimuADraw(Player *player)
 {
@@ -305,13 +302,11 @@ void BombData::BombReimuADraw(Player *player)
     }
 }
 
-#pragma var_order(tmpFloat3, tmpFloat2, bombInfo, i, subInfo, vm, tmpFloat1, \
-                  targetPos, j)
 // FUNCTION: TH07 0x004091b0
 void BombData::BombReimuACalcFocus(Player *player)
 {
     i32 j;
-    D3DXVECTOR3 targetPos;
+    ZunVec3 targetPos;
     f32 tmpFloat1;
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
@@ -444,9 +439,6 @@ void BombData::BombReimuACalcFocus(Player *player)
                     player->SpawnBombEffect(&subInfo->bombRegionPositions, 32.0f,
                                             6.6666665f, 15, ITEM_POINT_BULLET);
 
-                    // ZUN bloat: This does absolutely nothing
-                    subInfo->bombRegionVelocities / 8.0f;
-
                     g_SoundPlayer.PlaySoundByIdx(SOUND_ENEMY_SPELLCARD_END, 0);
                     BombEffects::RegisterChain(1, 16, 8, 0, 0);
                 }
@@ -474,7 +466,6 @@ void BombData::BombReimuACalcFocus(Player *player)
     bombInfo->bombTimer++;
 }
 
-#pragma var_order(vm, i)
 // FUNCTION: TH07 0x00409990
 void BombData::BombReimuADrawFocus(Player *player)
 {
@@ -512,7 +503,6 @@ void BombData::BombReimuADrawFocus(Player *player)
     }
 }
 
-#pragma var_order(i, vm, projectiles)
 // FUNCTION: TH07 0x00409dd0
 void BombData::BombReimuBCalc(Player *player)
 {
@@ -603,7 +593,6 @@ void BombData::BombReimuBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i)
 // FUNCTION: TH07 0x0040a280
 void BombData::BombReimuBDraw(Player *player)
 {
@@ -681,7 +670,6 @@ void BombData::BombReimuBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i)
 // FUNCTION: TH07 0x0040a6b0
 void BombData::BombReimuBDrawFocus(Player *player)
 {
@@ -700,7 +688,6 @@ void BombData::BombReimuBDrawFocus(Player *player)
     }
 }
 
-#pragma var_order(i, vm, unused, angle)
 // FUNCTION: TH07 0x0040a7c0
 void BombData::BombMarisaACalc(Player *player)
 {
@@ -766,7 +753,6 @@ void BombData::BombMarisaACalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i)
 // FUNCTION: TH07 0x0040aba0
 void BombData::BombMarisaADraw(Player *player)
 {
@@ -806,7 +792,6 @@ void BombData::BombMarisaADraw(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, vm, unused, j, angle)
 // FUNCTION: TH07 0x0040af10
 void BombData::BombMarisaACalcFocus(Player *player)
 {
@@ -909,7 +894,6 @@ void BombData::BombMarisaACalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i, subInfo)
 // FUNCTION: TH07 0x0040b5d0
 void BombData::BombMarisaADrawFocus(Player *player)
 {
@@ -952,7 +936,6 @@ void BombData::BombMarisaADrawFocus(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, offset, projectile, unused, j, accel)
 // FUNCTION: TH07 0x0040b7d0
 void BombData::BombMarisaBCalc(Player *player)
 {
@@ -1057,7 +1040,6 @@ void BombData::BombMarisaBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i, accel, angle)
 // FUNCTION: TH07 0x0040bca0
 void BombData::BombMarisaBDraw(Player *player)
 {
@@ -1154,7 +1136,6 @@ void BombData::BombMarisaBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(vm, i, accel, angle)
 // FUNCTION: TH07 0x0040c160
 void BombData::BombMarisaBDrawFocus(Player *player)
 {
@@ -1184,7 +1165,6 @@ void BombData::BombMarisaBDrawFocus(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, vm, unused, angle, spawnsRemaining)
 // FUNCTION: TH07 0x0040c2e0
 void BombData::BombSakuyaACalc(Player *player)
 {
@@ -1287,7 +1267,6 @@ void BombData::BombSakuyaACalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(i, subInfo, angle, vm)
 // FUNCTION: TH07 0x0040c970
 void BombData::BombSakuyaADraw(Player *player)
 {
@@ -1315,7 +1294,6 @@ void BombData::BombSakuyaADraw(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, vm, unused, angle)
 // FUNCTION: TH07 0x0040ca50
 void BombData::BombSakuyaACalcFocus(Player *player)
 {
@@ -1454,7 +1432,6 @@ void BombData::BombSakuyaACalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(i, subInfo, angle, vm)
 // FUNCTION: TH07 0x0040d3b0
 void BombData::BombSakuyaADrawFocus(Player *player)
 {
@@ -1483,7 +1460,6 @@ void BombData::BombSakuyaADrawFocus(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, vm, unused)
 // FUNCTION: TH07 0x0040d4c0
 void BombData::BombSakuyaBCalc(Player *player)
 {
@@ -1578,7 +1554,6 @@ void BombData::BombSakuyaBCalc(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(i, subInfo)
 // FUNCTION: TH07 0x0040d9a0
 void BombData::BombSakuyaBDraw(Player *player)
 {
@@ -1603,7 +1578,6 @@ void BombData::BombSakuyaBDraw(Player *player)
     }
 }
 
-#pragma var_order(i, subInfo, vm, unused, j)
 // FUNCTION: TH07 0x0040da80
 void BombData::BombSakuyaBCalcFocus(Player *player)
 {
@@ -1708,7 +1682,6 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     player->bombInfo.bombTimer++;
 }
 
-#pragma var_order(oldAlpha, i, subInfo, j)
 // FUNCTION: TH07 0x0040e280
 void BombData::BombSakuyaBDrawFocus(Player *player)
 {

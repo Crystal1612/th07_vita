@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <windows.h>
+
 #include "FileSystem.hpp"
 
 struct GameErrorContext

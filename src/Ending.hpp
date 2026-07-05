@@ -51,4 +51,3 @@ struct Ending
     i32 fadeType;
     char *endFileDataPtr;
 };
-C_ASSERT(sizeof(Ending) == 0x2530);

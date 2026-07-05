@@ -58,7 +58,6 @@ struct SoundPlayerCommand
     i32 arg2;
     char string[256];
 };
-C_ASSERT(sizeof(SoundPlayerCommand) == 0x10c);
 
 struct SoundPlayer
 {
@@ -98,14 +97,14 @@ struct SoundPlayer
     LPDIRECTSOUNDBUFFER initSoundBuffer;
     HWND gameWindow;
     CSoundManager *manager;
-    DWORD backgroundMusicThreadId; // ZUN name: m_dwNotifyThreadID
+    u32 backgroundMusicThreadId; // ZUN name: m_dwNotifyThreadID
     HANDLE backgroundMusicThreadHandle;
     u32 unused_61c;
     i32 soundQueue[5];
     ThBgmFormat *bgmPreloadFmtData[16];
     LPBYTE bgmPreloadData[16];
     LPBYTE bgmPreloadDataCursor[16];
-    DWORD bgmPreloadAllocSizes[16];
+    u32 bgmPreloadAllocSizes[16];
     i32 curBgmIdx;
     ThBgmFormat *bgmFmtData;
     SoundPlayerCommand commandQueue[32];
@@ -116,5 +115,5 @@ struct SoundPlayer
     i32 unused_39c4;
     i32 bgmSeekOffset;
 };
-C_ASSERT(sizeof(SoundPlayer) == 0x39cc);
+
 extern SoundPlayer g_SoundPlayer;

@@ -1,5 +1,10 @@
 #include "Pbg4File.hpp"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <windows.h>
+
 #include "../inttypes.hpp"
 
 // GLOBAL: TH07 0x00495120
@@ -19,7 +24,7 @@ const char *g_AccessModes[3] = {
 // FUNCTION: TH07 0x0045e550
 Pbg4File::Pbg4File()
 {
-    this->handle = INVALID_HANDLE_VALUE;
+    this->file = NULL;
     this->access = 0;
 }
 
@@ -29,11 +34,10 @@ Pbg4File::~Pbg4File()
     Close();
 }
 
-#pragma var_order(local_8, local_c, local_114, local_118)
 // FUNCTION: TH07 0x0045e620
 bool Pbg4File::Open(const char *path, const char *mode)
 {
-    DWORD local_118;
+    u32 local_118;
     char local_114[264];
     i32 local_c;
     const char *local_8;
@@ -44,21 +48,21 @@ bool Pbg4File::Open(const char *path, const char *mode)
     {
         if (*local_8 == 'r')
         {
-            this->access = GENERIC_READ;
+            this->access = "rb";
             local_118 = 3;
             break;
         }
         if (*local_8 == 'w')
         {
-            DeleteFileA(path);
-            this->access = GENERIC_WRITE;
+            remove(path);
+            this->access = "wb";
             local_118 = 2;
             break;
         }
         if (*local_8 == 'a')
         {
             local_c = 1;
-            this->access = GENERIC_WRITE;
+            this->access = "ab";
             local_118 = 4;
             break;
         }
@@ -70,111 +74,111 @@ bool Pbg4File::Open(const char *path, const char *mode)
     else
     {
         GetFullPath(local_114, path);
-        this->handle = CreateFileA(local_114, this->access, 1, NULL, local_118,
-                                   FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-        if (this->handle == INVALID_HANDLE_VALUE)
+        this->file = fopen(local_114, this->access);
+        if (!this->file)
         {
             return false;
         }
-        else
+
+        if (local_c != 0)
         {
-            if (local_c != 0)
-            {
-                SetFilePointer(this->handle, 0, NULL, 2);
-            }
-            return true;
+            fseek(this->file, 0, SEEK_END);
         }
+        return true;
     }
 }
 
 // FUNCTION: TH07 0x0045e770
 void Pbg4File::Close()
 {
-    if (this->handle != INVALID_HANDLE_VALUE)
+    if (this->file)
     {
-        CloseHandle(this->handle);
-        this->handle = INVALID_HANDLE_VALUE;
+        fclose(this->file);
+        this->file = NULL;
         this->access = 0;
     }
 }
 
 // FUNCTION: TH07 0x0045e7b0
-DWORD Pbg4File::Read(void *data, u32 len)
+u32 Pbg4File::Read(void *data, u32 len)
 {
-    DWORD local_8;
+    u32 local_8;
 
     local_8 = 0;
-    if (this->access != GENERIC_READ)
+    if (!this->access || strcmp(this->access, "rb") != 0)
     {
         return 0;
     }
 
-    ReadFile(this->handle, data, len, &local_8, NULL);
+    local_8 = fread(data, 1, len, this->file);
     return local_8;
 }
 
 // FUNCTION: TH07 0x0045e800
 bool Pbg4File::Write(void *data, u32 len)
 {
-    DWORD local_8;
+    u32 local_8;
 
     local_8 = 0;
-    if (this->access != GENERIC_WRITE)
+    if (!this->access || strcmp(this->access, "wb") != 0)
     {
         return false;
     }
 
-    WriteFile(this->handle, data, len, &local_8, NULL);
-    return len == local_8 ? true : false;
+    local_8 = fwrite(data, 1, len, this->file);
+    return len == local_8;
 }
 
 // FUNCTION: TH07 0x0045e850
-DWORD Pbg4File::Tell()
+u32 Pbg4File::Tell()
 {
-    if (this->handle == INVALID_HANDLE_VALUE)
+    if (!this->file)
     {
         return 0;
     }
     else
     {
-        return SetFilePointer(this->handle, 0, NULL, 1);
+        return ftell(this->file);
     }
 }
 
 // FUNCTION: TH07 0x0045e880
-DWORD Pbg4File::GetSize()
+u32 Pbg4File::GetSize()
 {
-    if (this->handle == INVALID_HANDLE_VALUE)
+    if (!this->file)
     {
         return 0;
     }
     else
     {
-        return GetFileSize(this->handle, NULL);
+        long cur = ftell(this->file);
+        fseek(this->file, 0, SEEK_END);
+        u32 size = ftell(this->file);
+        fseek(this->file, cur, SEEK_SET);
+        return size;
     }
 }
 
 // FUNCTION: TH07 0x0045e8b0
-bool Pbg4File::Seek(u32 offset, DWORD seekFrom)
+bool Pbg4File::Seek(u32 offset, u32 seekFrom)
 {
-    if (this->handle == INVALID_HANDLE_VALUE)
+    if (!this->file)
     {
         return false;
     }
 
-    SetFilePointer(this->handle, (LONG)offset, NULL, seekFrom);
+    fseek(this->file, offset, seekFrom);
     return true;
 }
 
-#pragma var_order(hMem, DVar2, DVar3)
 // FUNCTION: TH07 0x0045e8f0
-HGLOBAL Pbg4File::ReadRemaining(u32 max)
+void *Pbg4File::ReadRemaining(u32 max)
 {
-    HGLOBAL hMem;
-    DWORD DVar2;
-    DWORD DVar3;
+    void *hMem;
+    u32 DVar2;
+    u32 DVar3;
 
-    if (this->access != GENERIC_READ)
+    if (!this->access || strcmp(this->access, "rb") != 0)
     {
         return NULL;
     }
@@ -185,7 +189,7 @@ HGLOBAL Pbg4File::ReadRemaining(u32 max)
         return NULL;
     }
 
-    hMem = GlobalAlloc(GMEM_ZEROINIT, DVar2);
+    hMem = calloc(1, DVar2);
     if (!hMem)
     {
         return NULL;
@@ -201,7 +205,7 @@ HGLOBAL Pbg4File::ReadRemaining(u32 max)
     {
         if (hMem)
         {
-            GlobalFree(hMem);
+            free(hMem);
             hMem = NULL;
         }
         return NULL;

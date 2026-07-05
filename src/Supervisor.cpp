@@ -1,7 +1,7 @@
 #include "Supervisor.hpp"
 
 #include <dinput.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -391,16 +391,8 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     }
     arg->wantedState = arg->curState;
     arg->calcCount = arg->calcCount + 1;
-    if (arg->calcCount % 4000 == 3999 &&
-        g_Supervisor.CheckIntegrity("0100b", g_Supervisor.exeSize,
-                                    g_Supervisor.exeChecksum) != ZUN_SUCCESS)
-    {
-        return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
-    }
-    else
-    {
-        return CHAIN_CALLBACK_RESULT_CONTINUE;
-    }
+
+    return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
 // FUNCTION: TH07 0x0043831b
@@ -427,7 +419,6 @@ i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
     return 0;
 }
 
-#pragma var_order(local_1c, idk)
 // FUNCTION: TH07 0x0043836e
 i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
                                              void *param_2)
@@ -551,8 +542,6 @@ ZunResult Supervisor::LoadGameData()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(i, frameCount, timeStart, fpsArray, fpsCount, timeEnd, \
-                  timeDiff, fps, unused, j, fpsSum)
 // FUNCTION: TH07 0x004386f3
 i32 Supervisor::CheckVSync()
 {
@@ -561,10 +550,10 @@ i32 Supervisor::CheckVSync()
     f32 unused;
     f32 fps;
     i32 timeDiff;
-    DWORD timeEnd;
+    u32 timeEnd;
     i32 fpsCount;
     f32 fpsArray[29];
-    DWORD timeStart;
+    u32 timeStart;
     i32 frameCount;
     i32 i;
 
@@ -811,7 +800,6 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(chain, res, mgr)
 // FUNCTION: TH07 0x00439000
 ZunResult Supervisor::RegisterChain()
 {
@@ -837,15 +825,14 @@ ZunResult Supervisor::RegisterChain()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(fps, elapsedTimeInSecs, curTime, targetFps, local_1c, local_28, local_34)
 // FUNCTION: TH07 0x004390a5
 void Supervisor::DrawFpsCounter(i32 param_1)
 {
-    D3DXVECTOR3 local_30;
-    D3DXVECTOR3 local_24;
+    ZunVec3 local_30;
+    ZunVec3 local_24;
     LARGE_INTEGER local_18;
     f32 targetFps;
-    DWORD curTime;
+    u32 curTime;
     f32 elapsedTimeInSecs;
     f32 fps;
 
@@ -856,7 +843,7 @@ void Supervisor::DrawFpsCounter(i32 param_1)
 
         if (g_Supervisor.perfFrequency.LowPart == 0)
         {
-            static DWORD g_LastTime = timeGetTime();
+            static u32 g_LastTime = timeGetTime();
 
             curTime = timeGetTime();
             if (curTime < g_LastTime)
@@ -1053,14 +1040,11 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
 }
 
 // ZUN name: snapShotScreen
-#pragma var_order(local_14, local_18, local_1c, backBuffer, local_24,        \
-                  local_28, local_2c, y, x, bytesPerRow, local_40, local_44, \
-                  hFile)
 // FUNCTION: TH07 0x004395fb
 i32 Supervisor::SnapshotScreen(const char *param_1)
 {
-    HANDLE hFile;
-    DWORD local_44;
+    FILE *file;
+    u32 local_44;
     D3DLOCKED_RECT local_40;
     i32 bytesPerRow;
     i32 x;
@@ -1089,7 +1073,7 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         g_GameErrorContext.Log("16bit ‚ÍŽæ‚èž‚ß‚È‚¢\r\n");
         break;
     case D3DFMT_X8R8G8B8:
-        local_1c = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
+        local_1c = (BITMAPINFO *)malloc(sizeof(BITMAPINFO));
         if (!local_1c)
         {
             // STRING: TH07 0x00496f60
@@ -1133,16 +1117,16 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
             }
         }
         backBuffer->UnlockRect();
-        hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
-        if (hFile == INVALID_HANDLE_VALUE)
+        file = fopen(param_1, "wb");
+        if (!file)
         {
             break;
         }
 
-        WriteFile(hFile, &local_14, 14, &local_44, NULL);
-        WriteFile(hFile, local_1c, 40, &local_44, NULL);
-        WriteFile(hFile, local_18, local_24 * 480, &local_44, NULL);
-        CloseHandle(hFile);
+        fwrite(&local_14, 14, 1, file);
+        fwrite(local_1c, 40, 1, file);
+        fwrite(local_18, local_24 * 480, 1, file);
+        fclose(file);
         break;
     default:
         // STRING: TH07 0x00496f48
@@ -1155,16 +1139,15 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
     return 0;
 }
 
-#pragma var_order(configFile, bgm2, bytesRead2, bgm2Data, bgm, bytesRead, bgmData)
 // FUNCTION: TH07 0x004398b6
 ZunResult Supervisor::LoadConfig(const char *configFilename)
 {
     i32 bgmData[4];
-    DWORD bytesRead;
-    HANDLE bgm;
+    u32 bytesRead;
+    FILE *bgm;
     i32 bgm2Data[4];
-    DWORD bytesRead2;
-    HANDLE bgm2;
+    u32 bytesRead2;
+    FILE *bgm2;
     u32 *configFile;
 
     memset(&g_Supervisor.cfg, 0, sizeof(GameConfiguration));
@@ -1180,11 +1163,11 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.cfg.version = 0x70002;
         g_Supervisor.cfg.padAxisX = 600;
         g_Supervisor.cfg.padAxisY = 600;
-        bgm2 = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-        if (bgm2 != INVALID_HANDLE_VALUE)
+        bgm2 = fopen("./thbgm.dat", "rb");
+        if (bgm2)
         {
-            ReadFile(bgm2, bgm2Data, 16, &bytesRead2, NULL);
-            CloseHandle(bgm2);
+            fread(bgm2Data, 16, 1, bgm2);
+            fclose(bgm2);
             if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 ||
                 bgm2Data[2] != 0x700)
             {
@@ -1214,11 +1197,11 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.cfg = *(GameConfiguration *)configFile;
         free(configFile);
 
-        bgm = CreateFileA("./thbgm.dat", GENERIC_READ, 1, NULL, 3, FILE_FLAG_SEQUENTIAL_SCAN | FILE_ATTRIBUTE_NORMAL, NULL);
-        if (bgm != INVALID_HANDLE_VALUE)
+        bgm = fopen("./thbgm.dat", "rb");
+        if (bgm)
         {
-            ReadFile(bgm, bgmData, 16, &bytesRead, NULL);
-            CloseHandle(bgm);
+            fread(bgmData, 16, 1, bgm);
+            fclose(bgm);
             if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
                 bgmData[2] != 0x700)
             {
@@ -1333,7 +1316,6 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(pathext, pathbuf)
 // FUNCTION: TH07 0x00439dd0
 i32 Supervisor::LoadAudio(i32 idx, const char *path)
 {
@@ -1354,8 +1336,12 @@ i32 Supervisor::LoadAudio(i32 idx, const char *path)
         {
             strcpy(pathbuf, path);
 
-            // ZUN landmine: the result of strrchr is not checked for NULL.
             pathext = strrchr(pathbuf, '.');
+            if (!pathext)
+            {
+                return 1;
+            }
+
             pathext[1] = 'w';
             pathext[2] = 'a';
             pathext[3] = 'v';
@@ -1387,7 +1373,6 @@ ZunResult Supervisor::PlayLoadedAudio(i32 idx)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, local_10c)
 // FUNCTION: TH07 0x00439f4d
 ZunResult Supervisor::PlayAudio(const char *path)
 {
@@ -1405,9 +1390,13 @@ ZunResult Supervisor::PlayAudio(const char *path)
     {
         if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
         {
-            // ZUN landmine: the result of strrchr is not checked for NULL.
             strcpy(local_10c, path);
             local_8 = strrchr(local_10c, '.');
+            if (!local_8)
+            {
+                return ZUN_ERROR;
+            }
+
             local_8[1] = 'w';
             local_8[2] = 'a';
             local_8[3] = 'v';
@@ -1525,18 +1514,17 @@ HRESULT Supervisor::DisableFog()
 }
 
 // FUNCTION: TH07 0x0043a24e
-void Supervisor::SetRenderState(D3DRENDERSTATETYPE stateType, DWORD param_2)
+void Supervisor::SetRenderState(D3DRENDERSTATETYPE stateType, u32 param_2)
 {
     g_AnmManager->Flush();
     this->d3dDevice->SetRenderState(stateType, param_2);
 }
 
-#pragma var_order(time, timeSinceStartup)
 // FUNCTION: TH07 0x0043a27f
 void Supervisor::UpdateStartupTime()
 {
     u32 timeSinceStartup;
-    DWORD time;
+    u32 time;
 
     time = timeGetTime();
     if (time < this->lastTotalPlayTimeUpdate)
@@ -1570,12 +1558,11 @@ void Supervisor::UpdateStartupTime()
     this->lastTotalPlayTimeUpdate = time;
 }
 
-#pragma var_order(time, timeSinceLastTime)
 // FUNCTION: TH07 0x0043a3f4
 void Supervisor::UpdateTime()
 {
     u32 timeSinceLastTime;
-    DWORD time;
+    u32 time;
 
     time = timeGetTime();
     if (time < this->currentTime)
@@ -1607,63 +1594,4 @@ void Supervisor::UpdateTime()
         g_GameManager.plst.gameMinutes %= 60;
     }
     this->currentTime = time;
-}
-
-#pragma var_order(local_8, local_c, local_10, local_14, local_18)
-// FUNCTION: TH07 0x0043a569
-ZunResult Supervisor::CheckIntegrity(const char *version, i32 exeSize,
-                                     i32 exeChecksum)
-{
-#ifdef NON_MATCHING
-    return ZUN_SUCCESS;
-#else
-    i32 local_18;
-    char *local_14;
-    i32 local_10;
-    i32 local_c;
-    char *local_8;
-
-    if (!this->version)
-    {
-        return ZUN_SUCCESS;
-    }
-    else
-    {
-        local_8 = this->version;
-        local_10 = this->versionTableSize;
-        // STRING: TH07 0x00496c18
-        if (strncmp(version, "debug", 5) == 0)
-        {
-            return ZUN_SUCCESS;
-        }
-        else
-        {
-            if (strcmp("0100b", "debug") == 0)
-            {
-                return ZUN_SUCCESS;
-            }
-            else
-            {
-                while ((u32)local_10 > 0)
-                {
-                    if (strncmp(version, local_8, 5) == 0)
-                    {
-                        local_8 = local_8 + 6;
-                        // STRING: TH07 0x00496c10
-                        sscanf(local_8, "%d %d", &local_18, &local_c);
-                        if (local_18 == exeSize && local_c == exeChecksum)
-                        {
-                            return ZUN_SUCCESS;
-                        }
-                        return ZUN_ERROR;
-                    }
-                    local_14 = local_8;
-                    local_8 = strchr(local_8, 10) + 1;
-                    local_10 -= (u8 *)local_8 - (u8 *)local_14;
-                }
-                return ZUN_ERROR;
-            }
-        }
-    }
-#endif
 }

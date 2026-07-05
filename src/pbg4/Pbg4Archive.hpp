@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+
 #include "../inttypes.hpp"
 #include "Pbg4File.hpp"
 
@@ -16,7 +18,7 @@ struct Pbg4Entry
     {
         if (filename)
         {
-            GlobalFree(filename);
+            free(filename);
             filename = NULL;
         }
     }
@@ -43,7 +45,7 @@ struct Pbg4Archive
     u8 *ReadDecompressEntry(const char *filename, u8 *buf);
     void Release();
 
-    DWORD ReadFile(void *data, u32 len)
+    u32 ReadFile(void *data, u32 len)
     {
         Pbg4File *file = this->fileAbstraction;
         return file->Read(data, len);

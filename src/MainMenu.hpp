@@ -107,4 +107,3 @@ struct MainMenu
     // pad 2
     GameConfiguration cfg;
 };
-C_ASSERT(sizeof(MainMenu) == 0xd158);

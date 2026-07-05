@@ -5,7 +5,7 @@
 
 extern u8 g_ItemDropTable[32];
 
-void AngleToVector(D3DXVECTOR3 *out, f32 angle, f32 speed);
+void AngleToVector(ZunVec3 *out, f32 angle, f32 speed);
 
 typedef enum ItemType
 {
@@ -43,9 +43,9 @@ struct Item
     }
 
     AnmVm sprite;
-    D3DXVECTOR3 currentPosition;
-    D3DXVECTOR3 startPosition;
-    D3DXVECTOR3 targetPosition;
+    ZunVec3 currentPosition;
+    ZunVec3 startPosition;
+    ZunVec3 targetPosition;
     ZunTimer timer;
     i8 itemType;
     i8 isInUse;
@@ -55,7 +55,6 @@ struct Item
     // pad 3
     struct Item *next;
 };
-C_ASSERT(sizeof(Item) == 0x288);
 
 struct ItemManager
 {
@@ -66,7 +65,7 @@ struct ItemManager
     void OnUpdate();
     void OnDraw();
     void RemoveAllItems();
-    Item *SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state);
+    Item *SpawnItem(ZunVec3 *heading, i32 itemType, i32 state);
 
     struct Item items[1101];
     i32 nextIndex;

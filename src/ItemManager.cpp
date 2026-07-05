@@ -30,20 +30,10 @@ u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
 ItemManager g_ItemManager;
 
 // FUNCTION: TH07 0x004325c0
-void AngleToVector(D3DXVECTOR3 *vec, f32 angle, f32 speed)
+void AngleToVector(ZunVec3 *vec, f32 angle, f32 speed)
 {
-    /* vec->x = cosf(angle) * speed;
-     * vec->y = sinf(angle) * speed;
-     */
-    __asm {
-        mov eax, vec
-        fld [angle]
-        fsincos
-        fmul [speed]
-        fstp float ptr [eax]
-        fmul [speed]
-        fstp float ptr [eax + 4]
-    }
+    vec->x = cosf(angle) * speed;
+    vec->y = sinf(angle) * speed;
 }
 
 // FUNCTION: TH07 0x004325e0
@@ -60,11 +50,6 @@ void GameManager::AddCurrentPower(i32 amount)
 // FUNCTION: TH07 0x00432630
 ItemManager::ItemManager()
 {
-    i32 idk;
-
-    UselessStack::FourBytes();
-    UselessStack::FourBytes();
-    UselessStack::FourBytes();
 }
 
 // FUNCTION: TH07 0x00432690
@@ -72,9 +57,8 @@ Item::Item()
 {
 }
 
-#pragma var_order(i, item)
 // FUNCTION: TH07 0x004326f0
-Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
+Item *ItemManager::SpawnItem(ZunVec3 *heading, i32 itemType, i32 state)
 {
     Item *item;
     i32 i;
@@ -142,8 +126,6 @@ Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
     return i < 1100 ? item : &this->items[1100];
 }
 
-#pragma var_order(i, itemTimerSecs, itemScore, playerAngle, local_20, itemAcquired, \
-                  item, j, prevPowerIdx, k, prevPowerLevel2)
 // FUNCTION: TH07 0x00432990
 void ItemManager::OnUpdate()
 {
@@ -159,8 +141,8 @@ void ItemManager::OnUpdate()
     i32 i;
 
     item = this->items;
-    D3DXVECTOR3 local_20(g_Player.shooterData->itemCollectRadius,
-                         g_Player.shooterData->itemCollectRadius, 16.0f);
+    ZunVec3 local_20(g_Player.shooterData->itemCollectRadius,
+                     g_Player.shooterData->itemCollectRadius, 16.0f);
     itemAcquired = 0;
     this->activeItemCount = 0;
     this->listTail = &this->listHead;
@@ -186,7 +168,7 @@ void ItemManager::OnUpdate()
             }
             else if (item->timer == 60)
             {
-                item->startPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                item->startPosition = ZunVec3(0.0f, 0.0f, 0.0f);
                 item->state = 0;
             }
         }
@@ -526,7 +508,6 @@ void ItemManager::OnUpdate()
     }
 }
 
-#pragma var_order(i, item)
 // FUNCTION: TH07 0x00433a90
 void ItemManager::RemoveAllItems()
 {
@@ -542,11 +523,10 @@ void ItemManager::RemoveAllItems()
         }
 
         item->state = 1;
-        item->startPosition = D3DXVECTOR3(0.0f, -0.5f, 0.0f);
+        item->startPosition = ZunVec3(0.0f, -0.5f, 0.0f);
     }
 }
 
-#pragma var_order(i, item)
 // FUNCTION: TH07 0x00433b20
 void ItemManager::DespawnAllItems(i32 param_1)
 {
@@ -576,7 +556,6 @@ void ItemManager::DespawnAllItems(i32 param_1)
     }
 }
 
-#pragma var_order(i, item)
 // FUNCTION: TH07 0x00433c40
 void ItemManager::ActivateAllItems()
 {
@@ -601,7 +580,6 @@ void ItemManager::ActivateAllItems()
     }
 }
 
-#pragma var_order(local_8, item)
 // FUNCTION: TH07 0x00433cd0
 void ItemManager::OnDraw()
 {

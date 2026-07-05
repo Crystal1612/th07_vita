@@ -6,6 +6,7 @@
 #include <dinput.h>
 
 #include "MidiOutput.hpp"
+#include "ZunMath.hpp"
 #include "inttypes.hpp"
 
 extern u16 g_CurFrameRawInput;
@@ -74,9 +75,7 @@ struct GameConfiguration
     u8 unused_27[13];
     u32 opts;
 };
-C_ASSERT(sizeof(GameConfiguration) == 0x38);
 
-#pragma pack(4)
 struct Supervisor
 {
     static void DebugPrint2(const char *fmt, ...);
@@ -88,7 +87,6 @@ struct Supervisor
     static u32 OnUpdate(Supervisor *arg);
     static u32 OnDraw(Supervisor *arg);
 
-    ZunResult CheckIntegrity(const char *version, i32 exeSize, i32 exeChecksum);
     void CheckTiming();
     static i32 CheckVSync();
     static void DrawFpsCounter(i32 param_1);
@@ -101,7 +99,7 @@ struct Supervisor
     static ZunResult LoadGameData();
     ZunResult PlayAudio(const char *path);
     ZunResult PlayLoadedAudio(i32 idx);
-    void SetRenderState(D3DRENDERSTATETYPE stateType, DWORD param_2);
+    void SetRenderState(D3DRENDERSTATETYPE stateType, u32 param_2);
     ZunResult SetupDInput();
     i32 SnapshotScreen(const char *param_1);
     ZunResult StopAudio();
@@ -129,8 +127,8 @@ struct Supervisor
     LPDIRECTINPUTDEVICE8A controller;
     DIDEVCAPS controllerCaps;
     HWND hwndGameWindow;
-    D3DXMATRIX viewMatrix;
-    D3DXMATRIX projectionMatrix;
+    ZunMatrix viewMatrix;
+    ZunMatrix projectionMatrix;
     D3DVIEWPORT8 viewport;
     D3DPRESENT_PARAMETERS presentParameters;
     DummyMidiTimer *midiTimer;
@@ -152,8 +150,8 @@ struct Supervisor
     i16 curFps;
     i16 unused_18a;
     u32 flags;
-    DWORD lastTotalPlayTimeUpdate;
-    DWORD currentTime;
+    u32 lastTotalPlayTimeUpdate;
+    u32 currentTime;
     D3DCAPS8 d3dCaps;
     LARGE_INTEGER perfFrequency;
     LARGE_INTEGER prevPerfCounter;
@@ -172,7 +170,7 @@ struct Supervisor
     i32 versionTableSize;
     char *version;
 };
-C_ASSERT(sizeof(Supervisor) == 0x2d0);
+
 extern Supervisor g_Supervisor;
 
 #define NUKE_SUPERVISOR() memset(&g_Supervisor, -1, sizeof(g_Supervisor))

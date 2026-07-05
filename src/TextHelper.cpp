@@ -139,10 +139,7 @@ struct ThBitmapInfo
     BITMAPINFOHEADER bmiHeader;
     RGBQUAD bmiColors[17];
 };
-C_ASSERT(sizeof(ThBitmapInfo) == 0x6c);
 
-#pragma var_order(imageWidthInBytes, deviceContext, originalBitmapObj, \
-                  bitmapInfo, formatInfo, bitmapObj, bitmapData)
 // FUNCTION: TH07 0x00431b2d
 bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
 {
@@ -223,7 +220,6 @@ struct A1R5G5B5
     u16 alpha : 1;
 };
 
-#pragma var_order(bufferRegion, i, doubleArea, bufferCursor, bufferStart)
 // FUNCTION: TH07 0x00431d3c
 bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
                              i32 param5)
@@ -315,8 +311,6 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
     return true;
 }
 
-#pragma var_order(dstBuf, dstWidthBytes, rectToLock, curHeight, srcWidthBytes, \
-                  outSurfaceDesc, srcBuf, lockedRect)
 // FUNCTION: TH07 0x00432164
 bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
 {
@@ -374,8 +368,6 @@ void TextHelper::ReleaseTextBuffer()
     SAFE_RELEASE(g_TextBufferSurface);
 }
 
-#pragma var_order(hdc, hFont, textSurfaceDesc, h, textHelper, srcRect, \
-                  dstRect, dstSurface)
 // FUNCTION: TH07 0x004322a3
 void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
                                          i32 spriteHeight, i32 fontHeight,

@@ -1,7 +1,7 @@
 #include "ResultScreen.hpp"
 
 #include <direct.h>
-#include <stdio.h>
+#include <cstdio>
 #include <time.h>
 
 #include "AnmManager.hpp"
@@ -14,7 +14,6 @@
 #include "SoundPlayer.hpp"
 #include "ZunResult.hpp"
 #include "pbg4/Lzss.hpp"
-#include "utils.hpp"
 
 // GLOBAL: TH07 0x004964f4
 static const f32 g_DifficultyWeightsList[] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
@@ -90,7 +89,7 @@ i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *hscr)
         scoresAmount++;
     }
     nextNode = prevNode->next;
-    prevNode->next = (ScoreListNode *)ZunMemory::Alloc2(sizeof(ScoreListNode));
+    prevNode->next = (ScoreListNode *)malloc(sizeof(ScoreListNode));
     prevNode->next->prev = prevNode;
     prevNode = prevNode->next;
     prevNode->data = hscr;
@@ -112,9 +111,6 @@ void ResultScreen::FreeAllScores(ScoreListNode *scores)
     }
 }
 
-#pragma var_order(uncompressedData, scoreData, i, xorValue,                \
-                  checksum, idx, remainingData, chunk, cursor, parsedTh7k, \
-                  isTh7k, parsedVrsm)
 // FUNCTION: TH07 0x00444c20
 ScoreDat *ResultScreen::OpenScore(const char *path)
 {
@@ -141,7 +137,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         {
             free(scoreData);
         }
-        scoreData = (ScoreDat *)ZunMemory::Alloc2(sizeof(ScoreDat));
+        scoreData = (ScoreDat *)malloc(sizeof(ScoreDat));
         scoreData->dataOffset = sizeof(ScoreDat);
         scoreData->fileLength = sizeof(ScoreDat);
         goto INIT_SCORES;
@@ -191,7 +187,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         goto RECREATE_SCORE;
     }
 
-    uncompressedData = (ScoreDat *)ZunMemory::Alloc2(0xa001c);
+    uncompressedData = (ScoreDat *)malloc(0xa001c);
     memcpy(uncompressedData, scoreData, sizeof(ScoreDat));
     Lzss::Decompress(
         (u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
@@ -216,14 +212,6 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
             if (chunk->version == 1)
             {
                 parsedVrsm = (Vrsm *)chunk;
-                if (g_Supervisor.CheckIntegrity(
-                        parsedVrsm->versionStr,
-                        parsedVrsm->exeSize,
-                        parsedVrsm->exeChecksum) != ZUN_SUCCESS)
-                {
-                    Supervisor::DebugPrint2("warning : score.dat exesumcheck error\r\n");
-                    goto RECREATE_SCORE;
-                }
             }
         }
         if (chunk->th7kLen == 0)
@@ -242,14 +230,13 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     }
 
 INIT_SCORES:
-    scoreData->scores = (ScoreListNode *)ZunMemory::Alloc2(sizeof(ScoreListNode));
+    scoreData->scores = (ScoreListNode *)malloc(sizeof(ScoreListNode));
     scoreData->scores->next = NULL;
     scoreData->scores->data = NULL;
     scoreData->scores->prev = NULL;
     return scoreData;
 }
 
-#pragma var_order(parsedHscr, cursor, sd)
 // FUNCTION: TH07 0x00444f0d
 u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
                                u32 character, u32 difficulty, u8 *numRetries)
@@ -298,7 +285,6 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
                : 100000;
 }
 
-#pragma var_order(parsedCatk, cursor, sd)
 // FUNCTION: TH07 0x00445069
 ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
 {
@@ -329,7 +315,6 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(parsedLsnm, cursor, sd)
 // FUNCTION: TH07 0x00445110
 i32 ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm)
 {
@@ -352,7 +337,6 @@ i32 ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm)
     return 0;
 }
 
-#pragma var_order(parsedClrd, i, cursor, j, sd)
 // FUNCTION: TH07 0x00445192
 ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
 {
@@ -399,7 +383,6 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(pscr, parsedPscr, i, j, cursor, k, sd)
 // FUNCTION: TH07 0x004452f4
 ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
 {
@@ -456,7 +439,6 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(parsedPlst, cursor, sd)
 // FUNCTION: TH07 0x0044547f
 ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
 {
@@ -482,14 +464,10 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
 void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
 {
     FreeAllScores(scoreDat->scores);
-    ZunMemory::Free(scoreDat->scores);
+    free(scoreDat->scores);
     free(scoreDat);
 }
 
-#pragma var_order(difficulty, characterSlot, fileBuffer, sizeOfFile,         \
-                  currentCharacter, character, clrd, catk, pscr, j, k, vrsm, \
-                  compressedBuffer, scoreDat, originalByte, remainingSize,   \
-                  xorValue, bytes, sd)
 // FUNCTION: TH07 0x0044552c
 void ResultScreen::WriteScore()
 {
@@ -515,7 +493,7 @@ void ResultScreen::WriteScore()
 
     sizeOfFile = 0;
 
-    fileBuffer = (u8 *)ZunMemory::Alloc2(0xa0000);
+    fileBuffer = (u8 *)malloc(0xa0000);
 
     memcpy(fileBuffer + sizeOfFile, this->scoreDat, sizeof(ScoreDat));
     sizeOfFile += sizeof(ScoreDat);
@@ -640,7 +618,7 @@ void ResultScreen::WriteScore()
 
     memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer,
            scoreDat->srcLen);
-    GlobalFree(compressedBuffer);
+    free(compressedBuffer);
     sizeOfFile = scoreDat->srcLen + sizeof(ScoreDat);
 
     sd = (ScoreDat *)fileBuffer;
@@ -764,7 +742,6 @@ void ResultScreen::FreeScore(i32 difficulty, i32 character)
     FreeAllScores(&this->scoreLists[difficulty][character]);
 }
 
-#pragma var_order(vmIdx, vm, i, j)
 // FUNCTION: TH07 0x00445db3
 u32 ResultScreen::OnUpdate(ResultScreen *arg)
 {
@@ -797,12 +774,12 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 if (vmIdx == arg->cursor)
                 {
                     vm->color.color = 0xffffffff;
-                    vm->offset = D3DXVECTOR3(-4.0f, -4.0f, 0.0f);
+                    vm->offset = ZunVec3(-4.0f, -4.0f, 0.0f);
                 }
                 else
                 {
                     vm->color.color = 0xb0ffffff;
-                    vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                    vm->offset = ZunVec3(0.0f, 0.0f, 0.0f);
                 }
             }
             if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
@@ -836,12 +813,12 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             if (vmIdx == arg->cursor)
             {
                 vm->color.color = 0xffffffff;
-                vm->offset = D3DXVECTOR3(-4.0f, -4.0f, 0.0f);
+                vm->offset = ZunVec3(-4.0f, -4.0f, 0.0f);
             }
             else
             {
                 vm->color.color = 0xb0ffffff;
-                vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                vm->offset = ZunVec3(0.0f, 0.0f, 0.0f);
             }
         }
         if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
@@ -1136,7 +1113,6 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(vmIdx, vm, slowRateFactor, cursor, cursor2)
 // FUNCTION: TH07 0x00446a66
 ZunResult ResultScreen::HandleResultKeyboard()
 {
@@ -1325,7 +1301,6 @@ ZunResult ResultScreen::HandleResultKeyboard()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(timeinfo, seconds)
 // FUNCTION: TH07 0x00447161
 void ResultScreen::GetDate(char *outDate)
 {
@@ -1338,8 +1313,6 @@ void ResultScreen::GetDate(char *outDate)
     strftime(outDate, 6, "%m/%d", timeinfo);
 }
 
-#pragma var_order(vm, interrupt, vmIdx, replayFile, replayPath, cursor, \
-                  replayPath2, cursor2)
 // FUNCTION: TH07 0x00447198
 ZunResult ResultScreen::HandleReplaySaveKeyboard()
 {
@@ -1731,7 +1704,7 @@ ZunResult ResultScreen::CheckConfirmButton()
 i32 ResultScreen::DrawStats()
 {
     AnmVm *vm;
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
 
     switch (this->resultScreenState)
     {
@@ -2013,12 +1986,11 @@ i32 ResultScreen::DrawStats()
     return 0;
 }
 
-#pragma var_order(vm, pos, rankingProbably, clearPercent, slowdown, color)
 // FUNCTION: TH07 0x004488a9
 ZunResult ResultScreen::DrawFinalStats()
 {
     AnmVm *vm;
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     f32 rankingProbably;
     f32 clearPercent;
     f32 slowdown;
@@ -2161,8 +2133,6 @@ ZunResult ResultScreen::DrawFinalStats()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(charPos, i, name, vm, node, j, \
-                  pos, oldX, spellcardIdx, offsetX, offsetY, charBuf)
 // FUNCTION: TH07 0x00448d40
 u32 ResultScreen::OnDraw(ResultScreen *arg)
 {
@@ -2171,13 +2141,13 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     f32 offsetX;
     i32 spellcardIdx;
     f32 oldX;
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     i32 j;
     ScoreListNode *node;
     AnmVm *vm;
     char name[9];
     i32 i;
-    D3DXVECTOR3 charPos;
+    ZunVec3 charPos;
 
     vm = arg->vms;
     g_AnmManager->Flush();
@@ -2203,13 +2173,13 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             arg->spellcardListVms[0].pos = pos;
             arg->spellcardListVms[0].pos.x += 64.0f;
             g_AnmManager->DrawNoRotation(arg->spellcardListVms);
-            pos[1] += 18.0f;
-            pos[0] += 24.0f;
+            pos.y += 18.0f;
+            pos.x += 24.0f;
             g_AsciiManager.color = 0xffe0e0ef;
             AsciiManager::AddFormatText(&g_AsciiManager, &pos,
                                         // STRING: TH07 0x004964b4
                                         "No  Name      Score(Stage)  Date   Slow");
-            pos[1] += 18.0f;
+            pos.y += 18.0f;
             node = arg->scoreLists[arg->diffPlayed][arg->charUsed].next;
             for (i = 0; i < 10; i++)
             {
@@ -2269,8 +2239,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 // STRING: TH07 0x00496468
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, " %5s   %3.2f",
                                             node->data->date, node->data->slowRatePercent);
-                pos[1] += 18.0f;
-                pos[0] -= 368.0f;
+                pos.y += 18.0f;
+                pos.x -= 368.0f;
                 node = node->next;
             }
         }
@@ -2279,7 +2249,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             pos = vm->pos;
             arg->spellcardListVms[10].pos = pos;
             g_AnmManager->DrawNoRotation(arg->spellcardListVms + 10);
-            pos[1] += 16.0f;
+            pos.y += 16.0f;
             for (i = 0; i < 10; i++)
             {
                 spellcardIdx = arg->lastSpellcardSelected * 10 + i;
@@ -2288,12 +2258,12 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                     break;
                 }
                 oldX = pos.x;
-                pos[0] += 320.0f;
-                pos[1] += 16.0f;
+                pos.x += 320.0f;
+                pos.y += 16.0f;
                 arg->rightArrowVm.pos = pos;
                 arg->rightArrowVm.scale.x = 2.375f;
                 g_AnmManager->DrawNoRotation(&arg->rightArrowVm);
-                pos[1] -= 16.0f;
+                pos.y -= 16.0f;
                 pos.x = oldX;
                 arg->spellcardListVms[i].pos = pos;
                 if (g_GameManager.catk[spellcardIdx]
@@ -2312,9 +2282,9 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 }
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, "No.%.2d",
                                             spellcardIdx + 1);
-                arg->spellcardListVms[i].pos[0] += 96.0f;
+                arg->spellcardListVms[i].pos.x += 96.0f;
                 g_AnmManager->DrawNoRotation(arg->spellcardListVms + i);
-                pos[0] += 496.0f;
+                pos.x += 496.0f;
                 if (g_GameManager.catk[spellcardIdx]
                         .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
                 {
@@ -2332,9 +2302,9 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                         g_GameManager.catk[spellcardIdx]
                             .numAttemptsPerShot[arg->prevSpellcardListPage]);
                 }
-                pos[0] -= 496.0f;
-                pos[0] += 424.0f;
-                pos[1] -= 13.0f;
+                pos.x -= 496.0f;
+                pos.x += 424.0f;
+                pos.y -= 13.0f;
                 g_AsciiManager.color = 0xffa08090;
                 g_AsciiManager.scale.x = 0.8f;
                 g_AsciiManager.scale.y = 0.8f;
@@ -2347,22 +2317,22 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                         g_GameManager.catk[spellcardIdx]
                             .highScorePerShot[arg->prevSpellcardListPage]);
                 }
-                pos[0] -= 424.0f;
-                pos[1] += 13.0f;
+                pos.x -= 424.0f;
+                pos.y += 13.0f;
                 g_AsciiManager.scale.x = 1.0f;
                 g_AsciiManager.scale.y = 1.0f;
                 if (arg->listScrollAnimState == 0)
                 {
-                    pos[1] += 33.0f;
+                    pos.y += 33.0f;
                 }
                 else if (arg->frameTimer < 20)
                 {
-                    pos[1] +=
+                    pos.y +=
                         (f32)((20 - arg->frameTimer) * 33 / 20);
                 }
                 else
                 {
-                    pos[1] +=
+                    pos.y +=
                         (f32)((arg->frameTimer - 20) * 33 / 20);
                 }
             }
@@ -2374,7 +2344,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     }
     if (arg->resultScreenState == 10 || arg->resultScreenState == 14)
     {
-        pos = D3DXVECTOR3(160.0f, 356.0f, 0.0f);
+        pos = ZunVec3(160.0f, 356.0f, 0.0f);
         for (i = 0; i < 6; i++)
         {
             for (j = 0; j < 16; j++)
@@ -2420,10 +2390,10 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                     }
                 }
                 g_AsciiManager.AddString(&charPos, charBuf);
-                pos[0] += 20.0f;
+                pos.x += 20.0f;
             }
-            pos[0] -= (f32)(j * 20);
-            pos[1] += 18.0f;
+            pos.x -= (f32)(j * 20);
+            pos.y += 18.0f;
         }
     }
     g_AsciiManager.scale.x = 1.0f;
@@ -2507,7 +2477,6 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(i, vm, j, k, catk, catkIdx)
 // FUNCTION: TH07 0x00449b05
 ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
 {
@@ -2560,18 +2529,16 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         vm = arg->vms;
         for (i = 0; i < 41; i++, vm++)
         {
-            vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-            vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            vm->pos = ZunVec3(0.0f, 0.0f, 0.0f);
+            vm->offset = ZunVec3(0.0f, 0.0f, 0.0f);
             g_AnmManager->SetAnmIdxAndExecuteScript(vm, i + 2304);
         }
-        UselessStack::FourBytes();
         g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 2320);
         vm = arg->spellcardListVms;
         for (i = 0; i < 15; i++, vm++)
         {
-            UselessStack::FourBytes();
             g_AnmManager->InitializeAndSetActiveSprite(vm, i + 1813);
-            vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+            vm->pos = ZunVec3(0.0f, 0.0f, 0.0f);
             vm->anchor = 3;
             vm->fontWidth = 15;
             vm->fontHeight = 15;

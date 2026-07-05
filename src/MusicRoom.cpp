@@ -38,7 +38,6 @@ ZunResult MusicRoom::CheckInputEnable()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(unusedListingOffset, i, local_54)
 // FUNCTION: TH07 0x0043a801
 i32 MusicRoom::ProcessInput()
 {
@@ -183,11 +182,10 @@ recheck:
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(i, local_c, local_18)
 // FUNCTION: TH07 0x0043ac4c
 u32 MusicRoom::OnDraw(MusicRoom *arg)
 {
-    D3DXVECTOR3 local_18;
+    ZunVec3 local_18;
     char local_c[4];
     i32 i;
 
@@ -227,7 +225,6 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(offset, lineIdx, curChar, charIdx, firstChar, lineCharBuffer)
 // FUNCTION: TH07 0x0043ae20
 ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
 {
@@ -400,11 +397,6 @@ ZunResult MusicRoom::RegisterChain()
     static MusicRoom g_MusicRoom;
     MusicRoom *musicRoom = &g_MusicRoom;
 
-    // ZUN bloat:
-    // Once would have sufficed
-    // And yet ZUN must memset twice
-    // But just to be nice
-    memset(musicRoom, 0, sizeof(MusicRoom));
     musicRoom->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
     musicRoom->calcChain->arg = musicRoom;
     musicRoom->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;

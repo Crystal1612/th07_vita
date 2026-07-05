@@ -48,13 +48,12 @@ struct ThBgmFormat
 {
     char name[16];
     i32 startOffset;
-    DWORD preloadAllocSize;
+    u32 preloadAllocSize;
     i32 introLength;
     i32 totalLength;
     WAVEFORMATEX format;
     // pad 2
 };
-C_ASSERT(sizeof(ThBgmFormat) == 0x34);
 
 //-----------------------------------------------------------------------------
 // Name: class CWaveFile
@@ -66,9 +65,9 @@ class CWaveFile
     HMMIO h_mmio;
     MMCKINFO m_ck;
     MMCKINFO m_ckRiff;
-    DWORD m_dwSize;
+    u32 m_dwSize;
     MMIOINFO m_mmioinfo;
-    DWORD m_dwFlags;
+    u32 m_dwFlags;
     BOOL m_bIsReadingFromMemory;
     u8 *m_pbData;
     u8 *m_pbDataCur;
@@ -79,13 +78,13 @@ class CWaveFile
     CWaveFile();
     ~CWaveFile();
 
-    HRESULT Open(LPCSTR strFileName, ThBgmFormat *pzwf, DWORD dwFlags);
+    HRESULT Open(LPCSTR strFileName, ThBgmFormat *pzwf, u32 dwFlags);
     HRESULT OpenFromMemory(u8 *pbData, ULONG ulDataSize, ThBgmFormat *pzwf,
-                           DWORD dwFlags);
+                           u32 dwFlags);
     HRESULT Close();
 
-    HRESULT Read(u8 *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead);
-    DWORD GetSize();
+    HRESULT Read(u8 *pBuffer, u32 dwSizeToRead, u32 *pdwSizeRead);
+    u32 GetSize();
     HRESULT ResetFile(bool bLoop);
     HRESULT Reopen(ThBgmFormat *pzwf);
 
@@ -107,25 +106,25 @@ class CSoundManager
     CSoundManager();
     ~CSoundManager();
 
-    HRESULT Initialize(HWND hWnd, DWORD dwCoopLevel, DWORD dwPrimaryChannels,
-                       DWORD dwPrimaryFreq, DWORD dwPrimaryBitRate);
+    HRESULT Initialize(HWND hWnd, u32 dwCoopLevel, u32 dwPrimaryChannels,
+                       u32 dwPrimaryFreq, u32 dwPrimaryBitRate);
     LPDIRECTSOUND8 GetDirectSound()
     {
         return pDS;
     }
-    HRESULT SetPrimaryBufferFormat(DWORD dwPrimaryChannels, DWORD dwPrimaryFreq,
-                                   DWORD dwPrimaryBitRate);
+    HRESULT SetPrimaryBufferFormat(u32 dwPrimaryChannels, u32 dwPrimaryFreq,
+                                   u32 dwPrimaryBitRate);
 
     HRESULT CreateStreaming(CStreamingSound **ppStreamingSound,
-                            LPCSTR strWaveFileName, DWORD dwCreationFlags,
-                            GUID guid3DAlgorithm, DWORD dwNotifyCount,
-                            DWORD dwNotifySize, HANDLE hNotifyEvent,
+                            LPCSTR strWaveFileName, u32 dwCreationFlags,
+                            GUID guid3DAlgorithm, u32 dwNotifyCount,
+                            u32 dwNotifySize, HANDLE hNotifyEvent,
                             ThBgmFormat *pzwf);
     HRESULT CreateStreamingFromMemory(CStreamingSound **ppStreamingSound,
                                       u8 *pbData, ULONG ulDataSize,
-                                      ThBgmFormat *pzwf, DWORD dwCreationFlags,
-                                      GUID guid3DAlgorithm, DWORD dwNotifyCount,
-                                      DWORD dwNotifySize, HANDLE hNotifyEvent);
+                                      ThBgmFormat *pzwf, u32 dwCreationFlags,
+                                      GUID guid3DAlgorithm, u32 dwNotifyCount,
+                                      u32 dwNotifySize, HANDLE hNotifyEvent);
 };
 
 //-----------------------------------------------------------------------------
@@ -137,22 +136,22 @@ class CSound
 {
   public:
     LPDIRECTSOUNDBUFFER *m_apDSBuffer;
-    DWORD m_dwDSBufferSize;
+    u32 m_dwDSBufferSize;
     CWaveFile *m_pWaveFile;
-    DWORD m_dwNumBuffers;
+    u32 m_dwNumBuffers;
     i32 m_iCurFadeoutProgress;
     i32 m_iTotalFadeout;
-    DWORD m_dwIsFadingOut;
-    DWORD m_dwPriority;
-    DWORD m_dwFlags;
-    DWORD unused_28;
-    DWORD unused_2c;
+    u32 m_dwIsFadingOut;
+    u32 m_dwPriority;
+    u32 m_dwFlags;
+    u32 unused_28;
+    u32 unused_2c;
     BOOL m_bIsPlaying;
     DSBUFFERDESC m_dsbd;
     CSoundManager *m_pSoundManager;
 
-    CSound(LPDIRECTSOUNDBUFFER *apDSBuffer, DWORD dwDSBufferSize,
-           DWORD dwNumBuffers, CWaveFile *pWaveFile);
+    CSound(LPDIRECTSOUNDBUFFER *apDSBuffer, u32 dwDSBufferSize,
+           u32 dwNumBuffers, CWaveFile *pWaveFile);
     virtual ~CSound();
 
     // SYNTHETIC: TH07 0x0045d030
@@ -162,15 +161,14 @@ class CSound
     HRESULT FillBufferWithSound(LPDIRECTSOUNDBUFFER pDSB,
                                 BOOL bRepeatWavIfBufferLarger);
     LPDIRECTSOUNDBUFFER GetFreeBuffer();
-    LPDIRECTSOUNDBUFFER GetBuffer(DWORD dwIndex);
+    LPDIRECTSOUNDBUFFER GetBuffer(u32 dwIndex);
 
-    HRESULT Play(DWORD dwPriority, DWORD dwFlags);
+    HRESULT Play(u32 dwPriority, u32 dwFlags);
     u32 Stop();
     HRESULT Reset();
     HRESULT Pause();
     HRESULT Unpause();
 };
-C_ASSERT(sizeof(CSound) == 0x5c);
 
 //-----------------------------------------------------------------------------
 // Name: class CStreamingSound
@@ -180,16 +178,16 @@ C_ASSERT(sizeof(CSound) == 0x5c);
 class CStreamingSound : public CSound
 {
   public:
-    DWORD m_dwLastPlayPos;
-    DWORD m_dwPlayProgress;
-    DWORD m_dwNextWriteOffset;
+    u32 m_dwLastPlayPos;
+    u32 m_dwPlayProgress;
+    u32 m_dwNextWriteOffset;
     BOOL m_bFillNextNotificationWithSilence;
-    DWORD m_dwNotifySize;
+    u32 m_dwNotifySize;
     HANDLE m_hNotifyEvent;
     BOOL m_bIsLocked;
 
-    CStreamingSound(LPDIRECTSOUNDBUFFER pDSBuffer, DWORD dwDSBufferSize,
-                    CWaveFile *pWaveFile, DWORD dwNotifySize);
+    CStreamingSound(LPDIRECTSOUNDBUFFER pDSBuffer, u32 dwDSBufferSize,
+                    CWaveFile *pWaveFile, u32 dwNotifySize);
     ~CStreamingSound();
 
     // SYNTHETIC: TH07 0x0045da80
@@ -213,6 +211,5 @@ class CStreamingSound : public CSound
         return this->m_pWaveFile;
     }
 };
-C_ASSERT(sizeof(CStreamingSound) == 0x78);
 
 void DebugPrint(const char *fmt, ...);

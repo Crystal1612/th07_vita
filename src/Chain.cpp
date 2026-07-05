@@ -210,7 +210,6 @@ i32 Chain::RunDrawChain()
     return updateCount;
 }
 
-#pragma var_order(curElem, tmp2, tmp, nextRootElem)
 // FUNCTION: TH07 0x0042fee0
 void Chain::ReleaseSingleChain(ChainElem *root)
 {
@@ -266,10 +265,7 @@ ChainElem *Chain::CreateElem(ChainCallback callback)
 // FUNCTION: TH07 0x00430140
 void Chain::Cut(ChainElem *toRemove)
 {
-    BOOL isDrawChain;
     ChainElem *curElem;
-
-    isDrawChain = FALSE;
 
     if (!toRemove)
     {
@@ -285,7 +281,6 @@ void Chain::Cut(ChainElem *toRemove)
         }
         curElem = curElem->next;
     }
-    isDrawChain = TRUE;
     curElem = &this->drawChain;
     while (curElem)
     {

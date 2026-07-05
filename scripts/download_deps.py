@@ -129,28 +129,3 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
     _ = (vs_path / "Common7" / "Packages" / "Debugger" / "msvcr70.dll").rename(
         vc_path / "bin" / "msvcr70.dll"
     )
-
-
-# provides pragma var_order
-def install_hackery(cl_path: Path, msvc_path: Path, vc_path: Path):
-    c1xx_path = vc_path / "bin" / "c1xx.dll"
-    orig_path = vc_path / "bin" / "c1xxorig.dll"
-
-    if orig_path.exists() and c1xx_path.exists():
-        return
-    os.chdir(msvc_path)
-    download(HACKERY_URL, msvc_path / "hackery.cpp")
-    if not orig_path.exists():
-        _ = shutil.copy(c1xx_path, orig_path)
-    _ = run_program(
-        str(cl_path),
-        f'/I"{vc_path / "include"}"',
-        f'/I"{vc_path / "PlatformSDK" / "Include"}"',
-        "/LD",
-        conv_path(msvc_path / "hackery.cpp"),
-        "/link",
-        f"/LIBPATH:{vc_path / 'lib'}",
-        f"/LIBPATH:{vc_path / 'PlatformSDK' / 'lib'}",
-        f"/OUT:{msvc_path / 'c1xx.dll'}",
-    )
-    _ = (msvc_path / "c1xx.dll").replace(c1xx_path)

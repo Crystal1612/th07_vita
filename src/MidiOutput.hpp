@@ -89,7 +89,6 @@ struct MidiTrack
     u8 *savedTrackDataCursor;
     u32 savedTrackLengthOther;
 };
-C_ASSERT(sizeof(MidiTrack) == 0x20);
 
 struct MidiDevice
 {
@@ -193,7 +192,6 @@ struct MidiOutput : MidiTimer
     u64 savedVolume;
     u64 savedfield_0x130;
 };
-C_ASSERT(sizeof(MidiOutput) == 0x300);
 
 // VTABLE: TH07 0x00496c0c
 struct DummyMidiTimer : MidiTimer

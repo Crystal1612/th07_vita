@@ -61,7 +61,6 @@ void EnemyEclInstr::ExInsSetPosToBoss(Enemy *enemy, EclRawInstr *instr)
     enemy->disableMovement = 1;
 }
 
-#pragma var_order(i, bullet, local_10)
 // FUNCTION: TH07 0x00417c30
 void EnemyEclInstr::ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr)
 {
@@ -122,7 +121,6 @@ void EnemyEclInstr::ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-#pragma var_order(bulletProps, i, local_e4, distance, bullet)
 // FUNCTION: TH07 0x00417e50
 void EnemyEclInstr::ExInsTurnBulletsIntoOtherBullets(Enemy *enemy,
                                                      EclRawInstr *instr)
@@ -191,7 +189,6 @@ void EnemyEclInstr::ExInsNoOp(Enemy *enemy, EclRawInstr *instr)
 {
 }
 
-#pragma var_order(bulletProps, i, bullet)
 // FUNCTION: TH07 0x00418120
 void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy,
                                                       EclRawInstr *instr)
@@ -199,9 +196,6 @@ void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy,
     Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
-
-    // ZUN bloat: Ok
-    instr->GetSecondArg();
 
     enemy->currentContext.eclContextArgs.floatVars1[0] = -999.0f;
     for (i = 0; i < 1024; i++, bullet++)
@@ -230,14 +224,8 @@ void EnemyEclInstr::ExInsCopyMainBossMovement(Enemy *enemy, EclRawInstr *instr)
     enemy->moveInterpStartPos = boss->position;
     enemy->moveRadius = boss->moveRadius;
     enemy->moveAngularVelocity = boss->moveAngularVelocity;
-
-    // ZUN bloat: what??????????????????
-    switch (boss->currentContext.eclContextArgs.intVars2[0])
-    {
-    }
 }
 
-#pragma var_order(bulletProps, i, bullet)
 // FUNCTION: TH07 0x004182d0
 void EnemyEclInstr::ExInsSplitBulletsOrShootBackwards(Enemy *enemy,
                                                       EclRawInstr *instr)
@@ -331,15 +319,14 @@ void EnemyEclInstr::ExInsSplitBulletsOrShootBackwards(Enemy *enemy,
     }
 }
 
-#pragma var_order(p, rot, d)
 // FUNCTION: TH07 0x004185d0
-i32 IsPointInRotatedRect(D3DXVECTOR3 *point, D3DXVECTOR3 *center,
-                         D3DXVECTOR3 *size, D3DXVECTOR3 *pivot,
+i32 IsPointInRotatedRect(ZunVec3 *point, ZunVec3 *center,
+                         ZunVec3 *size, ZunVec3 *pivot,
                          f32 sine, f32 cosine)
 {
-    D3DXVECTOR3 d;
-    D3DXVECTOR3 rot;
-    D3DXVECTOR3 p;
+    ZunVec3 d;
+    ZunVec3 rot;
+    ZunVec3 p;
 
     d = *point - *pivot;
 
@@ -361,17 +348,16 @@ i32 IsPointInRotatedRect(D3DXVECTOR3 *point, D3DXVECTOR3 *center,
     return 1;
 }
 
-#pragma var_order(j, sine, dot, size, bullet, laser, i, cosine, center)
 // FUNCTION: TH07 0x00418880
 void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
                                                   EclRawInstr *instr)
 {
-    D3DXVECTOR3 center;
+    ZunVec3 center;
     f32 cosine;
     i32 i;
     Laser *laser;
     Bullet *bullet;
-    D3DXVECTOR3 size;
+    ZunVec3 size;
     f32 dot;
     f32 sine;
     i32 j;
@@ -448,19 +434,17 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
     }
 }
 
-#pragma var_order(dirY, j, sine, dot, size, bullet, dirX, laser, i, \
-                  cosine, center)
 // FUNCTION: TH07 0x00418b40
 void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy,
                                                 EclRawInstr *instr)
 {
-    D3DXVECTOR3 center;
+    ZunVec3 center;
     f32 cosine;
     i32 i;
     Laser *laser;
     f32 dirX;
     Bullet *bullet;
-    D3DXVECTOR3 size;
+    ZunVec3 size;
     f32 dot;
     f32 sine;
     i32 j;
@@ -580,7 +564,6 @@ void EnemyEclInstr::ExInsYoumuSetGameSpeed(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-#pragma var_order(i, fps, bullet)
 // FUNCTION: TH07 0x00418fc0
 void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
 {
@@ -616,7 +599,6 @@ void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
     g_Stage.spellcardVms[1].pendingInterrupt = 1;
 }
 
-#pragma var_order(bulletProps, numBullets, i, bullet, j)
 // FUNCTION: TH07 0x004190f0
 void EnemyEclInstr::ExInsBurstLargeBullets(Enemy *enemy, EclRawInstr *instr)
 {
@@ -691,7 +673,6 @@ void EnemyEclInstr::ExInsBurstLargeBullets(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-#pragma var_order(i, bullet)
 // FUNCTION: TH07 0x004194e0
 void EnemyEclInstr::ExInsYoumuCurveBulletsBelow(Enemy *enemy,
                                                 EclRawInstr *instr)
@@ -786,7 +767,6 @@ void EnemyEclInstr::ExInsYuyukoTransformButterflyBullets(Enemy *enemy,
     }
 }
 
-#pragma var_order(i, bullet, args, angleOffset)
 // FUNCTION: TH07 0x00419880
 void EnemyEclInstr::ExInsYuyukoButterflySpawnEnemy(Enemy *enemy,
                                                    EclRawInstr *instr)
@@ -848,7 +828,6 @@ void EnemyEclInstr::ExInsYuyukoCountButterflyBullets(Enemy *enemy,
     }
 }
 
-#pragma var_order(triggerHeight, bulletProps, i, bullet, j)
 // FUNCTION: TH07 0x00419a50
 void EnemyEclInstr::ExInsBurstLargeBullets2(Enemy *enemy, EclRawInstr *instr)
 {
@@ -931,7 +910,6 @@ void EnemyEclInstr::ExInsYuyukoPlayResurrectionButterflyBgm(Enemy *enemy,
     }
 }
 
-#pragma var_order(i, bulletProps, timerMod2, bullet)
 // FUNCTION: TH07 0x00419dc0
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy,
                                                    EclRawInstr *instr)
@@ -1000,7 +978,6 @@ void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy,
     }
 }
 
-#pragma var_order(i, bulletProps, timerMod3, bullet)
 // FUNCTION: TH07 0x00419ff0
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange2(Enemy *enemy,
                                                     EclRawInstr *instr)
@@ -1047,15 +1024,7 @@ void EnemyEclInstr::ExInsSpawnBulletsWithDirChange2(Enemy *enemy,
                 bulletProps.speed1 = 0.8f;
             }
 
-            // ZUN bloat: What
-            if (timerMod3 != 0)
-            {
-                bulletProps.count1 = 1;
-            }
-            else
-            {
-                bulletProps.count1 = 1;
-            }
+            bulletProps.count1 = 1;
             bulletProps.count2 = 1;
             bulletProps.flags = 0x208;
             bulletProps.aimMode = 3;

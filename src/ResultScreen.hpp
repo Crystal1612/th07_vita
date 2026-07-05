@@ -1,11 +1,8 @@
 #pragma once
 
-#include <windows.h>
-
 #include "AnmVm.hpp"
 #include "Chain.hpp"
 #include "ReplayManager.hpp"
-#include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
@@ -27,7 +24,6 @@ struct Th7k
     u8 isPlayerScore;
     // pad 2
 };
-C_ASSERT(sizeof(Th7k) == 0xc);
 
 struct Catk : Th7k
 {
@@ -38,7 +34,6 @@ struct Catk : Th7k
     u16 numAttemptsPerShot[7];
     u16 numSuccessesPerShot[7];
 };
-C_ASSERT(sizeof(Catk) == 0x78);
 
 struct Hscr : Th7k
 {
@@ -52,7 +47,6 @@ struct Hscr : Th7k
     i8 numRetries;
     // pad 1
 };
-C_ASSERT(sizeof(Hscr) == 0x28);
 
 struct Clrd : Th7k
 {
@@ -61,7 +55,6 @@ struct Clrd : Th7k
     u8 characterShotType;
     // pad 3
 };
-C_ASSERT(sizeof(Clrd) == 0x1c);
 
 struct Pscr : Th7k
 {
@@ -72,7 +65,6 @@ struct Pscr : Th7k
     u8 stage;
     // pad 1
 };
-C_ASSERT(sizeof(Pscr) == 0x18);
 
 struct PlstPlayCounts
 {
@@ -101,7 +93,6 @@ struct Lsnm : Th7k
 {
     char name[12];
 };
-C_ASSERT(sizeof(Lsnm) == 0x18);
 
 struct Vrsm : Th7k
 {
@@ -109,7 +100,6 @@ struct Vrsm : Th7k
     i32 exeSize;
     i32 exeChecksum;
 };
-C_ASSERT(sizeof(Vrsm) == 0x1c);
 
 struct ScoreListNode
 {
@@ -126,7 +116,6 @@ struct ScoreListNode
     ScoreListNode *next;
     Hscr *data;
 };
-C_ASSERT(sizeof(ScoreListNode) == 0xc);
 
 struct ScoreDat
 {
@@ -141,7 +130,6 @@ struct ScoreDat
     SIZE_T dstLen;
     i32 srcLen;
 };
-C_ASSERT(sizeof(ScoreDat) == 0x1c);
 
 struct ResultScreen
 {
@@ -153,7 +141,7 @@ struct ResultScreen
 
     ~ResultScreen()
     {
-        ZunMemory::Free(this->scoreDat);
+        free(this->scoreDat);
     }
 
     static ZunResult RegisterChain(u32 type);
@@ -225,4 +213,3 @@ struct ResultScreen
     ReplayFile replays[15];
     ReplayFile defaultReplay;
 };
-C_ASSERT(sizeof(ResultScreen) == 0xce6c);

@@ -8,12 +8,6 @@
 // FUNCTION: TH07 0x0044a460
 void ScreenEffect::Clear(D3DCOLOR color)
 {
-    // ZUN bloat: This is doing the exact same thing twice
-    g_Supervisor.d3dDevice->Clear(0, NULL, 3, color, 1.0f, 0);
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
     g_Supervisor.d3dDevice->Clear(0, NULL, 3, color, 1.0f, 0);
     if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
     {
@@ -66,10 +60,10 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
 
     VertexDiffuseXyzrhw vertices[4];
 
-    vertices[0].pos = D3DXVECTOR3(rect->left, rect->top, 0.0f);
-    vertices[1].pos = D3DXVECTOR3(rect->right, rect->top, 0.0f);
-    vertices[2].pos = D3DXVECTOR3(rect->left, rect->bottom, 0.0f);
-    vertices[3].pos = D3DXVECTOR3(rect->right, rect->bottom, 0.0f);
+    vertices[0].pos = ZunVec3(rect->left, rect->top, 0.0f);
+    vertices[1].pos = ZunVec3(rect->right, rect->top, 0.0f);
+    vertices[2].pos = ZunVec3(rect->left, rect->bottom, 0.0f);
+    vertices[3].pos = ZunVec3(rect->right, rect->bottom, 0.0f);
     vertices[0].w = vertices[1].w = vertices[2].w = vertices[3].w = 1.0f;
     vertices[0].diffuse.color =
         vertices[1].diffuse.color =
@@ -114,10 +108,10 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
 
     VertexDiffuseXyzrhw vertices[4];
 
-    vertices[0].pos = D3DXVECTOR3(rect->left, rect->top, 0.0f);
-    vertices[1].pos = D3DXVECTOR3(rect->right, rect->top, 0.0f);
-    vertices[2].pos = D3DXVECTOR3(rect->left, rect->bottom, 0.0f);
-    vertices[3].pos = D3DXVECTOR3(rect->right, rect->bottom, 0.0f);
+    vertices[0].pos = ZunVec3(rect->left, rect->top, 0.0f);
+    vertices[1].pos = ZunVec3(rect->right, rect->top, 0.0f);
+    vertices[2].pos = ZunVec3(rect->left, rect->bottom, 0.0f);
+    vertices[3].pos = ZunVec3(rect->right, rect->bottom, 0.0f);
     vertices[0].w = vertices[1].w = vertices[2].w = vertices[3].w = 1.0f;
     vertices[0].diffuse.color = param_2;
     vertices[1].diffuse.color = param_3;
@@ -310,7 +304,6 @@ ZunResult BombEffects::DeletedCallback(BombEffects *arg)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, local_c, bombEffects)
 // FUNCTION: TH07 0x0044b310
 BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
                                         u32 arg2, u32 arg3)

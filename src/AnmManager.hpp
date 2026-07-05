@@ -13,48 +13,46 @@
 
 struct VertexDiffuseXyzrhw
 {
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     f32 w;
     ZunColor diffuse;
 };
-C_ASSERT(sizeof(VertexDiffuseXyzrhw) == 0x14);
 
 struct VertexTex1DiffuseXyz
 {
-    D3DXVECTOR3 position;
+    ZunVec3 position;
     ZunColor diffuse;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(VertexTex1DiffuseXyz) == 0x18);
+
 extern VertexTex1DiffuseXyz g_Quad3DFallback[4];
 
 struct VertexTex1Xyzrhw
 {
-    D3DXVECTOR3 pos;
+    ZunVec3 pos;
     f32 w;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(VertexTex1Xyzrhw) == 0x18);
+
 extern VertexTex1Xyzrhw g_QuadTemplate[4];
 
 struct VertexTex1DiffuseXyzrhw
 {
     VertexTex1DiffuseXyzrhw() {}
 
-    Float3 pos;
+    ZunVec3 pos;
     f32 w;
     ZunColor color;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(VertexTex1DiffuseXyzrhw) == 0x1c);
+
 extern VertexTex1DiffuseXyzrhw g_QuadVertices[4];
 
 struct RenderVertexInfo
 {
-    D3DXVECTOR3 position;
+    ZunVec3 position;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(RenderVertexInfo) == 0x14);
 
 struct ZunImageInfo
 {
@@ -196,8 +194,8 @@ struct AnmManager
     void ExecuteAnmIdx(AnmVm *vm, i32 anmFileIdx)
     {
         vm->anmFileIdx = anmFileIdx;
-        vm->pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-        vm->offset = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+        vm->pos = ZunVec3(0.0f, 0.0f, 0.0f);
+        vm->offset = ZunVec3(0.0f, 0.0f, 0.0f);
         vm->fontHeight = 15;
         vm->fontWidth = 15;
         SetAndExecuteScript(vm, this->scripts[anmFileIdx]);
@@ -360,7 +358,7 @@ struct AnmManager
     i32 renderStateChangesThisFrame;
     u32 flushesThisFrame;
     Float2 offset;
-    D3DXMATRIX matrix;
+    ZunMatrix matrix;
     struct AnmLoadedSprite sprites[2560];
     struct AnmVm vm;
     struct IDirect3DTexture8 *textures[264];
@@ -398,5 +396,5 @@ struct AnmManager
     i32 screenshotDstWidth;
     i32 screenshotDstHeight;
 };
-C_ASSERT(sizeof(AnmManager) == 0x17e560);
+
 extern AnmManager *g_AnmManager;
