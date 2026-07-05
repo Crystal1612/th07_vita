@@ -100,6 +100,7 @@ struct GuiMsgVm
     u32 ignoreWaitCounter;
     u8 dialogueSkippable;
 };
+
 struct GuiImpl
 {
     GuiImpl();

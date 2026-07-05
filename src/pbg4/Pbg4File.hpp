@@ -37,6 +37,7 @@ struct Pbg4File : IPbg4File
 {
     Pbg4File();
     virtual ~Pbg4File();
+
     // SYNTHETIC: TH07 0x0045e590
     // Pbg4File::`scalar deleting destructor'
 

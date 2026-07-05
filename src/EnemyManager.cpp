@@ -142,6 +142,8 @@ void EnemyManager::Initialize()
 // FUNCTION: TH07 0x0041ee70
 EnemyManager::EnemyManager()
 {
+    i32 idk[8];
+
     Initialize();
 }
 
