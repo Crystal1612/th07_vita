@@ -9,7 +9,6 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "Supervisor.hpp"
-#include "dsutil.hpp"
 #include "pbg4/Lzss.hpp"
 #include <cstdio>
 
@@ -62,13 +61,10 @@ u32 ReplayManager::OnUpdate(ReplayManager *arg)
     if (arg->frameId % 30 == 0)
     {
         *(u8 *)&arg->stageReplayData->score =
-            (u8)g_Supervisor.curFps |
-            ((g_Supervisor.timingErrorCount != 0) ? 128 : 0);
+            (u8)g_Supervisor.curFps | ((g_Supervisor.timingErrorCount != 0) ? 128 : 0);
         *((u8 *)&arg->stageReplayData->score + 1) = (u8)g_Supervisor.curFps;
-        arg->replayDataEndPointers[stage] =
-            (i32)((i32)&arg->stageReplayData->score + 2);
-        arg->stageReplayData =
-            (StageReplayData *)((i32)&arg->stageReplayData->score + 1);
+        arg->replayDataEndPointers[stage] = (i32)((i32)&arg->stageReplayData->score + 2);
+        arg->stageReplayData = (StageReplayData *)((i32)&arg->stageReplayData->score + 1);
     }
     arg->frameId++;
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -81,15 +77,11 @@ u32 ReplayManager::OnUpdateDemoLowPrio(ReplayManager *arg)
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
 
-    if (g_Gui.HasCurrentMsgIdx() &&
-        g_Gui.IsDialogueSkippable() &&
-        arg->frameId % 3 != 2)
+    if (g_Gui.HasCurrentMsgIdx() && g_Gui.IsDialogueSkippable() && arg->frameId % 3 != 2)
     {
         return CHAIN_CALLBACK_RESULT_RESTART_FROM_FIRST_JOB;
     }
-    if (g_GameManager.replayStage == 2 &&
-        !g_EnemyManager.HasActiveBoss() &&
-        arg->frameId % 5 != 4)
+    if (g_GameManager.replayStage == 2 && !g_EnemyManager.HasActiveBoss() && arg->frameId % 5 != 4)
     {
         return CHAIN_CALLBACK_RESULT_RESTART_FROM_FIRST_JOB;
     }
@@ -135,12 +127,9 @@ u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
     }
     if (arg->frameId % 30 == 0)
     {
-        g_Supervisor.curFps =
-            (i16) * (char *)((i32)&arg->stageReplayData->score + 1) & 0x7f;
-        g_Supervisor.isFpsBad =
-            (i32) * (char *)((i32)&arg->stageReplayData->score + 1) >> 7;
-        arg->stageReplayData =
-            (StageReplayData *)((i32)&arg->stageReplayData->score + 1);
+        g_Supervisor.curFps = (i16) * (char *)((i32)&arg->stageReplayData->score + 1) & 0x7f;
+        g_Supervisor.isFpsBad = (i32) * (char *)((i32)&arg->stageReplayData->score + 1) >> 7;
+        arg->stageReplayData = (StageReplayData *)((i32)&arg->stageReplayData->score + 1);
     }
     arg->frameId = arg->frameId + 1;
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -196,10 +185,8 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     {
         free(arg->data->head.stageEndData[i].data);
     }
-    arg->data->head.stageReplayData[i].data =
-        (StageReplayData *)malloc(sizeof(StageReplayData));
-    arg->data->head.stageEndData[i].data =
-        (StageReplayData *)malloc(sizeof(StageReplayData));
+    arg->data->head.stageReplayData[i].data = (StageReplayData *)malloc(sizeof(StageReplayData));
+    arg->data->head.stageEndData[i].data = (StageReplayData *)malloc(sizeof(StageReplayData));
 
     replayData = arg->data->head.stageReplayData[i].data;
     endData = arg->data->head.stageEndData[i].data;
@@ -217,7 +204,8 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     replayData->cherryPlus = g_GameManager.cherryPlus - g_GameManager.globals->cherryStart;
     replayData->spellCardsCaptured = (u8)g_GameManager.globals->spellCardsCaptured;
     replayData->extendsFromPointItems = g_GameManager.globals->extendsFromPointItems;
-    replayData->nextNeededPointItemsForExtend = g_GameManager.globals->nextNeededPointItemsForExtend;
+    replayData->nextNeededPointItemsForExtend =
+        g_GameManager.globals->nextNeededPointItemsForExtend;
 
     arg->replayInputs = replayData->replayInputs;
     arg->stageReplayData = endData;
@@ -226,8 +214,7 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     return ZUN_SUCCESS;
 }
 
-ReplayFile *
-ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
+ReplayFile *ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
 {
     ReplayFile *dataDecompressed;
     ReplayFile *curData = data;
@@ -269,8 +256,8 @@ ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
     {
         goto bad;
     }
-    dataDecompressed = (ReplayFile *)malloc(curData->head.sizeWithoutHeader +
-                                            sizeof(ReplayHeader));
+    dataDecompressed =
+        (ReplayFile *)malloc(curData->head.sizeWithoutHeader + sizeof(ReplayHeader));
     memcpy(dataDecompressed, data, sizeof(ReplayHeader));
     Lzss::Decompress(&curData->data.rngValue3, curData->head.compressedSize,
                      &dataDecompressed->data.rngValue3, curData->head.sizeWithoutHeader);
@@ -299,8 +286,8 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     arg->frameId = 0;
     if (!arg->data)
     {
-        arg->data = (ReplayFile *)FileSystem::OpenFile(
-            arg->replayFilename, !g_GameManager.demo);
+        arg->data =
+            (ReplayFile *)FileSystem::OpenFile(arg->replayFilename, !g_GameManager.demo);
         arg->data = ValidateReplayData(arg->data, g_LastFileSize);
         if (!arg->data)
         {
@@ -315,41 +302,36 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
             {
                 if (i < 6 && arg->data->head.stageReplayData[i + 1].offset != 0)
                 {
-                    arg->stageReplayDataSize[i] =
-                        arg->data->head.stageReplayData[i + 1].offset -
-                        arg->data->head.stageReplayData[i].offset;
+                    arg->stageReplayDataSize[i] = arg->data->head.stageReplayData[i + 1].offset -
+                                                  arg->data->head.stageReplayData[i].offset;
                 }
                 else
                 {
-                    arg->stageReplayDataSize[i] =
-                        arg->data->head.stageEndData[i].offset -
-                        arg->data->head.stageReplayData[i].offset;
+                    arg->stageReplayDataSize[i] = arg->data->head.stageEndData[i].offset -
+                                                  arg->data->head.stageReplayData[i].offset;
                 }
                 if (i < 6 && arg->data->head.stageEndData[i + 1].offset != 0)
                 {
-                    arg->stageEndDataSize[i] =
-                        arg->data->head.stageEndData[i + 1].offset -
-                        arg->data->head.stageEndData[i].offset;
+                    arg->stageEndDataSize[i] = arg->data->head.stageEndData[i + 1].offset -
+                                               arg->data->head.stageEndData[i].offset;
                 }
                 else
                 {
-                    arg->stageEndDataSize[i] =
-                        arg->data->head.sizeWithoutHeader + sizeof(ReplayHeader) -
-                        arg->data->head.stageEndData[i].offset;
+                    arg->stageEndDataSize[i] = arg->data->head.sizeWithoutHeader +
+                                               sizeof(ReplayHeader) -
+                                               arg->data->head.stageEndData[i].offset;
                 }
             }
 
             if (arg->data->head.stageReplayData[i].offset != 0)
             {
                 arg->data->head.stageReplayData[i].data =
-                    (StageReplayData *)(arg->data->head.stageReplayData[i].offset +
-                                        (i32)arg->data);
+                    (StageReplayData *)(arg->data->head.stageReplayData[i].offset + (i32)arg->data);
             }
             if (arg->data->head.stageEndData[i].offset != 0)
             {
                 arg->data->head.stageEndData[i].data =
-                    (StageReplayData *)(arg->data->head.stageEndData[i].offset +
-                                        (i32)arg->data);
+                    (StageReplayData *)(arg->data->head.stageEndData[i].offset + (i32)arg->data);
             }
         }
     }
@@ -370,8 +352,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     g_GameManager.shotType = arg->data->data.shotType % 2;
     g_GameManager.shotTypeAndCharacter = arg->data->data.shotType;
     g_GameManager.difficulty = arg->data->data.difficulty;
-    g_GameManager.globals->pointItemsCollectedForExtend =
-        replayData->pointItemsCollectedForExtend;
+    g_GameManager.globals->pointItemsCollectedForExtend = replayData->pointItemsCollectedForExtend;
     g_GameManager.rank.rank = replayData->rank;
     g_GameManager.SetLivesRemaining(replayData->livesRemaining);
     g_GameManager.RegenerateGameIntegrityCsum();
@@ -381,12 +362,9 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     g_GameManager.globals->grazeInTotal = replayData->grazeInTotal;
     arg->replayInputs = replayData->replayInputs;
     g_GameManager.powerItemCountForScore = replayData->powerItemCountForScore;
-    g_GameManager.cherry = replayData->cherry +
-                           g_GameManager.globals->cherryStart;
-    g_GameManager.cherryMax = replayData->cherryMax +
-                              g_GameManager.globals->cherryStart;
-    g_GameManager.cherryPlus = replayData->cherryPlus +
-                               g_GameManager.globals->cherryStart;
+    g_GameManager.cherry = replayData->cherry + g_GameManager.globals->cherryStart;
+    g_GameManager.cherryMax = replayData->cherryMax + g_GameManager.globals->cherryStart;
+    g_GameManager.cherryPlus = replayData->cherryPlus + g_GameManager.globals->cherryStart;
     if (g_GameManager.cherryPlus >= g_GameManager.globals->cherryStart + 50000)
     {
         g_GameManager.cherryPlus = g_GameManager.globals->cherryStart + 50000;
@@ -394,20 +372,16 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     }
     *g_GameManager.defaultCfg = arg->data->data.cfg;
     g_Rng.SetSeed(replayData->stageRngSeed);
-    g_GameManager.globals->spellCardsCaptured =
-        replayData->spellCardsCaptured;
-    g_GameManager.globals->extendsFromPointItems =
-        replayData->extendsFromPointItems;
+    g_GameManager.globals->spellCardsCaptured = replayData->spellCardsCaptured;
+    g_GameManager.globals->extendsFromPointItems = replayData->extendsFromPointItems;
     g_GameManager.globals->nextNeededPointItemsForExtend =
         replayData->nextNeededPointItemsForExtend;
     arg->stageReplayData = endData;
-    if (g_GameManager.currentStage >= 2 &&
-        g_GameManager.currentStage <= 6 &&
+    if (g_GameManager.currentStage >= 2 && g_GameManager.currentStage <= 6 &&
         arg->data->head.stageReplayData[g_GameManager.currentStage - 2].data)
     {
         g_GameManager.globals->guiScore = g_GameManager.globals->score =
-            arg->data->head.stageReplayData[g_GameManager.currentStage - 2]
-                .data->score;
+            arg->data->head.stageReplayData[g_GameManager.currentStage - 2].data->score;
     }
     return ZUN_SUCCESS;
 }
@@ -455,8 +429,8 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
             mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
             mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
             mgr->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-            mgr->drawChain = g_Chain.CreateElem(
-                (ChainCallback)EffectManager::UpdateNoOp); // idk either bro
+            mgr->drawChain =
+                g_Chain.CreateElem((ChainCallback)EffectManager::UpdateNoOp); // idk either bro
             mgr->calcChain->arg = mgr;
             if (g_Chain.AddToCalcChain(mgr->calcChain, 16))
             {
@@ -472,16 +446,14 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
             mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdateDemoHighPrio);
             mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallbackDemo;
             mgr->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-            mgr->drawChain =
-                g_Chain.CreateElem((ChainCallback)EffectManager::UpdateNoOp);
+            mgr->drawChain = g_Chain.CreateElem((ChainCallback)EffectManager::UpdateNoOp);
             mgr->calcChain->arg = mgr;
             if (g_Chain.AddToCalcChain(mgr->calcChain, 5))
             {
                 return ZUN_ERROR;
             }
 
-            mgr->demoCalcChain =
-                g_Chain.CreateElem((ChainCallback)OnUpdateDemoLowPrio);
+            mgr->demoCalcChain = g_Chain.CreateElem((ChainCallback)OnUpdateDemoLowPrio);
             mgr->demoCalcChain->arg = mgr;
             g_Chain.AddToCalcChain(mgr->demoCalcChain, 17);
             mgr->rngCalcChain = NULL;
@@ -545,8 +517,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
         mgr = g_ReplayManager;
         if (!mgr->IsDemo())
         {
-            if (!g_GameManager.practice &&
-                g_GameManager.difficulty < 4 &&
+            if (!g_GameManager.practice && g_GameManager.difficulty < 4 &&
                 memcmp(&g_Supervisor.cfg, &mgr->data->data.cfg, sizeof(g_Supervisor.cfg)) != 0)
             {
                 goto SKIP_WRITE;
@@ -557,7 +528,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
             }
             if (filename)
             {
-                DebugPrint("info : Replay File write %s\r\n", filename);
+                Supervisor::DebugPrint("info : Replay File write %s\r\n", filename);
                 replayData = (u8 *)malloc(0x100000);
                 replayCopy = *mgr->data;
                 StopRecording();
@@ -566,8 +537,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                 {
                     i = 6;
                 }
-                mgr->data->head.stageReplayData[i].data->score =
-                    g_GameManager.globals->score;
+                mgr->data->head.stageReplayData[i].data->score = g_GameManager.globals->score;
                 replaySize = sizeof(ReplayHeader);
                 replaySize += sizeof(ReplayData);
                 for (i = 0; i < 7; i++)
@@ -576,10 +546,8 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     {
                         stageSize = (u32)mgr->replayInputsByStage[i] -
                                     (u32)mgr->data->head.stageReplayData[i].data;
-                        memcpy((StageReplayData *)(replayData + replaySize -
-                                                   sizeof(ReplayHeader)),
-                               mgr->data->head.stageReplayData[i].data,
-                               stageSize);
+                        memcpy((StageReplayData *)(replayData + replaySize - sizeof(ReplayHeader)),
+                               mgr->data->head.stageReplayData[i].data, stageSize);
                         replayCopy.head.stageReplayData[i].offset = replaySize;
                         replaySize += stageSize;
                     }
@@ -590,20 +558,15 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     {
                         stageSize = (u32)mgr->replayDataEndPointers[i] -
                                     (u32)mgr->data->head.stageEndData[i].data;
-                        memcpy((StageReplayData *)(replayData + replaySize -
-                                                   sizeof(ReplayHeader)),
-                               mgr->data->head.stageEndData[i].data,
-                               stageSize);
+                        memcpy((StageReplayData *)(replayData + replaySize - sizeof(ReplayHeader)),
+                               mgr->data->head.stageEndData[i].data, stageSize);
                         replayCopy.head.stageEndData[i].offset = replaySize;
                         replaySize += stageSize;
                     }
                 }
                 replayCopy.data.score = g_GameManager.globals->guiScore;
                 slowdown =
-                    (g_Supervisor.framerateMultiplier /
-                         g_Supervisor.fpsAccumulator -
-                     0.5f) *
-                    2.0f;
+                    (g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f) * 2.0f;
                 if (slowdown < 0.0f)
                 {
                     slowdown = 0.0f;
@@ -623,7 +586,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                 replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
                 replayCopy.data.magic30 = 30;
                 memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
-                DebugPrint("info : original size %d\r\n", replaySize);
+                Supervisor::DebugPrint("info : original size %d\r\n", replaySize);
                 replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
                 lpBuffer = Lzss::Compress(replayData, replayCopy.head.sizeWithoutHeader,
                                           &replayCopy.head.compressedSize);
@@ -660,8 +623,8 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                     fwrite(lpBuffer, compressedSize, 1, file);
                     fclose(file);
-                    DebugPrint("info : Size %d -> %d\r\n", replaySize,
-                               compressedSize + sizeof(ReplayHeader));
+                    Supervisor::DebugPrint("info : Size %d -> %d\r\n", replaySize,
+                                           compressedSize + sizeof(ReplayHeader));
                     free(lpBuffer);
                 }
             }
@@ -702,8 +665,7 @@ void ReplayManager::SaveReplay2(const char *filename)
     if (g_ReplayManager)
     {
         mgr = g_ReplayManager;
-        if (!g_GameManager.practice &&
-            g_GameManager.difficulty < 4 &&
+        if (!g_GameManager.practice && g_GameManager.difficulty < 4 &&
             memcmp(&g_Supervisor.cfg, &mgr->data->data.cfg, sizeof(g_Supervisor.cfg)) != 0)
         {
             goto SKIP_WRITE;
@@ -714,7 +676,7 @@ void ReplayManager::SaveReplay2(const char *filename)
         }
         if (filename)
         {
-            DebugPrint("info : Replay File rewrite %s\r\n", filename);
+            Supervisor::DebugPrint("info : Replay File rewrite %s\r\n", filename);
             replayData = (u8 *)malloc(0x100000);
             replayCopy = *mgr->data;
             i = g_GameManager.currentStage - 1;
@@ -722,8 +684,7 @@ void ReplayManager::SaveReplay2(const char *filename)
             {
                 i = 6;
             }
-            mgr->data->head.stageReplayData[i].data->score =
-                g_GameManager.globals->score;
+            mgr->data->head.stageReplayData[i].data->score = g_GameManager.globals->score;
             replaySize = sizeof(ReplayHeader);
             replaySize += sizeof(ReplayData);
             for (i = 0; i < 7; i++)
@@ -731,11 +692,8 @@ void ReplayManager::SaveReplay2(const char *filename)
                 if (mgr->data->head.stageReplayData[i].data)
                 {
                     stageSize = mgr->stageReplayDataSize[i];
-                    memcpy((StageReplayData *)(replayData +
-                                               replaySize -
-                                               sizeof(ReplayHeader)),
-                           mgr->data->head.stageReplayData[i].data,
-                           stageSize);
+                    memcpy((StageReplayData *)(replayData + replaySize - sizeof(ReplayHeader)),
+                           mgr->data->head.stageReplayData[i].data, stageSize);
                     replayCopy.head.stageReplayData[i].offset = replaySize;
                     replaySize += stageSize;
                 }
@@ -745,11 +703,8 @@ void ReplayManager::SaveReplay2(const char *filename)
                 if (mgr->data->head.stageEndData[i].data)
                 {
                     stageSize = mgr->stageEndDataSize[i];
-                    memcpy((StageReplayData *)(replayData +
-                                               replaySize -
-                                               sizeof(ReplayHeader)),
-                           mgr->data->head.stageEndData[i].data,
-                           stageSize);
+                    memcpy((StageReplayData *)(replayData + replaySize - sizeof(ReplayHeader)),
+                           mgr->data->head.stageEndData[i].data, stageSize);
                     replayCopy.head.stageEndData[i].offset = replaySize;
                     replaySize += stageSize;
                 }
@@ -763,7 +718,7 @@ void ReplayManager::SaveReplay2(const char *filename)
             replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
             replayCopy.data.magic30 = 30;
             memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
-            DebugPrint("info : original size %d\r\n", replaySize);
+            Supervisor::DebugPrint("info : original size %d\r\n", replaySize);
             replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
             lpBuffer = Lzss::Compress(replayData, replayCopy.head.sizeWithoutHeader,
                                       &replayCopy.head.compressedSize);
@@ -800,8 +755,8 @@ void ReplayManager::SaveReplay2(const char *filename)
                 fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                 fwrite(lpBuffer, compressedSize, 1, file);
                 fclose(file);
-                DebugPrint("info : Size %d -> %d\r\n", replaySize,
-                           compressedSize + sizeof(ReplayHeader));
+                Supervisor::DebugPrint("info : Size %d -> %d\r\n", replaySize,
+                                       compressedSize + sizeof(ReplayHeader));
                 free(lpBuffer);
             }
         }

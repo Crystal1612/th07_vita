@@ -163,7 +163,8 @@ ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
         return ZUN_ERROR;
     }
 
-    if (g_AnmManager->LoadAnms(ANM_FILE_CAPTURE, "data/capture.anm", ANM_OFFSET_CAPTURE) != ZUN_SUCCESS)
+    if (g_AnmManager->LoadAnms(ANM_FILE_CAPTURE, "data/capture.anm", ANM_OFFSET_CAPTURE) !=
+        ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -189,8 +190,7 @@ ZunResult AsciiManager::RegisterChain()
     g_AsciiManagerCalcChain.addedCallback = NULL;
     g_AsciiManagerCalcChain.deletedCallback = NULL;
     g_AsciiManagerCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
-    g_AsciiManagerCalcChain.deletedCallback =
-        (ChainLifecycleCallback)DeletedCallback;
+    g_AsciiManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_AsciiManagerCalcChain.arg = mgr;
 
     if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, 1))
@@ -250,8 +250,7 @@ void AsciiManager::AddString(ZunVec3 *position, const char *text)
     }
 }
 
-void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position,
-                                 const char *fmt, ...)
+void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position, const char *fmt, ...)
 {
     char str[508];
     va_list args;
@@ -335,15 +334,12 @@ void AsciiManager::DrawStrings()
     }
     for (i = 0; i < 4; i++)
     {
-        if (this->bossMarkers[i].pos.x >= 56.0f &&
-            this->bossMarkers[i].pos.x <= 392.0f)
+        if (this->bossMarkers[i].pos.x >= 56.0f && this->bossMarkers[i].pos.x <= 392.0f)
         {
-            charWidth = fabsf(this->bossMarkers[i].pos.x - 32.0f -
-                              g_Player.positionCenter.x);
+            charWidth = fabsf(this->bossMarkers[i].pos.x - 32.0f - g_Player.positionCenter.x);
             if (charWidth < 64.0f)
             {
-                this->bossMarkers[i].color.bytes.a =
-                    charWidth * 128.0f / 64.0f + 48.0f;
+                this->bossMarkers[i].color.bytes.a = charWidth * 128.0f / 64.0f + 48.0f;
             }
             else
             {
@@ -367,8 +363,7 @@ void AsciiManager::DrawStrings()
     }
 }
 
-void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value,
-                                D3DCOLOR color)
+void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value, D3DCOLOR color)
 {
     i32 characterCount;
     AsciiManagerPopup *popup;
@@ -405,8 +400,7 @@ void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value,
     this->nextPopupIndex1++;
 }
 
-void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value,
-                                D3DCOLOR color)
+void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value, D3DCOLOR color)
 {
     i32 characterCount;
     AsciiManagerPopup *popup;
@@ -461,8 +455,7 @@ i32 RetryMenu::OnUpdate()
         this->numFrames = 0;
         this->menuBackground.pendingInterrupt = 1;
     }
-    if (WAS_PRESSED_RAW(TH_BUTTON_Q) &&
-        this->curState != 9)
+    if (WAS_PRESSED_RAW(TH_BUTTON_Q) && this->curState != 9)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
         this->curState = 9;
@@ -475,9 +468,7 @@ i32 RetryMenu::OnUpdate()
         }
         this->numFrames = 0;
     }
-    if (!g_GameManager.replay &&
-        WAS_PRESSED_RAW(TH_BUTTON_RESET) &&
-        this->curState != 9)
+    if (!g_GameManager.replay && WAS_PRESSED_RAW(TH_BUTTON_RESET) && this->curState != 9)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
         this->curState = 10;
@@ -495,14 +486,14 @@ i32 RetryMenu::OnUpdate()
     case 0:
         for (i = 0; i < 10; i++)
         {
-            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + ANM_OFFSET_RETRY_MENU);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i],
+                                                    i + ANM_OFFSET_RETRY_MENU);
         }
         for (i = 0; (i32)i < 4; i++)
         {
             this->menuSprites[i].pendingInterrupt = 1;
         }
-        g_AnmManager->SetActiveSprite(this->menuSprites + 7,
-                                      g_GameManager.difficulty + 269);
+        g_AnmManager->SetActiveSprite(this->menuSprites + 7, g_GameManager.difficulty + 269);
         if (!g_GameManager.practice)
         {
             this->menuSprites[8].SetInvisible();
@@ -520,10 +511,10 @@ i32 RetryMenu::OnUpdate()
         if ((g_Supervisor.flags >> 1 & 1) != 0)
         {
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, ANM_OFFSET_MENU_BG);
-            if (g_AnmManager->CreateScreenshotTexture(this->menuBackground.sprite->startPixelInclusive.x,
-                                                      this->menuBackground.sprite->startPixelInclusive.y,
-                                                      this->menuBackground.sprite->heightPx,
-                                                      this->menuBackground.sprite->widthPx))
+            if (g_AnmManager->CreateScreenshotTexture(
+                    this->menuBackground.sprite->startPixelInclusive.x,
+                    this->menuBackground.sprite->startPixelInclusive.y,
+                    this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
             {
                 this->curState = 0;
                 return 0;
@@ -862,9 +853,11 @@ i32 PauseMenu::OnUpdate()
             if ((g_Supervisor.flags >> 1 & 1) != 0)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, ANM_OFFSET_MENU_BG);
-                if (g_AnmManager->CreateScreenshotTexture(this->menuBackground.sprite->startPixelInclusive.x,
-                                                          this->menuBackground.sprite->startPixelInclusive.y,
-                                                          this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
+                if (g_AnmManager->CreateScreenshotTexture(
+                        this->menuBackground.sprite->startPixelInclusive.x,
+                        this->menuBackground.sprite->startPixelInclusive.y,
+                        this->menuBackground.sprite->heightPx,
+                        this->menuBackground.sprite->widthPx))
                 {
                     this->curState = 0;
                     return 0;
@@ -962,8 +955,7 @@ i32 PauseMenu::OnUpdate()
             g_GameManager.globals->score = g_GameManager.globals->guiScore;
             g_GameManager.SetLivesRemaining(g_GameManager.defaultCfg->lifeCount);
             g_GameManager.RegenerateGameIntegrityCsum();
-            g_GameManager.SetBombsRemainingAndComputeCsum(
-                g_Player.shooterData->initialBombs);
+            g_GameManager.SetBombsRemainingAndComputeCsum(g_Player.shooterData->initialBombs);
             g_GameManager.globals->grazeInStage = 0;
             g_GameManager.globals->pointItemsCollectedThisStage = 0;
             g_GameManager.globals->pointItemsCollectedForExtend = 0;
@@ -978,21 +970,17 @@ i32 PauseMenu::OnUpdate()
             g_Gui.showPoint = 2;
             g_Gui.showPower = 2;
             IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .playCount,
+                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty].playCount,
                 999999);
             IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].playCount, 999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                                 .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
+                            999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6]
+                                 .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
+                            999999);
             IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
-                999999);
-            IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[6]
-                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
-                999999);
-            IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .retryCount,
+                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty].retryCount,
                 999999);
             IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].retryCount, 999999);
             g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, "UnPause");
@@ -1025,8 +1013,7 @@ void PauseMenu::OnDraw()
         g_Supervisor.viewport.Width = g_GameManager.arcadeRegionSize.x;
         g_Supervisor.viewport.Height = g_GameManager.arcadeRegionSize.y;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-        if ((g_Supervisor.flags >> 1 & 1) != 0 &&
-            (this->curState != 0 || 2 < this->numFrames))
+        if ((g_Supervisor.flags >> 1 & 1) != 0 && (this->curState != 0 || 2 < this->numFrames))
         {
             g_AnmManager->DrawNoRotation(&this->menuBackground);
         }
@@ -1230,10 +1217,8 @@ void AsciiManager::DrawPopups()
             {
                 divisor = 4000 - divisor;
             }
-            this->cherryDigit.color.bytes.g =
-                cherry * 192 / 50000 + divisor * 64 / 2000;
-            this->cherryDigit.color.bytes.b =
-                cherry * 192 / 50000 + divisor * 64 / 2000;
+            this->cherryDigit.color.bytes.g = cherry * 192 / 50000 + divisor * 64 / 2000;
+            this->cherryDigit.color.bytes.b = cherry * 192 / 50000 + divisor * 64 / 2000;
             this->cherryDigit.scale.x = 1.41f;
             this->cherryDigit.scale.y = 1.41f;
             xInc = 10;

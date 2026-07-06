@@ -87,8 +87,7 @@ struct GameManager
         this->globals->bombsRemaining = (f32)param_1;
         this->globals->curCsum = this->globals->rng1[2];
         this->globals->csumAsSum = ComputeGameIntegrityCsum();
-        this->csumFloat =
-            (f32)(this->globals->csumAsSum + this->globals->rng2[3]);
+        this->csumFloat = (f32)(this->globals->csumAsSum + this->globals->rng2[3]);
     }
 
     // FUNCTION: TH07 0x00404fe0

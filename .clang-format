@@ -1,4 +1,4 @@
 BasedOnStyle: Microsoft
-ColumnLimit: 0
+ColumnLimit: 100
 InsertBraces: true
 RemoveParentheses: MultipleParentheses

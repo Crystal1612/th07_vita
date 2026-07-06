@@ -191,21 +191,18 @@ struct Player
 
     i32 CalcItemBoxCollision(ZunVec3 *center, ZunVec3 *size);
     i32 CalcKillboxCollision(ZunVec3 *center, ZunVec3 *size);
-    i32 CalcLaserHitbox(ZunVec3 *center, ZunVec3 *size,
-                        ZunVec3 *origin, f32 rotation, i32 canGraze);
+    i32 CalcLaserHitbox(ZunVec3 *center, ZunVec3 *size, ZunVec3 *origin, f32 rotation,
+                        i32 canGraze);
     i32 CheckBombGraze(ZunVec3 *center, ZunVec3 *size);
-    i32 CalcDamageToEnemy(ZunVec3 *param_1, ZunVec3 *param_2,
-                          i32 *param_3);
+    i32 CalcDamageToEnemy(ZunVec3 *param_1, ZunVec3 *param_2, i32 *param_3);
     i32 CheckGraze(ZunVec3 *center, ZunVec3 *size);
 
     void Die();
     i32 HandlePlayerInputs();
     void Respawn();
     void ScoreGraze(ZunVec3 *param_1);
-    BombClearBox *SpawnBombEffect(ZunVec3 *pos, f32 sizeY, f32 sizeZ,
-                                    i32 lifetime, i32 itemType);
-    BombClearBox *SpawnBombProjectile(ZunVec3 *centerPosition, f32 posZ,
-                                        f32 size, i32 itemType);
+    BombClearBox *SpawnBombEffect(ZunVec3 *pos, f32 sizeY, f32 sizeZ, i32 lifetime, i32 itemType);
+    BombClearBox *SpawnBombProjectile(ZunVec3 *centerPosition, f32 posZ, f32 size, i32 itemType);
     static void SpawnBullets(Player *player, u32 timer);
     void StartFireBulletTimer();
 
@@ -222,7 +219,8 @@ struct Player
         return timer;
     }
 
-    static void SetVecCorners(ZunVec3 *topLeft, ZunVec3 *bottomRight, ZunVec3 *center, ZunVec3 *size)
+    static void SetVecCorners(ZunVec3 *topLeft, ZunVec3 *bottomRight, ZunVec3 *center,
+                              ZunVec3 *size)
     {
         topLeft->x = center->x - size->x * 0.5f;
         topLeft->y = center->y - size->y * 0.5f;
@@ -344,30 +342,27 @@ struct ShtLevel
 struct ShtData
 {
     static ZunResult LoadShtData(ShtData **data, const char *shtPath);
-    static i32 FireBulletDefault(Player *player, PlayerBullet *bullet,
-                                 i32 fireTime, ShtEntry *shtEntry);
-    static i32 FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet,
-                                      i32 fireTime, ShtEntry *shtEntry);
-    static i32 FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
-                                    i32 fireTime, ShtEntry *shtEntry);
-    static i32 FireHomingBullet(Player *player, PlayerBullet *bullet,
-                                i32 fireTime, ShtEntry *shtEntry);
-    static i32 FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
-                                     i32 fireTime, ShtEntry *shtEntry);
+    static i32 FireBulletDefault(Player *player, PlayerBullet *bullet, i32 fireTime,
+                                 ShtEntry *shtEntry);
+    static i32 FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet, i32 fireTime,
+                                      ShtEntry *shtEntry);
+    static i32 FireOrbBulletFocused(Player *player, PlayerBullet *bullet, i32 fireTime,
+                                    ShtEntry *shtEntry);
+    static i32 FireHomingBullet(Player *player, PlayerBullet *bullet, i32 fireTime,
+                                ShtEntry *shtEntry);
+    static i32 FireRotatingOrbBullet(Player *player, PlayerBullet *bullet, i32 fireTime,
+                                     ShtEntry *shtEntry);
 
     static i32 UpdateHomingBullet(Player *player, PlayerBullet *bullet);
     static i32 UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet);
-    static i32 UpdateUpwardAcceleratingBullet(Player *player,
-                                              PlayerBullet *bullet);
+    static i32 UpdateUpwardAcceleratingBullet(Player *player, PlayerBullet *bullet);
     static i32 UpdateOrbLaser(Player *player, PlayerBullet *bullet);
     static i32 UpdatePlayerLaser(Player *player, PlayerBullet *bullet);
 
     static i32 DrawBulletWithTrail(Player *player, PlayerBullet *bullet);
 
-    static i32 OnMissileHit(Player *player, PlayerBullet *bullet,
-                            ZunVec3 *pos);
-    static i32 SpawnHitParticles(Player *player, PlayerBullet *bullet,
-                                 ZunVec3 *pos);
+    static i32 OnMissileHit(Player *player, PlayerBullet *bullet, ZunVec3 *pos);
+    static i32 SpawnHitParticles(Player *player, PlayerBullet *bullet, ZunVec3 *pos);
 
     i16 numLevels;
     u16 entryCount;

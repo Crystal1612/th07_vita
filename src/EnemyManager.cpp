@@ -12,27 +12,22 @@
 #include "utils.hpp"
 
 u32 g_SpellcardScore[141] = {
-    0x1E8480, 0x1E8480, 0x2191C0, 0x2191C0, 0x249F00, 0x249F00, 0x249F00,
-    0x249F00, 0x249F00, 0x249F00, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40,
-    0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40,
-    0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x2DC6C0, 0x2DC6C0,
-    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0,
-    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0,
-    0x2DC6C0, 0x2DC6C0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3D0900, 0x3D0900,
-    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
-    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
-    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x5B8D80, 0x5B8D80, 0x6ACFC0,
-    0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0,
-    0x3D0900, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x7A1200, 0x7A1200, 0x7A1200,
-    0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x3D0900, 0x7A1200,
-    0x3D0900};
+    0x1E8480, 0x1E8480, 0x2191C0, 0x2191C0, 0x249F00, 0x249F00, 0x249F00, 0x249F00, 0x249F00,
+    0x249F00, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40,
+    0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x2DC6C0,
+    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0,
+    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x3567E0,
+    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
+    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
+    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
+    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
+    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x4C4B40, 0x4C4B40,
+    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
+    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
+    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x5B8D80,
+    0x5B8D80, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0,
+    0x3D0900, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200,
+    0x7A1200, 0x7A1200, 0x7A1200, 0x3D0900, 0x7A1200, 0x3D0900};
 
 ChainElem g_EnemyManagerDrawChain1;
 
@@ -48,18 +43,14 @@ void Enemy::Move()
     this->prevPos = this->position;
     if (!this->mirror)
     {
-        this->position.x +=
-            g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
+        this->position.x += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
     }
     else
     {
-        this->position.x -=
-            g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
+        this->position.x -= g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
     }
-    this->position.y +=
-        g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.y;
-    this->position.z +=
-        g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
+    this->position.y += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.y;
+    this->position.z += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
 }
 
 void EnemyManager::Initialize()
@@ -145,8 +136,8 @@ EnemyEclContext::EnemyEclContext()
 {
 }
 
-Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life,
-                                i32 itemDrop, i32 score, u8 mirror)
+Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop, i32 score,
+                                u8 mirror)
 {
     Enemy *enemy;
     i32 i;
@@ -186,8 +177,8 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life,
     return enemy;
 }
 
-Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life,
-                                  i32 itemDrop, i32 score, EclContextArgs *args)
+Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop, i32 score,
+                                  EclContextArgs *args)
 {
     Enemy *enemy;
     i32 i;
@@ -249,8 +240,7 @@ void Enemy::UpdateEffects()
         {
             effect->radius = effect->radius + 0.3f;
         }
-        effect->angularVelocity =
-            utils::AddNormalizeAngle(effect->angularVelocity, 0.03141593f);
+        effect->angularVelocity = utils::AddNormalizeAngle(effect->angularVelocity, 0.03141593f);
     }
 }
 
@@ -291,36 +281,33 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                 if (!g_Gui.BossPresent())
                 {
                     args1 = &timeline->timelineInstr->args;
-                    g_EnemyManager.SpawnEnemy(
-                        timeline->timelineInstr->arg0, args1->AsVec(),
-                        args1->args[3].i, args1->args[4].i, args1->args[5].i, 0);
+                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, args1->AsVec(),
+                                              args1->args[3].i, args1->args[4].i, args1->args[5].i,
+                                              0);
                 }
                 break;
             case 1:
                 if (!g_Gui.BossPresent())
                 {
-                    g_EnemyManager.SpawnEnemy(
-                        timeline->timelineInstr->arg0,
-                        timeline->timelineInstr->args.AsVec(), -1, -1, -1,
-                        0);
+                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0,
+                                              timeline->timelineInstr->args.AsVec(), -1, -1, -1, 0);
                 }
                 break;
             case 2:
                 if (!g_Gui.BossPresent())
                 {
                     args2 = &timeline->timelineInstr->args;
-                    enemy = g_EnemyManager.SpawnEnemy(
-                        timeline->timelineInstr->arg0, args2->AsVec(),
-                        args2->args[3].i, args2->args[4].i, args2->args[5].i, 1);
+                    enemy = g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, args2->AsVec(),
+                                                      args2->args[3].i, args2->args[4].i,
+                                                      args2->args[5].i, 1);
                 }
                 break;
             case 3:
                 if (!g_Gui.BossPresent())
                 {
-                    enemy = g_EnemyManager.SpawnEnemy(
-                        timeline->timelineInstr->arg0,
-                        timeline->timelineInstr->args.AsVec(), -1, -1, -1,
-                        1);
+                    enemy = g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0,
+                                                      timeline->timelineInstr->args.AsVec(), -1, -1,
+                                                      -1, 1);
                 }
                 break;
             case 4:
@@ -343,8 +330,8 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                         pos1.z = g_Rng.GetRandomFloatInRange(800.0f);
                     }
                     g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos1,
-                                              args3->args[3].i, args3->args[4].i,
-                                              args3->args[5].i, 0);
+                                              args3->args[3].i, args3->args[4].i, args3->args[5].i,
+                                              0);
                 }
                 break;
             case 5:
@@ -365,8 +352,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                     {
                         pos2.z = g_Rng.GetRandomFloatInRange(800.0f);
                     }
-                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos2,
-                                              -1, -1, -1, 0);
+                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos2, -1, -1, -1, 0);
                 }
                 break;
             case 6:
@@ -388,9 +374,9 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                     {
                         pos3.z = g_Rng.GetRandomFloatInRange(800.0f);
                     }
-                    enemy = g_EnemyManager.SpawnEnemy(
-                        timeline->timelineInstr->arg0, &pos3, args4->args[3].i,
-                        args4->args[4].i, args4->args[5].i, 0);
+                    enemy = g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos3,
+                                                      args4->args[3].i, args4->args[4].i,
+                                                      args4->args[5].i, 0);
                     enemy->mirror = 1;
                 }
                 break;
@@ -412,14 +398,13 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                     {
                         pos4.z = g_Rng.GetRandomFloatInRange(800.0f);
                     }
-                    enemy = g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0,
-                                                      &pos4, -1, -1, -1, 0);
+                    enemy = g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos4, -1, -1,
+                                                      -1, 0);
                     enemy->mirror = 1;
                 }
                 break;
             case 8:
-                g_Gui.MsgRead(timeline->timelineInstr->arg0 +
-                              g_GameManager.character * 10);
+                g_Gui.MsgRead(timeline->timelineInstr->arg0 + g_GameManager.character * 10);
                 break;
             case 9:
                 if (g_Gui.MsgWait())
@@ -429,8 +414,8 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                 }
                 break;
             case 10:
-                g_EnemyManager.bosses[timeline->timelineInstr->args.args[0].i]
-                    ->runInterrupt = timeline->timelineInstr->args.args[1].i;
+                g_EnemyManager.bosses[timeline->timelineInstr->args.args[0].i]->runInterrupt =
+                    timeline->timelineInstr->args.args[1].i;
                 break;
             case 11:
                 g_GameManager.SetCurrentPower(timeline->timelineInstr->arg0);
@@ -450,8 +435,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
             break;
         }
         timeline->timelineInstr =
-            (EclTimelineInstr *)((u8 *)timeline->timelineInstr +
-                                 timeline->timelineInstr->size);
+            (EclTimelineInstr *)((u8 *)timeline->timelineInstr + timeline->timelineInstr->size);
     }
 stop:
     timeline->timelineTime++;
@@ -474,8 +458,7 @@ i32 Enemy::HandleLifeCallback()
         if (this->life < this->lifeCallbackThreshold[i])
         {
             this->life = this->lifeCallbackThreshold[i];
-            g_EclManager.CallEclSub(&this->currentContext,
-                                    (i16)this->lifeCallbackSub[i]);
+            g_EclManager.CallEclSub(&this->currentContext, (i16)this->lifeCallbackSub[i]);
             this->lifeCallbackThreshold[i] = -1;
             this->timerCallbackThreshold = -1;
             this->periodicCallbackSub = -1;
@@ -503,8 +486,7 @@ i32 Enemy::HandleLifeCallback()
                 enemy->life = 0;
                 if (!enemy->canDie && enemy->deathCallbackSub >= 0)
                 {
-                    g_EclManager.CallEclSub(&enemy->currentContext,
-                                            (i16)enemy->deathCallbackSub);
+                    g_EclManager.CallEclSub(&enemy->currentContext, (i16)enemy->deathCallbackSub);
                     enemy->deathCallbackSub = -1;
                 }
             }
@@ -562,8 +544,7 @@ i32 Enemy::HandleTimerCallback()
             }
             g_BulletManager.RemoveAllBullets(10);
             cherryPenalty =
-                (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
-                0.25f;
+                (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) * 0.25f;
             cherryPenalty -= (i32)cherryPenalty % 10;
             g_GameManager.cherry -= cherryPenalty;
         }
@@ -583,8 +564,7 @@ i32 Enemy::HandleTimerCallback()
             enemy->life = 0;
             if (!enemy->canDie && enemy->deathCallbackSub >= 0)
             {
-                g_EclManager.CallEclSub(&enemy->currentContext,
-                                        (i16)enemy->deathCallbackSub);
+                g_EclManager.CallEclSub(&enemy->currentContext, (i16)enemy->deathCallbackSub);
                 enemy->deathCallbackSub = -1;
             }
         }
@@ -655,21 +635,17 @@ void Enemy::ClampPos()
     }
 }
 
-void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
-                                       ZunVec3 *bulletSize)
+void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter, ZunVec3 *bulletSize)
 {
     ZunVec3 grazeSize;
 
     grazeSize = *bulletSize / 0.7f;
-    if (this->isProjectile &&
-        this->timer.HasTicked() &&
-        this->timer.current % 6 == 0)
+    if (this->isProjectile && this->timer.HasTicked() && this->timer.current % 6 == 0)
     {
         g_Player.CheckGraze(bulletCenter, &grazeSize);
     }
     grazeSize = *bulletSize / 1.5f;
-    if (g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 &&
-        this->canDie &&
+    if (g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 && this->canDie &&
         (!this->isBoss && !this->isProjectile))
     {
         this->life = this->life - 10;
@@ -703,8 +679,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     {
         timerLimit = 2400;
         timerLimit -= (i32)g_GameManager.globals->livesRemaining * 4 * 60;
-        if (arg->timelineTime.HasTicked() &&
-            arg->timelineTime.GetCurrent() % timerLimit == 0)
+        if (arg->timelineTime.HasTicked() && arg->timelineTime.GetCurrent() % timerLimit == 0)
         {
             g_GameManager.IncreaseSubrank(100);
         }
@@ -733,8 +708,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         arg->enemyCountReal++;
         if (enemy->freezeEclDuringBombs &&
-            (g_Player.bombInfo.isInUse ||
-             g_Player.playerState != PLAYER_STATE_ALIVE))
+            (g_Player.bombInfo.isInUse || g_Player.playerState != PLAYER_STATE_ALIVE))
         {
             enemy->timer--;
             goto LAB_00421da7;
@@ -753,19 +727,17 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
-                enemy->specialEffect->pos1 = enemy->specialEffect->pos1 + (enemy->position - enemy->specialEffect->pos1) / 16.0f;
+                enemy->specialEffect->pos1 = enemy->specialEffect->pos1 +
+                                             (enemy->position - enemy->specialEffect->pos1) / 16.0f;
             }
         }
         if (enemy->trailFlags != 0)
         {
             for (j = enemy->trailCount - 1; j > 0; j--)
             {
-                enemy->enemyHistory[j].position =
-                    enemy->enemyHistory[j - 1].position;
-                enemy->enemyHistory[j].axisSpeed =
-                    enemy->enemyHistory[j - 1].axisSpeed;
-                enemy->enemyHistory[j].angle =
-                    enemy->enemyHistory[j - 1].angle;
+                enemy->enemyHistory[j].position = enemy->enemyHistory[j - 1].position;
+                enemy->enemyHistory[j].axisSpeed = enemy->enemyHistory[j - 1].axisSpeed;
+                enemy->enemyHistory[j].angle = enemy->enemyHistory[j - 1].angle;
             }
             enemy->enemyHistory[0].position = enemy->position;
             enemy->enemyHistory[0].axisSpeed = enemy->axisSpeed;
@@ -775,12 +747,10 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             enemy->hasNoCollision = 1;
         }
-        if (!enemy->hasNoCollision &&
-            !enemy->isInBounds &&
+        if (!enemy->hasNoCollision && !enemy->isInBounds &&
             g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
                                      enemy->primaryVm.sprite->widthPx,
-                                     enemy->primaryVm.sprite->heightPx) !=
-                0)
+                                     enemy->primaryVm.sprite->heightPx) != 0)
         {
             enemy->isInBounds = 1;
         }
@@ -788,18 +758,15 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             (((enemy->trailFlags == 0 &&
                g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
                                         enemy->primaryVm.sprite->widthPx,
-                                        enemy->primaryVm.sprite->heightPx) ==
-                   0) ||
+                                        enemy->primaryVm.sprite->heightPx) == 0) ||
               (enemy->trailFlags != 0 &&
-               (g_GameManager.IsInBounds(
-                    enemy->position.x, enemy->position.y,
-                    enemy->primaryVm.sprite->widthPx,
-                    enemy->primaryVm.sprite->heightPx) == 0 &&
-                g_GameManager.IsInBounds(
-                    enemy->enemyHistory[enemy->trailCount - 1].position.x,
-                    enemy->enemyHistory[enemy->trailCount - 1].position.y,
-                    enemy->primaryVm.sprite->widthPx,
-                    enemy->primaryVm.sprite->heightPx) == 0))) &&
+               (g_GameManager.IsInBounds(enemy->position.x, enemy->position.y,
+                                         enemy->primaryVm.sprite->widthPx,
+                                         enemy->primaryVm.sprite->heightPx) == 0 &&
+                g_GameManager.IsInBounds(enemy->enemyHistory[enemy->trailCount - 1].position.x,
+                                         enemy->enemyHistory[enemy->trailCount - 1].position.y,
+                                         enemy->primaryVm.sprite->widthPx,
+                                         enemy->primaryVm.sprite->heightPx) == 0))) &&
              !enemy->disableOOBDespawn))
         {
             enemy->active = 0;
@@ -810,8 +777,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             goto HUH;
         }
-        if (enemy->timerCallbackThreshold >= 0 &&
-            enemy->HandleTimerCallback())
+        if (enemy->timerCallbackThreshold >= 0 && enemy->HandleTimerCallback())
         {
             goto HUH;
         }
@@ -820,8 +786,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         enemy->color.color = enemy->primaryVm.color.color;
         for (j = 0; j < 2; j++)
         {
-            if (enemy->vms[j].anmFileIdx >= 0 &&
-                g_AnmManager->ExecuteScript(enemy->vms + j))
+            if (enemy->vms[j].anmFileIdx >= 0 && g_AnmManager->ExecuteScript(enemy->vms + j))
             {
                 enemy->vms[j].anmFileIdx = -1;
             }
@@ -832,8 +797,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             if (enemy->canDie && enemy->hasContactHitbox)
             {
-                enemy->CheckBulletPlayerCollision(&enemy->position,
-                                                  &enemy->hitboxSize);
+                enemy->CheckBulletPlayerCollision(&enemy->position, &enemy->hitboxSize);
                 if (enemy->trailFlags != 0)
                 {
                     currentHitbox = enemy->hitboxSize;
@@ -841,25 +805,23 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     {
                         if ((enemy->trailFlags & 2) != 0)
                         {
-                            currentHitbox = enemy->hitboxSize -
-                                            enemy->hitboxSize *
-                                                (f32)j /
-                                                (f32)(i32)enemy->trailInterval;
+                            currentHitbox = enemy->hitboxSize - enemy->hitboxSize * (f32)j /
+                                                                    (f32)(i32)enemy->trailInterval;
                         }
-                        enemy->CheckBulletPlayerCollision(
-                            &enemy->enemyHistory[j].position, &currentHitbox);
+                        enemy->CheckBulletPlayerCollision(&enemy->enemyHistory[j].position,
+                                                          &currentHitbox);
                     }
                 }
             }
             enemy->lastDamage = 0;
             if (enemy->canDie && enemy->isHittable)
             {
-                damage = g_Player.CalcDamageToEnemy(
-                    &enemy->position, &enemy->hitboxSize, &collisionOut);
+                damage =
+                    g_Player.CalcDamageToEnemy(&enemy->position, &enemy->hitboxSize, &collisionOut);
                 if (enemy->grazeSize.x > 0.0f)
                 {
-                    grazeDamage = g_Player.CalcDamageToEnemy(
-                        &enemy->position, &enemy->grazeSize, &collisionOut);
+                    grazeDamage = g_Player.CalcDamageToEnemy(&enemy->position, &enemy->grazeSize,
+                                                             &collisionOut);
                     if (collisionOut == 0)
                     {
                         damage = (i32)((f32)damage + (f32)grazeDamage / 2.5f);
@@ -867,8 +829,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 if (damage > 0)
                 {
-                    if ((enemy->isBoss || !g_Player.isFocus) &&
-                        g_Player.bombInfo.isInUse == 0)
+                    if ((enemy->isBoss || !g_Player.isFocus) && g_Player.bombInfo.isInUse == 0)
                     {
                         if (enemy->isBoss && !g_Player.isFocus)
                         {
@@ -882,8 +843,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         {
                             cherryGain = 70;
                         }
-                        if (cherryGain == 0 && (g_Player.isFocus == 0 ||
-                                                (enemy->timer.GetCurrent() & 1) != 0))
+                        if (cherryGain == 0 &&
+                            (g_Player.isFocus == 0 || (enemy->timer.GetCurrent() & 1) != 0))
                         {
                             cherryGain = 10;
                         }
@@ -900,13 +861,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                                 cherryGain -= 10;
                             }
                             if (g_GameManager.currentStage >= 5 &&
-                                g_GameManager.currentStage <= 6 &&
-                                !enemy->isBoss)
+                                g_GameManager.currentStage <= 6 && !enemy->isBoss)
                             {
                                 damage = damage / 2;
                             }
-                            if (g_GameManager.currentStage == 4 &&
-                                !enemy->isBoss)
+                            if (g_GameManager.currentStage == 4 && !enemy->isBoss)
                             {
                                 damage -= damage / 4 + damage / 16;
                             }
@@ -985,7 +944,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                                        enemy->position.x - g_Player.positionCenter.x);
 
                         if (angle >= -2.0943952f && angle <= -1.0471976f &&
-                            (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
+                            (!g_Player.targetingEnemy ||
+                             fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
                         {
                             g_Player.sakuyaTargetPosition = enemy->position;
                             g_Player.targetingEnemy = 1;
@@ -1034,9 +994,12 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 g_ReplayManager->replayEventFlags |= 0x20;
                 if (enemy->deathAnm1 >= 0)
                 {
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1, 0xffffffff);
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1, 0xffffffff);
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1, 0xffffffff);
+                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1,
+                                                   0xffffffff);
+                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1,
+                                                   0xffffffff);
+                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1,
+                                                   0xffffffff);
                 }
                 break;
             case 1:
@@ -1056,15 +1019,19 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             case 2:
                 if (enemy->itemDrop >= 0)
                 {
-                    g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 3, 0xffffffff);
+                    g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 3,
+                                                   0xffffffff);
                     g_ItemManager.SpawnItem(&enemy->position, enemy->itemDrop, collisionOut);
                 }
                 else if (enemy->itemDrop == -1)
                 {
                     if ((i32)arg->randomItemSpawnIdx % 3 == 0)
                     {
-                        g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 6, 0xffffffff);
-                        g_ItemManager.SpawnItem(&enemy->position, g_ItemDropTable[arg->randomItemTableIdx], collisionOut);
+                        g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 6,
+                                                       0xffffffff);
+                        g_ItemManager.SpawnItem(&enemy->position,
+                                                g_ItemDropTable[arg->randomItemTableIdx],
+                                                collisionOut);
                         arg->randomItemTableIdx++;
                         if (arg->randomItemTableIdx >= 32)
                         {
@@ -1092,7 +1059,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             if (enemy->deathAnm1 >= 0)
             {
                 g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->position, 1, 0xffffffff);
-                g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 4, 0xffffffff);
+                g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->position, 4,
+                                               0xffffffff);
             }
             if (enemy->deathCallbackSub >= 0)
             {
@@ -1176,8 +1144,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
     }
 
-    if (arg->timelineTime.current % 200 == 0 &&
-        g_GameManager.CheckGameIntegrity())
+    if (arg->timelineTime.current % 200 == 0 && g_GameManager.CheckGameIntegrity())
     {
         return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
     }
@@ -1305,13 +1272,16 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                         }
                         if ((enemy->trailFlags & 2) != 0)
                         {
-                            enemy->primaryVm.scale.x = scale.x - (f32)j * scale.x / (f32)enemy->trailCount;
+                            enemy->primaryVm.scale.x =
+                                scale.x - (f32)j * scale.x / (f32)enemy->trailCount;
                         }
                         if ((enemy->trailFlags & 4) != 0)
                         {
-                            enemy->primaryVm.color.bytes.a = baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
+                            enemy->primaryVm.color.bytes.a =
+                                baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
                         }
-                        enemy->primaryVm.pos = enemy->enemyHistory[j].position + enemy->primaryVm.offset;
+                        enemy->primaryVm.pos =
+                            enemy->enemyHistory[j].position + enemy->primaryVm.offset;
                         enemy->primaryVm.pos.z = 0.3f;
                         enemy->primaryVm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
                         enemy->primaryVm.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
@@ -1332,12 +1302,15 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                     }
                     if (vertexCount > 2)
                     {
-                        uvDiff = enemy->primaryVm.sprite->uvEnd.x - enemy->primaryVm.sprite->uvStart.x;
+                        uvDiff =
+                            enemy->primaryVm.sprite->uvEnd.x - enemy->primaryVm.sprite->uvStart.x;
                         uvStep = uvDiff / (f32)((vertexCount + 1) / 2 - 1);
-                        currentUvX = enemy->primaryVm.sprite->uvEnd.x + enemy->primaryVm.uvScrollPos.x;
+                        currentUvX =
+                            enemy->primaryVm.sprite->uvEnd.x + enemy->primaryVm.uvScrollPos.x;
                         trailVert = enemy->trailVertices;
 
-                        for (j = 0; j < enemy->trailCount; j += enemy->trailNodeStep, currentUvX -= uvStep)
+                        for (j = 0; j < enemy->trailCount;
+                             j += enemy->trailNodeStep, currentUvX -= uvStep)
                         {
                             if (enemy->enemyHistory[j].position.x < -990.0f)
                             {
@@ -1350,13 +1323,18 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                             }
                             else
                             {
-                                angle1 = AngleLerp(enemy->enemyHistory[j - 1].angle, enemy->enemyHistory[j].angle, 0.5f);
+                                angle1 = AngleLerp(enemy->enemyHistory[j - 1].angle,
+                                                   enemy->enemyHistory[j].angle, 0.5f);
                             }
 
-                            if ((enemy->trailFlags & 2) != 0 && j > 0 && j + enemy->trailNodeStep < enemy->trailCount)
+                            if ((enemy->trailFlags & 2) != 0 && j > 0 &&
+                                j + enemy->trailNodeStep < enemy->trailCount)
                             {
-                                sinAngle = AngleLerp(enemy->enemyHistory[j + enemy->trailNodeStep - 1].angle, enemy->enemyHistory[enemy->trailNodeStep].angle, 0.5f);
-                                if (fabsf(prevAngle - angle1) < 0.00001f && fabsf(angle1 - sinAngle) < 0.00001f)
+                                sinAngle = AngleLerp(
+                                    enemy->enemyHistory[j + enemy->trailNodeStep - 1].angle,
+                                    enemy->enemyHistory[enemy->trailNodeStep].angle, 0.5f);
+                                if (fabsf(prevAngle - angle1) < 0.00001f &&
+                                    fabsf(angle1 - sinAngle) < 0.00001f)
                                 {
                                     vertexCount -= 2;
                                     continue;
@@ -1381,7 +1359,8 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
 
                             if ((enemy->trailFlags & 4) != 0)
                             {
-                                trailVert[1].color.bytes.a = baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
+                                trailVert[1].color.bytes.a =
+                                    baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
                                 trailVert[0].color.bytes.a = trailVert[1].color.bytes.a;
                             }
 
@@ -1389,19 +1368,22 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                             trailVert[0].pos.x += cosAngle * xOffset - sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset + cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
-                            trailVert[0].textureUV.y = enemy->primaryVm.sprite->uvStart.y + enemy->primaryVm.uvScrollPos.y;
+                            trailVert[0].textureUV.y =
+                                enemy->primaryVm.sprite->uvStart.y + enemy->primaryVm.uvScrollPos.y;
                             trailVert++;
 
                             trailVert[0].pos = enemy->enemyHistory[j].position;
                             trailVert[0].pos.x += cosAngle * xOffset + sinAngle * yOffset + 32.0f;
                             trailVert[0].pos.y += sinAngle * xOffset - cosAngle * yOffset + 16.0f;
                             trailVert[0].textureUV.x = currentUvX;
-                            trailVert[0].textureUV.y = enemy->primaryVm.sprite->uvEnd.y + enemy->primaryVm.uvScrollPos.y;
+                            trailVert[0].textureUV.y =
+                                enemy->primaryVm.sprite->uvEnd.y + enemy->primaryVm.uvScrollPos.y;
                             trailVert++;
                         }
                         if (vertexCount > 2)
                         {
-                            g_AnmManager->DrawTriangleStrip(&enemy->primaryVm, enemy->trailVertices, vertexCount);
+                            g_AnmManager->DrawTriangleStrip(&enemy->primaryVm, enemy->trailVertices,
+                                                            vertexCount);
                         }
                     }
                 }
@@ -1429,15 +1411,13 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
     Enemy *enemy;
 
     enemy = &arg->enemies[0];
-    if (arg->stgEnmAnmFilename &&
-        g_AnmManager->LoadAnms(ANM_FILE_ENEMY, arg->stgEnmAnmFilename, ANM_OFFSET_ENEMY) !=
-            ZUN_SUCCESS)
+    if (arg->stgEnmAnmFilename && g_AnmManager->LoadAnms(ANM_FILE_ENEMY, arg->stgEnmAnmFilename,
+                                                         ANM_OFFSET_ENEMY) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    if (arg->stgEnm2AnmFilename &&
-        g_AnmManager->LoadAnms(ANM_FILE_ENEMY2, arg->stgEnm2AnmFilename, ANM_OFFSET_ENEMY) !=
-            ZUN_SUCCESS)
+    if (arg->stgEnm2AnmFilename && g_AnmManager->LoadAnms(ANM_FILE_ENEMY2, arg->stgEnm2AnmFilename,
+                                                          ANM_OFFSET_ENEMY) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -1476,8 +1456,7 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerCalcChain.addedCallback = NULL;
     g_EnemyManagerCalcChain.deletedCallback = NULL;
     g_EnemyManagerCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
-    g_EnemyManagerCalcChain.deletedCallback =
-        (ChainLifecycleCallback)DeletedCallback;
+    g_EnemyManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_EnemyManagerCalcChain.arg = mgr;
     if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, 10))
     {
@@ -1540,8 +1519,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
         {
             g_ItemManager.SpawnItem(&enemy->position, ITEM_POINT_BULLET, 1);
             g_AsciiManager.CreatePopup1(&enemy->position, popupScore,
-                                        popupScore >= scoreMax ? 0xffffff00
-                                                               : 0xffffffff);
+                                        popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
             totalScore += popupScore;
             popupScore += 30;
             if (popupScore > scoreMax)
@@ -1552,11 +1530,9 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
             {
                 for (j = 0; j < enemy->trailCount; j += 6)
                 {
-                    g_ItemManager.SpawnItem(&enemy->enemyHistory[j].position,
-                                            ITEM_POINT_BULLET, 1);
-                    g_AsciiManager.CreatePopup1(
-                        &enemy->enemyHistory[j].position, popupScore,
-                        popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
+                    g_ItemManager.SpawnItem(&enemy->enemyHistory[j].position, ITEM_POINT_BULLET, 1);
+                    g_AsciiManager.CreatePopup1(&enemy->enemyHistory[j].position, popupScore,
+                                                popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
                     totalScore += popupScore;
                     popupScore += 30;
                     if (popupScore > scoreMax)
@@ -1568,8 +1544,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
         }
         if (!enemy->canDie && enemy->deathCallbackSub >= 0)
         {
-            g_EclManager.CallEclSub(&enemy->currentContext,
-                                    (i16)enemy->deathCallbackSub);
+            g_EclManager.CallEclSub(&enemy->currentContext, (i16)enemy->deathCallbackSub);
             enemy->deathCallbackSub = -1;
         }
     }

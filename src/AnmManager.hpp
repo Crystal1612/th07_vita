@@ -38,7 +38,9 @@ extern VertexTex1Xyzrhw g_QuadTemplate[4];
 
 struct VertexTex1DiffuseXyzrhw
 {
-    VertexTex1DiffuseXyzrhw() {}
+    VertexTex1DiffuseXyzrhw()
+    {
+    }
 
     ZunVec3 pos;
     f32 w;
@@ -129,40 +131,34 @@ struct AnmManager
     void CalcProjectedTransform(AnmVm *vm);
     void CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y);
     void CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRect);
-    ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
-                                 i32 textureFormat);
+    ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat);
     ZunResult Draw(AnmVm *vm);
     ZunResult DrawBillboard(AnmVm *vm);
     ZunResult Draw3(AnmVm *vm);
-    void DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY, i32 rectLeft,
-                        i32 rectTop, i32 width, i32 height);
+    void DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY, i32 rectLeft, i32 rectTop, i32 width,
+                        i32 height);
     ZunResult DrawFacingCamera(AnmVm *vm);
     ZunResult DrawInner(AnmVm *vm, u32 drawFlags);
     ZunResult DrawNoRotation(AnmVm *vm);
     ZunResult DrawProjected(AnmVm *vm);
-    void DrawStringFormat(AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
-                          const char *text, ...);
-    void DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
-                           const char *text, ...);
-    void DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width, i32 height,
-                          i32 fontWidth, i32 fontHeight, D3DCOLOR textColor,
-                          u32 outlineType, char *strToPrint, f32 scaleY,
-                          f32 scaleX);
-    ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
-                                i32 count);
-    static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor,
-                              u32 outlineType, const char *str, ...);
+    void DrawStringFormat(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text, ...);
+    void DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text, ...);
+    void DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width, i32 height, i32 fontWidth,
+                          i32 fontHeight, D3DCOLOR textColor, u32 outlineType, char *strToPrint,
+                          f32 scaleY, f32 scaleX);
+    ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count);
+    static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
+                              const char *str, ...);
     i32 ExecuteScript(AnmVm *vm);
     void Flush();
-    i32 LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
-                u32 ownsMemory);
+    i32 LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset, u32 ownsMemory);
     i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
     void LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
     ZunResult LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx,
                           D3DCOLOR colorKey);
-    ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath,
-                                      i32 formatIdx, D3DCOLOR colorKey);
+    ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath, i32 formatIdx,
+                                      D3DCOLOR colorKey);
     ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
                                   D3DCOLOR formatIdx);
     ZunResult PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex);
@@ -176,16 +172,13 @@ struct AnmManager
     void SetRenderStateForVm(AnmVm *vm);
     void SetupVertexBuffer();
     void SyncRenderState(AnmVm *vm);
-    void TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop, i32 srcWidth,
-                        i32 srcHeight, i32 dstLeft, i32 dstTop, i32 dstWidth,
-                        i32 dstHeight);
+    void TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop, i32 srcWidth, i32 srcHeight,
+                        i32 dstLeft, i32 dstTop, i32 dstWidth, i32 dstHeight);
     void TakeScreenshotIfRequested();
-    void TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width,
-                           f32 height, f32 sine, f32 cosine,
-                           f32 xOffset, f32 yOffset);
+    void TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width, f32 height, f32 sine,
+                           f32 cosine, f32 xOffset, f32 yOffset);
 
-    void SetInterruptActiveVms(AnmVm *vm, i32 vmCount,
-                               i16 interrupt);
+    void SetInterruptActiveVms(AnmVm *vm, i32 vmCount, i16 interrupt);
     void ExecuteScripts(AnmVm *startVm, i32 count);
     void ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount);
     ZunResult UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count);

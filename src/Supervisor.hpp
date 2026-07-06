@@ -78,7 +78,7 @@ struct GameConfiguration
 
 struct Supervisor
 {
-    static void DebugPrint2(const char *fmt, ...);
+    static void DebugPrint(const char *fmt, ...);
 
     static ZunResult RegisterChain();
 
@@ -109,10 +109,8 @@ struct Supervisor
 
     i32 CanSaveReplay();
 
-    static i32 __stdcall ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
-                                            void *param_2);
-    static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
-                                               void *param_2);
+    static i32 __stdcall ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1, void *param_2);
+    static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1, void *param_2);
 
     i32 VsyncEnabled()
     {

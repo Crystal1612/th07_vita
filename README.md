@@ -21,10 +21,6 @@ uv run scripts/build.py
 
 The resulting build can be found at `build/th07.exe`.
 
-## Contributing
-
-See the [CONTRIBUTING.md](./CONTRIBUTING.md).
-
 ## Credits
 
 * The earlier [decompilation for th06](https://github.com/GensokyoClub/th06), used as a source of shared types, function names, file names, source organization, basically everything. Because EoSD and PCB are so similar architecturally, the pre-existing th06 decompilation could be used as a direct reference for reverse engineering th07.

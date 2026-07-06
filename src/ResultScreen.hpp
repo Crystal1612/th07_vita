@@ -164,8 +164,8 @@ struct ResultScreen
     static ScoreDat *OpenScore(const char *path);
     static i32 LinkScore(ScoreListNode *prevNode, Hscr *hscr);
     i32 LinkScoreEx(Hscr *out, i32 difficulty, i32 character);
-    static u32 GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
-                            u32 character, u32 difficulty, u8 *numRetries);
+    static u32 GetHighScore(ScoreDat *scoreDat, ScoreListNode *node, u32 character, u32 difficulty,
+                            u8 *numRetries);
     static ZunResult ParseCatk(ScoreDat *scoreDat, Catk *outCatk);
     static ZunResult ParseClrd(ScoreDat *scoreDat, Clrd *outClrd);
     static ZunResult ParsePlst(ScoreDat *scoreDat, Plst *outPlst);

@@ -34,8 +34,7 @@ u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
 {
     if (arg->duration != 0)
     {
-        arg->alpha = (i32)(255.0f - arg->timer.AsFloat() * 255.0f /
-                                        (f32)arg->duration);
+        arg->alpha = (i32)(255.0f - arg->timer.AsFloat() * 255.0f / (f32)arg->duration);
         if (arg->alpha < 0)
         {
             arg->alpha = (i32)0.0f;
@@ -61,10 +60,8 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     vertices[2].pos = ZunVec3(rect->left, rect->bottom, 0.0f);
     vertices[3].pos = ZunVec3(rect->right, rect->bottom, 0.0f);
     vertices[0].w = vertices[1].w = vertices[2].w = vertices[3].w = 1.0f;
-    vertices[0].diffuse.color =
-        vertices[1].diffuse.color =
-            vertices[2].diffuse.color =
-                vertices[3].diffuse.color = color;
+    vertices[0].diffuse.color = vertices[1].diffuse.color = vertices[2].diffuse.color =
+        vertices[3].diffuse.color = color;
     if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
@@ -95,9 +92,8 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
 }
 
-void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
-                                   D3DCOLOR param_3, D3DCOLOR param_4,
-                                   D3DCOLOR param_5)
+void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
+                                   D3DCOLOR param_4, D3DCOLOR param_5)
 {
     g_AnmManager->Flush();
 
@@ -224,8 +220,7 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
     rect.top = 16.0f;
     rect.right = 416.0f;
     rect.bottom = 464.0f;
-    ScreenEffect::DrawSquare(&rect,
-                             arg->alpha << 24 | (arg->args[1] & 0xffffff));
+    ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | (arg->args[1] & 0xffffff));
     return 1;
 }
 
@@ -291,8 +286,7 @@ ZunResult BombEffects::DeletedCallback(BombEffects *arg)
     return ZUN_SUCCESS;
 }
 
-BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1,
-                                        u32 arg2, u32 arg3)
+BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2, u32 arg3)
 {
     ChainElem *local_8 = NULL;
     ChainElem *local_c = NULL;

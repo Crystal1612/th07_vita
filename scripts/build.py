@@ -60,7 +60,6 @@ SOURCES: List[Path] = list(
             "SoundPlayer.cpp",
             "AnmManager.cpp",
             "MainMenu.cpp",
-            "dsutil.cpp",
             "pbg4/Pbg4File.cpp",
             "pbg4/Lzss.cpp",
             "pbg4/Pbg4Archive.cpp",
@@ -134,7 +133,6 @@ lflags = [
 
 libs = [
     "dinput8.lib",
-    "dsound.lib",
     "d3d8.lib",
     "d3dx8.lib",
     "dxguid.lib",

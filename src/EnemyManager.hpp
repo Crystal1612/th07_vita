@@ -47,8 +47,7 @@ struct Enemy
 {
     Enemy();
 
-    void CheckBulletPlayerCollision(ZunVec3 *bulletCenter,
-                                    ZunVec3 *bulletSize);
+    void CheckBulletPlayerCollision(ZunVec3 *bulletCenter, ZunVec3 *bulletSize);
     void ClampPos();
     void Despawn();
     i32 HandleLifeCallback();
@@ -64,12 +63,14 @@ struct Enemy
 
     i32 BulletRankAmount1(i32 scaleFactor)
     {
-        return BulletRankAmountInner(this->bulletRankAmount1Low, this->bulletRankAmount1High, scaleFactor);
+        return BulletRankAmountInner(this->bulletRankAmount1Low, this->bulletRankAmount1High,
+                                     scaleFactor);
     }
 
     i32 BulletRankAmount2(i32 scaleFactor)
     {
-        return BulletRankAmountInner(this->bulletRankAmount2Low, this->bulletRankAmount2High, scaleFactor);
+        return BulletRankAmountInner(this->bulletRankAmount2Low, this->bulletRankAmount2High,
+                                     scaleFactor);
     }
 
     static f32 BulletRankSpeedInner(f32 low, f32 high, f32 scaleFactor)
@@ -79,7 +80,8 @@ struct Enemy
 
     f32 BulletRankSpeed(f32 scaleFactor)
     {
-        return Enemy::BulletRankSpeedInner(this->bulletRankSpeedLow, this->bulletRankSpeedHigh, scaleFactor);
+        return Enemy::BulletRankSpeedInner(this->bulletRankSpeedLow, this->bulletRankSpeedHigh,
+                                           scaleFactor);
     }
 
     static i32 ShootIntervalInner(i32 low, i32 high, i32 scaleFactor)
@@ -89,7 +91,8 @@ struct Enemy
 
     i32 ShootInterval(i32 scaleFactor)
     {
-        return Enemy::ShootIntervalInner(this->shootInterval / 5, -this->shootInterval / 5, scaleFactor);
+        return Enemy::ShootIntervalInner(this->shootInterval / 5, -this->shootInterval / 5,
+                                         scaleFactor);
     }
 
     AnmVm primaryVm;
@@ -258,10 +261,9 @@ struct EnemyManager
     i32 HasActiveBoss();
     i32 RemoveAllEnemies(i32 scoreMax, i32 scoreMin);
     static void RunEclTimeline(EclTimeline *timeline);
-    Enemy *SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop,
-                      i32 score, u8 param_6);
-    Enemy *SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop,
-                        i32 score, EclContextArgs *args);
+    Enemy *SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop, i32 score, u8 param_6);
+    Enemy *SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDrop, i32 score,
+                        EclContextArgs *args);
 
     const char *stgEnmAnmFilename;
     const char *stgEnm2AnmFilename;

@@ -1,7 +1,7 @@
 #include "ResultScreen.hpp"
 
-#include <direct.h>
 #include <cstdio>
+#include <direct.h>
 #include <time.h>
 
 #include "AnmManager.hpp"
@@ -17,37 +17,24 @@
 
 static const f32 g_DifficultyWeightsList[] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
 
-const char *g_AlphabetList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,:;_@abcdefghijklmnopqrstuvwxyz+-/*=%0123456789#!?'\"$(){}[]<>&\\|~^ --";
+const char *g_AlphabetList = "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,:;_@abcdefghijklmnopqrstuvwxyz+-/"
+                             "*=%0123456789#!?'\"$(){}[]<>&\\|~^ --";
 
 const char *g_CharacterList[6] = {
-    "博麗 霊夢 (霊)　",
-    "博麗 霊夢 (夢)　",
-    "霧雨 魔理沙 (魔)",
-    "霧雨 魔理沙 (恋)",
-    "十六夜 咲夜 (幻)",
-    "十六夜 咲夜 (時)",
+    "博麗 霊夢 (霊)　", "博麗 霊夢 (夢)　", "霧雨 魔理沙 (魔)",
+    "霧雨 魔理沙 (恋)", "十六夜 咲夜 (幻)", "十六夜 咲夜 (時)",
 };
 
 const char *g_TotalForAllProtagonists = "全主人公合計  　";
 
 const char *g_CharactersAndShotTypesStrings[6] = {
-    "ReimuA ",
-    "ReimuB ",
-    "MarisaA",
-    "MarisaB",
-    "SakuyaA",
-    "SakuyaB",
+    "ReimuA ", "ReimuB ", "MarisaA", "MarisaB", "SakuyaA", "SakuyaB",
 };
 
 static const f32 g_DifficultySpellcardWeightsList[] = {1.0f, 1.5f, 1.5f, 2.0f, 2.5f};
 
 const char *g_DifficultyNameTable[6] = {
-    "      Easy",
-    "    Normal",
-    "      Hard",
-    "   Lunatic",
-    "     Extra",
-    "  Phantasm",
+    "      Easy", "    Normal", "      Hard", "   Lunatic", "     Extra", "  Phantasm",
 };
 
 i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *hscr)
@@ -58,8 +45,7 @@ i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *hscr)
     scoresAmount = 0;
     while (prevNode->next)
     {
-        if (prevNode->next->data &&
-            prevNode->next->data->score <= hscr->score)
+        if (prevNode->next->data && prevNode->next->data->score <= hscr->score)
         {
             break;
         }
@@ -103,12 +89,12 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     i32 isTh7k;
     Vrsm *parsedVrsm;
 
-    Supervisor::DebugPrint2("info : score load\r\n");
+    Supervisor::DebugPrint("info : score load\r\n");
     scoreData = (ScoreDat *)FileSystem::OpenFile(path, 1);
     if (!scoreData)
     {
     RECREATE_SCORE:
-        Supervisor::DebugPrint2("info : score recreate\r\n");
+        Supervisor::DebugPrint("info : score recreate\r\n");
         if (scoreData)
         {
             free(scoreData);
@@ -121,7 +107,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
 
     if (g_LastFileSize < sizeof(ScoreDat))
     {
-        Supervisor::DebugPrint2("warning : score.dat size is short\r\n");
+        Supervisor::DebugPrint("warning : score.dat size is short\r\n");
         free(scoreData);
         goto RECREATE_SCORE;
     }
@@ -147,27 +133,26 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
 
     if (scoreData->csum != checksum)
     {
-        Supervisor::DebugPrint2("warning : score.dat chksum error\r\n");
+        Supervisor::DebugPrint("warning : score.dat chksum error\r\n");
         goto RECREATE_SCORE;
     }
 
     if (scoreData->dataOffset != sizeof(ScoreDat))
     {
-        Supervisor::DebugPrint2("warning : header size is mismatch\r\n");
+        Supervisor::DebugPrint("warning : header size is mismatch\r\n");
         goto RECREATE_SCORE;
     }
 
     if (scoreData->magic != 11)
     {
-        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
+        Supervisor::DebugPrint("warning : score.dat version mismatch\r\n");
         goto RECREATE_SCORE;
     }
 
     uncompressedData = (ScoreDat *)malloc(0xa001c);
     memcpy(uncompressedData, scoreData, sizeof(ScoreDat));
-    Lzss::Decompress(
-        (u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
-        (u8 *)uncompressedData + sizeof(ScoreDat), scoreData->dstLen);
+    Lzss::Decompress((u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
+                     (u8 *)uncompressedData + sizeof(ScoreDat), scoreData->dstLen);
     free(scoreData);
     scoreData = uncompressedData;
 
@@ -192,7 +177,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         }
         if (chunk->th7kLen == 0)
         {
-            Supervisor::DebugPrint2("warning : score.dat chapter size is ZERO\r\n");
+            Supervisor::DebugPrint("warning : score.dat chapter size is ZERO\r\n");
             goto RECREATE_SCORE;
         }
         cursor -= chunk->th7kLen;
@@ -201,7 +186,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
 
     if (!isTh7k || parsedTh7k->version != 1)
     {
-        Supervisor::DebugPrint2("warning : score.dat version mismatch\r\n");
+        Supervisor::DebugPrint("warning : score.dat version mismatch\r\n");
         goto RECREATE_SCORE;
     }
 
@@ -213,8 +198,8 @@ INIT_SCORES:
     return scoreData;
 }
 
-u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
-                               u32 character, u32 difficulty, u8 *numRetries)
+u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node, u32 character,
+                               u32 difficulty, u8 *numRetries)
 {
     ScoreDat *sd = scoreDat;
     i32 cursor;
@@ -234,8 +219,7 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
     while (cursor > 0)
     {
         if (parsedHscr->magic == HSCR_MAGIC && parsedHscr->version == 1 &&
-            parsedHscr->character == character &&
-            parsedHscr->difficulty == difficulty)
+            parsedHscr->character == character && parsedHscr->difficulty == difficulty)
         {
             if (node)
             {
@@ -254,9 +238,7 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node,
         *numRetries = sd->scores->next ? sd->scores->next->data->numRetries : 0;
     }
     return sd->scores->next
-               ? sd->scores->next->data->score > 100000
-                     ? sd->scores->next->data->score
-                     : 100000
+               ? sd->scores->next->data->score > 100000 ? sd->scores->next->data->score : 100000
                : 100000;
 }
 
@@ -396,13 +378,11 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
         if (parsedPscr->magic == PSCR_MAGIC && parsedPscr->version == 1)
         {
             pscr = parsedPscr;
-            if (pscr->character >= 6 ||
-                (pscr->difficulty >= 5 || pscr->stage >= 7))
+            if (pscr->character >= 6 || (pscr->difficulty >= 5 || pscr->stage >= 7))
             {
                 break;
             }
-            outPscr[pscr->character * 6 * 4 + pscr->stage * 4 +
-                    pscr->difficulty] = *pscr;
+            outPscr[pscr->character * 6 * 4 + pscr->stage * 4 + pscr->difficulty] = *pscr;
         }
         cursor -= parsedPscr->th7kLen;
         parsedPscr = (Pscr *)((u8 *)parsedPscr + parsedPscr->th7kLen);
@@ -580,12 +560,10 @@ void ResultScreen::WriteScore()
     scoreDat = (ScoreDat *)fileBuffer;
     scoreDat->dstLen = sizeOfFile - sizeof(ScoreDat);
     scoreDat->fileLength = sizeOfFile;
-    compressedBuffer = Lzss::Compress(fileBuffer + sizeof(ScoreDat),
-                                      scoreDat->dstLen,
-                                      &scoreDat->srcLen);
+    compressedBuffer =
+        Lzss::Compress(fileBuffer + sizeof(ScoreDat), scoreDat->dstLen, &scoreDat->srcLen);
 
-    memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer,
-           scoreDat->srcLen);
+    memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer, scoreDat->srcLen);
     free(compressedBuffer);
     sizeOfFile = scoreDat->srcLen + sizeof(ScoreDat);
 
@@ -764,8 +742,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
         arg->frameTimer = 0;
     case 1:
         vmIdx = MoveCursor(arg, 9);
-        if (arg->cursor == 5 &&
-            !g_GameManager.HasUnlockedPhantomAndMaxClears())
+        if (arg->cursor == 5 && !g_GameManager.HasUnlockedPhantomAndMaxClears())
         {
             arg->cursor += vmIdx;
         }
@@ -980,8 +957,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             arg->lastSpellcardSelected = arg->cursor;
             arg->prevSpellcardListPage = arg->spellcardListPage;
             for (vmIdx = arg->lastSpellcardSelected * 10;
-                 vmIdx < arg->lastSpellcardSelected * 10 + 10;
-                 vmIdx++)
+                 vmIdx < arg->lastSpellcardSelected * 10 + 10; vmIdx++)
             {
                 if (vmIdx >= 141)
                 {
@@ -989,15 +965,13 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 }
                 if (g_GameManager.catk[vmIdx].numAttemptsPerShot[6] == 0)
                 {
-                    AnmManager::DrawVmTextFmt(g_AnmManager,
-                                              arg->spellcardListVms + vmIdx % 10,
+                    AnmManager::DrawVmTextFmt(g_AnmManager, arg->spellcardListVms + vmIdx % 10,
                                               0xffffff, 0, "？？？？？");
                 }
                 else
                 {
-                    AnmManager::DrawVmTextFmt(
-                        g_AnmManager, arg->spellcardListVms + vmIdx % 10, 0xffffff, 0,
-                        g_GameManager.catk[vmIdx].name);
+                    AnmManager::DrawVmTextFmt(g_AnmManager, arg->spellcardListVms + vmIdx % 10,
+                                              0xffffff, 0, g_GameManager.catk[vmIdx].name);
                 }
                 arg->spellcardListVms[vmIdx % 10].color.bytes.a = 255;
             }
@@ -1081,8 +1055,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
     AnmVm *vm;
     i32 vmIdx;
 
-    if (g_Supervisor.CanSaveReplay() ||
-        (g_Supervisor.flags >> 3 & 1) != 0)
+    if (g_Supervisor.CanSaveReplay() || (g_Supervisor.flags >> 3 & 1) != 0)
     {
         this->resultScreenState = 16;
         this->frameTimer = 0;
@@ -1091,8 +1064,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
     }
     if (this->frameTimer == 0)
     {
-        this->charUsed =
-            (u32)g_GameManager.character * 2 + (u32)g_GameManager.shotType;
+        this->charUsed = (u32)g_GameManager.character * 2 + (u32)g_GameManager.shotType;
         this->diffPlayed = g_GameManager.difficulty;
         vm = this->vms;
         for (vmIdx = 0; vmIdx < 41; vmIdx++, vm++)
@@ -1286,8 +1258,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     case 11:
         if (this->frameTimer == 60)
         {
-            if (g_Supervisor.CanSaveReplay() ||
-                (g_Supervisor.flags >> 3 & 1) != 0)
+            if (g_Supervisor.CanSaveReplay() || (g_Supervisor.flags >> 3 & 1) != 0)
             {
                 interrupt = 19;
             }
@@ -1313,17 +1284,13 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         vm = this->vms + 19;
         if (this->cursor == 0)
         {
-            vm[0].color.color =
-                (vm[0].color.color & 0xff000000) | 0xff6060;
-            vm[1].color.color =
-                (vm[1].color.color & 0xff000000) | 0x606060;
+            vm[0].color.color = (vm[0].color.color & 0xff000000) | 0xff6060;
+            vm[1].color.color = (vm[1].color.color & 0xff000000) | 0x606060;
         }
         else
         {
-            vm[0].color.color =
-                (vm[0].color.color & 0xff000000) | 0x606060;
-            vm[1].color.color =
-                (vm[1].color.color & 0xff000000) | 0xff6060;
+            vm[0].color.color = (vm[0].color.color & 0xff000000) | 0x606060;
+            vm[1].color.color = (vm[1].color.color & 0xff000000) | 0xff6060;
         }
         if (this->frameTimer < 80)
         {
@@ -1414,8 +1381,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             this->frameTimer = 0;
             GetDate(this->defaultReplay.data.date);
             this->defaultReplay.data.score = g_GameManager.globals->score;
-            if (*(i32 *)&this->replays[this->cursor].head.magic !=
-                    *(i32 *)&"T7RP" ||
+            if (*(i32 *)&this->replays[this->cursor].head.magic != *(i32 *)&"T7RP" ||
                 (this->replays[this->cursor].head.version & 0xfff) != 256)
             {
                 vm = this->vms;
@@ -1535,8 +1501,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             }
             else
             {
-                sprintf(replayPath2, "./replay/th7_%.2d.rpy",
-                        this->chosenReplayIdx + 1);
+                sprintf(replayPath2, "./replay/th7_%.2d.rpy", this->chosenReplayIdx + 1);
                 ReplayManager::SaveReplay(replayPath2, this->replayName);
                 this->frameTimer = 0;
                 this->resultScreenState = 2;
@@ -1577,25 +1542,20 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         vm = this->vms + 19;
         if (this->cursor == 0)
         {
-            vm[0].color.color =
-                (vm[0].color.color & 0xff000000) | 0xff6060;
-            vm[1].color.color =
-                (vm[1].color.color & 0xff000000) | 0x606060;
+            vm[0].color.color = (vm[0].color.color & 0xff000000) | 0xff6060;
+            vm[1].color.color = (vm[1].color.color & 0xff000000) | 0x606060;
         }
         else
         {
-            vm[0].color.color =
-                (vm[0].color.color & 0xff000000) | 0x606060;
-            vm[1].color.color =
-                (vm[1].color.color & 0xff000000) | 0xff6060;
+            vm[0].color.color = (vm[0].color.color & 0xff000000) | 0x606060;
+            vm[1].color.color = (vm[1].color.color & 0xff000000) | 0xff6060;
         }
         if (this->frameTimer < 20)
         {
             return ZUN_SUCCESS;
         }
         MoveCursorHorizontally(this, 2);
-        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) ||
-            WAS_PRESSED_RAW(TH_BUTTON_MENU))
+        if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU) || WAS_PRESSED_RAW(TH_BUTTON_MENU))
         {
             goto LAB_004473e3;
         }
@@ -1609,7 +1569,13 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 {
                     vm->pendingInterrupt = 17;
                 }
+<<<<<<< HEAD
                 vm = &this->vms[chosenReplayIdx + 25];
+=======
+                vm = &this->vms[(
+                    i32)((i32) &
+                         ((StageReplayData *)this->chosenReplayIdx)->extendsFromPointItems + 1)];
+>>>>>>> b29177e (formatting + use miniaudio for sound)
                 vm->pendingInterrupt = 16;
                 this->resultScreenState = 14;
             }
@@ -1671,20 +1637,19 @@ i32 ResultScreen::DrawStats()
             vm = this->spellcardListVms;
             vm->pos = pos;
             g_Supervisor.UpdateStartupTime();
-            AnmManager::DrawVmTextFmt(
-                g_AnmManager, vm, 0xffffff, 0,
-                "総起動時間   %.2d:%.2d:%.2d", g_GameManager.plst.totalHours,
-                g_GameManager.plst.totalMinutes, g_GameManager.plst.totalSeconds);
+            AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0, "総起動時間   %.2d:%.2d:%.2d",
+                                      g_GameManager.plst.totalHours,
+                                      g_GameManager.plst.totalMinutes,
+                                      g_GameManager.plst.totalSeconds);
             g_Supervisor.UpdateStartupTime();
             this->lastTotalSeconds = g_GameManager.plst.totalSeconds;
 
             vm++;
             pos.y += 17.0f;
             vm->pos = pos;
-            AnmManager::DrawVmTextFmt(
-                g_AnmManager, vm, 0xffffff, 0,
-                "総プレイ時間 %.2d:%.2d:%.2d", g_GameManager.plst.gameHours,
-                g_GameManager.plst.gameMinutes, g_GameManager.plst.gameSeconds);
+            AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0, "総プレイ時間 %.2d:%.2d:%.2d",
+                                      g_GameManager.plst.gameHours, g_GameManager.plst.gameMinutes,
+                                      g_GameManager.plst.gameSeconds);
 
             vm++;
             pos.y += 17.0f;
@@ -1741,8 +1706,7 @@ i32 ResultScreen::DrawStats()
             {
                 AnmManager::DrawVmTextFmt(
                     g_AnmManager, vm, 0xffffff, 0, "%s %6d %6d %6d %6d %6d %6d %6d",
-                    g_TotalForAllProtagonists,
-                    g_GameManager.plst.playDataByDifficulty[0].playCount,
+                    g_TotalForAllProtagonists, g_GameManager.plst.playDataByDifficulty[0].playCount,
                     g_GameManager.plst.playDataByDifficulty[1].playCount,
                     g_GameManager.plst.playDataByDifficulty[2].playCount,
                     g_GameManager.plst.playDataByDifficulty[3].playCount,
@@ -1752,15 +1716,14 @@ i32 ResultScreen::DrawStats()
             }
             else
             {
-                AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0, "%s %6d %6d %6d %6d %6d %6d",
-                    g_TotalForAllProtagonists,
-                    g_GameManager.plst.playDataByDifficulty[0].playCount,
-                    g_GameManager.plst.playDataByDifficulty[1].playCount,
-                    g_GameManager.plst.playDataByDifficulty[2].playCount,
-                    g_GameManager.plst.playDataByDifficulty[3].playCount,
-                    g_GameManager.plst.playDataByDifficulty[4].playCount,
-                    g_GameManager.plst.playDataByDifficulty[6].playCount);
+                AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0,
+                                          "%s %6d %6d %6d %6d %6d %6d", g_TotalForAllProtagonists,
+                                          g_GameManager.plst.playDataByDifficulty[0].playCount,
+                                          g_GameManager.plst.playDataByDifficulty[1].playCount,
+                                          g_GameManager.plst.playDataByDifficulty[2].playCount,
+                                          g_GameManager.plst.playDataByDifficulty[3].playCount,
+                                          g_GameManager.plst.playDataByDifficulty[4].playCount,
+                                          g_GameManager.plst.playDataByDifficulty[6].playCount);
             }
 
             vm++;
@@ -1777,8 +1740,7 @@ i32 ResultScreen::DrawStats()
             if (g_GameManager.HasUnlockedPhantomAndMaxClears())
             {
                 AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "クリア回数  　　 %6d %6d %6d %6d %6d %6d %6d",
+                    g_AnmManager, vm, 0xffffff, 0, "クリア回数  　　 %6d %6d %6d %6d %6d %6d %6d",
                     g_GameManager.plst.playDataByDifficulty[0].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[1].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[2].noContinueClearCount,
@@ -1790,8 +1752,7 @@ i32 ResultScreen::DrawStats()
             else
             {
                 AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "クリア回数  　　 %6d %6d %6d %6d %6d %6d",
+                    g_AnmManager, vm, 0xffffff, 0, "クリア回数  　　 %6d %6d %6d %6d %6d %6d",
                     g_GameManager.plst.playDataByDifficulty[0].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[1].noContinueClearCount,
                     g_GameManager.plst.playDataByDifficulty[2].noContinueClearCount,
@@ -1805,28 +1766,26 @@ i32 ResultScreen::DrawStats()
             vm->pos = pos;
             if (g_GameManager.HasUnlockedPhantomAndMaxClears())
             {
-                AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "コンティニュー   %6d %6d %6d %6d %6d %6d %6d",
-                    g_GameManager.plst.playDataByDifficulty[0].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[1].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[2].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[3].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[4].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[5].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[6].retryCount);
+                AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0,
+                                          "コンティニュー   %6d %6d %6d %6d %6d %6d %6d",
+                                          g_GameManager.plst.playDataByDifficulty[0].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[1].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[2].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[3].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[4].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[5].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[6].retryCount);
             }
             else
             {
-                AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "コンティニュー   %6d %6d %6d %6d %6d %6d",
-                    g_GameManager.plst.playDataByDifficulty[0].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[1].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[2].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[3].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[4].retryCount,
-                    g_GameManager.plst.playDataByDifficulty[6].retryCount);
+                AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0,
+                                          "コンティニュー   %6d %6d %6d %6d %6d %6d",
+                                          g_GameManager.plst.playDataByDifficulty[0].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[1].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[2].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[3].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[4].retryCount,
+                                          g_GameManager.plst.playDataByDifficulty[6].retryCount);
             }
 
             vm++;
@@ -1835,8 +1794,7 @@ i32 ResultScreen::DrawStats()
             if (g_GameManager.HasUnlockedPhantomAndMaxClears())
             {
                 AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "プラクティス　   %6d %6d %6d %6d %6d %6d %6d",
+                    g_AnmManager, vm, 0xffffff, 0, "プラクティス　   %6d %6d %6d %6d %6d %6d %6d",
                     g_GameManager.plst.playDataByDifficulty[0].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[1].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[2].extraClearCount,
@@ -1848,8 +1806,7 @@ i32 ResultScreen::DrawStats()
             else
             {
                 AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "プラクティス　   %6d %6d %6d %6d %6d %6d",
+                    g_AnmManager, vm, 0xffffff, 0, "プラクティス　   %6d %6d %6d %6d %6d %6d",
                     g_GameManager.plst.playDataByDifficulty[0].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[1].extraClearCount,
                     g_GameManager.plst.playDataByDifficulty[2].extraClearCount,
@@ -1863,28 +1820,26 @@ i32 ResultScreen::DrawStats()
             vm->pos = pos;
             if (g_GameManager.HasUnlockedPhantomAndMaxClears())
             {
-                AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "リトライ回数  　 %6d %6d %6d %6d %6d %6d %6d",
-                    g_GameManager.plst.playDataByDifficulty[0].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[1].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[2].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[3].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[4].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[5].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[6].clearCount);
+                AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0,
+                                          "リトライ回数  　 %6d %6d %6d %6d %6d %6d %6d",
+                                          g_GameManager.plst.playDataByDifficulty[0].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[1].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[2].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[3].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[4].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[5].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[6].clearCount);
             }
             else
             {
-                AnmManager::DrawVmTextFmt(
-                    g_AnmManager, vm, 0xffffff, 0,
-                    "リトライ回数  　 %6d %6d %6d %6d %6d %6d",
-                    g_GameManager.plst.playDataByDifficulty[0].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[1].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[2].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[3].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[4].clearCount,
-                    g_GameManager.plst.playDataByDifficulty[6].clearCount);
+                AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0,
+                                          "リトライ回数  　 %6d %6d %6d %6d %6d %6d",
+                                          g_GameManager.plst.playDataByDifficulty[0].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[1].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[2].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[3].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[4].clearCount,
+                                          g_GameManager.plst.playDataByDifficulty[6].clearCount);
             }
         }
 
@@ -1908,14 +1863,13 @@ i32 ResultScreen::DrawStats()
              g_GameManager.plst.totalSeconds != this->lastTotalSeconds))
         {
             vm = this->spellcardListVms;
-            AnmManager::DrawVmTextFmt(
-                g_AnmManager, vm, 0xffffff, 0,
-                "総起動時間   %.2d:%.2d:%.2d", g_GameManager.plst.totalHours,
-                g_GameManager.plst.totalMinutes, g_GameManager.plst.totalSeconds);
+            AnmManager::DrawVmTextFmt(g_AnmManager, vm, 0xffffff, 0, "総起動時間   %.2d:%.2d:%.2d",
+                                      g_GameManager.plst.totalHours,
+                                      g_GameManager.plst.totalMinutes,
+                                      g_GameManager.plst.totalSeconds);
             this->lastTotalSeconds = g_GameManager.plst.totalSeconds;
         }
-        if (WAS_PRESSED_RAW(TH_BUTTON_SHOOT | TH_BUTTON_BOMB |
-                            TH_BUTTON_MENU | TH_BUTTON_ENTER))
+        if (WAS_PRESSED_RAW(TH_BUTTON_SHOOT | TH_BUTTON_BOMB | TH_BUTTON_MENU | TH_BUTTON_ENTER))
         {
             this->resultScreenState = 22;
             this->frameTimer = 0;
@@ -1969,8 +1923,7 @@ ZunResult ResultScreen::DrawFinalStats()
         pos.x += 210.0f;
         pos.y += 32.0f;
 
-        AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d",
-                                    g_GameManager.globals->guiScore);
+        AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%9d", g_GameManager.globals->guiScore);
 
         pos.x += 126.0f;
         AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%1d",
@@ -1983,7 +1936,9 @@ ZunResult ResultScreen::DrawFinalStats()
         }
         else if (g_GameManager.globals->guiScore < 200000000)
         {
-            rankingProbably += (f32)(u32)(g_GameManager.globals->guiScore - 2000000) / 198000000.0f * 60.0f - 20.0f;
+            rankingProbably +=
+                (f32)(u32)(g_GameManager.globals->guiScore - 2000000) / 198000000.0f * 60.0f -
+                20.0f;
         }
         else
         {
@@ -1991,8 +1946,7 @@ ZunResult ResultScreen::DrawFinalStats()
         }
 
         pos.y += 22.0f;
-        g_AsciiManager.AddString(&pos,
-                                 g_DifficultyNameTable[g_GameManager.difficulty]);
+        g_AsciiManager.AddString(&pos, g_DifficultyNameTable[g_GameManager.difficulty]);
 
         rankingProbably += g_DifficultyWeightsList[g_GameManager.difficulty];
 
@@ -2036,8 +1990,7 @@ ZunResult ResultScreen::DrawFinalStats()
         rankingProbably += (f32)g_GameManager.globals->spellCardsCaptured *
                            g_DifficultySpellcardWeightsList[g_GameManager.difficulty];
 
-        slowdown =
-            (g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f) * 2;
+        slowdown = (g_Supervisor.framerateMultiplier / g_Supervisor.fpsAccumulator - 0.5f) * 2;
 
         if (slowdown < 0.0f)
         {
@@ -2149,11 +2102,9 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 {
                     g_AsciiManager.color = 0xffffc0c0;
                 }
-                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%2d",
-                                            i + 1);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%2d", i + 1);
                 pos.x += 48.0f;
-                if (arg->resultScreenState == 10 &&
-                    node->data->isPlayerScore)
+                if (arg->resultScreenState == 10 && node->data->isPlayerScore)
                 {
                     // ZUN quirk: VIRGIN strcpy vs CHAD whatever tf this is
                     *(u32 *)&name[0] = *(u32 *)"    ";
@@ -2165,26 +2116,24 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 if (node->data->stage <= 6)
                 {
                     AsciiManager::AddFormatText(
-                        &g_AsciiManager, &pos, "%8s %9d%1d(%d)",
-                        node->data->name, node->data->score,
-                        (i32)node->data->numRetries, (u32)node->data->stage);
+                        &g_AsciiManager, &pos, "%8s %9d%1d(%d)", node->data->name,
+                        node->data->score, (i32)node->data->numRetries, (u32)node->data->stage);
                 }
-                else if (node->data->stage == 7 ||
-                         node->data->stage == 8)
+                else if (node->data->stage == 7 || node->data->stage == 8)
                 {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &pos, "%8s %9d%1d(1)", node->data->name,
-                        node->data->score, (i32)node->data->numRetries);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%8s %9d%1d(1)",
+                                                node->data->name, node->data->score,
+                                                (i32)node->data->numRetries);
                 }
                 else
                 {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &pos, "%8s %9d%1d(C)", node->data->name,
-                        node->data->score, (i32)node->data->numRetries);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%8s %9d%1d(C)",
+                                                node->data->name, node->data->score,
+                                                (i32)node->data->numRetries);
                 }
                 pos.x += 320.0f;
-                AsciiManager::AddFormatText(&g_AsciiManager, &pos, " %5s   %3.2f",
-                                            node->data->date, node->data->slowRatePercent);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, " %5s   %3.2f", node->data->date,
+                                            node->data->slowRatePercent);
                 pos.y += 18.0f;
                 pos.x -= 368.0f;
                 node = node->next;
@@ -2226,17 +2175,19 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 {
                     g_AsciiManager.color = 0xfff0f0ff - i * 0x80800;
                 }
-                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "No.%.2d",
-                                            spellcardIdx + 1);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "No.%.2d", spellcardIdx + 1);
                 arg->spellcardListVms[i].pos.x += 96.0f;
                 g_AnmManager->DrawNoRotation(arg->spellcardListVms + i);
                 pos.x += 496.0f;
                 if (g_GameManager.catk[spellcardIdx]
                         .numAttemptsPerShot[arg->prevSpellcardListPage] == 0)
                 {
-                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "---/---",
-                                                g_GameManager.catk[spellcardIdx].numSuccessesPerShot[arg->prevSpellcardListPage],
-                                                g_GameManager.catk[spellcardIdx].numAttemptsPerShot[arg->prevSpellcardListPage]);
+                    AsciiManager::AddFormatText(
+                        &g_AsciiManager, &pos, "---/---",
+                        g_GameManager.catk[spellcardIdx]
+                            .numSuccessesPerShot[arg->prevSpellcardListPage],
+                        g_GameManager.catk[spellcardIdx]
+                            .numAttemptsPerShot[arg->prevSpellcardListPage]);
                 }
                 else
                 {
@@ -2256,10 +2207,9 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 if (g_GameManager.catk[spellcardIdx]
                         .numAttemptsPerShot[arg->prevSpellcardListPage] != 0)
                 {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &pos, "MaxBonus %8d",
-                        g_GameManager.catk[spellcardIdx]
-                            .highScorePerShot[arg->prevSpellcardListPage]);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &pos, "MaxBonus %8d",
+                                                g_GameManager.catk[spellcardIdx]
+                                                    .highScorePerShot[arg->prevSpellcardListPage]);
                 }
                 pos.x -= 424.0f;
                 pos.y += 13.0f;
@@ -2271,13 +2221,11 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 }
                 else if (arg->frameTimer < 20)
                 {
-                    pos.y +=
-                        (f32)((20 - arg->frameTimer) * 33 / 20);
+                    pos.y += (f32)((20 - arg->frameTimer) * 33 / 20);
                 }
                 else
                 {
-                    pos.y +=
-                        (f32)((arg->frameTimer - 20) * 33 / 20);
+                    pos.y += (f32)((arg->frameTimer - 20) * 33 / 20);
                 }
             }
             if (arg->frameTimer >= 40)
@@ -2352,8 +2300,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
         vm = &arg->vms[24];
         pos = vm->pos;
         vm++;
-        AsciiManager::AddFormatText(&g_AsciiManager, &pos,
-                                    "No.   Name     Date   Player Score");
+        AsciiManager::AddFormatText(&g_AsciiManager, &pos, "No.   Name     Date   Player Score");
         for (i = 0; i < 15; i++)
         {
             pos = vm->pos;
@@ -2369,8 +2316,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             if (arg->resultScreenState == 14)
             {
                 AsciiManager::AddFormatText(
-                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0",
-                    i + 1, arg->replayName, arg->defaultReplay.data.date,
+                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0", i + 1, arg->replayName,
+                    arg->defaultReplay.data.date,
                     g_CharactersAndShotTypesStrings[(u32)g_GameManager.character * 2 +
                                                     (u32)g_GameManager.shotType],
                     arg->defaultReplay.data.score);
@@ -2379,26 +2326,20 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 *(u32 *)&name[4] = *(u32 *)"    ";
                 name[8] = '\0';
                 name[arg->cursor >= 8 ? 7 : arg->cursor] = '_';
-                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "      %8s",
-                                            name);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "      %8s", name);
             }
-            else if (*(i32 *)&arg->replays[i].head.magic !=
-                         *(i32 *)&"T7RP" ||
+            else if (*(i32 *)&arg->replays[i].head.magic != *(i32 *)&"T7RP" ||
                      (arg->replays[i].head.version & 0xfff) != 256)
             {
-                AsciiManager::AddFormatText(
-                    &g_AsciiManager, &pos,
-                    "No.%.2d -------- --/--  -------          0",
-                    i + 1);
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos,
+                                            "No.%.2d -------- --/--  -------          0", i + 1);
             }
             else
             {
                 AsciiManager::AddFormatText(
-                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0",
-                    i + 1, arg->replays[i].data.name,
-                    arg->replays[i].data.date,
-                    g_CharactersAndShotTypesStrings[arg->replays[i]
-                                                        .data.shotType],
+                    &g_AsciiManager, &pos, "No.%.2d %8s %5s  %7s %9d0", i + 1,
+                    arg->replays[i].data.name, arg->replays[i].data.date,
+                    g_CharactersAndShotTypesStrings[arg->replays[i].data.shotType],
                     arg->replays[i].data.score);
             }
         }
@@ -2579,8 +2520,7 @@ ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)
 ZunResult ResultScreen::RegisterChain(u32 type)
 {
     ResultScreen *resultScreen = new ResultScreen;
-    Supervisor::DebugPrint2("Stg.PlayTimeAll = %d\r\n",
-                            g_GameManager.playTimeAll);
+    Supervisor::DebugPrint("Stg.PlayTimeAll = %d\r\n", g_GameManager.playTimeAll);
     if (type == 1)
     {
         if (!g_GameManager.practice)
@@ -2599,10 +2539,8 @@ ZunResult ResultScreen::RegisterChain(u32 type)
         return ZUN_SUCCESS;
     }
     resultScreen->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
-    resultScreen->calcChain->addedCallback =
-        (ChainLifecycleCallback)AddedCallback;
-    resultScreen->calcChain->deletedCallback =
-        (ChainLifecycleCallback)DeletedCallback;
+    resultScreen->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
+    resultScreen->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     resultScreen->calcChain->arg = resultScreen;
     if (g_Chain.AddToCalcChain(resultScreen->calcChain, 14))
     {

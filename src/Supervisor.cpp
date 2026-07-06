@@ -1,7 +1,7 @@
 #include "Supervisor.hpp"
 
-#include <dinput.h>
 #include <cstdio>
+#include <dinput.h>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -48,7 +48,7 @@ u32 g_NumFramesSinceLastTime;
 
 LARGE_INTEGER g_PerformanceCounter;
 
-void Supervisor::DebugPrint2(const char *fmt, ...)
+void Supervisor::DebugPrint(const char *fmt, ...)
 {
 }
 
@@ -65,27 +65,23 @@ void Supervisor::CheckTiming()
     QueryPerformanceCounter(&this->curPerfCounter);
     GetLocalTime(&this->curTime);
 
-    timeDiff = (f64)this->curTime.wDay * 24.0 * 60.0 * 60.0 +
-               (f64)(this->curTime.wHour * 60 * 60) +
-               (f64)(this->curTime.wMinute * 60) +
-               (f64)this->curTime.wSecond;
+    timeDiff = (f64)this->curTime.wDay * 24.0 * 60.0 * 60.0 + (f64)(this->curTime.wHour * 60 * 60) +
+               (f64)(this->curTime.wMinute * 60) + (f64)this->curTime.wSecond;
 
     perfDiff = (f64)this->prevTime.wDay * 24.0 * 60.0 * 60.0 +
-               (f64)(this->prevTime.wHour * 60 * 60) +
-               (f64)(this->prevTime.wMinute * 60) +
+               (f64)(this->prevTime.wHour * 60 * 60) + (f64)(this->prevTime.wMinute * 60) +
                (f64)this->prevTime.wSecond;
 
     if (timeDiff < perfDiff)
     {
         timeDiff = (f64)(this->prevTime.wDay + 1) * 24.0 * 60.0 * 60.0 +
-                   (f64)(this->curTime.wHour * 60 * 60) +
-                   (f64)(this->curTime.wMinute * 60) +
+                   (f64)(this->curTime.wHour * 60 * 60) + (f64)(this->curTime.wMinute * 60) +
                    (f64)this->curTime.wSecond;
     }
 
     timeDiff -= perfDiff;
-    timeDiff = timeDiff * 1000.0 + (f64)this->curTime.wMilliseconds -
-               (f64)this->prevTime.wMilliseconds;
+    timeDiff =
+        timeDiff * 1000.0 + (f64)this->curTime.wMilliseconds - (f64)this->prevTime.wMilliseconds;
     timeDiff /= 1000.0;
 
     perfDiff = (f64)(this->curPerfCounter.LowPart - this->prevPerfCounter.LowPart) /
@@ -109,8 +105,8 @@ void Supervisor::CheckTiming()
                 this->timingBadCount++;
                 this->timingSpikeAccumulator = 0;
             }
-            Supervisor::DebugPrint2("alq チェック %f / %f = %f\r\n", timeDiff, perfDiff,
-                                    timeDiff / perfDiff);
+            Supervisor::DebugPrint("alq チェック %f / %f = %f\r\n", timeDiff, perfDiff,
+                                   timeDiff / perfDiff);
         }
         else if (this->timingErrorCount != 0)
         {
@@ -148,10 +144,6 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     g_AnmManager->offset.y = 0.0f;
     g_AnmManager->offset.x = 0.0f;
     g_Supervisor.fogEnabled = 255;
-    if (g_SoundPlayer.backgroundMusic)
-    {
-        g_SoundPlayer.backgroundMusic->UpdateFadeOut();
-    }
     if (!g_GameManager.slowModeSlowActive)
     {
         g_LastFrameRawInput = g_CurFrameRawInput;
@@ -184,8 +176,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     if (arg->wantedState != arg->curState)
     {
         arg->prevState = arg->wantedState;
-        Supervisor::DebugPrint2("scene %d -> %d\r\n", arg->wantedState,
-                                arg->curState);
+        Supervisor::DebugPrint("scene %d -> %d\r\n", arg->wantedState, arg->curState);
         switch (arg->wantedState)
         {
         case 0:
@@ -367,8 +358,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
             }
             break;
         }
-        g_CurFrameRawInput = g_LastFrameRawInput =
-            g_IsEighthFrameOfHeldInput = 0;
+        g_CurFrameRawInput = g_LastFrameRawInput = g_IsEighthFrameOfHeldInput = 0;
     }
     arg->wantedState = arg->curState;
     arg->calcCount = arg->calcCount + 1;
@@ -382,14 +372,13 @@ u32 Supervisor::OnDraw(Supervisor *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
-                                                void *param_2)
+i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1, void *param_2)
 {
     HRESULT hr;
     if (!g_Supervisor.controller)
     {
-        hr = g_Supervisor.directInput->CreateDevice(param_1->guidInstance,
-                                                    &g_Supervisor.controller, NULL);
+        hr = g_Supervisor.directInput->CreateDevice(param_1->guidInstance, &g_Supervisor.controller,
+                                                    NULL);
         if (FAILED(hr))
         {
             return 1;
@@ -398,8 +387,7 @@ i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
     return 0;
 }
 
-i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
-                                             void *param_2)
+i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1, void *param_2)
 {
     DIPROPRANGE local_1c;
     void *idk = param_2;
@@ -412,8 +400,7 @@ i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
         local_1c.diph.dwObj = param_1->dwType;
         local_1c.lMin = -1000;
         local_1c.lMax = 1000;
-        if (g_Supervisor.controller->SetProperty(DIPROP_RANGE, &local_1c.diph) <
-            0)
+        if (g_Supervisor.controller->SetProperty(DIPROP_RANGE, &local_1c.diph) < 0)
         {
             return 0;
         }
@@ -438,8 +425,7 @@ ZunResult Supervisor::SetupDInput()
     }
     else
     {
-        if (FAILED(this->directInput->CreateDevice(GUID_SysKeyboard,
-                                                   &this->keyboard, NULL)))
+        if (FAILED(this->directInput->CreateDevice(GUID_SysKeyboard, &this->keyboard, NULL)))
         {
             SAFE_RELEASE(this->directInput);
             g_GameErrorContext.Log("DirectInput が使用できません\r\n");
@@ -861,12 +847,11 @@ void Supervisor::DrawFpsCounter(i32 param_1)
             g_PerformanceCounter.HighPart = local_18.HighPart;
             g_NumFramesSinceLastTime = 0;
         }
-        if (local_18.LowPart >= g_PerformanceCounter.LowPart +
-                                    (g_Supervisor.perfFrequency.LowPart >> 1))
+        if (local_18.LowPart >=
+            g_PerformanceCounter.LowPart + (g_Supervisor.perfFrequency.LowPart >> 1))
         {
-            elapsedTimeInSecs =
-                (f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
-                (f32)g_Supervisor.perfFrequency.LowPart;
+            elapsedTimeInSecs = (f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
+                                (f32)g_Supervisor.perfFrequency.LowPart;
             g_PerformanceCounter.LowPart = local_18.LowPart;
             g_PerformanceCounter.HighPart = local_18.HighPart;
             g_FpsUpdateCounter++;
@@ -885,8 +870,7 @@ LAB_00439350:
         local_24.y = 464.0f;
         local_24.z = 0.0f;
         g_AsciiManager.AddString(&local_24, g_FpsCounterBuffer);
-        if (g_GameManager.replay &&
-            g_GameManager.notInMenu)
+        if (g_GameManager.replay && g_GameManager.notInMenu)
         {
             local_30.x = 384.0f;
             local_30.y = 448.0f;
@@ -926,8 +910,8 @@ void ZunTimer::Increment(i32 value)
         else
         {
             this->previous = this->current;
-            this->subFrame = (f32)value * g_Supervisor.effectiveFramerateMultiplier +
-                             this->subFrame;
+            this->subFrame =
+                (f32)value * g_Supervisor.effectiveFramerateMultiplier + this->subFrame;
             while (this->subFrame >= 1.0f)
             {
                 this->current = this->current + 1;
@@ -958,8 +942,8 @@ void ZunTimer::Decrement(i32 value)
         else
         {
             this->previous = this->current;
-            this->subFrame = this->subFrame -
-                             (f32)value * g_Supervisor.effectiveFramerateMultiplier;
+            this->subFrame =
+                this->subFrame - (f32)value * g_Supervisor.effectiveFramerateMultiplier;
             while (this->subFrame < 0.0f)
             {
                 this->current--;
@@ -1108,8 +1092,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         {
             fread(bgm2Data, 16, 1, bgm2);
             fclose(bgm2);
-            if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 ||
-                bgm2Data[2] != 0x700)
+            if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 || bgm2Data[2] != 0x700)
             {
                 g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
                 return ZUN_ERROR;
@@ -1119,7 +1102,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         else
         {
             g_Supervisor.cfg.musicMode = MUSIC_MIDI;
-            Supervisor::DebugPrint2("wave データが無いので、midi にします\r\n");
+            Supervisor::DebugPrint("wave データが無いので、midi にします\r\n");
         }
         g_Supervisor.cfg.playSounds = 1;
         g_Supervisor.cfg.defaultDifficulty = (u8)DIFF_NORMAL;
@@ -1140,25 +1123,18 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         {
             fread(bgmData, 16, 1, bgm);
             fclose(bgm);
-            if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
-                bgmData[2] != 0x700)
+            if (bgmData[0] != 0x5641575a || bgmData[1] != 1 || bgmData[2] != 0x700)
             {
                 g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
                 return ZUN_ERROR;
             }
         }
-        if (!(g_Supervisor.cfg.lifeCount < 5 &&
-              g_Supervisor.cfg.bombCount < 4 &&
-              g_Supervisor.cfg.colorMode16bit < 2 &&
-              g_Supervisor.cfg.musicMode < 3 &&
-              g_Supervisor.cfg.defaultDifficulty < 6 &&
-              g_Supervisor.cfg.playSounds < 2 &&
-              g_Supervisor.cfg.windowed < 2 &&
-              g_Supervisor.cfg.frameskipConfig < 3 &&
-              g_Supervisor.cfg.effectQuality < 3 &&
-              g_Supervisor.cfg.slowMode < 2 &&
-              g_Supervisor.cfg.shotSlow < 2 &&
-              g_Supervisor.cfg.version == 0x70002 &&
+        if (!(g_Supervisor.cfg.lifeCount < 5 && g_Supervisor.cfg.bombCount < 4 &&
+              g_Supervisor.cfg.colorMode16bit < 2 && g_Supervisor.cfg.musicMode < 3 &&
+              g_Supervisor.cfg.defaultDifficulty < 6 && g_Supervisor.cfg.playSounds < 2 &&
+              g_Supervisor.cfg.windowed < 2 && g_Supervisor.cfg.frameskipConfig < 3 &&
+              g_Supervisor.cfg.effectQuality < 3 && g_Supervisor.cfg.slowMode < 2 &&
+              g_Supervisor.cfg.shotSlow < 2 && g_Supervisor.cfg.version == 0x70002 &&
               g_LastFileSize == sizeof(GameConfiguration)))
         {
             g_GameErrorContext.Log("コンフィグデータが異常でしたので再初期化しました\r\n");
@@ -1226,11 +1202,11 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_GameErrorContext.Log("垂直同期を取りません\r\n");
         g_Supervisor.vsyncEnabled = 1;
     }
-    if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg,
-                                    sizeof(GameConfiguration)))
+    if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg, sizeof(GameConfiguration)))
     {
         g_GameErrorContext.Fatal("ファイルが書き出せません %s\r\n", configFilename);
-        g_GameErrorContext.Fatal("フォルダが書込み禁止属性になっているか、ディスクがいっぱいいっぱいになってませんか？\r\n");
+        g_GameErrorContext.Fatal("フォルダが書込み禁止属性になっているか、ディスクがいっぱいいっぱ"
+                                 "いになってませんか？\r\n");
         return ZUN_ERROR;
     }
 
@@ -1397,8 +1373,7 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
 
 i32 Supervisor::CanSaveReplay()
 {
-    return g_GameManager.defaultCfg != NULL &&
-           g_GameManager.defaultCfg->slowMode;
+    return g_GameManager.defaultCfg != NULL && g_GameManager.defaultCfg->slowMode;
 }
 
 HRESULT Supervisor::EnableFog()
@@ -1451,8 +1426,7 @@ void Supervisor::UpdateStartupTime()
     g_GameManager.plst.totalMilliseconds += timeSinceStartup;
     if (g_GameManager.plst.totalMilliseconds >= 1000)
     {
-        g_GameManager.plst.totalSeconds +=
-            g_GameManager.plst.totalMilliseconds / 1000;
+        g_GameManager.plst.totalSeconds += g_GameManager.plst.totalMilliseconds / 1000;
         g_GameManager.plst.totalMilliseconds %= 1000;
     }
     if (g_GameManager.plst.totalSeconds >= 60)
@@ -1488,8 +1462,7 @@ void Supervisor::UpdateTime()
     g_GameManager.plst.gameMilliseconds += timeSinceLastTime;
     if (g_GameManager.plst.gameMilliseconds >= 1000)
     {
-        g_GameManager.plst.gameSeconds +=
-            g_GameManager.plst.gameMilliseconds / 1000;
+        g_GameManager.plst.gameSeconds += g_GameManager.plst.gameMilliseconds / 1000;
         g_GameManager.plst.gameMilliseconds %= 1000;
     }
     if (g_GameManager.plst.gameSeconds >= 60)

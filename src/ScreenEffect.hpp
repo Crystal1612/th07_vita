@@ -18,15 +18,14 @@ namespace ScreenEffect
 {
 void Clear(D3DCOLOR color);
 void DrawSquare(ZunRect *rect, D3DCOLOR color);
-void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
-                     D3DCOLOR param_4, D3DCOLOR param_5);
+void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3, D3DCOLOR param_4,
+                     D3DCOLOR param_5);
 void SetViewport(D3DCOLOR color);
 } // namespace ScreenEffect
 
 struct BombEffects
 {
-    static BombEffects *RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2,
-                                      u32 arg3);
+    static BombEffects *RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2, u32 arg3);
 
     static ZunResult AddedCallback(BombEffects *arg);
     static ZunResult DeletedCallback(BombEffects *arg);

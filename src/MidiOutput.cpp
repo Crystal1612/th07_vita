@@ -4,7 +4,6 @@
 #include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
-#include "dsutil.hpp"
 #include "inttypes.hpp"
 
 LARGE_INTEGER g_PerfCounter;
@@ -34,8 +33,7 @@ u32 MidiDevice::OpenDevice(i32 deviceID)
         }
     }
     this->deviceID = deviceID;
-    return midiOutOpen(&this->handle, deviceID,
-                       (DWORD_PTR)g_Supervisor.hwndGameWindow, 0,
+    return midiOutOpen(&this->handle, deviceID, (DWORD_PTR)g_Supervisor.hwndGameWindow, 0,
                        CALLBACK_WINDOW) != MMSYSERR_NOERROR;
 }
 
@@ -59,8 +57,7 @@ i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
         return 0;
     }
 
-    if (midiOutPrepareHeader(this->handle, pmh, sizeof(MIDIHDR)) !=
-        MMSYSERR_NOERROR)
+    if (midiOutPrepareHeader(this->handle, pmh, sizeof(MIDIHDR)) != MMSYSERR_NOERROR)
     {
         return 1;
     }
@@ -113,14 +110,12 @@ u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
     timeBeginPeriod(this->timeCaps.wPeriodMin);
     if (cb)
     {
-        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, cb,
-                                     data, TIME_PERIODIC);
+        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, cb, data, TIME_PERIODIC);
     }
     else
     {
-        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin,
-                                     DefaultTimerCallback, (DWORD_PTR)this,
-                                     TIME_PERIODIC);
+        this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, DefaultTimerCallback,
+                                     (DWORD_PTR)this, TIME_PERIODIC);
     }
     return this->timerId;
 }
@@ -136,9 +131,8 @@ i32 MidiTimer::StopTimer()
     return 1;
 }
 
-void CALLBACK MidiTimer::DefaultTimerCallback(u32 delay, u32 wPeriodMin,
-                                              DWORD_PTR dwUser, DWORD_PTR dw1,
-                                              DWORD_PTR dw2)
+void CALLBACK MidiTimer::DefaultTimerCallback(u32 delay, u32 wPeriodMin, DWORD_PTR dwUser,
+                                              DWORD_PTR dw1, DWORD_PTR dw2)
 {
     MidiTimer *timer = (MidiTimer *)dwUser;
 
@@ -262,7 +256,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     fileData = currentCursor;
     if (!currentCursor)
     {
-        DebugPrint("error : まだMIDIが読み込まれていないのに再生しようとしている\r\n");
+        Supervisor::DebugPrint("error : まだMIDIが読み込まれていないのに再生しようとしている\r\n");
         return ZUN_ERROR;
     }
 
@@ -275,8 +269,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     this->format = Ntohs(header[0]);
     this->divisions = Ntohs(header[2]);
     this->numTracks = Ntohs(header[1]);
-    this->tracks =
-        (MidiTrack *)malloc(this->numTracks * sizeof(MidiTrack));
+    this->tracks = (MidiTrack *)malloc(this->numTracks * sizeof(MidiTrack));
     memset(this->tracks, 0, this->numTracks * sizeof(MidiTrack));
     for (i = 0; i < this->numTracks; i++)
     {
@@ -291,7 +284,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     }
     this->tempo = 1000000;
     this->fileIdx = fileIdx;
-    DebugPrint(" midi open %d\n", fileIdx);
+    Supervisor::DebugPrint(" midi open %d\n", fileIdx);
     return ZUN_SUCCESS;
 }
 
@@ -337,7 +330,7 @@ ZunResult MidiOutput::Play()
     LoadTracks();
     this->midiOutDev.OpenDevice(-1);
     StartTimer(1, NULL, 0);
-    DebugPrint(" midi play\n");
+    Supervisor::DebugPrint(" midi play\n");
     return ZUN_SUCCESS;
 }
 
@@ -367,12 +360,12 @@ ZunResult MidiOutput::UnprepareHeader(LPMIDIHDR pmh)
 
     if (!pmh)
     {
-        DebugPrint("error :\r\n");
+        Supervisor::DebugPrint("error :\r\n");
     }
 
     if (!this->midiOutDev.handle)
     {
-        DebugPrint("error :\r\n");
+        Supervisor::DebugPrint("error :\r\n");
     }
 
     for (i = 0; i < 32; i++)
@@ -389,7 +382,7 @@ success:
     MMRESULT res = midiOutUnprepareHeader(this->midiOutDev.handle, pmh, 0x40);
     if (res)
     {
-        DebugPrint("error :\r\n");
+        Supervisor::DebugPrint("error :\r\n");
     }
 
     free(pmh->lpData);
@@ -415,8 +408,7 @@ void MidiOutput::OnTimerElapsed()
 
     trackLoaded = false;
 
-    local_14 =
-        this->field_0x130 + this->volume * this->divisions * 1000 / this->tempo;
+    local_14 = this->field_0x130 + this->volume * this->divisions * 1000 / this->tempo;
     if (this->fadeOutFlag)
     {
         if (this->fadeOutElapsedMs < this->fadeOutInterval)
@@ -446,8 +438,8 @@ void MidiOutput::OnTimerElapsed()
                 if (this->tracks[i].trackLengthOther <= local_14)
                 {
                     ProcessMsg(&this->tracks[i]);
-                    local_14 = this->field_0x130 +
-                               this->volume * this->divisions * 1000 / this->tempo;
+                    local_14 =
+                        this->field_0x130 + this->volume * this->divisions * 1000 / this->tempo;
                     continue;
                 }
                 break;
@@ -499,8 +491,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             {
                 UnprepareHeader(this->midiHeaders[this->midiHeadersCursor]);
             }
-            pmh = this->midiHeaders[this->midiHeadersCursor] =
-                (MIDIHDR *)malloc(sizeof(MIDIHDR));
+            pmh = this->midiHeaders[this->midiHeadersCursor] = (MIDIHDR *)malloc(sizeof(MIDIHDR));
             curTrackLength = SkipVariableLength(&track->curTrackDataCursor);
             memset(pmh, 0, sizeof(MIDIHDR));
             pmh->lpData = (LPSTR)malloc(curTrackLength + 1);
@@ -533,8 +524,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             }
             if (metaType == 0x51)
             {
-                this->field_0x130 +=
-                    this->volume * this->divisions * 1000 / this->tempo;
+                this->field_0x130 += this->volume * this->divisions * 1000 / this->tempo;
                 this->volume = 0;
                 this->tempo = 0;
                 for (i = 0; i < curTrackLength; i++)
@@ -571,14 +561,12 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
         if (arg2 != 0)
         {
             arg1 += this->pitchTranspose;
-            this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] |=
-                (u8)(1 << (arg1 & 7));
+            this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] |= (u8)(1 << (arg1 & 7));
             break;
         }
     case OPCODE_NOTE_OFF:
         arg1 += this->pitchTranspose;
-        this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] &=
-            (u8) ~(1 << (arg1 & 7));
+        this->channels[opcodeLow].keyPressedFlags[(i32)(u32)arg1 >> 3] &= (u8) ~(1 << (arg1 & 7));
         break;
     case OPCODE_PROGRAM_CHANGE:
         this->channels[opcodeLow].instrument = arg1;
@@ -661,9 +649,8 @@ void MidiOutput::FadeOutSetVolume(i32 vol)
     for (i = 0; i < 16; i++)
     {
         midiStatus = (u8)(i + 0xb0);
-        volumeClamped = (i32)(this->channels[i].channelVolume *
-                              this->fadeOutVolumeMultiplier) +
-                        vol;
+        volumeClamped =
+            (i32)(this->channels[i].channelVolume * this->fadeOutVolumeMultiplier) + vol;
         if (volumeClamped < 0)
         {
             volumeClamped = 0;

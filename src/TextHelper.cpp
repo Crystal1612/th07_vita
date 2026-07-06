@@ -107,8 +107,7 @@ bool TextHelper::ReleaseBuffer()
     }
 }
 
-bool TextHelper::AllocateBufferWithFallback(i32 width, i32 height,
-                                            D3DFORMAT format)
+bool TextHelper::AllocateBufferWithFallback(i32 width, i32 height, D3DFORMAT format)
 {
     if (TryAllocateBuffer(width, height, format))
     {
@@ -166,8 +165,7 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
         ((u32 *)bitmapInfo.bmiColors)[2] = formatInfo->blueMask;
         ((u32 *)bitmapInfo.bmiColors)[3] = formatInfo->alphaMask;
     }
-    bitmapObj = CreateDIBSection(NULL, (BITMAPINFO *)&bitmapInfo, 0,
-                                 (void **)&bitmapData, NULL, 0);
+    bitmapObj = CreateDIBSection(NULL, (BITMAPINFO *)&bitmapInfo, 0, (void **)&bitmapData, NULL, 0);
     if (!bitmapObj)
     {
         return false;
@@ -190,9 +188,7 @@ bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
 FormatInfo *TextHelper::GetFormatInfo(D3DFORMAT format)
 {
     i32 i;
-    for (i = 0; g_FormatInfoArray[i].format != -1 &&
-                g_FormatInfoArray[i].format != format;
-         i++)
+    for (i = 0; g_FormatInfoArray[i].format != -1 && g_FormatInfoArray[i].format != format; i++)
     {
     }
 
@@ -212,8 +208,7 @@ struct A1R5G5B5
     u16 alpha : 1;
 };
 
-bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
-                             i32 param5)
+bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight, i32 param5)
 {
     u8 *bufferStart;
     A1R5G5B5 *bufferCursor;
@@ -233,8 +228,7 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
         }
         break;
     case D3DFMT_A1R5G5B5:
-        for (bufferCursor = (A1R5G5B5 *)bufferRegion, i = 0; i < doubleArea;
-             i += 2, bufferCursor++)
+        for (bufferCursor = (A1R5G5B5 *)bufferRegion, i = 0; i < doubleArea; i += 2, bufferCursor++)
         {
             bufferCursor->alpha ^= 1;
             if (bufferCursor->alpha)
@@ -243,42 +237,34 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight,
                 {
                     if (bufferCursor->red >= bufferCursor->blue)
                     {
-                        bufferCursor->red = bufferCursor->red -
-                                            bufferCursor->red * i * 2 /
-                                                doubleArea / 3;
-                        bufferCursor->green = bufferCursor->green -
-                                              bufferCursor->green * i * 2 /
-                                                  doubleArea / 3;
+                        bufferCursor->red =
+                            bufferCursor->red - bufferCursor->red * i * 2 / doubleArea / 3;
+                        bufferCursor->green =
+                            bufferCursor->green - bufferCursor->green * i * 2 / doubleArea / 3;
                     }
                     else
                     {
-                        bufferCursor->blue = bufferCursor->blue -
-                                             bufferCursor->blue * i /
-                                                 doubleArea / 2;
-                        bufferCursor->green = bufferCursor->green -
-                                              bufferCursor->green * i /
-                                                  doubleArea / 2;
+                        bufferCursor->blue =
+                            bufferCursor->blue - bufferCursor->blue * i / doubleArea / 2;
+                        bufferCursor->green =
+                            bufferCursor->green - bufferCursor->green * i / doubleArea / 2;
                     }
                 }
                 else
                 {
                     if (bufferCursor->red >= bufferCursor->blue)
                     {
-                        bufferCursor->red = bufferCursor->red -
-                                            bufferCursor->red * i /
-                                                doubleArea / 4;
-                        bufferCursor->green = bufferCursor->green -
-                                              bufferCursor->green * i /
-                                                  doubleArea / 4;
+                        bufferCursor->red =
+                            bufferCursor->red - bufferCursor->red * i / doubleArea / 4;
+                        bufferCursor->green =
+                            bufferCursor->green - bufferCursor->green * i / doubleArea / 4;
                     }
                     else
                     {
-                        bufferCursor->blue = bufferCursor->blue -
-                                             bufferCursor->blue * i /
-                                                 doubleArea / 4;
-                        bufferCursor->green = bufferCursor->green -
-                                              bufferCursor->green * i /
-                                                  doubleArea / 4;
+                        bufferCursor->blue =
+                            bufferCursor->blue - bufferCursor->blue * i / doubleArea / 4;
+                        bufferCursor->green =
+                            bufferCursor->green - bufferCursor->green * i / doubleArea / 4;
                     }
                 }
             }
@@ -347,8 +333,7 @@ bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
 
 void TextHelper::CreateTextBuffer()
 {
-    g_Supervisor.d3dDevice->CreateImageSurface(1024, 64, D3DFMT_A1R5G5B5,
-                                               &g_TextBufferSurface);
+    g_Supervisor.d3dDevice->CreateImageSurface(1024, 64, D3DFMT_A1R5G5B5, &g_TextBufferSurface);
 }
 
 void TextHelper::ReleaseTextBuffer()
@@ -356,9 +341,8 @@ void TextHelper::ReleaseTextBuffer()
     SAFE_RELEASE(g_TextBufferSurface);
 }
 
-void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
-                                         i32 spriteHeight, i32 fontHeight,
-                                         i32 fontWidth, D3DCOLOR textColor,
+void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight,
+                                         i32 fontHeight, i32 fontWidth, D3DCOLOR textColor,
                                          u32 outlineType, char *string,
                                          IDirect3DTexture8 *outTexture)
 {
@@ -370,14 +354,13 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
     HFONT hFont;
     HDC hdc;
 
-    hFont =
-        CreateFontA(fontHeight * 2 - 2, 0, 0, 0, FW_BOLD, false, false, false,
-                    SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                    ANTIALIASED_QUALITY, FF_ROMAN | FIXED_PITCH, "ＭＳ ゴシック");
+    hFont = CreateFontA(fontHeight * 2 - 2, 0, 0, 0, FW_BOLD, false, false, false, SHIFTJIS_CHARSET,
+                        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
+                        FF_ROMAN | FIXED_PITCH, "ＭＳ ゴシック");
     TextHelper textHelper;
     g_TextBufferSurface->GetDesc(&textSurfaceDesc);
-    textHelper.AllocateBufferWithFallback(
-        textSurfaceDesc.Width, textSurfaceDesc.Height, textSurfaceDesc.Format);
+    textHelper.AllocateBufferWithFallback(textSurfaceDesc.Width, textSurfaceDesc.Height,
+                                          textSurfaceDesc.Format);
     hdc = textHelper.hdc;
     h = SelectObject(hdc, hFont);
     textHelper.InvertAlpha(0, 0, spriteWidth << 1, fontHeight * 2 + 6, 0);
@@ -419,7 +402,6 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
         srcRect.right = 1024;
     }
     outTexture->GetSurfaceLevel(0, &dstSurface);
-    D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, g_TextBufferSurface, 0,
-                               &srcRect, 4, 0);
+    D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, g_TextBufferSurface, 0, &srcRect, 4, 0);
     SAFE_RELEASE(dstSurface);
 }

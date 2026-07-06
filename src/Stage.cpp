@@ -14,27 +14,14 @@
 #include "utils.hpp"
 
 StageAnms g_EnemyAnmStageFiles[9] = {
-    {"dummy", "dummy"},
-    {"data/stg1enm.anm", NULL},
-    {"data/stg2enm.anm", NULL},
-    {"data/stg3enm.anm", NULL},
-    {"data/stg4enm.anm", NULL},
-    {"data/stg5enm.anm", NULL},
-    {"data/stg6enm.anm", NULL},
-    {"data/stg7enm.anm", NULL},
-    {"data/stg8enm.anm", NULL},
+    {"dummy", "dummy"},         {"data/stg1enm.anm", NULL}, {"data/stg2enm.anm", NULL},
+    {"data/stg3enm.anm", NULL}, {"data/stg4enm.anm", NULL}, {"data/stg5enm.anm", NULL},
+    {"data/stg6enm.anm", NULL}, {"data/stg7enm.anm", NULL}, {"data/stg8enm.anm", NULL},
 };
 
 const char *g_StageFiles[9] = {
-    "dummy",
-    "data/stage1.std",
-    "data/stage2.std",
-    "data/stage3.std",
-    "data/stage4.std",
-    "data/stage5.std",
-    "data/stage6.std",
-    "data/stage7.std",
-    "data/stage8.std",
+    "dummy",           "data/stage1.std", "data/stage2.std", "data/stage3.std", "data/stage4.std",
+    "data/stage5.std", "data/stage6.std", "data/stage7.std", "data/stage8.std",
 };
 
 ChainElem g_UnusedChain;
@@ -69,18 +56,15 @@ f32 InterpCubic(f32 p0, f32 p1, f32 p2, f32 p3, f32 t)
     return v[0] * p0 + v[2] * p1 + v[1] * p2 + v[3] * p3;
 }
 
-void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2,
-                                  ZunVec3 *param_3, ZunVec3 *param_4,
-                                  ZunVec3 *param_5, ZunVec3 *param_6,
-                                  ZunVec3 *param_7)
+void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2, ZunVec3 *param_3, ZunVec3 *param_4,
+                                  ZunVec3 *param_5, ZunVec3 *param_6, ZunVec3 *param_7)
 {
     f32 t;
 
     if (stage->timers[param_2] < stage->timersMax[param_2])
     {
         stage->timers[param_2]++;
-        t = stage->timers[param_2].AsFloat() /
-            (f32)stage->timersMax[param_2];
+        t = stage->timers[param_2].AsFloat() / (f32)stage->timersMax[param_2];
     }
     else
     {
@@ -118,12 +102,9 @@ void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2,
     }
     else
     {
-        param_3->x =
-            InterpCubic(param_4->x, param_5->x, param_6->x, param_7->x, t);
-        param_3->y =
-            InterpCubic(param_4->y, param_5->y, param_6->y, param_7->y, t);
-        param_3->z =
-            InterpCubic(param_4->z, param_5->z, param_6->z, param_7->z, t);
+        param_3->x = InterpCubic(param_4->x, param_5->x, param_6->x, param_7->x, t);
+        param_3->y = InterpCubic(param_4->y, param_5->y, param_6->y, param_7->y, t);
+        param_3->z = InterpCubic(param_4->z, param_5->z, param_6->z, param_7->z, t);
     }
 }
 
@@ -141,8 +122,7 @@ u32 Stage::OnUpdate(Stage *arg)
         i32 instrIdx = 0;
         curInstr = arg->beginningOfScript;
         arg->instructionIndex = 0;
-        while ((curInstr->opcode != 31 ||
-                arg->scriptWaitTime != curInstr->args.args[0].i) &&
+        while ((curInstr->opcode != 31 || arg->scriptWaitTime != curInstr->args.args[0].i) &&
                curInstr->frame != -1)
         {
             curInstr++;
@@ -325,7 +305,8 @@ loop_begin:
         case 29:
             if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm1, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm1,
+                                            curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
             }
             else
             {
@@ -335,7 +316,8 @@ loop_begin:
         case 30:
             if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm2, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm2,
+                                            curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
             }
             else
             {
@@ -350,9 +332,8 @@ LAB_004061aa: {
     i32 camIdx = 0;
     if (arg->timersMax[camIdx] != 0)
     {
-        UpdateScriptAndCamera(arg, camIdx, &arg->cam.pos, &arg->camStart.pos,
-                              &arg->camEnd.pos, &arg->camTangentStart.pos,
-                              &arg->camTangentEnd.pos);
+        UpdateScriptAndCamera(arg, camIdx, &arg->cam.pos, &arg->camStart.pos, &arg->camEnd.pos,
+                              &arg->camTangentStart.pos, &arg->camTangentEnd.pos);
     }
     camIdx = 1;
     if (arg->timersMax[camIdx] != 0)
@@ -364,9 +345,8 @@ LAB_004061aa: {
     camIdx = 2;
     if (arg->timersMax[camIdx] != 0)
     {
-        UpdateScriptAndCamera(arg, camIdx, &arg->cam.up, &arg->camStart.up,
-                              &arg->camEnd.up, &arg->camTangentStart.up,
-                              &arg->camTangentEnd.up);
+        UpdateScriptAndCamera(arg, camIdx, &arg->cam.up, &arg->camStart.up, &arg->camEnd.up,
+                              &arg->camTangentStart.up, &arg->camTangentEnd.up);
     }
     camIdx = 3;
 
@@ -378,8 +358,7 @@ LAB_004061aa: {
         if (arg->timers[camIdx] < arg->timersMax[camIdx])
         {
             arg->timers[camIdx]++;
-            t = arg->timers[camIdx].AsFloat() /
-                (f32)arg->timersMax[camIdx];
+            t = arg->timers[camIdx].AsFloat() / (f32)arg->timersMax[camIdx];
         }
         else
         {
@@ -418,8 +397,7 @@ LAB_004061aa: {
     if (arg->skyFogInterpDuration != 0)
     {
         arg->skyFogInterpTimer++;
-        f32 t = arg->skyFogInterpTimer.AsFloat() /
-                (f32)arg->skyFogInterpDuration;
+        f32 t = arg->skyFogInterpTimer.AsFloat() / (f32)arg->skyFogInterpDuration;
         if (t >= 1.0f)
         {
             t = 1.0f;
@@ -427,17 +405,13 @@ LAB_004061aa: {
         for (i32 i = 0; i < 4; i++)
         {
             arg->skyFog.color.raw[i] =
-                (u8)(((f32)arg->fogStart.color.raw[i] -
-                      (f32)arg->fogEnd.color.raw[i]) *
-                         t +
+                (u8)(((f32)arg->fogStart.color.raw[i] - (f32)arg->fogEnd.color.raw[i]) * t +
                      (f32)arg->fogEnd.color.raw[i]);
         }
         arg->skyFog.nearPlane =
-            (arg->fogStart.nearPlane - arg->fogEnd.nearPlane) * t +
-            arg->fogEnd.nearPlane;
+            (arg->fogStart.nearPlane - arg->fogEnd.nearPlane) * t + arg->fogEnd.nearPlane;
         arg->skyFog.farPlane =
-            (arg->fogStart.farPlane - arg->fogEnd.farPlane) * t +
-            arg->fogEnd.farPlane;
+            (arg->fogStart.farPlane - arg->fogEnd.farPlane) * t + arg->fogEnd.farPlane;
 
         if (arg->skyFogInterpTimer >= arg->skyFogInterpDuration)
         {
@@ -491,14 +465,10 @@ void Stage::SmoothBlendColor(ZunColor param_1)
     else
     {
         color = param_1;
-        this->color2.bytes.r =
-            (u8)((color.bytes.r + (u32)this->color2.bytes.r) >> 1);
-        this->color2.bytes.g =
-            (u8)((color.bytes.g + (u32)this->color2.bytes.g) >> 1);
-        this->color2.bytes.b =
-            (u8)((color.bytes.b + (u32)this->color2.bytes.b) >> 1);
-        this->color2.bytes.a =
-            (u8)((color.bytes.a + (u32)this->color2.bytes.a) >> 1);
+        this->color2.bytes.r = (u8)((color.bytes.r + (u32)this->color2.bytes.r) >> 1);
+        this->color2.bytes.g = (u8)((color.bytes.g + (u32)this->color2.bytes.g) >> 1);
+        this->color2.bytes.b = (u8)((color.bytes.b + (u32)this->color2.bytes.b) >> 1);
+        this->color2.bytes.a = (u8)((color.bytes.a + (u32)this->color2.bytes.a) >> 1);
     }
 }
 
@@ -528,8 +498,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
         viewport.Width = 384;
         viewport.Height = 448;
         g_Supervisor.d3dDevice->SetViewport(&viewport);
-        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xff000000, 1.0f,
-                                      0);
+        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_TARGET, 0xff000000, 1.0f, 0);
         arg->clearBackground = 0;
     }
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
@@ -557,13 +526,12 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     }
     if (arg->color != 0)
     {
-        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET,
-                                      arg->color, 1.0f, 0);
+        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET, arg->color, 1.0f,
+                                      0);
     }
     else
     {
-        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, arg->color, 1.0f,
-                                      0);
+        g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, arg->color, 1.0f, 0);
     }
     g_Supervisor.SetRenderState(D3DRS_ZFUNC, 4);
     if (!g_AnmManager->colorMulEnabled)
@@ -672,75 +640,86 @@ ZunResult Stage::AddedCallback(Stage *arg)
     switch (g_GameManager.currentStage)
     {
     case 1:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg1bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg1bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 2:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg2bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg2bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 3:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg3bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg3bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 4:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg4bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg4bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG2, "data/stg4bg2.anm", ANM_OFFSET_STAGE_BG2) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG2, "data/stg4bg2.anm", ANM_OFFSET_STAGE_BG2) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG3, "data/stg4bg3.anm", ANM_OFFSET_STAGE_BG3) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG3, "data/stg4bg3.anm", ANM_OFFSET_STAGE_BG3) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG4, "data/stg4bg4.anm", ANM_OFFSET_STAGE_BG4) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG4, "data/stg4bg4.anm", ANM_OFFSET_STAGE_BG4) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG5, "data/stg4bg5.anm", ANM_OFFSET_STAGE_BG5) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG5, "data/stg4bg5.anm", ANM_OFFSET_STAGE_BG5) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 5:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg5bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg5bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 6:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg6bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg6bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 7:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg7bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg7bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 8:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg8bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg8bg.anm", ANM_OFFSET_STAGE_BG1) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
     }
-    if (arg->LoadStageData(g_StageFiles[g_GameManager.currentStage]) !=
-        ZUN_SUCCESS)
+    if (arg->LoadStageData(g_StageFiles[g_GameManager.currentStage]) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -829,15 +808,12 @@ ZunResult Stage::LoadStageData(const char *stdPath)
 
     this->objectsCount = this->stdData->objectsCount;
     this->quadCount = this->stdData->quadCount;
-    this->objectInstances =
-        (StdRawInstance *)(this->stdData->facesOffset + (i32)this->stdData);
-    this->beginningOfScript =
-        (StdRawInstr *)(this->stdData->scriptOffset + (i32)this->stdData);
+    this->objectInstances = (StdRawInstance *)(this->stdData->facesOffset + (i32)this->stdData);
+    this->beginningOfScript = (StdRawInstr *)(this->stdData->scriptOffset + (i32)this->stdData);
     this->objects = (StdRawObject **)(this->stdData + 1);
     for (i = 0; i < this->objectsCount; i++)
     {
-        this->objects[i] =
-            (StdRawObject *)((i32)this->objects[i] + (i32)this->stdData);
+        this->objects[i] = (StdRawObject *)((i32)this->objects[i] + (i32)this->stdData);
     }
     this->quadVms = (AnmVm *)malloc(this->quadCount * sizeof(AnmVm));
     for (i = 0, vmIdx = 0; i < this->objectsCount; i++)
@@ -889,8 +865,7 @@ ZunResult Stage::UpdateObjects()
                 {
                     vmCount++;
                 }
-                quad =
-                    (StdRawQuadBasic *)((u8 *)quad + quad->byteSize);
+                quad = (StdRawQuadBasic *)((u8 *)quad + quad->byteSize);
             }
             if (vmCount == 0)
             {
@@ -971,9 +946,12 @@ i32 Stage::RenderObjects(i32 zLevel)
                         switch (curQuad->type)
                         {
                         case 0:
-                            curQuadVm->pos.x = curQuadVm->offset.x + curQuad->pos.x + instance->pos.x - this->position.x;
-                            curQuadVm->pos.y = curQuadVm->offset.y + curQuad->pos.y + instance->pos.y - this->position.y;
-                            curQuadVm->pos.z = curQuadVm->offset.z + curQuad->pos.z + instance->pos.z - this->position.z;
+                            curQuadVm->pos.x = curQuadVm->offset.x + curQuad->pos.x +
+                                               instance->pos.x - this->position.x;
+                            curQuadVm->pos.y = curQuadVm->offset.y + curQuad->pos.y +
+                                               instance->pos.y - this->position.y;
+                            curQuadVm->pos.z = curQuadVm->offset.z + curQuad->pos.z +
+                                               instance->pos.z - this->position.z;
 
                             if (curQuad->size.x != 0.0f)
                             {
@@ -990,11 +968,9 @@ i32 Stage::RenderObjects(i32 zLevel)
                                 worldMatrix.m[3][1] = curQuadVm->pos.y;
                                 worldMatrix.m[3][2] = curQuadVm->pos.z;
 
-                                quadPos.Project(&projectSrc,
-                                                &g_Supervisor.viewport,
+                                quadPos.Project(&projectSrc, &g_Supervisor.viewport,
                                                 &g_Supervisor.projectionMatrix,
-                                                &g_Supervisor.viewMatrix,
-                                                &worldMatrix);
+                                                &g_Supervisor.viewMatrix, &worldMatrix);
 
                                 viewDir.x = g_Supervisor.viewMatrix.m[0][0];
                                 viewDir.y = g_Supervisor.viewMatrix.m[0][1];
@@ -1014,11 +990,9 @@ i32 Stage::RenderObjects(i32 zLevel)
                                 worldMatrix.m[3][1] += viewDir.y * var_98 * curQuadVm->scale.x;
                                 worldMatrix.m[3][2] += viewDir.z * var_98 * curQuadVm->scale.x;
 
-                                viewDir.Project(&projectSrc,
-                                                &g_Supervisor.viewport,
+                                viewDir.Project(&projectSrc, &g_Supervisor.viewport,
                                                 &g_Supervisor.projectionMatrix,
-                                                &g_Supervisor.viewMatrix,
-                                                &worldMatrix);
+                                                &g_Supervisor.viewMatrix, &worldMatrix);
 
                                 diffPos = viewDir - quadPos;
 
@@ -1032,16 +1006,27 @@ i32 Stage::RenderObjects(i32 zLevel)
 
                                 if (this->skyFog.nearPlane < var_98)
                                 {
-                                    var_98 = (this->skyFog.nearPlane - var_98) / (this->skyFog.nearPlane - this->skyFog.farPlane);
+                                    var_98 = (this->skyFog.nearPlane - var_98) /
+                                             (this->skyFog.nearPlane - this->skyFog.farPlane);
                                     if (var_98 >= 1.0f)
                                     {
                                         goto skip_draw;
                                     }
 
-                                    curQuadVm->color.bytes.b = curQuadVm->color.bytes.b - (u8)((curQuadVm->color.bytes.b - this->skyFog.color.bytes.b) * var_98);
-                                    curQuadVm->color.bytes.g = curQuadVm->color.bytes.g - (u8)((curQuadVm->color.bytes.g - this->skyFog.color.bytes.g) * var_98);
-                                    curQuadVm->color.bytes.r = curQuadVm->color.bytes.r - (u8)((curQuadVm->color.bytes.r - this->skyFog.color.bytes.r) * var_98);
-                                    curQuadVm->color.bytes.a = (u8)(curQuadVm->color.bytes.a * (1.0f - var_98));
+                                    curQuadVm->color.bytes.b = curQuadVm->color.bytes.b -
+                                                               (u8)((curQuadVm->color.bytes.b -
+                                                                     this->skyFog.color.bytes.b) *
+                                                                    var_98);
+                                    curQuadVm->color.bytes.g = curQuadVm->color.bytes.g -
+                                                               (u8)((curQuadVm->color.bytes.g -
+                                                                     this->skyFog.color.bytes.g) *
+                                                                    var_98);
+                                    curQuadVm->color.bytes.r = curQuadVm->color.bytes.r -
+                                                               (u8)((curQuadVm->color.bytes.r -
+                                                                     this->skyFog.color.bytes.r) *
+                                                                    var_98);
+                                    curQuadVm->color.bytes.a =
+                                        (u8)(curQuadVm->color.bytes.a * (1.0f - var_98));
                                 }
 
                                 curQuadVm->pos = quadPos;
@@ -1120,26 +1105,20 @@ void Stage::SetupCameraStageBackground()
     eyeVec.z = eyeZ;
 
     g_Supervisor.viewMatrix.LookAtLH(&eyeVec, &atVec, &upVec);
-    g_Supervisor.projectionMatrix.PerspectiveFovLH(fov,
-                                                   aspectRatio,
-                                                   1.0f, 10000.0f);
+    g_Supervisor.projectionMatrix.PerspectiveFovLH(fov, aspectRatio, 1.0f, 10000.0f);
     g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW, g_Supervisor.viewMatrix.asD3DX());
-    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
-                                         g_Supervisor.projectionMatrix.asD3DX());
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION, g_Supervisor.projectionMatrix.asD3DX());
 }
 
 void Stage::UpdateCamera()
 {
     ZunVec3 at = this->cam.lookAt + this->cam.pos;
-    g_Supervisor.viewMatrix.LookAtLH(&this->cam.pos,
-                                     &at, &this->cam.up);
-    g_Supervisor.projectionMatrix.PerspectiveFovLH(this->cam.fov,
-                                                   (f32)g_Supervisor.viewport.Width /
-                                                       (f32)g_Supervisor.viewport.Height,
-                                                   30.0f, 1800.0f);
+    g_Supervisor.viewMatrix.LookAtLH(&this->cam.pos, &at, &this->cam.up);
+    g_Supervisor.projectionMatrix.PerspectiveFovLH(
+        this->cam.fov, (f32)g_Supervisor.viewport.Width / (f32)g_Supervisor.viewport.Height, 30.0f,
+        1800.0f);
     g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW, g_Supervisor.viewMatrix.asD3DX());
-    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
-                                         g_Supervisor.projectionMatrix.asD3DX());
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION, g_Supervisor.projectionMatrix.asD3DX());
     this->cam.right.Cross(&this->cam.lookAt, &this->cam.up);
     this->cam.right.Normalize(&this->cam.right);
 }

@@ -232,4 +232,3 @@ struct AnmVm : AnmVmBase
     u8 fontHeight;
     u8 unused_242[10];
 };
-

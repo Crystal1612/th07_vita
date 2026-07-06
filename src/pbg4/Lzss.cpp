@@ -12,33 +12,33 @@ u8 g_LzssDictionary[8196];
 
 #define FALSE 0
 
-#define ENC_NEXT_BIT()          \
-    inBitMask >>= 1;            \
-    if (inBitMask == 0)         \
-    {                           \
-        *dstCursor++ = curByte; \
-        checksum += curByte;    \
-        curByte = 0;            \
-        inBitMask = 0x80;       \
+#define ENC_NEXT_BIT()                                                                             \
+    inBitMask >>= 1;                                                                               \
+    if (inBitMask == 0)                                                                            \
+    {                                                                                              \
+        *dstCursor++ = curByte;                                                                    \
+        checksum += curByte;                                                                       \
+        curByte = 0;                                                                               \
+        inBitMask = 0x80;                                                                          \
     }
 
-#define ENC_WRITE_FLAG_BIT(bit) \
-    if (bit)                    \
-    {                           \
-        curByte |= inBitMask;   \
-    }                           \
+#define ENC_WRITE_FLAG_BIT(bit)                                                                    \
+    if (bit)                                                                                       \
+    {                                                                                              \
+        curByte |= inBitMask;                                                                      \
+    }                                                                                              \
     ENC_NEXT_BIT();
 
-#define ENC_WRITE_BITS(bitCount, condition) \
-    bitfieldMask = 0x1 << (bitCount - 1);   \
-    while (bitfieldMask != 0)               \
-    {                                       \
-        if (condition)                      \
-        {                                   \
-            curByte |= inBitMask;           \
-        }                                   \
-        ENC_NEXT_BIT();                     \
-        bitfieldMask >>= 1;                 \
+#define ENC_WRITE_BITS(bitCount, condition)                                                        \
+    bitfieldMask = 0x1 << (bitCount - 1);                                                          \
+    while (bitfieldMask != 0)                                                                      \
+    {                                                                                              \
+        if (condition)                                                                             \
+        {                                                                                          \
+            curByte |= inBitMask;                                                                  \
+        }                                                                                          \
+        ENC_NEXT_BIT();                                                                            \
+        bitfieldMask >>= 1;                                                                        \
     }
 
 u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *srcLen)
@@ -151,51 +151,51 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *srcLen)
     return dst;
 }
 
-#define DEC_NEXT_BIT()    \
-    inBitMask >>= 1;      \
-    if (inBitMask == 0)   \
-    {                     \
-        inBitMask = 0x80; \
+#define DEC_NEXT_BIT()                                                                             \
+    inBitMask >>= 1;                                                                               \
+    if (inBitMask == 0)                                                                            \
+    {                                                                                              \
+        inBitMask = 0x80;                                                                          \
     }
 
-#define DEC_WRITE_BYTE(data)           \
-    *dstCursor++ = data;               \
-    g_LzssDictionary[dictHead] = data; \
+#define DEC_WRITE_BYTE(data)                                                                       \
+    *dstCursor++ = data;                                                                           \
+    g_LzssDictionary[dictHead] = data;                                                             \
     dictHead = LZSS_DICTPOS_MOD(dictHead, 1);
 
-#define DEC_HANDLE_FETCH_NEW_BYTE()  \
-    if (inBitMask == 0x80)           \
-    {                                \
-        curByte = *srcCursor;        \
-        if (srcCursor - src >= size) \
-        {                            \
-            curByte = 0;             \
-        }                            \
-        else                         \
-        {                            \
-            srcCursor++;             \
-        }                            \
-        checksum += curByte;         \
+#define DEC_HANDLE_FETCH_NEW_BYTE()                                                                \
+    if (inBitMask == 0x80)                                                                         \
+    {                                                                                              \
+        curByte = *srcCursor;                                                                      \
+        if (srcCursor - src >= size)                                                               \
+        {                                                                                          \
+            curByte = 0;                                                                           \
+        }                                                                                          \
+        else                                                                                       \
+        {                                                                                          \
+            srcCursor++;                                                                           \
+        }                                                                                          \
+        checksum += curByte;                                                                       \
     }
 
-#define DEC_READ_FLAG_BIT()       \
-    DEC_HANDLE_FETCH_NEW_BYTE();  \
-    inBits = curByte & inBitMask; \
+#define DEC_READ_FLAG_BIT()                                                                        \
+    DEC_HANDLE_FETCH_NEW_BYTE();                                                                   \
+    inBits = curByte & inBitMask;                                                                  \
     DEC_NEXT_BIT();
 
-#define DEC_READ_BITS(bitsCount)          \
-    outBitMask = 0x01 << (bitsCount - 1); \
-    inBits = 0;                           \
-    while (outBitMask != 0)               \
-    {                                     \
-        DEC_HANDLE_FETCH_NEW_BYTE();      \
-        if ((curByte & inBitMask) != 0)   \
-        {                                 \
-            inBits |= outBitMask;         \
-        }                                 \
-                                          \
-        outBitMask >>= 1;                 \
-        DEC_NEXT_BIT();                   \
+#define DEC_READ_BITS(bitsCount)                                                                   \
+    outBitMask = 0x01 << (bitsCount - 1);                                                          \
+    inBits = 0;                                                                                    \
+    while (outBitMask != 0)                                                                        \
+    {                                                                                              \
+        DEC_HANDLE_FETCH_NEW_BYTE();                                                               \
+        if ((curByte & inBitMask) != 0)                                                            \
+        {                                                                                          \
+            inBits |= outBitMask;                                                                  \
+        }                                                                                          \
+                                                                                                   \
+        outBitMask >>= 1;                                                                          \
+        DEC_NEXT_BIT();                                                                            \
     }
 
 u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)

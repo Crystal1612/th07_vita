@@ -24,21 +24,21 @@ enum TouhouButton
     TH_BUTTON_UP_RIGHT = TH_BUTTON_UP | TH_BUTTON_RIGHT,
     TH_BUTTON_DOWN_LEFT = TH_BUTTON_DOWN | TH_BUTTON_LEFT,
     TH_BUTTON_DOWN_RIGHT = TH_BUTTON_DOWN | TH_BUTTON_RIGHT,
-    TH_BUTTON_DIRECTION =
-        TH_BUTTON_DOWN | TH_BUTTON_RIGHT | TH_BUTTON_UP | TH_BUTTON_LEFT,
+    TH_BUTTON_DIRECTION = TH_BUTTON_DOWN | TH_BUTTON_RIGHT | TH_BUTTON_UP | TH_BUTTON_LEFT,
 
     TH_BUTTON_SELECTMENU = TH_BUTTON_ENTER | TH_BUTTON_SHOOT,
     TH_BUTTON_RETURNMENU = TH_BUTTON_MENU | TH_BUTTON_BOMB,
-    TH_BUTTON_WRONG_CHEATCODE = TH_BUTTON_SHOOT | TH_BUTTON_BOMB |
-                                TH_BUTTON_MENU | TH_BUTTON_Q | TH_BUTTON_S |
-                                TH_BUTTON_ENTER,
+    TH_BUTTON_WRONG_CHEATCODE = TH_BUTTON_SHOOT | TH_BUTTON_BOMB | TH_BUTTON_MENU | TH_BUTTON_Q |
+                                TH_BUTTON_S | TH_BUTTON_ENTER,
     TH_BUTTON_ANY = 0xFFFF,
 };
 
 #define IS_PRESSED_RAW(key) ((g_CurFrameRawInput & (key)) != 0)
 #define IS_PRESSED_GAME(key) ((g_CurFrameGameInput & (key)) != 0)
-#define WAS_PRESSED_RAW(key) (IS_PRESSED_RAW(key) && ((g_CurFrameRawInput & (key)) != (g_LastFrameRawInput & (key))))
-#define WAS_PRESSED_GAME(key) (IS_PRESSED_GAME(key) && ((g_CurFrameGameInput & (key)) != (g_LastFrameGameInput & (key))))
+#define WAS_PRESSED_RAW(key)                                                                       \
+    (IS_PRESSED_RAW(key) && ((g_CurFrameRawInput & (key)) != (g_LastFrameRawInput & (key))))
+#define WAS_PRESSED_GAME(key)                                                                      \
+    (IS_PRESSED_GAME(key) && ((g_CurFrameGameInput & (key)) != (g_LastFrameGameInput & (key))))
 #define IS_EIGHTH(key) (((g_CurFrameRawInput & (key)) != 0) && (g_IsEighthFrameOfHeldInput != 0))
 #define WAS_PRESSED_RAW_AND_IS_EIGHTH(key) (WAS_PRESSED_RAW(key) || IS_EIGHTH(key))
 
@@ -49,9 +49,8 @@ u8 *GetControllerState();
 u16 GetInput();
 u16 GetJoystickCaps();
 void ResetKeyboard();
-u32 SetButtonFromControllerInputs(u16 *outButtons, i16 controllerButtonToTest,
-                                  u32 touhouButton, u32 inputButtons);
-u32 SetButtonFromDirectInputJoystate(u16 *outButtons,
-                                     i16 controllerButtonToTest,
-                                     u32 touhouButton, u8 *inputButtons);
+u32 SetButtonFromControllerInputs(u16 *outButtons, i16 controllerButtonToTest, u32 touhouButton,
+                                  u32 inputButtons);
+u32 SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controllerButtonToTest, u32 touhouButton,
+                                     u8 *inputButtons);
 } // namespace Controller

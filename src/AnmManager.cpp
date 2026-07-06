@@ -35,10 +35,7 @@ AnmManager::AnmManager()
     {
         this->sprites[i].sourceFileIndex = -1;
     }
-    g_QuadTemplate[0].w =
-        g_QuadTemplate[1].w =
-            g_QuadTemplate[2].w =
-                g_QuadTemplate[3].w = 1.0f;
+    g_QuadTemplate[0].w = g_QuadTemplate[1].w = g_QuadTemplate[2].w = g_QuadTemplate[3].w = 1.0f;
     g_QuadTemplate[0].textureUV.x = 0.0f;
     g_QuadTemplate[0].textureUV.y = 0.0f;
     g_QuadTemplate[1].textureUV.x = 1.0f;
@@ -47,10 +44,7 @@ AnmManager::AnmManager()
     g_QuadTemplate[2].textureUV.y = 1.0f;
     g_QuadTemplate[3].textureUV.x = 1.0f;
     g_QuadTemplate[3].textureUV.y = 1.0f;
-    g_QuadVertices[0].w =
-        g_QuadVertices[1].w =
-            g_QuadVertices[2].w =
-                g_QuadVertices[3].w = 1.0f;
+    g_QuadVertices[0].w = g_QuadVertices[1].w = g_QuadVertices[2].w = g_QuadVertices[3].w = 1.0f;
     g_QuadVertices[0].textureUV.x = 0.0f;
     g_QuadVertices[0].textureUV.y = 0.0f;
     g_QuadVertices[1].textureUV.x = 1.0f;
@@ -100,46 +94,33 @@ void AnmManager::SetupVertexBuffer()
     this->vertexBufferContents[0].textureUV.y = 0.0f;
     this->vertexBufferContents[3].textureUV.y = 1.0f;
     this->vertexBufferContents[2].textureUV.y = 1.0f;
-    g_Quad3DFallback[0].position =
-        this->vertexBufferContents[0].position;
-    g_Quad3DFallback[1].position =
-        this->vertexBufferContents[1].position;
-    g_Quad3DFallback[2].position =
-        this->vertexBufferContents[2].position;
-    g_Quad3DFallback[3].position =
-        this->vertexBufferContents[3].position;
-    g_Quad3DFallback[0].textureUV.x =
-        this->vertexBufferContents[0].textureUV.x;
-    g_Quad3DFallback[0].textureUV.y =
-        this->vertexBufferContents[0].textureUV.y;
-    g_Quad3DFallback[1].textureUV.x =
-        this->vertexBufferContents[1].textureUV.x;
-    g_Quad3DFallback[1].textureUV.y =
-        this->vertexBufferContents[1].textureUV.y;
-    g_Quad3DFallback[2].textureUV.x =
-        this->vertexBufferContents[2].textureUV.x;
-    g_Quad3DFallback[2].textureUV.y =
-        this->vertexBufferContents[2].textureUV.y;
-    g_Quad3DFallback[3].textureUV.x =
-        this->vertexBufferContents[3].textureUV.x;
-    g_Quad3DFallback[3].textureUV.y =
-        this->vertexBufferContents[3].textureUV.y;
+    g_Quad3DFallback[0].position = this->vertexBufferContents[0].position;
+    g_Quad3DFallback[1].position = this->vertexBufferContents[1].position;
+    g_Quad3DFallback[2].position = this->vertexBufferContents[2].position;
+    g_Quad3DFallback[3].position = this->vertexBufferContents[3].position;
+    g_Quad3DFallback[0].textureUV.x = this->vertexBufferContents[0].textureUV.x;
+    g_Quad3DFallback[0].textureUV.y = this->vertexBufferContents[0].textureUV.y;
+    g_Quad3DFallback[1].textureUV.x = this->vertexBufferContents[1].textureUV.x;
+    g_Quad3DFallback[1].textureUV.y = this->vertexBufferContents[1].textureUV.y;
+    g_Quad3DFallback[2].textureUV.x = this->vertexBufferContents[2].textureUV.x;
+    g_Quad3DFallback[2].textureUV.y = this->vertexBufferContents[2].textureUV.y;
+    g_Quad3DFallback[3].textureUV.x = this->vertexBufferContents[3].textureUV.x;
+    g_Quad3DFallback[3].textureUV.y = this->vertexBufferContents[3].textureUV.y;
     if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
     {
-        g_Supervisor.d3dDevice->CreateVertexBuffer(
-            sizeof(this->vertexBufferContents), 0, D3DFVF_TEX1 | D3DFVF_XYZ,
-            D3DPOOL_MANAGED, &this->vertexBuffer);
+        g_Supervisor.d3dDevice->CreateVertexBuffer(sizeof(this->vertexBufferContents), 0,
+                                                   D3DFVF_TEX1 | D3DFVF_XYZ, D3DPOOL_MANAGED,
+                                                   &this->vertexBuffer);
         this->vertexBuffer->Lock(0, 0, (u8 **)&vertexData, 0);
-        memcpy(vertexData, this->vertexBufferContents,
-               sizeof(this->vertexBufferContents));
+        memcpy(vertexData, this->vertexBufferContents, sizeof(this->vertexBufferContents));
         this->vertexBuffer->Unlock();
         g_Supervisor.d3dDevice->SetStreamSource(0, g_AnmManager->vertexBuffer,
                                                 sizeof(RenderVertexInfo));
     }
 }
 
-ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
-                                  i32 formatIdx, D3DCOLOR colorKey)
+ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx,
+                                  D3DCOLOR colorKey)
 {
     u8 *srcData;
 
@@ -162,10 +143,10 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
         return ZUN_ERROR;
     }
 
-    if (D3DXCreateTextureFromFileInMemoryEx(
-            g_Supervisor.d3dDevice, srcData, g_LastFileSize, 0, 0, 0, 0,
-            g_TextureFormatD3D8Mapping[formatIdx], D3DPOOL_MANAGED, 3, 0xffffffff,
-            colorKey, NULL, NULL, this->textures + textureIdx))
+    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, srcData, g_LastFileSize, 0, 0,
+                                            0, 0, g_TextureFormatD3D8Mapping[formatIdx],
+                                            D3DPOOL_MANAGED, 3, 0xffffffff, colorKey, NULL, NULL,
+                                            this->textures + textureIdx))
     {
         free(srcData);
         return ZUN_ERROR;
@@ -174,8 +155,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
-                                          ZunImageInfoEmbedded *imageInfo,
+ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
                                           D3DCOLOR formatIdx)
 {
     u8 *dst;
@@ -201,9 +181,8 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     }
     info = imageInfo;
 
-    if (g_Supervisor.d3dDevice->CreateImageSurface(
-            (i32)info->width, (i32)info->height,
-            g_TextureFormatD3D8Mapping[info->format], &surf))
+    if (g_Supervisor.d3dDevice->CreateImageSurface((i32)info->width, (i32)info->height,
+                                                   g_TextureFormatD3D8Mapping[info->format], &surf))
     {
         return ZUN_ERROR;
     }
@@ -215,8 +194,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
         memcpy(dst, src, info->width * g_TextureBytesPerPixel[info->format]);
     }
     surf->UnlockRect();
-    if (D3DXCreateTexture(g_Supervisor.d3dDevice, (i32)info->width,
-                          (i32)info->height, 1, 0,
+    if (D3DXCreateTexture(g_Supervisor.d3dDevice, (i32)info->width, (i32)info->height, 1, 0,
                           g_TextureFormatD3D8Mapping[formatIdx], D3DPOOL_MANAGED,
                           this->textures + textureIdx))
     {
@@ -224,8 +202,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     }
 
     this->textures[textureIdx]->GetSurfaceLevel(0, &texSurf);
-    if (D3DXLoadSurfaceFromSurface(texSurf, 0, NULL, surf, 0, NULL, 3, 0) !=
-        0)
+    if (D3DXLoadSurfaceFromSurface(texSurf, 0, NULL, surf, 0, NULL, 3, 0) != 0)
     {
         return ZUN_ERROR;
     }
@@ -235,8 +212,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
-                                              const char *texturePath,
+ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath,
                                               i32 formatIdx, D3DCOLOR colorKey)
 {
     struct Argb1555Pixel
@@ -281,18 +257,16 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
     }
 
     this->textures[textureIdx]->GetLevelDesc(0, &surfaceDesc);
-    if (surfaceDesc.Format != D3DFMT_A8R8G8B8 &&
-        surfaceDesc.Format != D3DFMT_A4R4G4B4 &&
+    if (surfaceDesc.Format != D3DFMT_A8R8G8B8 && surfaceDesc.Format != D3DFMT_A4R4G4B4 &&
         surfaceDesc.Format != D3DFMT_A1R5G5B5)
     {
         g_GameErrorContext.Fatal("error : イメージがαを持っていません\r\n");
         goto err;
     }
 
-    if (D3DXCreateTextureFromFileInMemoryEx(
-            g_Supervisor.d3dDevice, data, g_LastFileSize, 0, 0, 0, 0,
-            surfaceDesc.Format, D3DPOOL_SYSTEMMEM, 3, 0xffffffff, colorKey,
-            NULL, NULL, &textureSrc))
+    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, data, g_LastFileSize, 0, 0, 0,
+                                            0, surfaceDesc.Format, D3DPOOL_SYSTEMMEM, 3, 0xffffffff,
+                                            colorKey, NULL, NULL, &textureSrc))
     {
         goto err;
     }
@@ -312,10 +286,8 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
     case D3DFMT_A8R8G8B8:
         for (y0 = 0; y0 < surfaceDesc.Height; y0 = y0 + 1)
         {
-            dstData0 =
-                (u8 *)lockedRectDst.pBits + y0 * lockedRectDst.Pitch;
-            srcData0 =
-                (u8 *)lockedRectSrc.pBits + y0 * lockedRectSrc.Pitch;
+            dstData0 = (u8 *)lockedRectDst.pBits + y0 * lockedRectDst.Pitch;
+            srcData0 = (u8 *)lockedRectSrc.pBits + y0 * lockedRectSrc.Pitch;
             for (x0 = 0; x0 < surfaceDesc.Width; x0++, srcData0 += 4, dstData0 += 4)
             {
                 dstData0[3] = srcData0[0];
@@ -325,10 +297,8 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
     case D3DFMT_A1R5G5B5:
         for (y1 = 0; y1 < surfaceDesc.Height; y1 = y1 + 1)
         {
-            dstData1 =
-                (Argb1555Pixel *)((u8 *)lockedRectDst.pBits + y1 * lockedRectDst.Pitch);
-            srcData1 =
-                (Argb1555Pixel *)((u8 *)lockedRectSrc.pBits + y1 * lockedRectSrc.Pitch);
+            dstData1 = (Argb1555Pixel *)((u8 *)lockedRectDst.pBits + y1 * lockedRectDst.Pitch);
+            srcData1 = (Argb1555Pixel *)((u8 *)lockedRectSrc.pBits + y1 * lockedRectSrc.Pitch);
             for (x1 = 0; x1 < surfaceDesc.Width; x1++, srcData1++, dstData1++)
             {
                 dstData1->a = srcData1->b >> 4;
@@ -338,10 +308,8 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
     case D3DFMT_A4R4G4B4:
         for (y2 = 0; y2 < surfaceDesc.Height; y2 = y2 + 1)
         {
-            dstData2 =
-                (Argb4444Pixel *)((u8 *)lockedRectDst.pBits + y2 * lockedRectDst.Pitch);
-            srcData2 =
-                (Argb4444Pixel *)((u8 *)lockedRectSrc.pBits + y2 * lockedRectSrc.Pitch);
+            dstData2 = (Argb4444Pixel *)((u8 *)lockedRectDst.pBits + y2 * lockedRectDst.Pitch);
+            srcData2 = (Argb4444Pixel *)((u8 *)lockedRectSrc.pBits + y2 * lockedRectSrc.Pitch);
             for (x2 = 0; x2 < surfaceDesc.Width; x2++, srcData2++, dstData2++)
             {
                 dstData2->a = srcData2->b;
@@ -360,8 +328,7 @@ err:
     return ZUN_ERROR;
 }
 
-ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
-                                         i32 textureFormat)
+ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat)
 {
     D3DXCreateTexture(g_Supervisor.d3dDevice, width, height, 1, 0,
                       g_TextureFormatD3D8Mapping[textureFormat], D3DPOOL_MANAGED,
@@ -403,8 +370,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     }
 }
 
-i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
-                        i32 spriteIdxOffset, u32 ownsMemory)
+i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset, u32 ownsMemory)
 {
     char *name;
     AnmRawSprite *rawSprite;
@@ -440,37 +406,37 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         name = (char *)((u8 *)data + data->nameOffset);
         if (*name == '@')
         {
-            CreateEmptyTexture(data->textureIdx, data->width, data->height,
-                               data->format);
+            CreateEmptyTexture(data->textureIdx, data->width, data->height, data->format);
         }
         else
         {
-            if (LoadTexture(data->textureIdx, name, data->format, data->color_key) !=
-                ZUN_SUCCESS)
+            if (LoadTexture(data->textureIdx, name, data->format, data->color_key) != ZUN_SUCCESS)
             {
-                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                g_GameErrorContext.Fatal(
+                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
                 return ZUN_ERROR;
             }
         }
         if (data->mipmapNameOffset != 0)
         {
             name = (char *)((u8 *)data + data->mipmapNameOffset);
-            if (LoadTextureAlphaChannel(data->textureIdx, name, data->format,
-                                        data->color_key) != ZUN_SUCCESS)
+            if (LoadTextureAlphaChannel(data->textureIdx, name, data->format, data->color_key) !=
+                ZUN_SUCCESS)
             {
-                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                g_GameErrorContext.Fatal(
+                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
                 return ZUN_ERROR;
             }
         }
     }
     else
     {
-        if (LoadTextureEmbedded(
-                data->textureIdx,
-                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
-                data->format) != ZUN_SUCCESS)
+        if (LoadTextureEmbedded(data->textureIdx,
+                                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
+                                data->format) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Fatal("テクスチャが読み込めません。データが失われてるか壊れています\r\n");
+            g_GameErrorContext.Fatal(
+                "テクスチャが読み込めません。データが失われてるか壊れています\r\n");
             return ZUN_ERROR;
         }
     }
@@ -486,10 +452,8 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         loadedSprite.sourceFileIndex = data->textureIdx;
         loadedSprite.cols = (f32)desc.Width / (f32)data->width;
         loadedSprite.rows = (f32)desc.Height / (f32)data->height;
-        loadedSprite.startPixelInclusive.x =
-            loadedSprite.cols * rawSprite->offset.x;
-        loadedSprite.startPixelInclusive.y =
-            loadedSprite.rows * rawSprite->offset.y;
+        loadedSprite.startPixelInclusive.x = loadedSprite.cols * rawSprite->offset.x;
+        loadedSprite.startPixelInclusive.y = loadedSprite.rows * rawSprite->offset.y;
         loadedSprite.endPixelInclusive.x =
             (rawSprite->offset.x + rawSprite->size.x) * loadedSprite.cols;
         loadedSprite.endPixelInclusive.y =
@@ -518,8 +482,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             id = *curSprite;
         }
-        this->scripts[*curSprite + spriteIdxOffset] =
-            (AnmRawInstr *)((u8 *)data + curSprite[1]);
+        this->scripts[*curSprite + spriteIdxOffset] = (AnmRawInstr *)((u8 *)data + curSprite[1]);
         this->spriteIndices[*curSprite + spriteIdxOffset] = spriteIdxOffset;
     }
     this->anmFiles[textureIdx].raw = data;
@@ -554,8 +517,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         for (i = 0; i < rawEntry->numSprites; i++, afterHdr++)
         {
             spriteIdx = (i32 *)((u8 *)rawEntry + *afterHdr);
-            memset(&this->sprites[*spriteIdx + spriteIdxOffset], 0,
-                   sizeof(AnmLoadedSprite));
+            memset(&this->sprites[*spriteIdx + spriteIdxOffset], 0, sizeof(AnmLoadedSprite));
             this->sprites[*spriteIdx + spriteIdxOffset].sourceFileIndex = -1;
         }
         for (i = 0; i < rawEntry->numScripts; i++, afterHdr += 2)
@@ -596,25 +558,19 @@ void AnmManager::LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite)
     this->sprites[spriteIdx].spriteId = this->loadedSpriteCount++;
 
     this->sprites[spriteIdx].uvStart.x =
-        this->sprites[spriteIdx].startPixelInclusive.x /
-        (this->sprites[spriteIdx].textureWidth);
+        this->sprites[spriteIdx].startPixelInclusive.x / (this->sprites[spriteIdx].textureWidth);
     this->sprites[spriteIdx].uvEnd.x =
-        this->sprites[spriteIdx].endPixelInclusive.x /
-        (this->sprites[spriteIdx].textureWidth);
+        this->sprites[spriteIdx].endPixelInclusive.x / (this->sprites[spriteIdx].textureWidth);
     this->sprites[spriteIdx].uvStart.y =
-        this->sprites[spriteIdx].startPixelInclusive.y /
-        (this->sprites[spriteIdx].textureHeight);
+        this->sprites[spriteIdx].startPixelInclusive.y / (this->sprites[spriteIdx].textureHeight);
     this->sprites[spriteIdx].uvEnd.y =
-        this->sprites[spriteIdx].endPixelInclusive.y /
-        (this->sprites[spriteIdx].textureHeight);
-    this->sprites[spriteIdx].widthPx =
-        (this->sprites[spriteIdx].endPixelInclusive.x -
-         this->sprites[spriteIdx].startPixelInclusive.x) /
-        sprite->cols;
-    this->sprites[spriteIdx].heightPx =
-        (this->sprites[spriteIdx].endPixelInclusive.y -
-         this->sprites[spriteIdx].startPixelInclusive.y) /
-        sprite->rows;
+        this->sprites[spriteIdx].endPixelInclusive.y / (this->sprites[spriteIdx].textureHeight);
+    this->sprites[spriteIdx].widthPx = (this->sprites[spriteIdx].endPixelInclusive.x -
+                                        this->sprites[spriteIdx].startPixelInclusive.x) /
+                                       sprite->cols;
+    this->sprites[spriteIdx].heightPx = (this->sprites[spriteIdx].endPixelInclusive.y -
+                                         this->sprites[spriteIdx].startPixelInclusive.y) /
+                                        sprite->rows;
 }
 
 ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
@@ -630,10 +586,8 @@ ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
     vm->uvMatrix.Identity();
     vm->matrix.m[0][0] = vm->sprite->widthPx / 256.0f;
     vm->matrix.m[1][1] = vm->sprite->heightPx / 256.0f;
-    vm->uvMatrix.m[0][0] =
-        vm->sprite->widthPx / vm->sprite->textureWidth * vm->sprite->cols;
-    vm->uvMatrix.m[1][1] =
-        vm->sprite->heightPx / vm->sprite->textureHeight * vm->sprite->rows;
+    vm->uvMatrix.m[0][0] = vm->sprite->widthPx / vm->sprite->textureWidth * vm->sprite->cols;
+    vm->uvMatrix.m[1][1] = vm->sprite->heightPx / vm->sprite->textureHeight * vm->sprite->rows;
     vm->worldTransformMatrix = vm->matrix;
     return ZUN_SUCCESS;
 }
@@ -789,22 +743,14 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
 
     if ((drawFlags & 1) != 0)
     {
-        g_QuadVertices[0].pos.x =
-            floorf(g_QuadVertices[0].pos.x + 0.5f) - 0.5f;
-        g_QuadVertices[1].pos.x =
-            floorf(g_QuadVertices[1].pos.x + 0.5f) - 0.5f;
-        g_QuadVertices[0].pos.y =
-            floorf(g_QuadVertices[0].pos.y + 0.5f) - 0.5f;
-        g_QuadVertices[2].pos.y =
-            floorf(g_QuadVertices[2].pos.y + 0.5f) - 0.5f;
-        g_QuadVertices[1].pos.y =
-            g_QuadVertices[0].pos.y;
-        g_QuadVertices[2].pos.x =
-            g_QuadVertices[0].pos.x;
-        g_QuadVertices[3].pos.x =
-            g_QuadVertices[1].pos.x;
-        g_QuadVertices[3].pos.y =
-            g_QuadVertices[2].pos.y;
+        g_QuadVertices[0].pos.x = floorf(g_QuadVertices[0].pos.x + 0.5f) - 0.5f;
+        g_QuadVertices[1].pos.x = floorf(g_QuadVertices[1].pos.x + 0.5f) - 0.5f;
+        g_QuadVertices[0].pos.y = floorf(g_QuadVertices[0].pos.y + 0.5f) - 0.5f;
+        g_QuadVertices[2].pos.y = floorf(g_QuadVertices[2].pos.y + 0.5f) - 0.5f;
+        g_QuadVertices[1].pos.y = g_QuadVertices[0].pos.y;
+        g_QuadVertices[2].pos.x = g_QuadVertices[0].pos.x;
+        g_QuadVertices[3].pos.x = g_QuadVertices[1].pos.x;
+        g_QuadVertices[3].pos.y = g_QuadVertices[2].pos.y;
     }
 
     g_QuadVertices[0].textureUV.x = g_QuadVertices[2].textureUV.x =
@@ -816,28 +762,23 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
     g_QuadVertices[2].textureUV.y = g_QuadVertices[3].textureUV.y =
         vm->sprite->uvEnd.y + vm->uvScrollPos.y;
 
-    triangleX1 = max(g_QuadVertices[0].pos.x,
-                     g_QuadVertices[1].pos.x);
+    triangleX1 = max(g_QuadVertices[0].pos.x, g_QuadVertices[1].pos.x);
     triangleX1 = max(g_QuadVertices[2].pos.x, triangleX1);
     triangleX1 = max(g_QuadVertices[3].pos.x, triangleX1);
 
-    triangleY1 = max(g_QuadVertices[0].pos.y,
-                     g_QuadVertices[1].pos.y);
+    triangleY1 = max(g_QuadVertices[0].pos.y, g_QuadVertices[1].pos.y);
     triangleY1 = max(g_QuadVertices[2].pos.y, triangleY1);
     triangleY1 = max(g_QuadVertices[3].pos.y, triangleY1);
 
-    triangleX2 = min(g_QuadVertices[0].pos.x,
-                     g_QuadVertices[1].pos.x);
+    triangleX2 = min(g_QuadVertices[0].pos.x, g_QuadVertices[1].pos.x);
     triangleX2 = min(g_QuadVertices[2].pos.x, triangleX2);
     triangleX2 = min(g_QuadVertices[3].pos.x, triangleX2);
 
-    triangleY2 = min(g_QuadVertices[0].pos.y,
-                     g_QuadVertices[1].pos.y);
+    triangleY2 = min(g_QuadVertices[0].pos.y, g_QuadVertices[1].pos.y);
     triangleY2 = min(g_QuadVertices[2].pos.y, triangleY2);
     triangleY2 = min(g_QuadVertices[3].pos.y, triangleY2);
 
-    if (triangleX1 < g_Supervisor.viewport.X ||
-        triangleY1 < g_Supervisor.viewport.Y ||
+    if (triangleX1 < g_Supervisor.viewport.X || triangleY1 < g_Supervisor.viewport.Y ||
         triangleX2 > g_Supervisor.viewport.X + g_Supervisor.viewport.Width ||
         triangleY2 > g_Supervisor.viewport.Y + g_Supervisor.viewport.Height)
     {
@@ -848,8 +789,7 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
     {
         this->currentTexture = this->textures[vm->sprite->sourceFileIndex];
         this->Flush();
-        g_Supervisor.d3dDevice->SetTexture(
-            0, (IDirect3DBaseTexture8 *)this->currentTexture);
+        g_Supervisor.d3dDevice->SetTexture(0, (IDirect3DBaseTexture8 *)this->currentTexture);
     }
     if (this->currentVertexShader != 1)
     {
@@ -858,8 +798,7 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
     }
     if ((drawFlags & 2) == 0)
     {
-        color.color =
-            vm->useColor2 ? vm->color2.color : vm->color.color;
+        color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
         if (this->colorMulEnabled)
         {
             color.bytes.r = ZunColor::Multiply(color.bytes.r, this->color.bytes.r);
@@ -893,11 +832,10 @@ void AnmManager::Flush()
 
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 0);
-    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
-                                            D3DFVF_XYZRHW);
-    g_Supervisor.d3dDevice->DrawPrimitiveUP(
-        D3DPT_TRIANGLELIST, this->spritesToDraw << 1, this->vertexBufferStartPtr,
-        sizeof(VertexTex1DiffuseXyzrhw));
+    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
+    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, this->spritesToDraw << 1,
+                                            this->vertexBufferStartPtr,
+                                            sizeof(VertexTex1DiffuseXyzrhw));
     this->vertexBufferStartPtr = this->vertexBufferCurPtr;
     this->spritesToDraw = 0;
     this->flushesThisFrame++;
@@ -942,47 +880,34 @@ ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
 
     if ((vm->anchor & 1) == 0)
     {
-        g_QuadVertices[0].pos.x =
-            g_QuadVertices[2].pos.x = vm->pos.x - centerX;
-        g_QuadVertices[1].pos.x =
-            g_QuadVertices[3].pos.x = centerX + vm->pos.x;
+        g_QuadVertices[0].pos.x = g_QuadVertices[2].pos.x = vm->pos.x - centerX;
+        g_QuadVertices[1].pos.x = g_QuadVertices[3].pos.x = centerX + vm->pos.x;
     }
     else
     {
-        g_QuadVertices[0].pos.x =
-            g_QuadVertices[2].pos.x = vm->pos.x;
-        g_QuadVertices[1].pos.x =
-            g_QuadVertices[3].pos.x = centerX + vm->pos.x +
-                                      centerX;
+        g_QuadVertices[0].pos.x = g_QuadVertices[2].pos.x = vm->pos.x;
+        g_QuadVertices[1].pos.x = g_QuadVertices[3].pos.x = centerX + vm->pos.x + centerX;
     }
 
     if ((vm->anchor & 2) == 0)
     {
-        g_QuadVertices[0].pos.y =
-            g_QuadVertices[1].pos.y = vm->pos.y - centerY;
-        g_QuadVertices[2].pos.y =
-            g_QuadVertices[3].pos.y = centerY + vm->pos.y;
+        g_QuadVertices[0].pos.y = g_QuadVertices[1].pos.y = vm->pos.y - centerY;
+        g_QuadVertices[2].pos.y = g_QuadVertices[3].pos.y = centerY + vm->pos.y;
     }
     else
     {
-        g_QuadVertices[0].pos.y =
-            g_QuadVertices[1].pos.y = vm->pos.y;
-        g_QuadVertices[2].pos.y =
-            g_QuadVertices[3].pos.y = centerY + vm->pos.y +
-                                      centerY;
+        g_QuadVertices[0].pos.y = g_QuadVertices[1].pos.y = vm->pos.y;
+        g_QuadVertices[2].pos.y = g_QuadVertices[3].pos.y = centerY + vm->pos.y + centerY;
     }
 
-    g_QuadVertices[0].pos.z =
-        g_QuadVertices[1].pos.z =
-            g_QuadVertices[2].pos.z =
-                g_QuadVertices[3].pos.z = vm->pos.z;
+    g_QuadVertices[0].pos.z = g_QuadVertices[1].pos.z = g_QuadVertices[2].pos.z =
+        g_QuadVertices[3].pos.z = vm->pos.z;
 
     return DrawInner(vm, 1);
 }
 
-void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width,
-                                   f32 height, f32 sine, f32 cosine,
-                                   f32 xOffset, f32 yOffset)
+void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width, f32 height,
+                                   f32 sine, f32 cosine, f32 xOffset, f32 yOffset)
 {
     vertex->pos.x = width * cosine - height * sine + xOffset;
     vertex->pos.y = width * sine + height * cosine + yOffset;
@@ -1022,19 +947,13 @@ ZunResult AnmManager::Draw(AnmVm *vm)
     width = vm->sprite->widthPx * vm->scale.x / 2.0f;
     height = vm->sprite->heightPx * vm->scale.y / 2.0f;
 
-    TranslateRotation(&g_QuadVertices[0], -width, -height, sinZ,
-                      cosZ, xOffset, yOffset);
-    TranslateRotation(&g_QuadVertices[1], width, -height, sinZ,
-                      cosZ, xOffset, yOffset);
-    TranslateRotation(&g_QuadVertices[2], -width, height, sinZ,
-                      cosZ, xOffset, yOffset);
-    TranslateRotation(&g_QuadVertices[3], width, height, sinZ,
-                      cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[0], -width, -height, sinZ, cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[1], width, -height, sinZ, cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[2], -width, height, sinZ, cosZ, xOffset, yOffset);
+    TranslateRotation(&g_QuadVertices[3], width, height, sinZ, cosZ, xOffset, yOffset);
 
-    g_QuadVertices[0].pos.z =
-        g_QuadVertices[1].pos.z =
-            g_QuadVertices[2].pos.z =
-                g_QuadVertices[3].pos.z = vm->pos.z;
+    g_QuadVertices[0].pos.z = g_QuadVertices[1].pos.z = g_QuadVertices[2].pos.z =
+        g_QuadVertices[3].pos.z = vm->pos.z;
     if ((vm->anchor & 1) != 0)
     {
         g_QuadVertices[0].pos.x += width;
@@ -1076,38 +995,28 @@ ZunResult AnmManager::DrawFacingCamera(AnmVm *vm)
 
     if ((vm->anchor & 1) == 0)
     {
-        g_QuadVertices[0].pos.x =
-            g_QuadVertices[2].pos.x = vm->pos.x - centerX;
-        g_QuadVertices[1].pos.x =
-            g_QuadVertices[3].pos.x = centerX + vm->pos.x;
+        g_QuadVertices[0].pos.x = g_QuadVertices[2].pos.x = vm->pos.x - centerX;
+        g_QuadVertices[1].pos.x = g_QuadVertices[3].pos.x = centerX + vm->pos.x;
     }
     else
     {
-        g_QuadVertices[0].pos.x =
-            g_QuadVertices[2].pos.x = vm->pos.x;
-        g_QuadVertices[1].pos.x =
-            g_QuadVertices[3].pos.x = centerX + vm->pos.x + centerX;
+        g_QuadVertices[0].pos.x = g_QuadVertices[2].pos.x = vm->pos.x;
+        g_QuadVertices[1].pos.x = g_QuadVertices[3].pos.x = centerX + vm->pos.x + centerX;
     }
 
     if ((vm->anchor & 2) == 0)
     {
-        g_QuadVertices[0].pos.y =
-            g_QuadVertices[1].pos.y = vm->pos.y - centerY;
-        g_QuadVertices[2].pos.y =
-            g_QuadVertices[3].pos.y = centerY + vm->pos.y;
+        g_QuadVertices[0].pos.y = g_QuadVertices[1].pos.y = vm->pos.y - centerY;
+        g_QuadVertices[2].pos.y = g_QuadVertices[3].pos.y = centerY + vm->pos.y;
     }
     else
     {
-        g_QuadVertices[0].pos.y =
-            g_QuadVertices[1].pos.y = vm->pos.y;
-        g_QuadVertices[2].pos.y =
-            g_QuadVertices[3].pos.y = centerY + vm->pos.y + centerY;
+        g_QuadVertices[0].pos.y = g_QuadVertices[1].pos.y = vm->pos.y;
+        g_QuadVertices[2].pos.y = g_QuadVertices[3].pos.y = centerY + vm->pos.y + centerY;
     }
 
-    g_QuadVertices[0].pos.z =
-        g_QuadVertices[1].pos.z =
-            g_QuadVertices[2].pos.z =
-                g_QuadVertices[3].pos.z = vm->pos.z;
+    g_QuadVertices[0].pos.z = g_QuadVertices[1].pos.z = g_QuadVertices[2].pos.z =
+        g_QuadVertices[3].pos.z = vm->pos.z;
 
     return DrawInner(vm, 0);
 }
@@ -1135,18 +1044,16 @@ ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
     matrix.m[3][1] = vm->pos.y;
     matrix.m[3][2] = vm->pos.z;
 
-    projectCenter.Project(&origin, &g_Supervisor.viewport,
-                     &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix,
-                     &matrix);
+    projectCenter.Project(&origin, &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
+                          &g_Supervisor.viewMatrix, &matrix);
 
     if (projectCenter.z < 0.0f || projectCenter.z > 1.0f)
     {
         return ZUN_ERROR;
     }
 
-    projectRight.Project(&g_Stage.cam.right, &g_Supervisor.viewport,
-                     &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix,
-                     &matrix);
+    projectRight.Project(&g_Stage.cam.right, &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
+                         &g_Supervisor.viewMatrix, &matrix);
 
     projectRightOffset = projectRight - projectCenter;
 
@@ -1157,19 +1064,17 @@ ZunResult AnmManager::CalcBillboardTransform(AnmVm *vm)
     halfLength = projectCenter.x; // used as screen center x here
     screenCenterY = projectCenter.y;
 
-    TranslateRotation(&g_QuadVertices[0], -halfWidth, -halfHeight, sinZ,
-                      cosZ, halfLength, screenCenterY);
-    TranslateRotation(&g_QuadVertices[1], halfWidth, -halfHeight, sinZ,
-                      cosZ, halfLength, screenCenterY);
-    TranslateRotation(&g_QuadVertices[2], -halfWidth, halfHeight, sinZ,
-                      cosZ, halfLength, screenCenterY);
-    TranslateRotation(&g_QuadVertices[3], halfWidth, halfHeight, sinZ,
-                      cosZ, halfLength, screenCenterY);
+    TranslateRotation(&g_QuadVertices[0], -halfWidth, -halfHeight, sinZ, cosZ, halfLength,
+                      screenCenterY);
+    TranslateRotation(&g_QuadVertices[1], halfWidth, -halfHeight, sinZ, cosZ, halfLength,
+                      screenCenterY);
+    TranslateRotation(&g_QuadVertices[2], -halfWidth, halfHeight, sinZ, cosZ, halfLength,
+                      screenCenterY);
+    TranslateRotation(&g_QuadVertices[3], halfWidth, halfHeight, sinZ, cosZ, halfLength,
+                      screenCenterY);
 
-    g_QuadVertices[0].pos.z =
-        g_QuadVertices[1].pos.z =
-            g_QuadVertices[2].pos.z =
-                g_QuadVertices[3].pos.z = projectCenter.z;
+    g_QuadVertices[0].pos.z = g_QuadVertices[1].pos.z = g_QuadVertices[2].pos.z =
+        g_QuadVertices[3].pos.z = projectCenter.z;
 
     if ((vm->anchor & 1) != 0)
     {
@@ -1218,8 +1123,7 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     ZunMatrix world;
     ZunMatrix rot;
 
-    if (vm->skipTransform == 0 &&
-        (vm->updateScale || vm->updateRotation))
+    if (vm->skipTransform == 0 && (vm->updateScale || vm->updateRotation))
     {
         vm->worldTransformMatrix = vm->matrix;
         vm->worldTransformMatrix.m[0][0] *= vm->scale.x;
@@ -1263,22 +1167,14 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     }
     world.m[3][2] = vm->pos.z;
 
-    g_QuadVertices[0].pos.Project(
-        &this->vertexBufferContents[0].position,
-        &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
-        &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[1].pos.Project(
-        &this->vertexBufferContents[1].position,
-        &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
-        &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[2].pos.Project(
-        &this->vertexBufferContents[2].position,
-        &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
-        &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[3].pos.Project(
-        &this->vertexBufferContents[3].position,
-        &g_Supervisor.viewport, &g_Supervisor.projectionMatrix,
-        &g_Supervisor.viewMatrix, &world);
+    g_QuadVertices[0].pos.Project(&this->vertexBufferContents[0].position, &g_Supervisor.viewport,
+                                  &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
+    g_QuadVertices[1].pos.Project(&this->vertexBufferContents[1].position, &g_Supervisor.viewport,
+                                  &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
+    g_QuadVertices[2].pos.Project(&this->vertexBufferContents[2].position, &g_Supervisor.viewport,
+                                  &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
+    g_QuadVertices[3].pos.Project(&this->vertexBufferContents[3].position, &g_Supervisor.viewport,
+                                  &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
 
     this->matrix = world;
 }
@@ -1330,8 +1226,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         this->Flush();
     }
 
-    if (vm->skipTransform == 0 &&
-        (vm->updateScale || vm->updateRotation))
+    if (vm->skipTransform == 0 && (vm->updateScale || vm->updateRotation))
     {
         vm->worldTransformMatrix = vm->matrix;
         vm->worldTransformMatrix.m[0][0] *= vm->scale.x;
@@ -1395,8 +1290,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         if (this->currentTexture != this->textures[vm->sprite->sourceFileIndex])
         {
             this->currentTexture = this->textures[vm->sprite->sourceFileIndex];
-            g_Supervisor.d3dDevice->SetTexture(
-                0, (IDirect3DBaseTexture8 *)this->currentTexture);
+            g_Supervisor.d3dDevice->SetTexture(0, (IDirect3DBaseTexture8 *)this->currentTexture);
         }
     }
 
@@ -1409,9 +1303,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         }
         else
         {
-            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 |
-                                                    D3DFVF_DIFFUSE |
-                                                    D3DFVF_XYZ);
+            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE | D3DFVF_XYZ);
         }
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
@@ -1424,8 +1316,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     }
     else
     {
-        g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2,
-                                                g_Quad3DFallback,
+        g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, g_Quad3DFallback,
                                                 sizeof(VertexTex1DiffuseXyz));
     }
     return ZUN_SUCCESS;
@@ -1544,17 +1435,17 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
     i32 i;
     f32 t;
 
-#define GET_INT_PTR(argIdx) \
-    vm->GetVar(&instr->args[argIdx].i, instr->flags, argIdx)
+#define GET_INT_PTR(argIdx) vm->GetVar(&instr->args[argIdx].i, instr->flags, argIdx)
 
-#define GET_FLOAT_PTR(argIdx) \
-    vm->GetFloatVar(&instr->args[argIdx].f, instr->flags, argIdx)
+#define GET_FLOAT_PTR(argIdx) vm->GetFloatVar(&instr->args[argIdx].f, instr->flags, argIdx)
 
-#define GET_INT_VALUE(argIdx) \
-    (((instr->flags & (1 << argIdx)) != 0) ? vm->GetVarValue(instr->args[argIdx].i) : instr->args[argIdx].i)
+#define GET_INT_VALUE(argIdx)                                                                      \
+    (((instr->flags & (1 << argIdx)) != 0) ? vm->GetVarValue(instr->args[argIdx].i)                \
+                                           : instr->args[argIdx].i)
 
-#define GET_FLOAT_VALUE(argIdx) \
-    (((instr->flags & (1 << argIdx)) != 0) ? vm->GetFloatVarValue(instr->args[argIdx].f) : instr->args[argIdx].f)
+#define GET_FLOAT_VALUE(argIdx)                                                                    \
+    (((instr->flags & (1 << argIdx)) != 0) ? vm->GetFloatVarValue(instr->args[argIdx].f)           \
+                                           : instr->args[argIdx].f)
 
     if (!vm->currentInstruction)
     {
@@ -1592,8 +1483,7 @@ WHY_NOT_JUST_CONTINUE:
             vm->color.bytes.a = instr->args[0].i & 255;
             break;
         case ANM_SET_COLOR:
-            vm->color.color =
-                (vm->color.color & 0xff000000) | (instr->args[0].i & 0xffffff);
+            vm->color.color = (vm->color.color & 0xff000000) | (instr->args[0].i & 0xffffff);
             break;
         case ANM_JUMP:
             vm->currentTimeInScript = instr->args[1].i;
@@ -1660,13 +1550,11 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_SET_TRANSLATION:
             if (!vm->useOffset)
             {
-                vm->pos =
-                    ZunVec3(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
+                vm->pos = ZunVec3(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
             }
             else
             {
-                vm->offset =
-                    ZunVec3(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
+                vm->offset = ZunVec3(GET_FLOAT_VALUE(0), GET_FLOAT_VALUE(1), GET_FLOAT_VALUE(2));
             }
             break;
         case ANM_POS_TIME_ACCEL:
@@ -1723,8 +1611,7 @@ WHY_NOT_JUST_CONTINUE:
                     (i32)vm->pendingInterrupt != instr->args[0].i) &&
                    instr->opcode != ANM_EXIT_HIDE)
             {
-                if (instr->opcode == ANM_INTERRUPT_LABEL &&
-                    instr->args[0].i == 0xffffffff)
+                if (instr->opcode == ANM_INTERRUPT_LABEL && instr->args[0].i == 0xffffffff)
                 {
                     nextInstr = instr;
                 }
@@ -2013,7 +1900,8 @@ WHY_NOT_JUST_CONTINUE:
             break;
         jump:
             vm->currentTimeInScript = instr->args[3].i;
-            vm->currentInstruction = (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[2].i);
+            vm->currentInstruction =
+                (AnmRawInstr *)((u8 *)vm->beginningOfScript + instr->args[2].i);
             goto WHY_NOT_JUST_CONTINUE;
         default:
             break;
@@ -2026,22 +1914,19 @@ stop:
     if (vm->angleVel.x != 0.0f)
     {
         vm->rotation.x = utils::AddNormalizeAngle(
-            vm->rotation.x,
-            g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.x);
+            vm->rotation.x, g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.x);
         vm->updateRotation = 1;
     }
     if (vm->angleVel.y != 0.0f)
     {
         vm->rotation.y = utils::AddNormalizeAngle(
-            vm->rotation.y,
-            g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.y);
+            vm->rotation.y, g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.y);
         vm->updateRotation = 1;
     }
     if (vm->angleVel.z != 0.0f)
     {
         vm->rotation.z = utils::AddNormalizeAngle(
-            vm->rotation.z,
-            g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.z);
+            vm->rotation.z, g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.z);
         vm->updateRotation = 1;
     }
     for (i = 0; i < 5; i++)
@@ -2056,8 +1941,7 @@ stop:
             }
             else
             {
-                t = vm->interpStartTimes[i].AsFloat() /
-                    vm->interpEndTimes[i].AsFloat();
+                t = vm->interpStartTimes[i].AsFloat() / vm->interpEndTimes[i].AsFloat();
             }
             switch (vm->interpModes[i])
             {
@@ -2093,40 +1977,42 @@ stop:
             case 0:
                 if (!vm->useOffset)
                 {
-                    vm->pos.x = (vm->posInterpFinal.x - vm->posInterpInitial.x) * t + vm->posInterpInitial.x;
-                    vm->pos.y = (vm->posInterpFinal.y - vm->posInterpInitial.y) * t + vm->posInterpInitial.y;
-                    vm->pos.z = (vm->posInterpFinal.z - vm->posInterpInitial.z) * t + vm->posInterpInitial.z;
+                    vm->pos.x = (vm->posInterpFinal.x - vm->posInterpInitial.x) * t +
+                                vm->posInterpInitial.x;
+                    vm->pos.y = (vm->posInterpFinal.y - vm->posInterpInitial.y) * t +
+                                vm->posInterpInitial.y;
+                    vm->pos.z = (vm->posInterpFinal.z - vm->posInterpInitial.z) * t +
+                                vm->posInterpInitial.z;
                 }
                 else
                 {
-                    vm->offset.x = (vm->posInterpFinal.x - vm->posInterpInitial.x) * t + vm->posInterpInitial.x;
-                    vm->offset.y = (vm->posInterpFinal.y - vm->posInterpInitial.y) * t + vm->posInterpInitial.y;
-                    vm->offset.z = (vm->posInterpFinal.z - vm->posInterpInitial.z) * t + vm->posInterpInitial.z;
+                    vm->offset.x = (vm->posInterpFinal.x - vm->posInterpInitial.x) * t +
+                                   vm->posInterpInitial.x;
+                    vm->offset.y = (vm->posInterpFinal.y - vm->posInterpInitial.y) * t +
+                                   vm->posInterpInitial.y;
+                    vm->offset.z = (vm->posInterpFinal.z - vm->posInterpInitial.z) * t +
+                                   vm->posInterpInitial.z;
                 }
                 break;
             case 1:
-                vm->color.bytes.r =
-                    (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.r -
-                               (i32)vm->colorInterpInitialColor.bytes.r) *
-                             t +
-                         (f32)vm->colorInterpInitialColor.bytes.r);
-                vm->color.bytes.g =
-                    (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.g -
-                               (i32)vm->colorInterpInitialColor.bytes.g) *
-                             t +
-                         (f32)vm->colorInterpInitialColor.bytes.g);
-                vm->color.bytes.b =
-                    (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.b -
-                               (i32)vm->colorInterpInitialColor.bytes.b) *
-                             t +
-                         (f32)vm->colorInterpInitialColor.bytes.b);
+                vm->color.bytes.r = (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.r -
+                                               (i32)vm->colorInterpInitialColor.bytes.r) *
+                                             t +
+                                         (f32)vm->colorInterpInitialColor.bytes.r);
+                vm->color.bytes.g = (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.g -
+                                               (i32)vm->colorInterpInitialColor.bytes.g) *
+                                             t +
+                                         (f32)vm->colorInterpInitialColor.bytes.g);
+                vm->color.bytes.b = (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.b -
+                                               (i32)vm->colorInterpInitialColor.bytes.b) *
+                                             t +
+                                         (f32)vm->colorInterpInitialColor.bytes.b);
                 break;
             case 2:
-                vm->color.bytes.a =
-                    (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.a -
-                               (i32)vm->colorInterpInitialColor.bytes.a) *
-                             t +
-                         (f32)vm->colorInterpInitialColor.bytes.a);
+                vm->color.bytes.a = (u8)((f32)((i32)vm->colorInterpFinalColor.bytes.a -
+                                               (i32)vm->colorInterpInitialColor.bytes.a) *
+                                             t +
+                                         (f32)vm->colorInterpInitialColor.bytes.a);
                 break;
             case 3:
                 vm->rotation.x = utils::AddNormalizeAngle(
@@ -2152,14 +2038,12 @@ stop:
     }
     if (vm->scaleGrowth.y != 0.0f)
     {
-        vm->scale.y +=
-            g_Supervisor.effectiveFramerateMultiplier * vm->scaleGrowth.y;
+        vm->scale.y += g_Supervisor.effectiveFramerateMultiplier * vm->scaleGrowth.y;
         vm->updateScale = 1;
     }
     if (vm->scaleGrowth.x != 0.0f)
     {
-        vm->scale.x +=
-            g_Supervisor.effectiveFramerateMultiplier * vm->scaleGrowth.x;
+        vm->scale.x += g_Supervisor.effectiveFramerateMultiplier * vm->scaleGrowth.x;
         vm->updateScale = 1;
         vm->updateRotation = 1;
     }
@@ -2186,10 +2070,9 @@ stop:
     return 0;
 }
 
-void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width,
-                                  i32 height, i32 fontWidth, i32 fontHeight,
-                                  D3DCOLOR textColor, u32 outlineType,
-                                  char *strToPrint, f32 scaleY, f32 scaleX)
+void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width, i32 height,
+                                  i32 fontWidth, i32 fontHeight, D3DCOLOR textColor,
+                                  u32 outlineType, char *strToPrint, f32 scaleY, f32 scaleX)
 {
     if (fontWidth <= 0)
     {
@@ -2199,14 +2082,12 @@ void AnmManager::DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width,
     {
         fontHeight = 15;
     }
-    TextHelper::RenderTextToTextureBold(x, y, width, height,
-                                        (f32)fontWidth * scaleY,
-                                        (f32)fontHeight * scaleX, textColor,
-                                        outlineType, strToPrint, this->textures[spriteDstIdx]);
+    TextHelper::RenderTextToTextureBold(x, y, width, height, (f32)fontWidth * scaleY,
+                                        (f32)fontHeight * scaleX, textColor, outlineType,
+                                        strToPrint, this->textures[spriteDstIdx]);
 }
 
-void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
-                               D3DCOLOR textColor, u32 outlineType,
+void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
                                const char *str, ...)
 {
     u32 fontWidth;
@@ -2219,25 +2100,16 @@ void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
     vsprintf(text, str, args);
     va_end(args);
 
-    manager->DrawTextToSprite(
-        vm->sprite->sourceFileIndex,
-        vm->sprite->startPixelInclusive.x,
-        vm->sprite->startPixelInclusive.y,
-        vm->sprite->textureWidth,
-        vm->sprite->textureHeight,
-        fontWidth,
-        vm->fontHeight,
-        textColor,
-        outlineType,
-        text,
-        vm->sprite->cols,
-        vm->sprite->rows);
+    manager->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+                              vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth,
+                              vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
+                              outlineType, text, vm->sprite->cols, vm->sprite->rows);
 
     vm->visible = 1;
 }
 
-void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor,
-                                  u32 outlineType, const char *text, ...)
+void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text,
+                                  ...)
 {
     i32 fontWidth;
     char buf[72];
@@ -2265,8 +2137,8 @@ void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor,
     vm->visible = 1;
 }
 
-void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor,
-                                   u32 outlineType, const char *text, ...)
+void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text,
+                                   ...)
 {
     i32 fontWidth;
     char buf[72];
@@ -2287,8 +2159,9 @@ void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor,
               (f32)strlen(buf) * fontWidth * vm->sprite->cols / 4.0f);
 
     this->DrawTextToSprite(vm->sprite->sourceFileIndex, x, vm->sprite->startPixelInclusive.y,
-                           vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight,
-                           textColor, outlineType, buf, vm->sprite->cols, vm->sprite->rows);
+                           vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth,
+                           vm->fontHeight, textColor, outlineType, buf, vm->sprite->cols,
+                           vm->sprite->rows);
 
     vm->visible = 1;
 }
@@ -2308,51 +2181,43 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
         return ZUN_ERROR;
     }
     if (g_Supervisor.d3dDevice->CreateImageSurface(
-            640, 1024, g_Supervisor.presentParameters.BackBufferFormat,
-            &surface))
+            640, 1024, g_Supervisor.presentParameters.BackBufferFormat, &surface))
     {
         return ZUN_ERROR;
     }
 
-    if (D3DXLoadSurfaceFromFileInMemory(
-            surface, NULL, NULL, data, g_LastFileSize, NULL, 1, 0,
-            (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]))
+    if (D3DXLoadSurfaceFromFileInMemory(surface, NULL, NULL, data, g_LastFileSize, NULL, 1, 0,
+                                        (D3DXIMAGE_INFO *)&this->surfaceSourceInfo[surfaceIdx]))
     {
         goto err;
     }
 
     if (g_Supervisor.d3dDevice->CreateRenderTarget(
-            this->surfaceSourceInfo[surfaceIdx].width,
-            this->surfaceSourceInfo[surfaceIdx].height,
-            g_Supervisor.presentParameters.BackBufferFormat, D3DMULTISAMPLE_NONE,
-            1, this->surfaces + surfaceIdx))
+            this->surfaceSourceInfo[surfaceIdx].width, this->surfaceSourceInfo[surfaceIdx].height,
+            g_Supervisor.presentParameters.BackBufferFormat, D3DMULTISAMPLE_NONE, 1,
+            this->surfaces + surfaceIdx))
     {
         if (g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
-                g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx))
+                g_Supervisor.presentParameters.BackBufferFormat, this->surfaces + surfaceIdx))
         {
             goto err;
         }
     }
 
     if (g_Supervisor.d3dDevice->CreateImageSurface(
-            this->surfaceSourceInfo[surfaceIdx].width,
-            this->surfaceSourceInfo[surfaceIdx].height,
-            g_Supervisor.presentParameters.BackBufferFormat,
-            this->surfacesBis + surfaceIdx))
+            this->surfaceSourceInfo[surfaceIdx].width, this->surfaceSourceInfo[surfaceIdx].height,
+            g_Supervisor.presentParameters.BackBufferFormat, this->surfacesBis + surfaceIdx))
     {
         goto err;
     }
 
-    if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], 0, NULL, surface,
-                                   0, NULL, 1, 0))
+    if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], 0, NULL, surface, 0, NULL, 1, 0))
     {
         goto err;
     }
-    if (D3DXLoadSurfaceFromSurface(this->surfacesBis[surfaceIdx], 0, NULL,
-                                   surface, 0, NULL, 1, 0))
+    if (D3DXLoadSurfaceFromSurface(this->surfacesBis[surfaceIdx], 0, NULL, surface, 0, NULL, 1, 0))
     {
         goto err;
     }
@@ -2373,16 +2238,14 @@ void AnmManager::ReleaseSurface(i32 surfaceIdx)
     SAFE_RELEASE(this->surfacesBis[surfaceIdx]);
 }
 
-void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
-                                         i32 x, i32 y)
+void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y)
 {
     if (!this->surfacesBis[surfaceIdx])
     {
         return;
     }
     IDirect3DSurface8 *dstSurface;
-    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &dstSurface))
+    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &dstSurface))
     {
         return;
     }
@@ -2392,20 +2255,18 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
         if (g_Supervisor.d3dDevice->CreateRenderTarget(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
-                g_Supervisor.presentParameters.BackBufferFormat,
-                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) &&
+                g_Supervisor.presentParameters.BackBufferFormat, D3DMULTISAMPLE_NONE, 1,
+                this->surfaces + surfaceIdx) &&
             g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
-                g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx))
+                g_Supervisor.presentParameters.BackBufferFormat, this->surfaces + surfaceIdx))
         {
             dstSurface->Release();
             return;
         }
         if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], NULL, NULL,
-                                       this->surfacesBis[surfaceIdx], NULL, NULL,
-                                       1, 0))
+                                       this->surfacesBis[surfaceIdx], NULL, NULL, 1, 0))
         {
             dstSurface->Release();
             return;
@@ -2414,22 +2275,20 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top,
     RECT srcRect = {left, top, (LONG)this->surfaceSourceInfo[surfaceIdx].width,
                     (LONG)this->surfaceSourceInfo[surfaceIdx].height};
     POINT dstPoint = {x, y};
-    g_Supervisor.d3dDevice->CopyRects(this->surfaces[surfaceIdx], &srcRect, 1,
-                                      dstSurface, &dstPoint);
+    g_Supervisor.d3dDevice->CopyRects(this->surfaces[surfaceIdx], &srcRect, 1, dstSurface,
+                                      &dstPoint);
     dstSurface->Release();
 }
 
-void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
-                                i32 rectLeft, i32 rectTop, i32 width,
-                                i32 height)
+void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY, i32 rectLeft, i32 rectTop,
+                                i32 width, i32 height)
 {
     if (!this->surfacesBis[surfaceIdx])
     {
         return;
     }
     IDirect3DSurface8 *backBuffer;
-    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &backBuffer))
+    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer))
     {
         return;
     }
@@ -2438,20 +2297,18 @@ void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
         if (g_Supervisor.d3dDevice->CreateRenderTarget(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
-                g_Supervisor.presentParameters.BackBufferFormat,
-                D3DMULTISAMPLE_NONE, 1, this->surfaces + surfaceIdx) &&
+                g_Supervisor.presentParameters.BackBufferFormat, D3DMULTISAMPLE_NONE, 1,
+                this->surfaces + surfaceIdx) &&
             g_Supervisor.d3dDevice->CreateImageSurface(
                 this->surfaceSourceInfo[surfaceIdx].width,
                 this->surfaceSourceInfo[surfaceIdx].height,
-                g_Supervisor.presentParameters.BackBufferFormat,
-                this->surfaces + surfaceIdx))
+                g_Supervisor.presentParameters.BackBufferFormat, this->surfaces + surfaceIdx))
         {
             backBuffer->Release();
             return;
         }
         if (D3DXLoadSurfaceFromSurface(this->surfaces[surfaceIdx], 0, NULL,
-                                       this->surfacesBis[surfaceIdx], 0, NULL, 1,
-                                       0))
+                                       this->surfacesBis[surfaceIdx], 0, NULL, 1, 0))
         {
             backBuffer->Release();
             return;
@@ -2459,14 +2316,12 @@ void AnmManager::DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY,
     }
     RECT rect = {rectLeft, rectTop, rectLeft + width, rectTop + height};
     POINT point = {rectX, rectY};
-    g_Supervisor.d3dDevice->CopyRects(this->surfaces[surfaceIdx], &rect, 1,
-                                      backBuffer, &point);
+    g_Supervisor.d3dDevice->CopyRects(this->surfaces[surfaceIdx], &rect, 1, backBuffer, &point);
     backBuffer->Release();
 }
 
-void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
-                                i32 srcWidth, i32 srcHeight, i32 dstLeft,
-                                i32 dstTop, i32 dstWidth, i32 dstHeight)
+void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop, i32 srcWidth, i32 srcHeight,
+                                i32 dstLeft, i32 dstTop, i32 dstWidth, i32 dstHeight)
 {
     RECT dstRect;
     IDirect3DSurface8 *srcSurface;
@@ -2479,8 +2334,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
     }
 
     Flush();
-    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO,
-                                              &srcSurface))
+    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &srcSurface))
     {
         return;
     }
@@ -2499,8 +2353,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 srcLeft, i32 srcTop,
     dstRect.top = dstTop;
     dstRect.right = dstLeft + dstWidth;
     dstRect.bottom = dstTop + dstHeight;
-    if (D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, srcSurface, 0,
-                                   &srcRect, 0xffffffff, 0))
+    if (D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, srcSurface, 0, &srcRect, 0xffffffff, 0))
     {
         dstSurface->Release();
         srcSurface->Release();
@@ -2536,8 +2389,7 @@ void AnmManager::CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRec
         return;
     }
 
-    if (D3DXLoadSurfaceFromSurface(dstSurf, 0, dstRect, srcSurf, 0, srcRect,
-                                   0xffffffff, 0))
+    if (D3DXLoadSurfaceFromSurface(dstSurf, 0, dstRect, srcSurf, 0, srcRect, 0xffffffff, 0))
     {
         dstSurf->Release();
         srcSurf->Release();
@@ -2601,8 +2453,7 @@ void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
     }
 }
 
-ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
-                                  i32 count)
+ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices, i32 count)
 {
     f32 num;
     f32 fVar4;
@@ -2644,9 +2495,7 @@ ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
-                                        VertexTex1DiffuseXyzrhw *vertices,
-                                        i32 count)
+ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count)
 {
     if (!vm->visible)
     {
@@ -2671,8 +2520,7 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
     if (this->currentTexture != this->textures[vm->sprite->sourceFileIndex])
     {
         this->currentTexture = this->textures[vm->sprite->sourceFileIndex];
-        g_Supervisor.d3dDevice->SetTexture(
-            0, (IDirect3DBaseTexture8 *)this->currentTexture);
+        g_Supervisor.d3dDevice->SetTexture(0, (IDirect3DBaseTexture8 *)this->currentTexture);
     }
 
     if (this->currentVertexShader != 3)
@@ -2682,8 +2530,7 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
     }
 
     SetRenderStateForVm(vm);
-    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, count - 2,
-                                            vertices,
+    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, count - 2, vertices,
                                             sizeof(VertexTex1DiffuseXyzrhw));
     return ZUN_SUCCESS;
 }

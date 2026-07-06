@@ -108,18 +108,16 @@ struct Stage
     static u32 OnDrawHighPrio(Stage *arg);
     static u32 OnDrawLowPrio(Stage *arg);
 
-    static void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
-                                D3DCOLOR param_4, D3DCOLOR param_5);
+    static void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3, D3DCOLOR param_4,
+                                D3DCOLOR param_5);
     ZunResult LoadStageData(const char *stdPath);
     i32 RenderObjects(i32 param_1);
     void SmoothBlendColor(ZunColor param_1);
     void UpdateCamera();
     ZunResult UpdateObjects();
     void SetupCameraStageBackground();
-    static void UpdateScriptAndCamera(Stage *stage, i32 param_2,
-                                      ZunVec3 *param_3, ZunVec3 *param_4,
-                                      ZunVec3 *param_5, ZunVec3 *param_6,
-                                      ZunVec3 *param_7);
+    static void UpdateScriptAndCamera(Stage *stage, i32 param_2, ZunVec3 *param_3, ZunVec3 *param_4,
+                                      ZunVec3 *param_5, ZunVec3 *param_6, ZunVec3 *param_7);
 
     AnmVm *quadVms;
     AnmVm vm1;

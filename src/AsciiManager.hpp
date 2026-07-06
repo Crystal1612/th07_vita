@@ -67,8 +67,7 @@ struct AsciiManager
     static u32 OnDrawMenus(AsciiManager *arg);
     static u32 OnDrawPopups(AsciiManager *arg);
 
-    static void AddFormatText(AsciiManager *manager, ZunVec3 *position,
-                              const char *fmt, ...);
+    static void AddFormatText(AsciiManager *manager, ZunVec3 *position, const char *fmt, ...);
     void AddString(ZunVec3 *position, const char *text);
     void CreatePopup1(ZunVec3 *position, i32 value, D3DCOLOR color);
     void CreatePopup2(ZunVec3 *position, i32 value, D3DCOLOR color);

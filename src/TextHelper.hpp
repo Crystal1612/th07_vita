@@ -25,9 +25,8 @@ struct TextHelper
     bool InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight, i32 someFlag);
     bool ReleaseBuffer();
     static void ReleaseTextBuffer();
-    static void RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
-                                        i32 spriteHeight, i32 fontHeight,
-                                        i32 fontWidth, D3DCOLOR textColor,
+    static void RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight,
+                                        i32 fontHeight, i32 fontWidth, D3DCOLOR textColor,
                                         u32 outlineType, char *string,
                                         IDirect3DTexture8 *outTexture);
     bool TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format);

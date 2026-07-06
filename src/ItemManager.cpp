@@ -13,15 +13,14 @@
 #include "d3dx8.h"
 #include "utils.hpp"
 
-i32 g_FullPowerScoreBonus[30] = {10, 20, 30, 40, 50, 60, 70, 80,
-                                 90, 100, 200, 300, 400, 500, 600, 700,
-                                 800, 900, 1000, 2000, 3000, 4000, 5000,
-                                 6000, 7000, 8000, 9000, 10000, 11000, 12000};
+i32 g_FullPowerScoreBonus[30] = {10,   20,   30,   40,   50,   60,   70,   80,    90,    100,
+                                 200,  300,  400,  500,  600,  700,  800,  900,   1000,  2000,
+                                 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000};
 
 i32 g_PowerLevels[9] = {8, 16, 32, 48, 64, 80, 96, 128, 999};
 
-u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
-                          1, 0, 1, 0, 1, 0, 1, 0, 7, 1, 1, 1, 0, 2};
+u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0,
+                          1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 7, 1, 1, 1, 0, 2};
 
 ItemManager g_ItemManager;
 
@@ -152,8 +151,7 @@ void ItemManager::OnUpdate()
             {
                 itemTimerSecs = item->timer.AsFloat() / 60.0f;
                 item->currentPosition = itemTimerSecs * item->targetPosition +
-                                        item->startPosition *
-                                            (1.0f - itemTimerSecs);
+                                        item->startPosition * (1.0f - itemTimerSecs);
                 goto check_collision;
             }
             else if (item->timer == 60)
@@ -164,12 +162,17 @@ void ItemManager::OnUpdate()
         }
         else
         {
-            if (item->state == 1 || ((128.0 <= (f64)(i32)g_GameManager.globals->currentPower || g_GameManager.difficulty >= 4) && g_Player.positionCenter.y < g_Player.shooterData->pocY) || g_Player.hasBorder == 1)
+            if (item->state == 1 ||
+                ((128.0 <= (f64)(i32)g_GameManager.globals->currentPower ||
+                  g_GameManager.difficulty >= 4) &&
+                 g_Player.positionCenter.y < g_Player.shooterData->pocY) ||
+                g_Player.hasBorder == 1)
             {
                 if (g_Player.playerState != 1)
                 {
                     playerAngle = g_Player.AngleToPlayer(&item->currentPosition);
-                    AngleToVector(&item->startPosition, playerAngle, g_Player.shooterData->itemCollectSpeed);
+                    AngleToVector(&item->startPosition, playerAngle,
+                                  g_Player.shooterData->itemCollectSpeed);
                     item->state = 1;
                     if (g_Player.hasBorder == 1)
                     {
@@ -223,7 +226,8 @@ void ItemManager::OnUpdate()
                     }
                     itemScore = g_FullPowerScoreBonus[g_GameManager.powerItemCountForScore];
                     g_GameManager.AddScore(itemScore);
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, itemScore >= 12800 ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore,
+                                                itemScore >= 12800 ? 0xffffff00 : 0xffffffff);
                 }
                 else
                 {
@@ -265,9 +269,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.IncreaseSubrank(1);
                 break;
             case ITEM_POINT:
-                itemScore =
-                    item->IsBelowPoc() ? 50000
-                                       : 50000 - item->OffsetFromPoc() * 100;
+                itemScore = item->IsBelowPoc() ? 50000 : 50000 - item->OffsetFromPoc() * 100;
                 if (item->autoCollect == 1)
                 {
                     itemScore = 50000;
@@ -281,10 +283,15 @@ void ItemManager::OnUpdate()
                 }
                 else if (g_GameManager.cherry - g_GameManager.globals->cherryStart > 50000)
                 {
-                    itemScore += (g_GameManager.cherry - g_GameManager.globals->cherryStart - 50000) / 5;
+                    itemScore +=
+                        (g_GameManager.cherry - g_GameManager.globals->cherryStart - 50000) / 5;
                 }
                 itemScore -= itemScore % 10;
-                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect == 1 ? 0xffffff00 : 0xffffffff);
+                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore,
+                                            item->currentPosition.y < g_Player.shooterData->pocY ||
+                                                    item->autoCollect == 1
+                                                ? 0xffffff00
+                                                : 0xffffffff);
                 g_GameManager.AddScore(itemScore);
                 g_GameManager.globals->pointItemsCollectedThisStage++;
                 g_GameManager.globals->pointItemsCollectedForExtend++;
@@ -305,15 +312,18 @@ void ItemManager::OnUpdate()
                         {
                             if (g_GameManager.globals->extendsFromPointItems < 3)
                             {
-                                g_GameManager.globals->nextNeededPointItemsForExtend = g_GameManager.globals->extendsFromPointItems * 75 + 50;
+                                g_GameManager.globals->nextNeededPointItemsForExtend =
+                                    g_GameManager.globals->extendsFromPointItems * 75 + 50;
                             }
                             else if (g_GameManager.globals->extendsFromPointItems < 5)
                             {
-                                g_GameManager.globals->nextNeededPointItemsForExtend = (g_GameManager.globals->extendsFromPointItems - 3) * 150 + 300;
+                                g_GameManager.globals->nextNeededPointItemsForExtend =
+                                    (g_GameManager.globals->extendsFromPointItems - 3) * 150 + 300;
                             }
                             else
                             {
-                                g_GameManager.globals->nextNeededPointItemsForExtend = (g_GameManager.globals->extendsFromPointItems - 5) * 200 + 800;
+                                g_GameManager.globals->nextNeededPointItemsForExtend =
+                                    (g_GameManager.globals->extendsFromPointItems - 5) * 200 + 800;
                             }
                         }
                         else if (g_GameManager.globals->extendsFromPointItems == 0)
@@ -326,10 +336,12 @@ void ItemManager::OnUpdate()
                         }
                         else
                         {
-                            g_GameManager.globals->nextNeededPointItemsForExtend = (g_GameManager.globals->extendsFromPointItems - 2) * 500 + 800;
+                            g_GameManager.globals->nextNeededPointItemsForExtend =
+                                (g_GameManager.globals->extendsFromPointItems - 2) * 500 + 800;
                         }
 
-                        if (g_GameManager.globals->pointItemsCollectedForExtend >= g_GameManager.globals->nextNeededPointItemsForExtend)
+                        if (g_GameManager.globals->pointItemsCollectedForExtend >=
+                            g_GameManager.globals->nextNeededPointItemsForExtend)
                         {
                             g_GameManager.ExtendFromPoints();
                             g_GameManager.globals->extendsFromPointItems++;
@@ -342,7 +354,8 @@ void ItemManager::OnUpdate()
             case ITEM_POWER_BIG:
                 if ((i32)g_GameManager.globals->currentPower >= 128)
                 {
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, itemScore >= 1000 ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore,
+                                                itemScore >= 1000 ? 0xffffff00 : 0xffffffff);
                 }
                 else
                 {
@@ -442,11 +455,14 @@ void ItemManager::OnUpdate()
             case ITEM_CHERRY:
                 if (g_GameManager.IsCherryAtMax())
                 {
-                    itemScore = item->ShouldAwardMaxScore()
-                                    ? 50000
-                                    : 50000 - item->OffsetFromPoc() * 100;
+                    itemScore =
+                        item->ShouldAwardMaxScore() ? 50000 : 50000 - item->OffsetFromPoc() * 100;
                     itemScore -= itemScore % 10;
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(
+                        &item->currentPosition, itemScore,
+                        item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect
+                            ? 0xffffff00
+                            : 0xffffffff);
                     g_GameManager.AddScore(itemScore);
                 }
                 itemScore = 1000;
@@ -575,10 +591,8 @@ void ItemManager::OnDraw()
     item = this->listHead.next;
     while (item)
     {
-        item->sprite.pos.x =
-            g_GameManager.arcadeRegionTopLeftPos.x + item->currentPosition.x;
-        item->sprite.pos.y =
-            g_GameManager.arcadeRegionTopLeftPos.y + item->currentPosition.y;
+        item->sprite.pos.x = g_GameManager.arcadeRegionTopLeftPos.x + item->currentPosition.x;
+        item->sprite.pos.y = g_GameManager.arcadeRegionTopLeftPos.y + item->currentPosition.y;
         item->sprite.pos.z = 0.01f;
         if (item->currentPosition.y < -8.0f)
         {
@@ -594,8 +608,7 @@ void ItemManager::OnDraw()
             {
                 local_8 = 64;
             }
-            item->sprite.color.color =
-                (item->sprite.color.color & 0xffffff) | local_8 << 24;
+            item->sprite.color.color = (item->sprite.color.color & 0xffffff) | local_8 << 24;
         }
         else
         {

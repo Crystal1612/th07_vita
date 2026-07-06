@@ -177,8 +177,7 @@ struct EclManager
     ZunResult CallEclSub(struct EnemyEclContext *ctx, i16 subId);
     static i32 *GetVar(Enemy *enemy, i32 *eclVarId, u16 paramMask, i32 param_4);
     static i32 GetVarValue(Enemy *enemy, i32 eclVarId);
-    static f32 *GetFloatVar(Enemy *enemy, f32 *eclVarFloat, u16 paramMask,
-                            i32 param_4);
+    static f32 *GetFloatVar(Enemy *enemy, f32 *eclVarFloat, u16 paramMask, i32 param_4);
     static f32 GetFloatVarValue(Enemy *enemy, f32 eclVarFloat);
     static void MoveDirTime(Enemy *enemy, EclRawInstr *instr);
     static void MovePosTime(Enemy *enemy, EclRawInstr *instr);

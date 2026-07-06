@@ -3,7 +3,7 @@
 #include <cstdio>
 
 #include "GameErrorContext.hpp"
-#include "dsutil.hpp"
+#include "Supervisor.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
 u32 g_LastFileSize;
@@ -40,13 +40,12 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
         g_LastFileSize = fsize;
         if (fsize == 0)
         {
-            g_GameErrorContext.Fatal("error : %s is not found in arcfile.\r\n",
-                                     filename);
+            g_GameErrorContext.Fatal("error : %s is not found in arcfile.\r\n", filename);
             return NULL;
         }
         if (fsize != 0)
         {
-            DebugPrint("%s Decode ... \r\n", filename);
+            Supervisor::DebugPrint("%s Decode ... \r\n", filename);
             buf = (u8 *)malloc(fsize);
             if (!buf)
             {
@@ -57,11 +56,11 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
             return buf;
         }
     }
-    DebugPrint("%s Load ... \r\n", filepath);
+    Supervisor::DebugPrint("%s Load ... \r\n", filepath);
     file = fopen(filepath, "rb");
     if (!file)
     {
-        DebugPrint("error : %s is not found.\r\n", filepath);
+        Supervisor::DebugPrint("error : %s is not found.\r\n", filepath);
         return NULL;
     }
 
@@ -98,8 +97,7 @@ i32 FileSystem::CheckFileExists(const char *file)
     return false;
 }
 
-i32 FileSystem::WriteDataToFile(const char *filename, const void *out,
-                                u32 bytesToWrite)
+i32 FileSystem::WriteDataToFile(const char *filename, const void *out, u32 bytesToWrite)
 {
     FILE *file;
     u32 bytesWritten;
@@ -107,7 +105,7 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out,
     file = fopen(filename, "wb");
     if (!file)
     {
-        DebugPrint("error : %s write error\r\n", filename);
+        Supervisor::DebugPrint("error : %s write error\r\n", filename);
         return -1;
     }
 
@@ -115,10 +113,10 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out,
     if (bytesToWrite != bytesWritten)
     {
         fclose(file);
-        DebugPrint("error : %s write error\r\n", filename);
+        Supervisor::DebugPrint("error : %s write error\r\n", filename);
         return -2;
     }
     fclose(file);
-    DebugPrint("%s write ...\r\n", filename);
+    Supervisor::DebugPrint("%s write ...\r\n", filename);
     return 0;
 }

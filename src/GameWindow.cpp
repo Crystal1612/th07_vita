@@ -1,9 +1,9 @@
 #include "GameWindow.hpp"
 
-#include <d3d8.h>
-#include <direct.h>
 #include <cmath>
 #include <cstdio>
+#include <d3d8.h>
+#include <direct.h>
 
 typedef __w64 long SHANDLE_PTR; // i dont know anymore bro
 
@@ -33,8 +33,7 @@ LARGE_INTEGER g_LastPerfCounter;
 
 // winmain should probably be here
 
-LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
-                                         LPARAM lParam)
+LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -176,7 +175,8 @@ RenderResult GameWindow::Render()
             if (g_GameWindow.lpFrequency.LowPart != 0)
             {
                 QueryPerformanceCounter(&perfCounter);
-                perfDiff = (f64)(perfCounter.LowPart - g_LastPerfCounter.LowPart) / (f64)g_GameWindow.lpFrequency.LowPart;
+                perfDiff = (f64)(perfCounter.LowPart - g_LastPerfCounter.LowPart) /
+                           (f64)g_GameWindow.lpFrequency.LowPart;
 
                 if (perfDiff < 0.0)
                 {
@@ -276,20 +276,18 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     {
         width = 640;
         height = 480;
-        g_GameWindow.window = CreateWindowExA(
-            0, "BASE",
-            "東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b", WS_OVERLAPPEDWINDOW,
-            0, 0, width, height, NULL, NULL, hInstance, NULL);
+        g_GameWindow.window =
+            CreateWindowExA(0, "BASE", "東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
+                            WS_OVERLAPPEDWINDOW, 0, 0, width, height, NULL, NULL, hInstance, NULL);
     }
     else
     {
         width = GetSystemMetrics(SM_CXFIXEDFRAME) * 2 + 640;
         height = 480 + GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
-        g_GameWindow.window = CreateWindowExA(
-            0, "BASE", "東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
-            WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX,
-            CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL,
-            hInstance, NULL);
+        g_GameWindow.window =
+            CreateWindowExA(0, "BASE", "東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
+                            WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT,
+                            width, height, NULL, NULL, hInstance, NULL);
     }
     g_Supervisor.hwndGameWindow = g_GameWindow.window;
     if (!g_GameWindow.window)
@@ -363,8 +361,7 @@ i32 GameWindow::InitD3dRendering()
         {
             presentParams.FullScreen_RefreshRateInHz = 0;
             presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
-            presentParams.FullScreen_PresentationInterval =
-                D3DPRESENT_INTERVAL_IMMEDIATE;
+            presentParams.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
             g_GameErrorContext.Log("VSync非同期可能かどうかを試みます\r\n");
         }
     }
@@ -388,18 +385,17 @@ i32 GameWindow::InitD3dRendering()
         {
             goto fallback_to_software;
         }
-        if (FAILED(g_Supervisor.d3dIface->CreateDevice(
-                0, D3DDEVTYPE_HAL, g_GameWindow.window,
-                D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentParams,
-                &g_Supervisor.d3dDevice)))
+        if (FAILED(g_Supervisor.d3dIface->CreateDevice(0, D3DDEVTYPE_HAL, g_GameWindow.window,
+                                                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
+                                                       &presentParams, &g_Supervisor.d3dDevice)))
         {
             if (retryWithoutRefreshRate)
             {
                 g_GameErrorContext.Log("T&L HAL は使用できないようです\r\n");
             }
             if (FAILED(g_Supervisor.d3dIface->CreateDevice(
-                    0, D3DDEVTYPE_HAL, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
-                    &g_Supervisor.d3dDevice)))
+                    0, D3DDEVTYPE_HAL, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                    &presentParams, &g_Supervisor.d3dDevice)))
             {
                 if (retryWithoutRefreshRate)
                 {
@@ -407,9 +403,8 @@ i32 GameWindow::InitD3dRendering()
                 }
             fallback_to_software:
                 if (FAILED(g_Supervisor.d3dIface->CreateDevice(
-                        0, D3DDEVTYPE_REF, g_GameWindow.window,
-                        D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
-                        &g_Supervisor.d3dDevice)))
+                        0, D3DDEVTYPE_REF, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                        &presentParams, &g_Supervisor.d3dDevice)))
                 {
                     if (!g_Supervisor.vsyncEnabled)
                     {
@@ -420,24 +415,29 @@ i32 GameWindow::InitD3dRendering()
                         continue;
                     }
 
-                    if (presentParams.FullScreen_PresentationInterval == D3DPRESENT_INTERVAL_IMMEDIATE)
+                    if (presentParams.FullScreen_PresentationInterval ==
+                        D3DPRESENT_INTERVAL_IMMEDIATE)
                     {
-                        g_GameErrorContext.Log("非同期更新も行えません。一番汚いモードに変更します\r\n");
-                        g_GameErrorContext.Fatal("*** リフレッシュレートを60Hzに変更することを推奨します ***\r\n");
+                        g_GameErrorContext.Log(
+                            "非同期更新も行えません。一番汚いモードに変更します\r\n");
+                        g_GameErrorContext.Fatal(
+                            "*** リフレッシュレートを60Hzに変更することを推奨します ***\r\n");
                         presentParams.FullScreen_PresentationInterval = 1;
                         presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
                         continue;
                     }
                     else
                     {
-                        g_GameErrorContext.Fatal("Direct3D の初期化に失敗、これではゲームは出来ません\r\n");
+                        g_GameErrorContext.Fatal(
+                            "Direct3D の初期化に失敗、これではゲームは出来ません\r\n");
                         SAFE_RELEASE(g_Supervisor.d3dIface);
                         return 1;
                     }
                 }
                 else
                 {
-                    g_GameErrorContext.Log("REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
+                    g_GameErrorContext.Log(
+                        "REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
                     g_Supervisor.flags &= 0xfffffffe;
                     usingD3dHal = false;
                 }
@@ -474,29 +474,28 @@ i32 GameWindow::InitD3dRendering()
     g_Supervisor.viewMatrix.LookAtLH(&pEye, &pAt, &pUp);
     g_Supervisor.projectionMatrix.PerspectiveFovLH(fov, aspectRatio, 100.0f, 10000.0f);
 
-    g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW,
-                                         g_Supervisor.viewMatrix.asD3DX());
-    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION,
-                                         g_Supervisor.projectionMatrix.asD3DX());
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_VIEW, g_Supervisor.viewMatrix.asD3DX());
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_PROJECTION, g_Supervisor.projectionMatrix.asD3DX());
     g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
-    if ((g_Supervisor.cfg.opts & 1) == 0 &&
-        (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
+    if ((g_Supervisor.cfg.opts & 1) == 0 && (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
-        g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
+        g_GameErrorContext.Log(
+            "D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
         g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
     }
     if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
     {
-        g_GameErrorContext.Log("512 以上のテクスチャをサポートしていません。殆どの絵がボケて表示されます。\r\n");
+        g_GameErrorContext.Log(
+            "512 以上のテクスチャをサポートしていません。殆どの絵がボケて表示されます。\r\n");
     }
     FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
     g_GameErrorContext.Log(capsBuffer);
     if ((g_Supervisor.cfg.opts >> 2 & 1) == 0 && usingD3dHal)
     {
-        if (g_Supervisor.d3dIface->CheckDeviceFormat(
-                0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
-                D3DRTYPE_TEXTURE, D3DFMT_A8R8G8B8) == 0)
+        if (g_Supervisor.d3dIface->CheckDeviceFormat(0, D3DDEVTYPE_HAL,
+                                                     presentParams.BackBufferFormat, 0,
+                                                     D3DRTYPE_TEXTURE, D3DFMT_A8R8G8B8) == 0)
         {
             g_Supervisor.flags |= 4;
         }
@@ -504,7 +503,8 @@ i32 GameWindow::InitD3dRendering()
         {
             g_Supervisor.flags &= 0xfffffffb;
             g_Supervisor.cfg.opts |= 4;
-            g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
+            g_GameErrorContext.Log(
+                "D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
         }
     }
     ResetRenderState();
@@ -514,8 +514,8 @@ i32 GameWindow::InitD3dRendering()
     return 0;
 }
 
-char *GameWindow::FormatCapability(const char *capabilityName,
-                                   u32 capabilityFlags, u32 mask, char *buf)
+char *GameWindow::FormatCapability(const char *capabilityName, u32 capabilityFlags, u32 mask,
+                                   char *buf)
 {
     buf += sprintf(buf, "%s", capabilityName);
     if ((capabilityFlags & mask) == 0)
@@ -535,74 +535,58 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
 
     strPos = buf;
     strPos += sprintf(strPos, "現在のビデオカード、及びドライバの能力詳細\r\n");
-    strPos = FormatCapability("　走査線取得能力 : ", caps->Caps,
-                              D3DCAPS_READ_SCANLINE, strPos);
+    strPos = FormatCapability("　走査線取得能力 : ", caps->Caps, D3DCAPS_READ_SCANLINE, strPos);
     strPos = FormatCapability("　ウィンドウモードのレンダリング : ", caps->Caps2,
                               D3DCAPS2_CANRENDERWINDOWED, strPos);
-    strPos = FormatCapability(
-        "　プレゼンテーション間隔（直接）: ", caps->PresentationIntervals,
-        D3DPRESENT_INTERVAL_IMMEDIATE, strPos);
-    strPos = FormatCapability(
-        "　プレゼンテーション間隔（垂直同期）: ", caps->PresentationIntervals,
-        D3DPRESENT_INTERVAL_ONE, strPos);
+    strPos = FormatCapability("　プレゼンテーション間隔（直接）: ", caps->PresentationIntervals,
+                              D3DPRESENT_INTERVAL_IMMEDIATE, strPos);
+    strPos = FormatCapability("　プレゼンテーション間隔（垂直同期）: ", caps->PresentationIntervals,
+                              D3DPRESENT_INTERVAL_ONE, strPos);
     strPos += sprintf(strPos, "　-- デバイス能力 ------------------------------\r\n");
-    strPos =
-        FormatCapability("　System -> 非ローカルVRAMブリット : ", caps->DevCaps,
-                         D3DDEVCAPS_CANBLTSYSTONONLOCAL, strPos);
+    strPos = FormatCapability("　System -> 非ローカルVRAMブリット : ", caps->DevCaps,
+                              D3DDEVCAPS_CANBLTSYSTONONLOCAL, strPos);
     strPos = FormatCapability("　ハードウェア T&L : ", caps->DevCaps,
                               D3DDEVCAPS_HWTRANSFORMANDLIGHT, strPos);
-    strPos =
-        FormatCapability("　非ローカルVRAMからテクスチャ取得 : ", caps->DevCaps,
-                         D3DDEVCAPS_TEXTURENONLOCALVIDMEM, strPos);
-    strPos =
-        FormatCapability("　システムメモリからテクスチャ取得 : ", caps->DevCaps,
-                         D3DDEVCAPS_TEXTURESYSTEMMEMORY, strPos);
+    strPos = FormatCapability("　非ローカルVRAMからテクスチャ取得 : ", caps->DevCaps,
+                              D3DDEVCAPS_TEXTURENONLOCALVIDMEM, strPos);
+    strPos = FormatCapability("　システムメモリからテクスチャ取得 : ", caps->DevCaps,
+                              D3DDEVCAPS_TEXTURESYSTEMMEMORY, strPos);
     strPos = FormatCapability("　VRAM からテクスチャ取得 : ", caps->DevCaps,
                               D3DDEVCAPS_TEXTUREVIDEOMEMORY, strPos);
+    strPos = FormatCapability("　頂点バッファにシステムメモリを使用 : ", caps->DevCaps,
+                              D3DDEVCAPS_TLVERTEXSYSTEMMEMORY, strPos);
+    strPos = FormatCapability("　頂点バッファにビデオメモリを使用 : ", caps->DevCaps,
+                              D3DDEVCAPS_TLVERTEXVIDEOMEMORY, strPos);
+    strPos += sprintf(strPos, "　-- プリミティブ能力 ---------------------------\r\n");
     strPos =
-        FormatCapability("　頂点バッファにシステムメモリを使用 : ", caps->DevCaps,
-                         D3DDEVCAPS_TLVERTEXSYSTEMMEMORY, strPos);
-    strPos =
-        FormatCapability("　頂点バッファにビデオメモリを使用 : ", caps->DevCaps,
-                         D3DDEVCAPS_TLVERTEXVIDEOMEMORY, strPos);
-    strPos +=
-        sprintf(strPos, "　-- プリミティブ能力 ---------------------------\r\n");
-    strPos = FormatCapability("　半透明処理 : ", caps->PrimitiveMiscCaps,
-                              D3DPMISCCAPS_BLENDOP, strPos);
-    strPos = FormatCapability(
-        "　ポイントのクリッピング処理 : ", caps->PrimitiveMiscCaps,
-        D3DPMISCCAPS_CLIPPLANESCALEDPOINTS, strPos);
-    strPos = FormatCapability(
-        "　プリミティブのクリッピング処理 : ", caps->PrimitiveMiscCaps,
-        D3DPMISCCAPS_CLIPTLVERTS, strPos);
-    strPos = FormatCapability(
-        "　法線クリップ（反時計周り） : ", caps->PrimitiveMiscCaps,
-        D3DPMISCCAPS_CULLCCW, strPos);
-    strPos =
-        FormatCapability("　法線クリップ（時計周り） : ", caps->PrimitiveMiscCaps,
-                         D3DPMISCCAPS_CULLCW, strPos);
+        FormatCapability("　半透明処理 : ", caps->PrimitiveMiscCaps, D3DPMISCCAPS_BLENDOP, strPos);
+    strPos = FormatCapability("　ポイントのクリッピング処理 : ", caps->PrimitiveMiscCaps,
+                              D3DPMISCCAPS_CLIPPLANESCALEDPOINTS, strPos);
+    strPos = FormatCapability("　プリミティブのクリッピング処理 : ", caps->PrimitiveMiscCaps,
+                              D3DPMISCCAPS_CLIPTLVERTS, strPos);
+    strPos = FormatCapability("　法線クリップ（反時計周り） : ", caps->PrimitiveMiscCaps,
+                              D3DPMISCCAPS_CULLCCW, strPos);
+    strPos = FormatCapability("　法線クリップ（時計周り） : ", caps->PrimitiveMiscCaps,
+                              D3DPMISCCAPS_CULLCW, strPos);
     strPos = FormatCapability("　法線クリップ無し : ", caps->PrimitiveMiscCaps,
                               D3DPMISCCAPS_CULLNONE, strPos);
-    strPos = FormatCapability(
-        "　デプステストON/OFF切り替え : ", caps->PrimitiveMiscCaps,
-        D3DPMISCCAPS_MASKZ, strPos);
+    strPos = FormatCapability("　デプステストON/OFF切り替え : ", caps->PrimitiveMiscCaps,
+                              D3DPMISCCAPS_MASKZ, strPos);
     strPos += sprintf(strPos, "　-- ラスタ能力 --------------------------------\r\n");
     strPos = FormatCapability("　異方性フィルタリング : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ANISOTROPY, strPos);
     strPos = FormatCapability("　アンチエイリアシング : ", caps->RasterCaps,
                               D3DPRASTERCAPS_ANTIALIASEDGES, strPos);
-    strPos = FormatCapability("　ディザ処理 : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_DITHER, strPos);
-    strPos = FormatCapability("　範囲ベースのフォグ : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_FOGRANGE, strPos);
-    strPos = FormatCapability("　Zベースのフォグ : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_ZFOG, strPos);
-    strPos = FormatCapability("　テーブルフォグ : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_FOGTABLE, strPos);
-    strPos = FormatCapability("　頂点フォグ : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_FOGVERTEX, strPos);
-    strPos = FormatCapability("　デプステスト : ", caps->RasterCaps,
-                              D3DPRASTERCAPS_ZTEST, strPos);
+    strPos = FormatCapability("　ディザ処理 : ", caps->RasterCaps, D3DPRASTERCAPS_DITHER, strPos);
+    strPos = FormatCapability("　範囲ベースのフォグ : ", caps->RasterCaps, D3DPRASTERCAPS_FOGRANGE,
+                              strPos);
+    strPos =
+        FormatCapability("　Zベースのフォグ : ", caps->RasterCaps, D3DPRASTERCAPS_ZFOG, strPos);
+    strPos =
+        FormatCapability("　テーブルフォグ : ", caps->RasterCaps, D3DPRASTERCAPS_FOGTABLE, strPos);
+    strPos =
+        FormatCapability("　頂点フォグ : ", caps->RasterCaps, D3DPRASTERCAPS_FOGVERTEX, strPos);
+    strPos = FormatCapability("　デプステスト : ", caps->RasterCaps, D3DPRASTERCAPS_ZTEST, strPos);
     strPos += sprintf(strPos, "　-- シェーディング能力 -----------------------\r\n");
     strPos = FormatCapability("　グーローシェーディング : ", caps->ShadeCaps,
                               D3DPSHADECAPS_COLORGOURAUDRGB, strPos);
@@ -611,10 +595,10 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
     strPos = FormatCapability("　グーローシェーディングでフォグ : ", caps->ShadeCaps,
                               D3DPSHADECAPS_FOGGOURAUD, strPos);
     strPos += sprintf(strPos, "　-- テクスチャ能力 ---------------------------\r\n");
-    strPos += sprintf(strPos, "　最大テクスチャサイズ : (%lu, %lu)\r\n",
-                      caps->MaxTextureWidth, caps->MaxTextureHeight);
-    strPos = FormatCapability("　α付きテクスチャ : ", caps->TextureCaps,
-                              D3DPTEXTURECAPS_ALPHA, strPos);
+    strPos += sprintf(strPos, "　最大テクスチャサイズ : (%lu, %lu)\r\n", caps->MaxTextureWidth,
+                      caps->MaxTextureHeight);
+    strPos =
+        FormatCapability("　α付きテクスチャ : ", caps->TextureCaps, D3DPTEXTURECAPS_ALPHA, strPos);
     strPos = FormatCapability("　テクスチャトランスフォーム : ", caps->TextureCaps,
                               D3DPTEXTURECAPS_PROJECTED, strPos);
     strPos = FormatCapability("　バイリニア補間（拡大） : ", caps->TextureFilterCaps,
@@ -711,8 +695,7 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, 2);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS,
-                                                 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, 2);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, 3);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, 1);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, 1);
@@ -748,8 +731,7 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     if (startupInfo.lpTitle)
     {
         ext = strrchr(startupInfo.lpTitle, '.');
-        if (FileSystem::CheckFileExists(startupInfo.lpTitle) &&
-            ext)
+        if (FileSystem::CheckFileExists(startupInfo.lpTitle) && ext)
         {
             if (_stricmp(ext, ".lnk") == 0)
             {
@@ -816,7 +798,7 @@ i32 GameWindow::ChecksumExecutable()
         {
             checksum += *dataCursor;
         }
-        DebugPrint("main sum %d\r\n", checksum);
+        Supervisor::DebugPrint("main sum %d\r\n", checksum);
         free(dataBase);
         g_Supervisor.exeChecksum = checksum;
         g_Supervisor.exeSize = g_LastFileSize;
@@ -826,8 +808,7 @@ i32 GameWindow::ChecksumExecutable()
     return -1;
 }
 
-i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
-                          i32 maxPathLen)
+i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath, i32 maxPathLen)
 {
     WIN32_FIND_DATAA wfd;
     LPWSTR wPath;
@@ -843,22 +824,18 @@ i32 GameWindow::ResolveIt(const char *shortcutPath, char *dstPath,
 
     ret = 0;
     CoInitialize(NULL);
-    if (SUCCEEDED(hr = CoCreateInstance(CLSID_ShellLink, NULL,
-                                        CLSCTX_INPROC_SERVER, IID_IShellLink,
+    if (SUCCEEDED(hr = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink,
                                         (void **)&psl)))
     {
-        if (SUCCEEDED(hr = psl->QueryInterface(IID_IPersistFile,
-                                               (void **)&ppf)))
+        if (SUCCEEDED(hr = psl->QueryInterface(IID_IPersistFile, (void **)&ppf)))
         {
             wPath = new WCHAR[maxPathLen];
             if (SUCCEEDED(hr))
             {
-                MultiByteToWideChar(CP_ACP, 0, shortcutPath, -1, wPath,
-                                    maxPathLen);
+                MultiByteToWideChar(CP_ACP, 0, shortcutPath, -1, wPath, maxPathLen);
                 if (SUCCEEDED(hr = ppf->Load(wPath, STGM_READ)))
                 {
-                    if (SUCCEEDED(hr = psl->GetPath(dstPath, maxPathLen, &wfd,
-                                                    0)))
+                    if (SUCCEEDED(hr = psl->GetPath(dstPath, maxPathLen, &wfd, 0)))
                     {
                         ret = 1;
                     }

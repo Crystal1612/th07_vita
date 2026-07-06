@@ -78,13 +78,11 @@ struct EnemyBulletShooter
     }
 
     BulletCommand *AddCommand(i32 command, i32 flag, u32 type);
-    void AddAngleAccelCommand(i32 command, i32 flag, i32 duration, f32 angle,
-                              f32 speed);
-    void AddDirChangeCommand(i32 command, i32 flag, i32 duration, i32 loopCount,
-                             f32 speed, f32 angle);
+    void AddAngleAccelCommand(i32 command, i32 flag, i32 duration, f32 angle, f32 speed);
+    void AddDirChangeCommand(i32 command, i32 flag, i32 duration, i32 loopCount, f32 speed,
+                             f32 angle);
     void AddSpawnDelayCommand(i32 command, i32 flag, i32 duration);
-    void AddTargetVelocityCommand(i32 command, i32 flag, i32 duration, f32 speed,
-                                  f32 angle);
+    void AddTargetVelocityCommand(i32 command, i32 flag, i32 duration, f32 speed, f32 angle);
 
     i16 sprite;
     i16 spriteOffset;
@@ -174,10 +172,8 @@ struct Laser
 struct Bullet
 {
     BulletCommand *AddCommand(i32 command, i32 flag, u32 type);
-    void AddAngleAccelCommand(i32 command, i32 flag, i32 duration, f32 angle,
-                              f32 speed);
-    void AddTargetVelocityCommand(i32 command, i32 flag, i32 duration, f32 speed,
-                                  f32 angle);
+    void AddAngleAccelCommand(i32 command, i32 flag, i32 duration, f32 angle, f32 speed);
+    void AddTargetVelocityCommand(i32 command, i32 flag, i32 duration, f32 speed, f32 angle);
     void RunCommands();
 
     void UpdateBulletBurstSpeed();
@@ -251,13 +247,11 @@ struct BulletManager
     i32 DespawnBullets(i32 param_1, i32 turnIntoItem);
     void RemoveAllBullets(i32 param_1);
     void RemoveBulletsInRadius(ZunVec3 *centerPos, f32 radius);
-    static void SetActiveSpriteByResolution(AnmVm *sprite,
-                                            AnmVm *bulletTypeTemplate,
+    static void SetActiveSpriteByResolution(AnmVm *sprite, AnmVm *bulletTypeTemplate,
                                             Bullet *bullet, i32 spriteOffset);
     i32 SpawnBulletPattern(struct EnemyBulletShooter *bulletProps);
     Laser *SpawnLaserPattern(struct EnemyLaserShooter *laserProps);
-    i32 SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32 y,
-                          f32 angle);
+    i32 SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32 y, f32 angle);
     void StopBulletMovement();
 
     BulletTypeSprites bulletTypeTemplates[16];

@@ -21,17 +21,14 @@ void AnmManager::TakeScreenshotIfRequested()
 {
     if (this->screenshotTextureId >= 0)
     {
-        TakeScreenshot(this->screenshotTextureId, this->screenshotSrcLeft,
-                       this->screenshotSrcTop, this->screenshotSrcWidth,
-                       this->screenshotSrcHeight, this->screenshotDstLeft,
-                       this->screenshotDstTop, this->screenshotDstWidth,
-                       this->screenshotDstHeight);
+        TakeScreenshot(this->screenshotTextureId, this->screenshotSrcLeft, this->screenshotSrcTop,
+                       this->screenshotSrcWidth, this->screenshotSrcHeight, this->screenshotDstLeft,
+                       this->screenshotDstTop, this->screenshotDstWidth, this->screenshotDstHeight);
         this->screenshotTextureId = -1;
     }
 }
 
-i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                   LPSTR lpCmdline, i32 nCmdShow)
+i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdline, i32 nCmdShow)
 {
     HRESULT d3dDeviceStatus;
     i32 res;
@@ -39,12 +36,9 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     res = RENDER_RESULT_KEEP_RUNNING;
     g_Supervisor.hInstance = hInstance;
-    SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0,
-                          &g_GameWindow.screen_save_active, 0);
-    SystemParametersInfoA(SPI_GETLOWPOWERACTIVE, 0,
-                          &g_GameWindow.low_power_active, 0);
-    SystemParametersInfoA(SPI_GETPOWEROFFACTIVE, 0,
-                          &g_GameWindow.power_off_active, 0);
+    SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &g_GameWindow.screen_save_active, 0);
+    SystemParametersInfoA(SPI_GETLOWPOWERACTIVE, 0, &g_GameWindow.low_power_active, 0);
+    SystemParametersInfoA(SPI_GETPOWEROFFACTIVE, 0, &g_GameWindow.power_off_active, 0);
     SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, 0, NULL, 2);
     SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, 0, NULL, 2);
     SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, 0, NULL, 2);
@@ -76,7 +70,7 @@ start:
         goto stop;
     }
 
-    g_SoundPlayer.InitializeDSound(g_GameWindow.window);
+    g_SoundPlayer.InitializeSound();
     Controller::GetJoystickCaps();
     Controller::ResetKeyboard();
     g_AnmManager = new AnmManager();
@@ -119,8 +113,7 @@ start:
             else if (d3dDeviceStatus == D3DERR_DEVICENOTRESET)
             {
                 g_AnmManager->ReleaseSurfaces();
-                if (g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters) !=
-                    0)
+                if (g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters) != 0)
                 {
                     break;
                 }
@@ -179,14 +172,10 @@ stop:
         }
         goto start;
     }
-    FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg,
-                                sizeof(GameConfiguration));
-    SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE,
-                          g_GameWindow.screen_save_active, NULL, 2);
-    SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, g_GameWindow.low_power_active,
-                          NULL, 2);
-    SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, g_GameWindow.power_off_active,
-                          NULL, 2);
+    FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg, sizeof(GameConfiguration));
+    SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, g_GameWindow.screen_save_active, NULL, 2);
+    SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, g_GameWindow.low_power_active, NULL, 2);
+    SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, g_GameWindow.power_off_active, NULL, 2);
     WINNLSEnableIME(0, 1);
     g_GameErrorContext.Flush();
     return 0;

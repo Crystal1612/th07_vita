@@ -16,25 +16,27 @@
 #include "Stage.hpp"
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
-#include "dsutil.hpp"
 
-#define GET_INT_PTR(enemy, argIdx) \
-    GetVar(enemy, &instr->args[argIdx].i, instr->paramMask, argIdx)
+#define GET_INT_PTR(enemy, argIdx) GetVar(enemy, &instr->args[argIdx].i, instr->paramMask, argIdx)
 
-#define GET_FLOAT_PTR(enemy, argIdx) \
+#define GET_FLOAT_PTR(enemy, argIdx)                                                               \
     GetFloatVar(enemy, &instr->args[argIdx].f, instr->paramMask, argIdx)
 
-#define GET_INT_VALUE(enemy, argIdx) \
-    (((instr->paramMask & (1 << argIdx)) != 0) ? GetVarValue(enemy, instr->args[argIdx].i) : instr->args[argIdx].i)
+#define GET_INT_VALUE(enemy, argIdx)                                                               \
+    (((instr->paramMask & (1 << argIdx)) != 0) ? GetVarValue(enemy, instr->args[argIdx].i)         \
+                                               : instr->args[argIdx].i)
 
-#define GET_FLOAT_VALUE(enemy, argIdx) \
-    (((instr->paramMask & (1 << argIdx)) != 0) ? GetFloatVarValue(enemy, instr->args[argIdx].f) : instr->args[argIdx].f)
+#define GET_FLOAT_VALUE(enemy, argIdx)                                                             \
+    (((instr->paramMask & (1 << argIdx)) != 0) ? GetFloatVarValue(enemy, instr->args[argIdx].f)    \
+                                               : instr->args[argIdx].f)
 
-#define GET_INT_VALUE_D(enemy, args, argIdx, bitIdx) \
-    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetVarValue(enemy, args[argIdx].i) : args[argIdx].i)
+#define GET_INT_VALUE_D(enemy, args, argIdx, bitIdx)                                               \
+    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetVarValue(enemy, args[argIdx].i)                \
+                                               : args[argIdx].i)
 
-#define GET_FLOAT_VALUE_D(enemy, args, argIdx, bitIdx) \
-    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetFloatVarValue(enemy, args[argIdx].f) : args[argIdx].f)
+#define GET_FLOAT_VALUE_D(enemy, args, argIdx, bitIdx)                                             \
+    (((instr->paramMask & (1 << bitIdx)) != 0) ? GetFloatVarValue(enemy, args[argIdx].f)           \
+                                               : args[argIdx].f)
 
 const char *g_EclPaths[10] = {
     "dummy",
@@ -60,7 +62,8 @@ ZunResult EclManager::Load(const char *path)
     this->eclFile = (EclRawHeader *)FileSystem::OpenFile(path, 0);
     if (!this->eclFile)
     {
-        g_GameErrorContext.Log("敵データの読み込みに失敗しました、データが壊れてるか失われています\r\n");
+        g_GameErrorContext.Log(
+            "敵データの読み込みに失敗しました、データが壊れてるか失われています\r\n");
         return ZUN_ERROR;
     }
 
@@ -72,8 +75,7 @@ ZunResult EclManager::Load(const char *path)
     this->subTable = this->eclFile->subTable;
     for (i = 0; i < this->eclFile->subCount; i++)
     {
-        this->subTable[i] =
-            (EclRawInstr *)((i32)this->subTable[i] + (i32)this->eclFile);
+        this->subTable[i] = (EclRawInstr *)((i32)this->subTable[i] + (i32)this->eclFile);
     }
     return ZUN_SUCCESS;
 }
@@ -448,7 +450,8 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
     case VAR_RNG:
         return g_Rng.GetRandomFloat();
     case VAR_RNG_CUSTOM_BOUND:
-        return g_Rng.GetRandomFloatInRange(enemy->currentContext.eclContextArgs.globalVars.floatVars[0]) +
+        return g_Rng.GetRandomFloatInRange(
+                   enemy->currentContext.eclContextArgs.globalVars.floatVars[0]) +
                enemy->currentContext.eclContextArgs.globalVars.floatVars[1];
     case VAR_RNG_RADIAN:
         return g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
@@ -463,8 +466,7 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
     }
 }
 
-f32 *EclManager::GetFloatVar(Enemy *enemy, f32 *eclVar, u16 paramMask,
-                             i32 param_4)
+f32 *EclManager::GetFloatVar(Enemy *enemy, f32 *eclVar, u16 paramMask, i32 param_4)
 {
     if (param_4 >= 0 && ((u32)paramMask & 1 << param_4) == 0)
     {
@@ -557,14 +559,11 @@ void EclManager::MoveDirTime(Enemy *enemy, EclRawInstr *instr)
     f32 fVar2;
 
     fVar2 = utils::AddNormalizeAngle(GET_FLOAT_VALUE(enemy, 2), 0.0f);
-    enemy->moveInterp.x = cosf(fVar2) * GET_FLOAT_VALUE(enemy, 3) *
-                          (f32)GET_INT_VALUE(enemy, 0);
-    enemy->moveInterp.y = sinf(fVar2) * GET_FLOAT_VALUE(enemy, 3) *
-                          (f32)GET_INT_VALUE(enemy, 0);
+    enemy->moveInterp.x = cosf(fVar2) * GET_FLOAT_VALUE(enemy, 3) * (f32)GET_INT_VALUE(enemy, 0);
+    enemy->moveInterp.y = sinf(fVar2) * GET_FLOAT_VALUE(enemy, 3) * (f32)GET_INT_VALUE(enemy, 0);
     enemy->moveInterp.z = 0.0f;
     enemy->moveInterpStartPos = enemy->position;
-    enemy->moveInterpTimer = enemy->moveInterpStartTime =
-        GET_INT_VALUE(enemy, 0);
+    enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
     enemy->interpEasing = (u8)GET_INT_VALUE(enemy, 1);
     enemy->moveMode = 2;
     if (enemy->mirror)
@@ -621,10 +620,7 @@ void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
     h10 = (1.0f - t) * (1.0f - t) * t;
     h11 = (t - 1.0f) * t * t;
 
-    *GetFloatVar(enemy, &interp->args[7].f, 0, -1) = h00 * p0 +
-                                                     h01 * p1 +
-                                                     h10 * m0 +
-                                                     h11 * m1;
+    *GetFloatVar(enemy, &interp->args[7].f, 0, -1) = h00 * p0 + h01 * p1 + h10 * m0 + h11 * m1;
 }
 
 void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
@@ -647,19 +643,17 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     g_Stage.ticksSinceSpellcardStarted = 0;
     for (i = 0; i < g_Stage.numSpellcardVms; i++)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(
-            &g_Stage.spellcardVms[i], i + g_Stage.spellcardVmsIdx + 732);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&g_Stage.spellcardVms[i],
+                                                i + g_Stage.spellcardVmsIdx + 732);
     }
     g_EnemyManager.spellcardInfo.isActive = 1;
     g_EnemyManager.spellcardInfo.isCapturing = 1;
-    g_EnemyManager.spellcardInfo.spellcardIdx =
-        instr->args[0].us[1];
+    g_EnemyManager.spellcardInfo.spellcardIdx = instr->args[0].us[1];
     g_EnemyManager.spellcardInfo.captureScore =
         g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx];
     g_EnemyManager.spellcardInfo.grazeBonusScore = 0;
     g_EnemyManager.spellcardInfo.scoreDrainRate =
-        g_EnemyManager.spellcardInfo.captureScore /
-        (enemy->timerCallbackThreshold / 60 + 10);
+        g_EnemyManager.spellcardInfo.captureScore / (enemy->timerCallbackThreshold / 60 + 10);
     g_EnemyManager.timer = 0;
     enemy->bulletRankSpeedLow = -0.5f;
     enemy->bulletRankSpeedHigh = 0.5f;
@@ -667,8 +661,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     enemy->bulletRankAmount1High = 0;
     enemy->bulletRankAmount2Low = 0;
     enemy->bulletRankAmount2High = 0;
-    enemy->specialEffect =
-        g_EffectManager.SpawnEffect(25, &enemy->position, 1, 1, 0xffffffff);
+    enemy->specialEffect = g_EffectManager.SpawnEffect(25, &enemy->position, 1, 1, 0xffffffff);
     enemy->specialEffect->vm.interpStartTimes[4] = 0;
     enemy->specialEffect->vm.interpEndTimes[4] = enemy->timerCallbackThreshold;
     enemy->specialEffect->vm.interpModes[4] = 0;
@@ -807,8 +800,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
         g_EnemyManager.spellcardInfo.isActive = 0;
         for (j = 0; j < 8; j++)
         {
-            if (g_EnemyManager.bosses[j] &&
-                g_EnemyManager.bosses[j]->specialEffect != NULL)
+            if (g_EnemyManager.bosses[j] && g_EnemyManager.bosses[j]->specialEffect != NULL)
             {
                 g_EnemyManager.bosses[j]->specialEffect->inUseFlag = 0;
                 g_EnemyManager.bosses[j]->specialEffect = NULL;
@@ -873,8 +865,7 @@ restart:
             enemy->periodicCounter = 0;
             enemy->savedContextStack[enemy->stackDepth] = enemy->currentContext;
             enemy->currentContext.eclContextArgs = enemy->savedEclContextArgs;
-            g_EclManager.CallEclSub(&enemy->currentContext,
-                                    (i16)enemy->periodicCallbackSub);
+            g_EclManager.CallEclSub(&enemy->currentContext, (i16)enemy->periodicCallbackSub);
             if (enemy->stackDepth < 15)
             {
                 enemy->stackDepth++;
@@ -918,40 +909,33 @@ restart:
                 *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1);
                 break;
             case 5:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(enemy, 1);
+                *GET_FLOAT_PTR(enemy, 0) = GET_FLOAT_VALUE(enemy, 1);
                 break;
             case 40:
                 *GET_FLOAT_PTR(enemy, 0) =
                     utils::AddNormalizeAngle(GET_FLOAT_VALUE(enemy, 0), 0.0f);
                 break;
             case 6:
-                *GET_INT_PTR(enemy, 0) =
-                    g_Rng.GetRandomU32InRange(GET_INT_VALUE(enemy, 1));
+                *GET_INT_PTR(enemy, 0) = g_Rng.GetRandomU32InRange(GET_INT_VALUE(enemy, 1));
                 break;
             case 7:
                 *GET_INT_PTR(enemy, 0) =
-                    g_Rng.GetRandomU32InRange(GET_INT_VALUE(enemy, 1)) +
-                    GET_INT_VALUE(enemy, 2);
+                    g_Rng.GetRandomU32InRange(GET_INT_VALUE(enemy, 1)) + GET_INT_VALUE(enemy, 2);
                 break;
             case 8:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 1));
+                *GET_FLOAT_PTR(enemy, 0) = g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 1));
                 break;
             case 9:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 1)) +
-                    GET_FLOAT_VALUE(enemy, 2);
+                *GET_FLOAT_PTR(enemy, 0) = g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 1)) +
+                                           GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 10:
                 *GET_INT_PTR(enemy, 0) =
-                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1 : -1) *
-                    GET_INT_VALUE(enemy, 1);
+                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1 : -1) * GET_INT_VALUE(enemy, 1);
                 break;
             case 11:
                 *GET_FLOAT_PTR(enemy, 0) =
-                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1.0f : -1.0f) *
-                    GET_FLOAT_VALUE(enemy, 1);
+                    ((g_Rng.GetRandomU16() & 1) != 0 ? 1.0f : -1.0f) * GET_FLOAT_VALUE(enemy, 1);
                 break;
             case 17:
                 *GET_INT_PTR(enemy, 0) += 1;
@@ -961,61 +945,48 @@ restart:
                 break;
             case 43:
                 *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(
-                        g_EnemyManager.bosses[GET_INT_VALUE(enemy, 2)], 1);
+                    GET_INT_VALUE(g_EnemyManager.bosses[GET_INT_VALUE(enemy, 2)], 1);
                 break;
             case 44:
                 *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(
-                        g_EnemyManager.bosses[GET_INT_VALUE(enemy, 2)], 1);
+                    GET_FLOAT_VALUE(g_EnemyManager.bosses[GET_INT_VALUE(enemy, 2)], 1);
                 break;
             case 12:
-                *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(enemy, 1) + GET_INT_VALUE(enemy, 2);
+                *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1) + GET_INT_VALUE(enemy, 2);
                 break;
             case 19:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(enemy, 1) + GET_FLOAT_VALUE(enemy, 2);
+                *GET_FLOAT_PTR(enemy, 0) = GET_FLOAT_VALUE(enemy, 1) + GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 13:
-                *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(enemy, 1) - GET_INT_VALUE(enemy, 2);
+                *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1) - GET_INT_VALUE(enemy, 2);
                 break;
             case 20:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(enemy, 1) - GET_FLOAT_VALUE(enemy, 2);
+                *GET_FLOAT_PTR(enemy, 0) = GET_FLOAT_VALUE(enemy, 1) - GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 14:
-                *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(enemy, 1) * GET_INT_VALUE(enemy, 2);
+                *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1) * GET_INT_VALUE(enemy, 2);
                 break;
             case 21:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(enemy, 1) * GET_FLOAT_VALUE(enemy, 2);
+                *GET_FLOAT_PTR(enemy, 0) = GET_FLOAT_VALUE(enemy, 1) * GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 15:
-                *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(enemy, 1) / GET_INT_VALUE(enemy, 2);
+                *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1) / GET_INT_VALUE(enemy, 2);
                 break;
             case 22:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    GET_FLOAT_VALUE(enemy, 1) / GET_FLOAT_VALUE(enemy, 2);
+                *GET_FLOAT_PTR(enemy, 0) = GET_FLOAT_VALUE(enemy, 1) / GET_FLOAT_VALUE(enemy, 2);
                 break;
             case 16:
-                *GET_INT_PTR(enemy, 0) =
-                    GET_INT_VALUE(enemy, 1) % GET_INT_VALUE(enemy, 2);
+                *GET_INT_PTR(enemy, 0) = GET_INT_VALUE(enemy, 1) % GET_INT_VALUE(enemy, 2);
                 break;
             case 23:
                 *GET_FLOAT_PTR(enemy, 0) =
                     fmodf(GET_FLOAT_VALUE(enemy, 1), GET_FLOAT_VALUE(enemy, 2));
                 break;
             case 24:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    sinf(GET_FLOAT_VALUE(enemy, 1));
+                *GET_FLOAT_PTR(enemy, 0) = sinf(GET_FLOAT_VALUE(enemy, 1));
                 break;
             case 25:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    cosf(GET_FLOAT_VALUE(enemy, 1));
+                *GET_FLOAT_PTR(enemy, 0) = cosf(GET_FLOAT_VALUE(enemy, 1));
                 break;
             case 26:
                 *GET_FLOAT_PTR(enemy, 0) =
@@ -1023,8 +994,7 @@ restart:
                            GET_FLOAT_VALUE(enemy, 3) - GET_FLOAT_VALUE(enemy, 1));
                 break;
             case 159:
-                lerpDelta = GET_FLOAT_VALUE(enemy, 1) -
-                            GET_FLOAT_VALUE(enemy, 2);
+                lerpDelta = GET_FLOAT_VALUE(enemy, 1) - GET_FLOAT_VALUE(enemy, 2);
                 *GET_FLOAT_PTR(enemy, 0) =
                     lerpDelta * GET_FLOAT_VALUE(enemy, 3) + GET_FLOAT_VALUE(enemy, 2);
                 break;
@@ -1032,8 +1002,7 @@ restart:
                 interp = enemy->currentContext.interps;
                 for (interpIdx = 0; interpIdx < 8; interpIdx++, interp++)
                 {
-                    if (interp->fn &&
-                        interp->args[7].f != instr->args[0].f)
+                    if (interp->fn && interp->args[7].f != instr->args[0].f)
                     {
                         continue;
                     }
@@ -1128,8 +1097,7 @@ restart:
                 continue;
             case 41:
                 local_8 = instr->args[0].i;
-                enemy->currentContext.curInstr =
-                    (EclRawInstr *)((u8 *)instr + instr->size);
+                enemy->currentContext.curInstr = (EclRawInstr *)((u8 *)instr + instr->size);
                 if (!enemy->noStackRet)
                 {
                     enemy->savedContextStack[enemy->stackDepth] = enemy->currentContext;
@@ -1144,7 +1112,7 @@ restart:
             case 42:
                 if (enemy->noStackRet)
                 {
-                    DebugPrint("error : no Stack Ret\r\n");
+                    Supervisor::DebugPrint("error : no Stack Ret\r\n");
                 }
                 enemy->stackDepth--;
                 if (enemy->currentContext.isPeriodicSub)
@@ -1161,13 +1129,12 @@ restart:
             case 97:
                 if (GET_INT_VALUE(enemy, 0) >= 2)
                 {
-                    DebugPrint("error : sub anim overflow\r\n");
+                    Supervisor::DebugPrint("error : sub anim overflow\r\n");
                 }
                 if (GET_INT_VALUE(enemy, 1) >= 0)
                 {
-                    g_AnmManager->SetAnmIdxAndExecuteScript(
-                        &enemy->vms[GET_INT_VALUE(enemy, 0)],
-                        GET_INT_VALUE(enemy, 1) + 2304);
+                    g_AnmManager->SetAnmIdxAndExecuteScript(&enemy->vms[GET_INT_VALUE(enemy, 0)],
+                                                            GET_INT_VALUE(enemy, 1) + 2304);
                 }
                 else
                 {
@@ -1192,8 +1159,7 @@ restart:
                 enemy->moveMode = 1;
                 break;
             case 53:
-                enemy->angle = g_Player.AngleToPlayer(&enemy->position) +
-                               GET_FLOAT_VALUE(enemy, 0);
+                enemy->angle = g_Player.AngleToPlayer(&enemy->position) + GET_FLOAT_VALUE(enemy, 0);
                 enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 1);
                 enemy->moveMode = 1;
                 break;
@@ -1207,18 +1173,15 @@ restart:
                 break;
             case 59:
                 enemy->moveMode = 1;
-                enemy->moveInterpTimer = enemy->moveInterpStartTime =
-                    GET_INT_VALUE(enemy, 0);
+                enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
                 break;
             case 60:
                 enemy->moveMode = 3;
-                enemy->moveInterpTimer = enemy->moveInterpStartTime =
-                    GET_INT_VALUE(enemy, 0);
+                enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
                 break;
             case 61:
                 enemy->moveMode = 2;
-                enemy->moveInterpTimer = enemy->moveInterpStartTime =
-                    GET_INT_VALUE(enemy, 0);
+                enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
                 break;
             case 64:
             case 65:
@@ -1236,9 +1199,8 @@ restart:
                 bulletInstrArgs = instr->args;
                 bulletProps = &enemy->bulletProps;
                 local_8 = bulletInstrArgs->s[0];
-                bulletProps->sprite = (instr->paramMask & 1) != 0
-                                          ? GetVarValue(enemy, local_8)
-                                          : local_8;
+                bulletProps->sprite =
+                    (instr->paramMask & 1) != 0 ? GetVarValue(enemy, local_8) : local_8;
                 bulletProps->aimMode = instr->id - 64;
                 bulletProps->count1 = GET_INT_VALUE_D(enemy, bulletInstrArgs, 1, 2);
                 bulletProps->count2 = GET_INT_VALUE_D(enemy, bulletInstrArgs, 2, 3);
@@ -1268,8 +1230,7 @@ restart:
                             bulletProps->speed1 = 0.3f;
                         }
                     }
-                    bulletProps->speed2 += enemy->BulletRankSpeed(g_GameManager.rank.rank) /
-                                           2.0f;
+                    bulletProps->speed2 += enemy->BulletRankSpeed(g_GameManager.rank.rank) / 2.0f;
                     if (bulletProps->speed2 < 0.3f)
                     {
                         bulletProps->speed2 = 0.3f;
@@ -1278,17 +1239,15 @@ restart:
                 bulletProps->unused_c2 = 0;
                 bulletProps->flags = bulletInstrArgs[7].u;
                 local_8 = bulletInstrArgs->s[1];
-                bulletProps->spriteOffset = (instr->paramMask & 2) != 0
-                                                ? GetVarValue(enemy, local_8)
-                                                : local_8;
+                bulletProps->spriteOffset =
+                    (instr->paramMask & 2) != 0 ? GetVarValue(enemy, local_8) : local_8;
                 if (!enemy->disableBullets)
                 {
                     g_BulletManager.SpawnBulletPattern(bulletProps);
                 }
                 break;
             case 79:
-                bulletCommand =
-                    &enemy->bulletProps.commands[GET_INT_VALUE(enemy, 0)];
+                bulletCommand = &enemy->bulletProps.commands[GET_INT_VALUE(enemy, 0)];
                 bulletCommand->type = GET_INT_VALUE(enemy, 1);
                 bulletCommand->flag = GET_INT_VALUE(enemy, 2);
                 bulletCommand->duration = GET_INT_VALUE(enemy, 3);
@@ -1314,8 +1273,7 @@ restart:
                 if (enemy->shootInterval != 0)
                 {
                     enemy->shootInterval += enemy->ShootInterval(g_GameManager.rank.rank);
-                    enemy->shootIntervalTimer =
-                        g_Rng.GetRandomU32InRange(enemy->shootInterval);
+                    enemy->shootIntervalTimer = g_Rng.GetRandomU32InRange(enemy->shootInterval);
                 }
                 break;
             case 75:
@@ -1363,8 +1321,7 @@ restart:
                 {
                     laserProps->type = 1;
                 }
-                enemy->lasers[enemy->laserIdx] =
-                    g_BulletManager.SpawnLaserPattern(laserProps);
+                enemy->lasers[enemy->laserIdx] = g_BulletManager.SpawnLaserPattern(laserProps);
                 break;
             case 84:
                 enemy->laserIdx = GET_INT_VALUE(enemy, 0);
@@ -1397,26 +1354,21 @@ restart:
                 local_8 = GET_INT_VALUE(enemy, 0);
                 if (enemy->lasers[local_8])
                 {
-                    enemy->lasers[local_8]->pos.x =
-                        GET_FLOAT_VALUE(enemy, 1) + enemy->position.x;
-                    enemy->lasers[local_8]->pos.y =
-                        GET_FLOAT_VALUE(enemy, 2) + enemy->position.y;
-                    enemy->lasers[local_8]->pos.z =
-                        GET_FLOAT_VALUE(enemy, 3) + enemy->position.z;
+                    enemy->lasers[local_8]->pos.x = GET_FLOAT_VALUE(enemy, 1) + enemy->position.x;
+                    enemy->lasers[local_8]->pos.y = GET_FLOAT_VALUE(enemy, 2) + enemy->position.y;
+                    enemy->lasers[local_8]->pos.z = GET_FLOAT_VALUE(enemy, 3) + enemy->position.z;
                 }
                 break;
             case 156:
                 local_8 = GET_INT_VALUE(enemy, 0);
                 if (enemy->lasers[local_8])
                 {
-                    enemy->lasers[local_8]->hideWarning =
-                        GET_INT_VALUE(enemy, 1);
+                    enemy->lasers[local_8]->hideWarning = GET_INT_VALUE(enemy, 1);
                 }
                 break;
             case 88:
                 local_8 = GET_INT_VALUE(enemy, 0);
-                if (enemy->lasers[local_8] &&
-                    enemy->lasers[local_8]->inUse)
+                if (enemy->lasers[local_8] && enemy->lasers[local_8]->inUse)
                 {
                     enemy->currentContext.compareRegister = 0;
                 }
@@ -1427,14 +1379,12 @@ restart:
                 break;
             case 89:
                 local_8 = GET_INT_VALUE(enemy, 0);
-                if (enemy->lasers[local_8] &&
-                    enemy->lasers[local_8]->inUse &&
+                if (enemy->lasers[local_8] && enemy->lasers[local_8]->inUse &&
                     enemy->lasers[local_8]->state < 2)
                 {
                     enemy->lasers[local_8]->state = 2;
                     enemy->lasers[local_8]->timer = 0;
-                    enemy->lasers[local_8]->width =
-                        enemy->lasers[local_8]->targetWidth;
+                    enemy->lasers[local_8]->width = enemy->lasers[local_8]->targetWidth;
                 }
                 break;
             case 134:
@@ -1447,18 +1397,15 @@ restart:
                 local_8 = GET_INT_VALUE(enemy, 0);
                 if (enemy->lasers[local_8])
                 {
-                    enemy->lasers[local_8]->startLength =
-                        GET_FLOAT_VALUE(enemy, 1);
+                    enemy->lasers[local_8]->startLength = GET_FLOAT_VALUE(enemy, 1);
                 }
                 break;
             case 158:
                 local_8 = GET_INT_VALUE(enemy, 0);
                 if (enemy->lasers[local_8])
                 {
-                    enemy->lasers[local_8]->startOffset =
-                        GET_FLOAT_VALUE(enemy, 1);
-                    enemy->lasers[local_8]->endOffset =
-                        GET_FLOAT_VALUE(enemy, 2);
+                    enemy->lasers[local_8]->startOffset = GET_FLOAT_VALUE(enemy, 1);
+                    enemy->lasers[local_8]->endOffset = GET_FLOAT_VALUE(enemy, 2);
                 }
                 break;
             case 147:
@@ -1497,13 +1444,10 @@ restart:
             case 54:
                 if (GET_INT_VALUE(enemy, 0) <= 0)
                 {
-                    enemy->angle =
-                        utils::AddNormalizeAngle(
-                            GET_FLOAT_VALUE(enemy, 2), 0.0f);
+                    enemy->angle = utils::AddNormalizeAngle(GET_FLOAT_VALUE(enemy, 2), 0.0f);
                     enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 3);
                     enemy->moveMode = 1;
-                    enemy->moveInterpTimer = enemy->moveInterpStartTime =
-                        GET_INT_VALUE(enemy, 0);
+                    enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
                 }
                 else
                 {
@@ -1514,8 +1458,7 @@ restart:
                 MovePosTime(enemy, instr);
                 break;
             case 56:
-                enemy->moveInterpTimer = enemy->moveInterpStartTime =
-                    GET_INT_VALUE(enemy, 0);
+                enemy->moveInterpTimer = enemy->moveInterpStartTime = GET_INT_VALUE(enemy, 0);
                 enemy->moveInterpStartPos.x = GET_FLOAT_VALUE(enemy, 1);
                 enemy->moveInterpStartPos.y = GET_FLOAT_VALUE(enemy, 2);
                 enemy->moveInterpStartPos.z = GET_FLOAT_VALUE(enemy, 3);
@@ -1544,10 +1487,9 @@ restart:
                 enemy->hasMovementBounds = 0;
                 break;
             case 51:
-                *GET_FLOAT_PTR(enemy, 0) =
-                    g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 2) -
-                                                GET_FLOAT_VALUE(enemy, 1)) +
-                    GET_FLOAT_VALUE(enemy, 1);
+                *GET_FLOAT_PTR(enemy, 0) = g_Rng.GetRandomFloatInRange(GET_FLOAT_VALUE(enemy, 2) -
+                                                                       GET_FLOAT_VALUE(enemy, 1)) +
+                                           GET_FLOAT_VALUE(enemy, 1);
                 break;
             case 52:
                 if (g_Player.positionCenter.x < enemy->position.x)
@@ -1581,13 +1523,11 @@ restart:
                         exitAngle = -3.1415927f - exitAngle;
                     }
                 }
-                if (enemy->lowerMoveLimit.y + 48.0f > enemy->position.y &&
-                    exitAngle < 0.0f)
+                if (enemy->lowerMoveLimit.y + 48.0f > enemy->position.y && exitAngle < 0.0f)
                 {
                     exitAngle = -exitAngle;
                 }
-                if (enemy->upperMoveLimit.y - 48.0f < enemy->position.y &&
-                    exitAngle > 0.0f)
+                if (enemy->upperMoveLimit.y - 48.0f < enemy->position.y && exitAngle > 0.0f)
                 {
                     exitAngle = -exitAngle;
                 }
@@ -1630,8 +1570,7 @@ restart:
                 enemy->deathCallbackSub = (u32)instr->args[0].b[0];
                 break;
             case 108:
-                enemy->interrupts[GET_INT_VALUE(enemy, 1)] =
-                    GET_INT_VALUE(enemy, 0);
+                enemy->interrupts[GET_INT_VALUE(enemy, 1)] = GET_INT_VALUE(enemy, 0);
                 break;
             case 109:
                 enemy->runInterrupt = GET_INT_VALUE(enemy, 0);
@@ -1662,11 +1601,8 @@ restart:
                 break;
             case 139:
                 bossIdx = GET_INT_VALUE(enemy, 0);
-                g_Gui.SetBossHealth(bossIdx,
-                                    GET_INT_VALUE(enemy, 1) /
-                                        (f32)enemy->maxLife,
-                                    GET_INT_VALUE(enemy, 2) /
-                                        (f32)enemy->maxLife);
+                g_Gui.SetBossHealth(bossIdx, GET_INT_VALUE(enemy, 1) / (f32)enemy->maxLife,
+                                    GET_INT_VALUE(enemy, 2) / (f32)enemy->maxLife);
                 g_Gui.bossColor[bossIdx] = GET_INT_VALUE(enemy, 3);
                 break;
             case 90:
@@ -1685,10 +1621,8 @@ restart:
                 enemy->lifeCallbackSub[0] = GET_INT_VALUE(enemy, 0);
                 break;
             case 148:
-                enemy->lifeCallbackThreshold[GET_INT_VALUE(enemy, 0)] =
-                    GET_INT_VALUE(enemy, 1);
-                enemy->lifeCallbackSub[GET_INT_VALUE(enemy, 0)] =
-                    GET_INT_VALUE(enemy, 2);
+                enemy->lifeCallbackThreshold[GET_INT_VALUE(enemy, 0)] = GET_INT_VALUE(enemy, 1);
+                enemy->lifeCallbackSub[GET_INT_VALUE(enemy, 0)] = GET_INT_VALUE(enemy, 2);
                 break;
             case 114:
                 enemy->timerCallbackThreshold = GET_INT_VALUE(enemy, 0);
@@ -1707,22 +1641,17 @@ restart:
                 enemy->canDie = instr->args[0].b[0];
                 break;
             case 117:
-                g_EffectManager.SpawnParticles(
-                    GET_INT_VALUE(enemy, 0),
-                    &enemy->position,
-                    GET_INT_VALUE(enemy, 1),
-                    *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
+                g_EffectManager.SpawnParticles(GET_INT_VALUE(enemy, 0), &enemy->position,
+                                               GET_INT_VALUE(enemy, 1),
+                                               *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
                 break;
             case 118:
                 particleVel.x = GET_FLOAT_VALUE(enemy, 3);
                 particleVel.y = GET_FLOAT_VALUE(enemy, 4);
                 particleVel.z = GET_FLOAT_VALUE(enemy, 5);
-                g_EffectManager.SpawnMovingParticles(
-                    GET_INT_VALUE(enemy, 0),
-                    &enemy->position,
-                    &particleVel,
-                    GET_INT_VALUE(enemy, 1),
-                    *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
+                g_EffectManager.SpawnMovingParticles(GET_INT_VALUE(enemy, 0), &enemy->position,
+                                                     &particleVel, GET_INT_VALUE(enemy, 1),
+                                                     *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
                 break;
             case 119:
                 numDrops = GET_INT_VALUE(enemy, 0);
@@ -1733,8 +1662,8 @@ restart:
                     itemDropPos.y += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     if ((i32)g_GameManager.globals->currentPower < 128)
                     {
-                        g_ItemManager.SpawnItem(&itemDropPos,
-                                                itemDropIdx == 0 ? ITEM_POWER_BIG : ITEM_POWER_SMALL, 0);
+                        g_ItemManager.SpawnItem(
+                            &itemDropPos, itemDropIdx == 0 ? ITEM_POWER_BIG : ITEM_POWER_SMALL, 0);
                     }
                     else
                     {
@@ -1761,8 +1690,7 @@ restart:
             case 122:
                 if (GET_INT_VALUE(enemy, 0) >= 0)
                 {
-                    enemy->currentContext.func =
-                        g_EclExInstr[GET_INT_VALUE(enemy, 0)];
+                    enemy->currentContext.func = g_EclExInstr[GET_INT_VALUE(enemy, 0)];
                     enemy->currentContext.eclExInstr = instr;
                 }
                 else
@@ -1774,8 +1702,7 @@ restart:
                 enemy->currentContext.time += GET_INT_VALUE(enemy, 0);
                 break;
             case 124:
-                g_ItemManager.SpawnItem(&enemy->position,
-                                        GET_INT_VALUE(enemy, 0), 0);
+                g_ItemManager.SpawnItem(&enemy->position, GET_INT_VALUE(enemy, 0), 0);
                 break;
             case 125:
                 g_Stage.scriptWaitTime = GET_INT_VALUE(enemy, 0);
@@ -1791,11 +1718,10 @@ restart:
                     absEnemySpawnPos.x = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 1, 1);
                     absEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 2, 2);
                     absEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 3, 3);
-                    unusedEnemyAbs = g_EnemyManager.SpawnEnemyEx(absSpawnInstrArgs[0].i, &absEnemySpawnPos,
-                                                                 GET_INT_VALUE(enemy, 4),
-                                                                 GET_INT_VALUE(enemy, 5),
-                                                                 GET_INT_VALUE(enemy, 6),
-                                                                 &enemy->currentContext.eclContextArgs);
+                    unusedEnemyAbs = g_EnemyManager.SpawnEnemyEx(
+                        absSpawnInstrArgs[0].i, &absEnemySpawnPos, GET_INT_VALUE(enemy, 4),
+                        GET_INT_VALUE(enemy, 5), GET_INT_VALUE(enemy, 6),
+                        &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 93:
@@ -1806,11 +1732,10 @@ restart:
                     relEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 2, 2);
                     relEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 3, 3);
                     relEnemySpawnPos += enemy->position;
-                    unusedEnemyRel = g_EnemyManager.SpawnEnemyEx(relSpawnInstrArgs[0].i, &relEnemySpawnPos,
-                                                                 GET_INT_VALUE(enemy, 4),
-                                                                 GET_INT_VALUE(enemy, 5),
-                                                                 GET_INT_VALUE(enemy, 6),
-                                                                 &enemy->currentContext.eclContextArgs);
+                    unusedEnemyRel = g_EnemyManager.SpawnEnemyEx(
+                        relSpawnInstrArgs[0].i, &relEnemySpawnPos, GET_INT_VALUE(enemy, 4),
+                        GET_INT_VALUE(enemy, 5), GET_INT_VALUE(enemy, 6),
+                        &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 94:
@@ -1872,32 +1797,28 @@ restart:
                 enemy->trailNodeStep = GET_INT_VALUE(enemy, 3);
                 if ((enemy->trailFlags & 8) != 0)
                 {
-                    g_AnmManager->UpdateTrail(
-                        &enemy->primaryVm, enemy->trailVertices,
-                        (i32)enemy->trailCount / (i32)enemy->trailNodeStep << 1);
+                    g_AnmManager->UpdateTrail(&enemy->primaryVm, enemy->trailVertices,
+                                              (i32)enemy->trailCount / (i32)enemy->trailNodeStep
+                                                  << 1);
                 }
                 break;
             case 140:
-                g_EffectManager.globalColorMultiplierR =
-                    GET_FLOAT_VALUE(enemy, 0);
-                g_EffectManager.globalColorMultiplierG =
-                    GET_FLOAT_VALUE(enemy, 1);
-                g_EffectManager.globalColorMultiplierB =
-                    GET_FLOAT_VALUE(enemy, 2);
-                g_EffectManager.globalColorMultiplierA =
-                    GET_FLOAT_VALUE(enemy, 3);
+                g_EffectManager.globalColorMultiplierR = GET_FLOAT_VALUE(enemy, 0);
+                g_EffectManager.globalColorMultiplierG = GET_FLOAT_VALUE(enemy, 1);
+                g_EffectManager.globalColorMultiplierB = GET_FLOAT_VALUE(enemy, 2);
+                g_EffectManager.globalColorMultiplierA = GET_FLOAT_VALUE(enemy, 3);
                 break;
             case 142:
                 enemy->invincibilityTimer = GET_INT_VALUE(enemy, 0);
                 break;
             case 143:
-                g_BulletManager.RemoveBulletsInRadius(&enemy->position,
-                                                      GET_FLOAT_VALUE(enemy, 0));
+                g_BulletManager.RemoveBulletsInRadius(&enemy->position, GET_FLOAT_VALUE(enemy, 0));
                 break;
             case 145:
                 if (g_EnemyManager.bosses[GET_INT_VALUE(enemy, 0)] != NULL)
                 {
-                    g_EnemyManager.bosses[GET_INT_VALUE(enemy, 0)]->runInterrupt = GET_INT_VALUE(enemy, 1);
+                    g_EnemyManager.bosses[GET_INT_VALUE(enemy, 0)]->runInterrupt =
+                        GET_INT_VALUE(enemy, 1);
                 }
                 break;
             case 146:
@@ -1922,18 +1843,15 @@ restart:
                     cosf(GET_FLOAT_VALUE(enemy, 2)) * GET_FLOAT_VALUE(enemy, 3);
                 break;
             case 155:
-                if ((g_Player.positionCenter.x < enemy->position.x &&
-                     enemy->position.x > 96.0f) ||
+                if ((g_Player.positionCenter.x < enemy->position.x && enemy->position.x > 96.0f) ||
                     enemy->position.x > 288.0f)
                 {
-                    *GET_FLOAT_PTR(enemy, 0) =
-                        utils::AddNormalizeAngle(
-                            g_Rng.GetRandomFloatInRange(1.5707964f) + 2.3561945f, 0.0f);
+                    *GET_FLOAT_PTR(enemy, 0) = utils::AddNormalizeAngle(
+                        g_Rng.GetRandomFloatInRange(1.5707964f) + 2.3561945f, 0.0f);
                 }
                 else
                 {
-                    *GET_FLOAT_PTR(enemy, 0) =
-                        g_Rng.GetRandomFloatInRange(1.5707964f) - 0.7853982f;
+                    *GET_FLOAT_PTR(enemy, 0) = g_Rng.GetRandomFloatInRange(1.5707964f) - 0.7853982f;
                 }
                 break;
             case 160:
@@ -1956,16 +1874,14 @@ restart:
             {
             case 3:
                 enemy->moveAngle = utils::AddNormalizeAngle(
-                    enemy->moveAngle, g_Supervisor.effectiveFramerateMultiplier *
-                                          enemy->moveAngularVelocity);
-                enemy->moveRadius = g_Supervisor.effectiveFramerateMultiplier *
-                                        enemy->moveRadialVelocity +
-                                    enemy->moveRadius;
+                    enemy->moveAngle,
+                    g_Supervisor.effectiveFramerateMultiplier * enemy->moveAngularVelocity);
+                enemy->moveRadius =
+                    g_Supervisor.effectiveFramerateMultiplier * enemy->moveRadialVelocity +
+                    enemy->moveRadius;
                 AngleToVector(&local_d8, enemy->moveAngle, enemy->moveRadius);
-                enemy->axisSpeed.x =
-                    local_d8.x + enemy->moveInterpStartPos.x - enemy->position.x;
-                enemy->axisSpeed.y =
-                    local_d8.y + enemy->moveInterpStartPos.y - enemy->position.y;
+                enemy->axisSpeed.x = local_d8.x + enemy->moveInterpStartPos.x - enemy->position.x;
+                enemy->axisSpeed.y = local_d8.y + enemy->moveInterpStartPos.y - enemy->position.y;
                 enemy->angle = atan2f(enemy->axisSpeed.y, enemy->axisSpeed.x);
                 if (enemy->moveInterpStartTime > 0)
                 {
@@ -1977,12 +1893,12 @@ restart:
                 }
                 break;
             case 1:
-                enemy->angle = utils::AddNormalizeAngle(
-                    enemy->angle,
-                    g_Supervisor.effectiveFramerateMultiplier * enemy->angularVelocity);
-                enemy->moveSpeed = g_Supervisor.effectiveFramerateMultiplier *
-                                       enemy->moveAcceleration +
-                                   enemy->moveSpeed;
+                enemy->angle = utils::AddNormalizeAngle(enemy->angle,
+                                                        g_Supervisor.effectiveFramerateMultiplier *
+                                                            enemy->angularVelocity);
+                enemy->moveSpeed =
+                    g_Supervisor.effectiveFramerateMultiplier * enemy->moveAcceleration +
+                    enemy->moveSpeed;
                 AngleToVector(&enemy->axisSpeed, enemy->angle, enemy->moveSpeed);
                 enemy->axisSpeed.z = 0.0f;
                 if (enemy->moveInterpStartTime > 0)
@@ -1996,8 +1912,7 @@ restart:
                 break;
             case 2:
                 enemy->moveInterpTimer--;
-                t1 = 1.0f - enemy->moveInterpTimer.AsFloat() /
-                                (f32)enemy->moveInterpStartTime;
+                t1 = 1.0f - enemy->moveInterpTimer.AsFloat() / (f32)enemy->moveInterpStartTime;
                 if (t1 < 0.0f)
                 {
                     t1 = 0.0f;
@@ -2036,8 +1951,7 @@ restart:
                 }
                 }
                 enemy->axisSpeed =
-                    t1 * enemy->moveInterp + enemy->moveInterpStartPos -
-                    enemy->position;
+                    t1 * enemy->moveInterp + enemy->moveInterpStartPos - enemy->position;
                 if (enemy->mirror)
                 {
                     enemy->axisSpeed.x = -enemy->axisSpeed.x;
@@ -2096,31 +2010,26 @@ restart:
                             if (enemy->anmExFlags == 255)
                             {
                                 g_AnmManager->SetAnmIdxAndExecuteScript(
-                                    &enemy->primaryVm,
-                                    enemy->anmExDefaults + 2304);
+                                    &enemy->primaryVm, enemy->anmExDefaults + 2304);
                             }
                             else if (enemy->anmExFlags == 1)
                             {
-                                g_AnmManager->SetAnmIdxAndExecuteScript(
-                                    &enemy->primaryVm,
-                                    enemy->anmExFarLeft + 2304);
+                                g_AnmManager->SetAnmIdxAndExecuteScript(&enemy->primaryVm,
+                                                                        enemy->anmExFarLeft + 2304);
                             }
                             else
                             {
                                 g_AnmManager->SetAnmIdxAndExecuteScript(
-                                    &enemy->primaryVm,
-                                    enemy->anmExFarRight + 2304);
+                                    &enemy->primaryVm, enemy->anmExFarRight + 2304);
                             }
                             break;
                         case 1:
-                            g_AnmManager->SetAnmIdxAndExecuteScript(
-                                &enemy->primaryVm,
-                                enemy->anmExLeft + 2304);
+                            g_AnmManager->SetAnmIdxAndExecuteScript(&enemy->primaryVm,
+                                                                    enemy->anmExLeft + 2304);
                             break;
                         case 2:
-                            g_AnmManager->SetAnmIdxAndExecuteScript(
-                                &enemy->primaryVm,
-                                enemy->anmExRight + 2304);
+                            g_AnmManager->SetAnmIdxAndExecuteScript(&enemy->primaryVm,
+                                                                    enemy->anmExRight + 2304);
                             break;
                         }
                         enemy->anmExFlags = anmDirection;
@@ -2142,8 +2051,7 @@ restart:
                         {
                             interp2->timer = interp2->args[0].i;
                         }
-                        t2 =
-                            interp2->timer.AsFloat() / (f32)interp2->args[0].i;
+                        t2 = interp2->timer.AsFloat() / (f32)interp2->args[0].i;
                         switch (interp2->args[2].i)
                         {
                         case 1: {
@@ -2182,8 +2090,7 @@ restart:
                         {
                             interp2->fn = NULL;
                         }
-                        if (interp2->args[7].f == 10018.0f ||
-                            interp2->args[7].f == 10019.0f ||
+                        if (interp2->args[7].f == 10018.0f || interp2->args[7].f == 10019.0f ||
                             interp2->args[7].f == 10020.0f)
                         {
                             local_f8 = true;
@@ -2201,8 +2108,7 @@ restart:
             enemy->currentContext.curInstr = instr;
             enemy->currentContext.time++;
             if (enemy->isBoss && enemy->bossId == 0 &&
-                (g_EnemyManager.spellcardInfo.isActive &&
-                 g_EnemyManager.spellcardInfo.isCapturing))
+                (g_EnemyManager.spellcardInfo.isActive && g_EnemyManager.spellcardInfo.isCapturing))
             {
                 if (!enemy->isSurvivalSpellcard)
                 {
@@ -2210,8 +2116,7 @@ restart:
                         (i32)((f32)(i32)
                                   g_SpellcardScore[g_EnemyManager.spellcardInfo.spellcardIdx] -
                               g_EnemyManager.timer.AsFloat() *
-                                  (f32)g_EnemyManager.spellcardInfo.scoreDrainRate /
-                                  60.0f);
+                                  (f32)g_EnemyManager.spellcardInfo.scoreDrainRate / 60.0f);
                     g_EnemyManager.spellcardInfo.captureScore =
                         g_EnemyManager.spellcardInfo.captureScore -
                         g_EnemyManager.spellcardInfo.captureScore % 10;
@@ -2220,8 +2125,7 @@ restart:
             }
             if (enemy->isBoss && g_GameManager.currentStage >= 7)
             {
-                if (g_Player.bombInfo.isInUse &&
-                    g_EnemyManager.spellcardInfo.isActive &&
+                if (g_Player.bombInfo.isInUse && g_EnemyManager.spellcardInfo.isActive &&
                     g_EnemyManager.spellcardInfo.spellcardIdx >= 118)
                 {
                     enemy->invisibleOnBomb = 1;

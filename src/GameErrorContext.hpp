@@ -32,8 +32,7 @@ struct GameErrorContext
             {
                 MessageBoxA(NULL, this->m_Buffer, "log", MB_ICONERROR);
             }
-            FileSystem::WriteDataToFile("./log.txt", this->m_Buffer,
-                                        strlen(this->m_Buffer));
+            FileSystem::WriteDataToFile("./log.txt", this->m_Buffer, strlen(this->m_Buffer));
         }
     }
 };

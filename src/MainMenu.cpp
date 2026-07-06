@@ -1,7 +1,7 @@
 #include "MainMenu.hpp"
 
-#include <direct.h>
 #include <cstdio>
+#include <direct.h>
 
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
@@ -25,42 +25,21 @@ const char *g_DemoReplayPaths[3] = {
 };
 
 const char *g_StagePracticeStrings[6] = {
-    "Stage1",
-    "Stage2",
-    "Stage3",
-    "Stage4",
-    "Stage5",
-    "Stage6",
+    "Stage1", "Stage2", "Stage3", "Stage4", "Stage5", "Stage6",
 };
 
 const char *g_StageReplayStrings[7] = {
-    "Stage1  ",
-    "Stage2  ",
-    "Stage3  ",
-    "Stage4  ",
-    "Stage5  ",
-    "Stage6  ",
-    "Extra   ",
+    "Stage1  ", "Stage2  ", "Stage3  ", "Stage4  ", "Stage5  ", "Stage6  ", "Extra   ",
 };
 
 const char *g_PhantasmReplayString = "Phantasm";
 
 const char *g_DifficultyStrings[6] = {
-    "Easy    ",
-    "Normal  ",
-    "Hard    ",
-    "Lunatic ",
-    "Extra   ",
-    "Phantasm",
+    "Easy    ", "Normal  ", "Hard    ", "Lunatic ", "Extra   ", "Phantasm",
 };
 
 const char *g_CharacterAndShottypeReplayStrings[6] = {
-    "ReimuA ",
-    "ReimuB ",
-    "MarisaA",
-    "MarisaB",
-    "SakuyaA",
-    "SakuyaB",
+    "ReimuA ", "ReimuB ", "MarisaA", "MarisaB", "SakuyaA", "SakuyaB",
 };
 
 i16 g_LastJoystickInput = 32;
@@ -174,16 +153,13 @@ u32 MainMenu::OnUpdatePreInput()
     switch (this->menuSubState)
     {
     case 0:
-        if (this->prevGameState == STATE_PRE_INPUT &&
-            g_Supervisor.prevState != 5)
+        if (this->prevGameState == STATE_PRE_INPUT && g_Supervisor.prevState != 5)
         {
             g_Supervisor.PlayLoadedAudio(8);
         }
-        if ((this->prevGameState == STATE_PRE_INPUT ||
-             this->prevGameState == 4 ||
+        if ((this->prevGameState == STATE_PRE_INPUT || this->prevGameState == 4 ||
              this->prevGameState == STATE_SELECT_REPLAY ||
-             (this->prevGameState == 8 ||
-              this->prevGameState == STATE_EXTRA_SELECT_DIFFICULTY)) &&
+             (this->prevGameState == 8 || this->prevGameState == STATE_EXTRA_SELECT_DIFFICULTY)) &&
             g_AnmManager->LoadSurface(0, "data/title/title00.jpg") != ZUN_SUCCESS)
         {
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
@@ -200,9 +176,8 @@ u32 MainMenu::OnUpdatePreInput()
             g_AnmManager->SetActiveSprite(&this->vmHead[i + 1],
                                           this->vmHead[i + 1].baseSpriteIdx + 1);
         }
-        g_AnmManager->SetActiveSprite(
-            &this->vmHead[this->cursor + 1],
-            (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
+        g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 1],
+                                      (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
         this->menuSubState = 0;
         this->inputDelayTimer = 0;
         this->selected = -1;
@@ -242,8 +217,7 @@ u32 MainMenu::OnUpdatePreInput()
         i = MoveCursorVertical(8);
         if (i != 0)
         {
-            while (g_GameManager.HasReachedMaxClearsAllShotTypes() == 0 &&
-                   this->cursor == 1)
+            while (g_GameManager.HasReachedMaxClearsAllShotTypes() == 0 && this->cursor == 1)
             {
                 this->cursor += i;
             }
@@ -252,9 +226,8 @@ u32 MainMenu::OnUpdatePreInput()
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 1],
                                               this->vmHead[i + 1].baseSpriteIdx + 1);
             }
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 1],
-                (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 1],
+                                          (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
         }
         this->demoFramesCount++;
         if (g_CurFrameRawInput != 0)
@@ -265,15 +238,14 @@ u32 MainMenu::OnUpdatePreInput()
         {
             g_GameManager.demoIdx++;
             g_GameManager.demoIdx %= 3;
-            strcpy(g_GameManager.replayFilename,
-                   g_DemoReplayPaths[g_GameManager.demoIdx]);
-            this->currentReplay = (ReplayFile *)FileSystem::OpenFile(
-                g_GameManager.replayFilename, 0);
+            strcpy(g_GameManager.replayFilename, g_DemoReplayPaths[g_GameManager.demoIdx]);
+            this->currentReplay =
+                (ReplayFile *)FileSystem::OpenFile(g_GameManager.replayFilename, 0);
             this->currentReplay =
                 ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
             if (!this->currentReplay)
             {
-                Supervisor::DebugPrint2("error : Demo Play is not ready\r\n");
+                Supervisor::DebugPrint("error : Demo Play is not ready\r\n");
                 this->demoFramesCount = 0;
             }
             else
@@ -404,13 +376,11 @@ u32 MainMenu::OnUpdatePreInput()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 1],
-                this->vmHead[this->cursor + 1].baseSpriteIdx + 1);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 1],
+                                          this->vmHead[this->cursor + 1].baseSpriteIdx + 1);
             this->cursor = 7;
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 1],
-                (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 1],
+                                          (i32)this->vmHead[this->cursor + 1].baseSpriteIdx);
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             g_SoundPlayer.ProcessQueues();
         }
@@ -466,9 +436,8 @@ u32 MainMenu::OnUpdateOptionsMenu()
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 9],
                                               this->vmHead[i + 9].baseSpriteIdx + 1);
             }
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 9],
-                (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 9],
+                                          (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             this->selected = -1;
@@ -476,8 +445,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
         this->menuSubState = 1;
         for (i = 0; (u32)i < 9; i++)
         {
-            g_AnmManager->DrawStringFormat2(&this->vms[i], 0xfff0e0, 0x300000,
-                                            g_OptionsStrings[i]);
+            g_AnmManager->DrawStringFormat2(&this->vms[i], 0xfff0e0, 0x300000, g_OptionsStrings[i]);
         }
     case 1:
         break;
@@ -490,9 +458,8 @@ u32 MainMenu::OnUpdateOptionsMenu()
             g_AnmManager->SetActiveSprite(&this->vmHead[i + 9],
                                           this->vmHead[i + 9].baseSpriteIdx + 1);
         }
-        g_AnmManager->SetActiveSprite(
-            &this->vmHead[this->cursor + 9],
-            (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
+        g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 9],
+                                      (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
     }
 
     if (this->selected != this->cursor)
@@ -504,63 +471,45 @@ u32 MainMenu::OnUpdateOptionsMenu()
 
     for (i = 18; i <= 22; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.lifeCount + 18;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     for (i = 23; i <= 24; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.colorMode16bit + 23;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     for (i = 25; i <= 27; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.musicMode + 25;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     for (i = 28; i <= 29; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.playSounds + 28;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     for (i = 30; i <= 31; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.windowed + 30;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     for (i = 32; i <= 33; i++)
     {
-        g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                      this->vmHead[i].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
     }
     i = g_Supervisor.cfg.slowMode + 32;
-    g_AnmManager->SetActiveSprite(
-        &this->vmHead[i],
-        (i32)this->vmHead[i].baseSpriteIdx);
+    g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
     if (this->stateTimer < 4)
     {
@@ -605,8 +554,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             {
                 g_Supervisor.cfg.musicMode--;
             }
-            if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0 &&
-                g_Supervisor.cfg.musicMode == MUSIC_MIDI)
+            if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0 && g_Supervisor.cfg.musicMode == MUSIC_MIDI)
             {
                 g_SoundPlayer.StartBGM("thbgm.dat");
             }
@@ -776,13 +724,11 @@ skip_right_sound:
         {
             goto LAB_00456cc0;
         }
-        g_AnmManager->SetActiveSprite(
-            &this->vmHead[this->cursor + 9],
-            this->vmHead[this->cursor + 9].baseSpriteIdx + 1);
+        g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 9],
+                                      this->vmHead[this->cursor + 9].baseSpriteIdx + 1);
         this->cursor = 8;
-        g_AnmManager->SetActiveSprite(
-            &this->vmHead[this->cursor + 9],
-            (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
+        g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 9],
+                                      (i32)this->vmHead[this->cursor + 9].baseSpriteIdx);
         g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
         g_SoundPlayer.ProcessQueues();
     }
@@ -850,13 +796,11 @@ u32 MainMenu::OnUpdateKeyConfig()
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 4);
             for (i = 0; i < 12; i++)
             {
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[i + 35],
-                    this->vmHead[i + 35].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[i + 35],
+                                              this->vmHead[i + 35].baseSpriteIdx + 1);
             }
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 35],
-                (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 35],
+                                          (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
             this->controlMapping = g_Supervisor.cfg.controllerMapping;
@@ -896,12 +840,10 @@ u32 MainMenu::OnUpdateKeyConfig()
             for (i = 0; i < 12; i++)
             {
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 35],
-                                              this->vmHead[i + 35].baseSpriteIdx +
-                                                  1);
+                                              this->vmHead[i + 35].baseSpriteIdx + 1);
             }
-            g_AnmManager->SetActiveSprite(
-                &this->vmHead[this->cursor + 35],
-                (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
+            g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 35],
+                                          (i32)this->vmHead[this->cursor + 35].baseSpriteIdx);
         }
         if (this->selected != this->cursor)
         {
@@ -933,13 +875,10 @@ u32 MainMenu::OnUpdateKeyConfig()
 
         for (i = 65; i <= 66; i++)
         {
-            g_AnmManager->SetActiveSprite(&this->vmHead[i],
-                                          this->vmHead[i].baseSpriteIdx + 1);
+            g_AnmManager->SetActiveSprite(&this->vmHead[i], this->vmHead[i].baseSpriteIdx + 1);
         }
         i = g_Supervisor.cfg.shotSlow + 65;
-        g_AnmManager->SetActiveSprite(
-            &this->vmHead[i],
-            (i32)this->vmHead[i].baseSpriteIdx);
+        g_AnmManager->SetActiveSprite(&this->vmHead[i], (i32)this->vmHead[i].baseSpriteIdx);
 
         controllerState = Controller::GetControllerState();
         for (btnPressed = 0; btnPressed < 32; btnPressed++)
@@ -1059,10 +998,9 @@ ZunResult MainMenu::UpdateMenuDigits(AnmVm *param_1, i16 param_2)
     }
     else
     {
-        g_AnmManager->SetActiveSprite(param_1, (i32)param_1->baseSpriteIdx +
-                                                   (i32)param_2 / 10 * 2);
-        g_AnmManager->SetActiveSprite(param_1 + 1, (i32)param_1[1].baseSpriteIdx +
-                                                       (i32)param_2 % 10 * 2);
+        g_AnmManager->SetActiveSprite(param_1, (i32)param_1->baseSpriteIdx + (i32)param_2 / 10 * 2);
+        g_AnmManager->SetActiveSprite(param_1 + 1,
+                                      (i32)param_1[1].baseSpriteIdx + (i32)param_2 % 10 * 2);
         param_1->active = 1;
         param_1[1].active = 1;
     }
@@ -1082,8 +1020,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
         {
             if (this->prevGameState != 5 && this->prevGameState != 9 &&
                 this->prevGameState != STATE_EXTRA_SELECT_CHARACTER &&
-                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
-                    ZUN_SUCCESS)
+                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") != ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
@@ -1109,13 +1046,11 @@ u32 MainMenu::OnUpdateSelectDifficulty()
                 }
                 for (i = 0; i < 4; i++)
                 {
-                    g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 67],
-                        this->vmHead[i + 67].baseSpriteIdx + 1);
+                    g_AnmManager->SetActiveSprite(&this->vmHead[i + 67],
+                                                  this->vmHead[i + 67].baseSpriteIdx + 1);
                 }
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 67],
-                    (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 67],
+                                              (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
             }
             else
             {
@@ -1126,13 +1061,11 @@ u32 MainMenu::OnUpdateSelectDifficulty()
                 }
                 for (i = 0; i < 2; i++)
                 {
-                    g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 162],
-                        this->vmHead[i + 162].baseSpriteIdx + 1);
+                    g_AnmManager->SetActiveSprite(&this->vmHead[i + 162],
+                                                  this->vmHead[i + 162].baseSpriteIdx + 1);
                 }
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 162],
-                    (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 162],
+                                              (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
             }
             this->menuSubState = 0;
             this->inputDelayTimer = 0;
@@ -1150,36 +1083,30 @@ u32 MainMenu::OnUpdateSelectDifficulty()
         }
         break;
     case 1:
-        numDifficulties = this->gameState != STATE_EXTRA_SELECT_DIFFICULTY
-                              ? 4
-                          : g_GameManager.HasUnlockedPhantomAndMaxClears()
-                              ? 2
-                              : 1;
+        numDifficulties = this->gameState != STATE_EXTRA_SELECT_DIFFICULTY ? 4
+                          : g_GameManager.HasUnlockedPhantomAndMaxClears() ? 2
+                                                                           : 1;
         if (MoveCursorVertical(numDifficulties))
         {
             if (this->gameState != STATE_EXTRA_SELECT_DIFFICULTY)
             {
                 for (i = 0; i < 4; i++)
                 {
-                    g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 67],
-                        this->vmHead[i + 67].baseSpriteIdx + 1);
+                    g_AnmManager->SetActiveSprite(&this->vmHead[i + 67],
+                                                  this->vmHead[i + 67].baseSpriteIdx + 1);
                 }
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 67],
-                    (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 67],
+                                              (i32)this->vmHead[this->cursor + 67].baseSpriteIdx);
             }
             else if (numDifficulties == 2)
             {
                 for (i = 0; i < 2; i++)
                 {
-                    g_AnmManager->SetActiveSprite(
-                        &this->vmHead[i + 162],
-                        this->vmHead[i + 162].baseSpriteIdx + 1);
+                    g_AnmManager->SetActiveSprite(&this->vmHead[i + 162],
+                                                  this->vmHead[i + 162].baseSpriteIdx + 1);
                 }
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 162],
-                    (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 162],
+                                              (i32)this->vmHead[this->cursor + 162].baseSpriteIdx);
             }
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
@@ -1270,8 +1197,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 8);
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
-                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67]
-                    .SetInterrupt(9);
+                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67].SetInterrupt(9);
             }
             else
             {
@@ -1281,16 +1207,14 @@ u32 MainMenu::OnUpdateSelectCharacter()
                 }
                 else
                 {
-                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158]
-                        .SetInterrupt(9);
+                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158].SetInterrupt(9);
                 }
             }
             this->cursor = g_GameManager.character;
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
-                while (
-                    g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
-                    g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
+                       g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1301,9 +1225,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == 5)
             {
-                while (
-                    g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                    g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
+                       g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1424,9 +1347,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
         {
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
-                while (
-                    g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
-                    g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasReachedMaxClears(this->cursor << 1) == 0 &&
+                       g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1437,9 +1359,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == 5)
             {
-                while (
-                    g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                    g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
+                       g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 3)
@@ -1564,8 +1485,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 10);
             if (g_Supervisor.cfg.defaultDifficulty < 4)
             {
-                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67]
-                    .SetInterrupt(9);
+                this->vmHead[g_Supervisor.cfg.defaultDifficulty + 67].SetInterrupt(9);
             }
             else
             {
@@ -1575,8 +1495,7 @@ u32 MainMenu::OnUpdateSelectShotType()
                 }
                 else
                 {
-                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158]
-                        .SetInterrupt(9);
+                    this->vmHead[g_Supervisor.cfg.defaultDifficulty + 158].SetInterrupt(9);
                 }
             }
             this->vmHead[72].active = 0;
@@ -1597,8 +1516,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             this->cursor = g_GameManager.shotType;
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
-                while (g_GameManager.HasReachedMaxClears(
-                           this->cursor + (u32)g_GameManager.character * 2) == 0)
+                while (g_GameManager.HasReachedMaxClears(this->cursor +
+                                                         (u32)g_GameManager.character * 2) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 2)
@@ -1609,8 +1528,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == 5)
             {
-                while (g_GameManager.HasUnlockedPhantom(
-                           this->cursor + (u32)g_GameManager.character * 2) == 0)
+                while (g_GameManager.HasUnlockedPhantom(this->cursor +
+                                                        (u32)g_GameManager.character * 2) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 2)
@@ -1625,34 +1544,28 @@ u32 MainMenu::OnUpdateSelectShotType()
                 this->vmHead[72].active = 1;
                 this->vmHead[73].active = 1;
                 this->vmHead[71].active = 1;
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[73 - this->cursor],
-                    this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 72],
-                    (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[73 - this->cursor],
+                                              this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 72],
+                                              (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
                 break;
             case CHAR_MARISA:
                 this->vmHead[75].active = 1;
                 this->vmHead[76].active = 1;
                 this->vmHead[74].active = 1;
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[76 - this->cursor],
-                    this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 75],
-                    (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[76 - this->cursor],
+                                              this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 75],
+                                              (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
                 break;
             case CHAR_SAKUYA:
                 this->vmHead[78].active = 1;
                 this->vmHead[79].active = 1;
                 this->vmHead[77].active = 1;
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[79 - this->cursor],
-                    this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 78],
-                    (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[79 - this->cursor],
+                                              this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 78],
+                                              (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
                 break;
             }
             this->menuSubState = 0;
@@ -1675,8 +1588,8 @@ u32 MainMenu::OnUpdateSelectShotType()
         {
             if (g_Supervisor.cfg.defaultDifficulty == 4)
             {
-                while (g_GameManager.HasReachedMaxClears(
-                           this->cursor + (u32)g_GameManager.character * 2) == 0)
+                while (g_GameManager.HasReachedMaxClears(this->cursor +
+                                                         (u32)g_GameManager.character * 2) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 2)
@@ -1687,8 +1600,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == 5)
             {
-                while (g_GameManager.HasUnlockedPhantom(
-                           this->cursor + (u32)g_GameManager.character * 2) == 0)
+                while (g_GameManager.HasUnlockedPhantom(this->cursor +
+                                                        (u32)g_GameManager.character * 2) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= 2)
@@ -1700,28 +1613,22 @@ u32 MainMenu::OnUpdateSelectShotType()
             switch (g_GameManager.character)
             {
             case CHAR_REIMU:
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[73 - this->cursor],
-                    this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 72],
-                    (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[73 - this->cursor],
+                                              this->vmHead[73 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 72],
+                                              (i32)this->vmHead[this->cursor + 72].baseSpriteIdx);
                 break;
             case CHAR_MARISA:
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[76 - this->cursor],
-                    this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 75],
-                    (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[76 - this->cursor],
+                                              this->vmHead[76 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 75],
+                                              (i32)this->vmHead[this->cursor + 75].baseSpriteIdx);
                 break;
             case CHAR_SAKUYA:
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[79 - this->cursor],
-                    this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
-                g_AnmManager->SetActiveSprite(
-                    &this->vmHead[this->cursor + 78],
-                    (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
+                g_AnmManager->SetActiveSprite(&this->vmHead[79 - this->cursor],
+                                              this->vmHead[79 - this->cursor].baseSpriteIdx + 1);
+                g_AnmManager->SetActiveSprite(&this->vmHead[this->cursor + 78],
+                                              (i32)this->vmHead[this->cursor + 78].baseSpriteIdx);
                 break;
             }
         }
@@ -1849,9 +1756,8 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
         }
         break;
     case 1:
-        local_8 =
-            g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
-                .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
+        local_8 = g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
+                      .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
         if (local_8 < 0)
         {
             local_8 = 1;
@@ -1924,8 +1830,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         if (this->stateTimer == 0)
         {
             if (this->prevGameState != STATE_SELECT_REPLAY &&
-                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") !=
-                    ZUN_SUCCESS)
+                g_AnmManager->LoadSurface(0, "data/title/select00.jpg") != ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
@@ -1944,8 +1849,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                     continue;
                 }
 
-                file =
-                    ReplayManager::ValidateReplayData(file, g_LastFileSize);
+                file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
                 if (file)
                 {
                     this->replays[local_10] = *file;
@@ -1962,16 +1866,14 @@ u32 MainMenu::OnUpdateSelectReplay()
             {
                 for (i = 0; i < 45; i++)
                 {
-                    file = (ReplayFile *)FileSystem::OpenFile(
-                        local_194.cFileName, 1);
+                    file = (ReplayFile *)FileSystem::OpenFile(local_194.cFileName, 1);
                     if (!file)
                     {
                         continue;
                     }
                     else
                     {
-                        file =
-                            ReplayManager::ValidateReplayData(file, g_LastFileSize);
+                        file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
                         if (file)
                         {
                             this->replays[local_10] = *file;
@@ -2039,24 +1941,22 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->menuSubState = 2;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 15);
             this->vmHead[this->chosenReplay % 15 + 135].SetInterrupt(17);
-            this->currentReplay = (ReplayFile *)FileSystem::OpenFile(
-                this->replayFilenames[this->chosenReplay], 1);
-            this->currentReplay = ReplayManager::ValidateReplayData(
-                this->currentReplay, g_LastFileSize);
+            this->currentReplay =
+                (ReplayFile *)FileSystem::OpenFile(this->replayFilenames[this->chosenReplay], 1);
+            this->currentReplay =
+                ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
             for (i = 0; i < 7; i++)
             {
                 if (this->currentReplay->head.stageReplayData[i].offset != 0)
                 {
                     this->currentReplay->head.stageReplayData[i].data =
                         (StageReplayData *)((u8 *)this->currentReplay +
-                                            this->currentReplay->head.stageReplayData[i]
-                                                .offset);
+                                            this->currentReplay->head.stageReplayData[i].offset);
                 }
             }
             this->cursor = 0;
-            while (this->replays[this->chosenReplay]
-                       .head.stageReplayData[this->cursor]
-                       .data == NULL)
+            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
+                   NULL)
             {
                 this->cursor++;
                 if (this->cursor >= 7)
@@ -2079,9 +1979,8 @@ u32 MainMenu::OnUpdateSelectReplay()
         i = MoveCursorVertical(7);
         if (i < 0)
         {
-            while (this->replays[this->chosenReplay]
-                       .head.stageReplayData[this->cursor]
-                       .data == NULL)
+            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
+                   NULL)
             {
                 this->cursor--;
                 if (this->cursor < 0)
@@ -2092,9 +1991,8 @@ u32 MainMenu::OnUpdateSelectReplay()
         }
         else if (0 < i)
         {
-            while (this->replays[this->chosenReplay]
-                       .head.stageReplayData[this->cursor]
-                       .data == NULL)
+            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
+                   NULL)
             {
                 this->cursor++;
                 if (this->cursor >= 7)
@@ -2139,16 +2037,14 @@ u32 MainMenu::OnUpdateSelectReplay()
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
             g_GameManager.SetReplay(1);
-            strcpy(g_GameManager.replayFilename,
-                   this->replayFilenames[this->chosenReplay]);
+            strcpy(g_GameManager.replayFilename, this->replayFilenames[this->chosenReplay]);
             g_GameManager.difficulty = this->currentReplay->data.difficulty;
             g_GameManager.character = this->currentReplay->data.shotType / 2;
             g_GameManager.shotType = this->currentReplay->data.shotType % 2;
             g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
             free(this->currentReplay);
             this->currentReplay = NULL;
-            g_GameManager.currentStage =
-                g_GameManager.difficulty >= 5 ? 7 : this->selectedStage;
+            g_GameManager.currentStage = g_GameManager.difficulty >= 5 ? 7 : this->selectedStage;
             g_Supervisor.curState = 2;
             g_GameManager.replayStage = (u8)this->cursor;
             g_Supervisor.StopAudio();
@@ -2188,8 +2084,7 @@ i32 MainMenu::DrawReplayMenu()
     AnmVm *vm;
 
     vm = &this->vmHead[134];
-    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                "No.   Name       Date  Player   Rank");
+    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "No.   Name       Date  Player   Rank");
     replayAmount = this->chosenReplay - this->chosenReplay % 15;
     for (i = replayAmount + 15; replayAmount < i; replayAmount++)
     {
@@ -2208,12 +2103,9 @@ i32 MainMenu::DrawReplayMenu()
             g_AsciiManager.color = 0xff808080;
         }
         AsciiManager::AddFormatText(
-            &g_AsciiManager, &vm->pos, "%s %8s  %6s %7s  %8s",
-            this->replayLabels + replayAmount,
-            this->replays[replayAmount].data.name,
-            this->replays[replayAmount].data.date,
-            g_CharacterAndShottypeReplayStrings[this->replays[replayAmount]
-                                                    .data.shotType],
+            &g_AsciiManager, &vm->pos, "%s %8s  %6s %7s  %8s", this->replayLabels + replayAmount,
+            this->replays[replayAmount].data.name, this->replays[replayAmount].data.date,
+            g_CharacterAndShottypeReplayStrings[this->replays[replayAmount].data.shotType],
             g_DifficultyStrings[this->replays[replayAmount].data.difficulty]);
     }
     if ((this->menuSubState == 2 || this->menuSubState == 3) && this->currentReplay != NULL)
@@ -2221,12 +2113,10 @@ i32 MainMenu::DrawReplayMenu()
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.isSelected = 0;
         vm = &this->vmHead[133];
-        AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                    "       %2.3f%%",
+        AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "       %2.3f%%",
                                     (double)this->currentReplay->data.slowdownRate);
         vm = &this->vmHead[150];
-        AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                    "Stage    LastScore");
+        AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "Stage    LastScore");
         replayAmount = this->chosenReplay - this->chosenReplay % 15;
         for (i = 0; i < 7; i++, replayAmount++)
         {
@@ -2258,29 +2148,27 @@ i32 MainMenu::DrawReplayMenu()
             {
                 if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
-                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
-                                                g_StageReplayStrings[i],
-                                                this->currentReplay->head.stageReplayData[i].data->score);
+                    AsciiManager::AddFormatText(
+                        &g_AsciiManager, &vm->pos, "%s %9d0", g_StageReplayStrings[i],
+                        this->currentReplay->head.stageReplayData[i].data->score);
                 }
                 else
                 {
-                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
-                                                g_PhantasmReplayString,
-                                                this->currentReplay->head.stageReplayData[i].data->score);
+                    AsciiManager::AddFormatText(
+                        &g_AsciiManager, &vm->pos, "%s %9d0", g_PhantasmReplayString,
+                        this->currentReplay->head.stageReplayData[i].data->score);
                 }
             }
             else
             {
                 if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
-                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                                "%s ----------",
+                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s ----------",
                                                 g_StageReplayStrings[i]);
                 }
                 else
                 {
-                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                                "%s ----------",
+                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s ----------",
                                                 g_PhantasmReplayString);
                 }
             }
@@ -2301,13 +2189,11 @@ i32 MainMenu::DrawPracticeMenu()
     g_AsciiManager.color = 0xffffffff;
     g_AsciiManager.isSelected = 0;
     vm = &this->vmHead[131];
-    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos,
-                                "Stage    HI-Score");
+    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "Stage    HI-Score");
     local_1c = vm->pos;
     local_1c.y += 16.0f;
-    local_10 =
-        g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
-            .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
+    local_10 = g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
+                   .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
 
     for (i = 0; i < 6; i++)
     {
@@ -2324,17 +2210,16 @@ i32 MainMenu::DrawPracticeMenu()
         {
             g_AsciiManager.color = 0xff404040;
         }
-        AsciiManager::AddFormatText(
-            &g_AsciiManager, &local_1c, "%s %9d0 (%3d)",
-            g_StagePracticeStrings[i],
-            g_GameManager
-                .pscr[g_GameManager.character * 2 + g_GameManager.shotType][i]
-                     [g_Supervisor.cfg.defaultDifficulty]
-                .score,
-            g_GameManager
-                .pscr[g_GameManager.character * 2 + g_GameManager.shotType][i]
-                     [g_Supervisor.cfg.defaultDifficulty]
-                .playCount);
+        AsciiManager::AddFormatText(&g_AsciiManager, &local_1c, "%s %9d0 (%3d)",
+                                    g_StagePracticeStrings[i],
+                                    g_GameManager
+                                        .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
+                                             [i][g_Supervisor.cfg.defaultDifficulty]
+                                        .score,
+                                    g_GameManager
+                                        .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
+                                             [i][g_Supervisor.cfg.defaultDifficulty]
+                                        .playCount);
         local_1c.y += 16.0f;
     }
     g_AsciiManager.color = 0xffffffff;
@@ -2491,8 +2376,7 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 5;
     }
-    if (!g_GameManager.phantasmUnlocked &&
-        g_GameManager.HasUnlockedPhantomAndMaxClears())
+    if (!g_GameManager.phantasmUnlocked && g_GameManager.HasUnlockedPhantomAndMaxClears())
     {
         frameCount = 0;
         g_AnmManager->LoadSurface(0, "data/title/phantasm.jpg");
@@ -2600,8 +2484,7 @@ ZunResult MainMenu::ActualAddedCallback()
     for (i = 0; i < 14; i++)
     {
         g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms[i], 1798);
-        g_AnmManager->SetActiveSprite(&this->vms[i],
-                                      this->vms[i].activeSpriteIdx + i);
+        g_AnmManager->SetActiveSprite(&this->vms[i], this->vms[i].activeSpriteIdx + i);
     }
     this->cursorVm = this->vms;
     g_GameManager.demo = 0;
@@ -2650,8 +2533,7 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
     mgr->calcChain->arg = mgr;
     mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
-    mgr->calcChain->deletedCallback =
-        (ChainLifecycleCallback)DeletedCallback;
+    mgr->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     if (g_Chain.AddToCalcChain(mgr->calcChain, 3))
     {
         return ZUN_ERROR;

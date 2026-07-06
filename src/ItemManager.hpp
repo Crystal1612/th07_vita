@@ -38,8 +38,7 @@ struct Item
 
     i32 ShouldAwardMaxScore()
     {
-        return this->currentPosition.y < g_Player.shooterData->pocY ||
-               this->autoCollect;
+        return this->currentPosition.y < g_Player.shooterData->pocY || this->autoCollect;
     }
 
     AnmVm sprite;

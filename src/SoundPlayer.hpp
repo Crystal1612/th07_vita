@@ -1,10 +1,11 @@
 #pragma once
 
-#include <dsound.h>
+#include <cstdio>
 
+#include "GameErrorContext.hpp"
 #include "ZunResult.hpp"
-#include "dsutil.hpp"
 #include "inttypes.hpp"
+#include "miniaudio.h"
 
 typedef enum AudioOpcode
 {
@@ -44,6 +45,28 @@ typedef enum SoundIdx
     SOUND_37 = 37
 } SoundIdx;
 
+struct ThWaveFormat
+{
+    WORD wFormatTag;
+    WORD nChannels;
+    DWORD nSamplesPerSec;
+    DWORD nAvgBytesPerSec;
+    WORD nBlockAlign;
+    WORD wBitsPerSample;
+    WORD cbSize;
+};
+
+struct ThBgmFormat
+{
+    char name[16];
+    i32 startOffset;
+    u32 preloadAllocSize;
+    i32 introLength;
+    i32 totalLength;
+    ThWaveFormat format;
+    // pad 2
+};
+
 struct SoundBufferIdxVolume
 {
     i32 bufferIdx;
@@ -59,15 +82,28 @@ struct SoundPlayerCommand
     char string[256];
 };
 
+struct ThBgmDataSource
+{
+    ma_data_source_base base;
+    ma_format format;
+    ma_uint32 channels;
+    ma_uint32 sampleRate;
+    ThBgmFormat *pFmt;
+    bool isMemory;
+
+    FILE *file;
+    const u8 *pData;
+    u32 dataSize;
+    u32 currentOffset;
+    u32 segmentBytesRemaining;
+};
+
 struct SoundPlayer
 {
     SoundPlayer();
 
-    static DWORD __stdcall BackgroundMusicPlayerThread(LPVOID lpThreadParameter);
     i32 GetFmtIndexByName(const char *param_1);
-    static WAVEFORMATEX *GetWavFormatData(u8 *soundData, const char *formatString,
-                                          i32 *formatSize, u32 fileSizeExcludingFormat);
-    ZunResult InitializeDSound(HWND gameWindow);
+    ZunResult InitializeSound();
     ZunResult InitSoundBuffers();
     ZunResult LoadBGM(i32 idx);
     ZunResult LoadFmt(const char *path);
@@ -83,36 +119,34 @@ struct SoundPlayer
 
     void FadeOut(f32 duration)
     {
+        g_GameErrorContext.Log("%f\r\n", duration);
         if (this->backgroundMusic)
         {
-            this->backgroundMusic->FadeOut(duration);
+            ma_sound_set_fade_start_in_milliseconds(
+                this->backgroundMusic, -1, 0, duration * 1000.0f,
+                ma_engine_get_time_in_milliseconds(this->engine));
         }
     }
 
-    LPDIRECTSOUND8 directSoundHdl;
-    i32 unused_4;
-    LPDIRECTSOUNDBUFFER soundBuffers[128];
-    LPDIRECTSOUNDBUFFER duplicateSoundBuffers[128];
+    ma_engine *engine;
+    ma_audio_buffer *duplicateSfxData[128];
+    ma_audio_buffer *sfxData[128];
+    void *sfxPCMData[128];
+    ma_uint64 sfxFrameCount[128];
+    ma_sound *soundBuffers[128];
     i32 unusedSoundVolRelated[128];
-    LPDIRECTSOUNDBUFFER initSoundBuffer;
-    HWND gameWindow;
-    CSoundManager *manager;
-    u32 backgroundMusicThreadId; // ZUN name: m_dwNotifyThreadID
-    HANDLE backgroundMusicThreadHandle;
-    u32 unused_61c;
     i32 soundQueue[5];
     ThBgmFormat *bgmPreloadFmtData[16];
-    LPBYTE bgmPreloadData[16];
-    LPBYTE bgmPreloadDataCursor[16];
+    u8 *bgmPreloadData[16];
+    u8 *bgmPreloadDataCursor[16];
     u32 bgmPreloadAllocSizes[16];
     i32 curBgmIdx;
     ThBgmFormat *bgmFmtData;
     SoundPlayerCommand commandQueue[32];
     char bgmFileNames[16][256];
     char bgmArchivePath[256];
-    CStreamingSound *backgroundMusic;
-    HANDLE backgroundMusicUpdateEvent;
-    i32 unused_39c4;
+    ThBgmDataSource *bgmDataSource;
+    ma_sound *backgroundMusic;
     i32 bgmSeekOffset;
 };
 

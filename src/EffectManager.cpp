@@ -14,22 +14,14 @@ EffectTypeInfo g_EffectMapping[34] = {
     {0x2ac, NULL, NULL},
     {0x2ad, NULL, NULL},
     {0x2ae, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurst},
-    {0x2b3, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b4, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b5, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b6, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b7, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b8, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2b9, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
-    {0x2ba, EffectManager::UpdatePhysics,
-     EffectManager::InitDeceleratingBurstFast},
+    {0x2b3, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b4, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b5, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b6, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b7, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b8, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2b9, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
+    {0x2ba, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast},
     {0x2bb, NULL, NULL},
     {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
     {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
@@ -38,26 +30,19 @@ EffectTypeInfo g_EffectMapping[34] = {
     {0x2af, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir},
     {0x2b0, EffectManager::UpdateGather240Frames, EffectManager::InitRandomDir},
     {0x2bd, EffectManager::UpdateNoOp, NULL},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
-     EffectManager::InitWeatherForward},
+    {0x2bf, EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherForward},
     {0x2c3, NULL, NULL},
-    {0x2c0, EffectManager::UpdateBurstEaseOut30Frames,
-     EffectManager::InitRandomDirWithSpeed},
+    {0x2c0, EffectManager::UpdateBurstEaseOut30Frames, EffectManager::InitRandomDirWithSpeed},
     {0x304, EffectManager::UpdateAttachToCamera, NULL},
     {0x2c2, EffectManager::UpdateAttachToPlayer, NULL},
     {0x2da, EffectManager::UpdateNoOp, NULL},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
-     EffectManager::InitWeatherVortex},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
-     EffectManager::InitWeatherBackward},
+    {0x2bf, EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherVortex},
+    {0x2bf, EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherBackward},
     {0x2db, EffectManager::UpdateNoOp, NULL},
     {0x2b2, EffectManager::UpdateBurst30Frames, EffectManager::InitRandomDir},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
-     EffectManager::InitWeatherSlow},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
-     EffectManager::InitWeatherFalling},
-    {0x2c1, EffectManager::UpdateBurstEaseOut30Frames,
-     EffectManager::InitRandomDirWithSpeed},
+    {0x2bf, EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherSlow},
+    {0x2bf, EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherFalling},
+    {0x2c1, EffectManager::UpdateBurstEaseOut30Frames, EffectManager::InitRandomDirWithSpeed},
     {0x2b1, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir},
 };
 
@@ -101,10 +86,8 @@ i32 EffectManager::UpdatePhysics(Effect *effect)
 
 i32 EffectManager::InitDeceleratingBurst(Effect *effect)
 {
-    effect->velocity.x =
-        (g_Rng.GetRandomFloatInRange(256.0f) - 128.0f) * 4.0f / 33.0f;
-    effect->velocity.y =
-        (g_Rng.GetRandomFloatInRange(256.0f) - 128.0f) * 4.0f / 33.0f;
+    effect->velocity.x = (g_Rng.GetRandomFloatInRange(256.0f) - 128.0f) * 4.0f / 33.0f;
+    effect->velocity.y = (g_Rng.GetRandomFloatInRange(256.0f) - 128.0f) * 4.0f / 33.0f;
     effect->velocity.z = 0.0f;
     effect->acceleration = -effect->velocity / 20.0f;
     effect->velocity *= g_Supervisor.effectiveFramerateMultiplier;
@@ -165,8 +148,8 @@ i32 EffectManager::UpdateOrbitEffect(Effect *effect)
             return 0;
         }
         fadeOutRatio = 1.0f - (f32)effect->fadeOutTime / 16.0f;
-        effect->vm.color.color =
-            (effect->vm.color.color & 0xffffff) | (u32)(fadeOutRatio * 255.0f) << 24;
+        effect->vm.color.color = (effect->vm.color.color & 0xffffff) | (u32)(fadeOutRatio * 255.0f)
+                                                                           << 24;
         effect->vm.scale.y = 2.0f - fadeOutRatio;
         effect->vm.scale.x = effect->vm.scale.y;
     }
@@ -288,10 +271,8 @@ i32 EffectManager::InitWeatherForward(Effect *effect)
     effect->basePosition.x += g_Rng.GetRandomFloatInRange(120.0f) - 60.0f + camLookAtInv.x / 2.0f;
     effect->basePosition.y += g_Rng.GetRandomFloatInRange(200.0f) - 100.0f + camLookAtInv.y / 2.0f;
     effect->basePosition.z += g_Rng.GetRandomFloatInRange(100.0f) - 100.0f + camLookAtInv.z / 2.0f;
-    effect->velocity.x =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
-    effect->velocity.y =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
+    effect->velocity.x = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
+    effect->velocity.y = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
     effect->velocity.z = g_Rng.GetRandomFloatInRange(0.1f) + 0.03f + effect->custom.z;
     effect->acceleration.x = g_Rng.GetRandomFloatInRange(0.0002f) - 0.0001f;
     effect->acceleration.y = g_Rng.GetRandomFloatInRange(0.0002f) - 0.0001f;
@@ -374,12 +355,9 @@ i32 EffectManager::InitWeatherSlow(Effect *effect)
     effect->basePosition.x = g_Rng.GetRandomFloatInRange(160.0f) - 80.0f;
     effect->basePosition.y = g_Rng.GetRandomFloatInRange(160.0f) - 80.0f;
     effect->basePosition.z = g_Rng.GetRandomFloatInRange(100.0f) - 100.0f;
-    effect->velocity.x =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
-    effect->velocity.y =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
-    effect->velocity.z =
-        g_Rng.GetRandomFloatInRange(0.02f) + 0.01f + effect->custom.z;
+    effect->velocity.x = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
+    effect->velocity.y = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
+    effect->velocity.z = g_Rng.GetRandomFloatInRange(0.02f) + 0.01f + effect->custom.z;
     effect->basePosition += g_Stage.cam.lookAt / 2.0f + g_Stage.cam.pos;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
@@ -399,10 +377,8 @@ i32 EffectManager::InitWeatherFalling(Effect *effect)
     effect->basePosition.x = g_Rng.GetRandomFloatInRange(160.0f) - 80.0f;
     effect->basePosition.y = g_Rng.GetRandomFloatInRange(160.0f) - 80.0f;
     effect->basePosition.z = g_Rng.GetRandomFloatInRange(200.0f) - 0.0f;
-    effect->velocity.x =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
-    effect->velocity.y =
-        g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
+    effect->velocity.x = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.x;
+    effect->velocity.y = g_Rng.GetRandomFloatInRange(0.06f) - 0.03f + effect->custom.y;
     effect->velocity.z = -g_Rng.GetRandomFloatInRange(0.1f) + effect->custom.z;
     effect->basePosition += g_Stage.cam.lookAt / 2.0f + g_Stage.cam.pos;
     effect->velocity = effect->velocity * g_Supervisor.effectiveFramerateMultiplier;
@@ -468,8 +444,7 @@ i32 EffectManager::UpdateNoOp(Effect *effect)
     return 1;
 }
 
-Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos,
-                                      i32 numParticles, D3DCOLOR color)
+Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles, D3DCOLOR color)
 {
     i32 i;
     Effect *effect;
@@ -530,8 +505,7 @@ Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos,
     return i >= 400 ? &this->effects[408] : effect;
 }
 
-Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos,
-                                            ZunVec3 *velocity,
+Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos, ZunVec3 *velocity,
                                             i32 numParticles, D3DCOLOR color)
 {
     i32 i;
@@ -593,8 +567,8 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos,
     return i >= 400 ? &this->effects[408] : effect;
 }
 
-Effect *EffectManager::SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3,
-                                   i32 param_4, D3DCOLOR color)
+Effect *EffectManager::SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4,
+                                   D3DCOLOR color)
 {
     Effect *effect;
 
@@ -683,8 +657,7 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
         }
     }
     arg->frameCounter++;
-    if (arg->frameCounter % 300 == 100 &&
-        g_GameManager.CheckGameIntegrity())
+    if (arg->frameCounter % 300 == 100 && g_GameManager.CheckGameIntegrity())
     {
         return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
     }
@@ -808,72 +781,84 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
     case 0:
     case 1:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff01.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff01.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 2:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 3:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff03.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff03.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 4:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff04.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff04.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff04b.anm", ANM_OFFSET_EFFECTS2) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff04b.anm", ANM_OFFSET_EFFECTS2) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 5:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 6:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff06.anm", ANM_OFFSET_EFFECTS3) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff06.anm", ANM_OFFSET_EFFECTS3) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 7:
         g_Stage.numSpellcardVms = 1;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff07.anm", ANM_OFFSET_EFFECTS2) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS2, "data/eff07.anm", ANM_OFFSET_EFFECTS2) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case 8:
         g_Stage.numSpellcardVms = 2;
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff07.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff07.anm", ANM_OFFSET_EFFECTS) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff08.anm", ANM_OFFSET_EFFECTS3) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS3, "data/eff08.anm", ANM_OFFSET_EFFECTS3) !=
+            ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
@@ -897,10 +882,8 @@ ZunResult EffectManager::RegisterChain()
     g_EffectManagerCalcChain.callback = (ChainCallback)OnUpdate;
     g_EffectManagerCalcChain.addedCallback = NULL;
     g_EffectManagerCalcChain.deletedCallback = NULL;
-    g_EffectManagerCalcChain.addedCallback =
-        (ChainLifecycleCallback)AddedCallback;
-    g_EffectManagerCalcChain.deletedCallback =
-        (ChainLifecycleCallback)DeletedCallback;
+    g_EffectManagerCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
+    g_EffectManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_EffectManagerCalcChain.arg = mgr;
     if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, 11))
     {

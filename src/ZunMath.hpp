@@ -101,8 +101,7 @@ struct ZunVec3
     }
 
     __forceinline ZunVec3 *Project(ZunVec3 *pV, D3DVIEWPORT8 *pViewport,
-                                   struct ZunMatrix *pProjection,
-                                   struct ZunMatrix *pView,
+                                   struct ZunMatrix *pProjection, struct ZunMatrix *pView,
                                    struct ZunMatrix *pWorld);
 
     __forceinline ZunVec3 *Normalize(ZunVec3 *pV)
@@ -117,8 +116,7 @@ struct ZunVec3
 
     __forceinline ZunVec3 *Cross(ZunVec3 *pV1, ZunVec3 *pV2)
     {
-        return (ZunVec3 *)D3DXVec3Cross(this->asD3DX(), pV1->asD3DX(),
-                                        pV2->asD3DX());
+        return (ZunVec3 *)D3DXVec3Cross(this->asD3DX(), pV1->asD3DX(), pV2->asD3DX());
     }
 
     __forceinline ZunVec3 *TransformCoord(ZunVec3 *pV, struct ZunMatrix *pM);
@@ -263,41 +261,34 @@ struct ZunMatrix
 
     __forceinline ZunMatrix *Multiply(ZunMatrix *pM1, ZunMatrix *pM2)
     {
-        return (ZunMatrix *)D3DXMatrixMultiply(this->asD3DX(), pM1->asD3DX(),
-                                               pM2->asD3DX());
+        return (ZunMatrix *)D3DXMatrixMultiply(this->asD3DX(), pM1->asD3DX(), pM2->asD3DX());
     }
 
     __forceinline ZunMatrix *LookAtLH(ZunVec3 *pEye, ZunVec3 *pAt, ZunVec3 *pUp)
     {
-        return (ZunMatrix *)D3DXMatrixLookAtLH(this->asD3DX(), pEye->asD3DX(),
-                                               pAt->asD3DX(), pUp->asD3DX());
+        return (ZunMatrix *)D3DXMatrixLookAtLH(this->asD3DX(), pEye->asD3DX(), pAt->asD3DX(),
+                                               pUp->asD3DX());
     }
 
-    __forceinline ZunMatrix *PerspectiveFovLH(f32 fovy, f32 Aspect, f32 zn,
-                                              f32 zf)
+    __forceinline ZunMatrix *PerspectiveFovLH(f32 fovy, f32 Aspect, f32 zn, f32 zf)
     {
-        return (ZunMatrix *)D3DXMatrixPerspectiveFovLH(this->asD3DX(), fovy, Aspect,
-                                                       zn, zf);
+        return (ZunMatrix *)D3DXMatrixPerspectiveFovLH(this->asD3DX(), fovy, Aspect, zn, zf);
     }
 
     __forceinline ZunMatrix *RotationQuaternion(ZunQuaternion *pQ)
     {
-        return (ZunMatrix *)D3DXMatrixRotationQuaternion(this->asD3DX(),
-                                                         pQ->asD3DX());
+        return (ZunMatrix *)D3DXMatrixRotationQuaternion(this->asD3DX(), pQ->asD3DX());
     }
 };
 
 __forceinline ZunVec3 *ZunVec3::Project(ZunVec3 *pV, D3DVIEWPORT8 *pViewport,
-                                        ZunMatrix *pProjection,
-                                        ZunMatrix *pView, ZunMatrix *pWorld)
+                                        ZunMatrix *pProjection, ZunMatrix *pView, ZunMatrix *pWorld)
 {
     return (ZunVec3 *)D3DXVec3Project(this->asD3DX(), pV->asD3DX(), pViewport,
-                                      pProjection->asD3DX(), pView->asD3DX(),
-                                      pWorld->asD3DX());
+                                      pProjection->asD3DX(), pView->asD3DX(), pWorld->asD3DX());
 }
 
 __forceinline ZunVec3 *ZunVec3::TransformCoord(ZunVec3 *pV, ZunMatrix *pM)
 {
-    return (ZunVec3 *)D3DXVec3TransformCoord(this->asD3DX(), pV->asD3DX(),
-                                             pM->asD3DX());
+    return (ZunVec3 *)D3DXVec3TransformCoord(this->asD3DX(), pV->asD3DX(), pM->asD3DX());
 }

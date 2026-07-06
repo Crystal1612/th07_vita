@@ -1,6 +1,6 @@
 #include "Pbg4Archive.hpp"
 
-#include "../dsutil.hpp"
+#include "../Supervisor.hpp"
 #include "../dxutil.hpp"
 #include "Lzss.hpp"
 #include "Pbg4File.hpp"
@@ -25,7 +25,7 @@ Pbg4Archive::~Pbg4Archive()
 bool Pbg4Archive::Load(const char *filename)
 {
     Release();
-    DebugPrint("info : %s open arcfile\r\n", filename);
+    Supervisor::DebugPrint("info : %s open arcfile\r\n", filename);
 
     this->fileAbstraction = new Pbg4File();
 
@@ -42,14 +42,14 @@ bool Pbg4Archive::Load(const char *filename)
             return true;
         }
     }
-    DebugPrint("info : %s not found\r\n", filename);
+    Supervisor::DebugPrint("info : %s not found\r\n", filename);
     Release();
     return false;
 }
 
 void Pbg4Archive::Release()
 {
-    DebugPrint("info : %s close arcfile\r\n", this->filename);
+    Supervisor::DebugPrint("info : %s close arcfile\r\n", this->filename);
     if (this->filename)
     {
         free(this->filename);
@@ -110,7 +110,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     }
     return dstBuf;
 err:
-    DebugPrint("info : %s error\r\n", this->filename);
+    Supervisor::DebugPrint("info : %s error\r\n", this->filename);
     if (srcBuf)
     {
         free(srcBuf);
@@ -216,15 +216,13 @@ bool Pbg4Archive::OpenArchive(const char *path)
         goto err;
     }
 
-    decompressedData =
-        Lzss::Decompress(compressedData, fileSize, NULL, decompressedSize);
+    decompressedData = Lzss::Decompress(compressedData, fileSize, NULL, decompressedSize);
     if (!decompressedData)
     {
         goto err;
     }
 
-    this->entries =
-        AllocEntries(decompressedData, this->numOfEntries, headerSize);
+    this->entries = AllocEntries(decompressedData, this->numOfEntries, headerSize);
     if (!this->entries)
     {
         goto err;
@@ -253,7 +251,7 @@ err:
         decompressedData = NULL;
     }
     SAFE_DELETE(this->fileAbstraction);
-    DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
+    Supervisor::DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
     return false;
 }
 
