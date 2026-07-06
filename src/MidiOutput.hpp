@@ -99,7 +99,7 @@ struct MidiDevice
     i32 SendLongMsg(LPMIDIHDR pmh);
     i32 SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte);
 
-    HMIDIOUT handle;
+    // HMIDIOUT handle;
     i32 deviceID;
 };
 
@@ -135,7 +135,7 @@ struct MidiOutput : MidiTimer
     ZunResult SetFadeOut(i32 interval);
     static u32 SkipVariableLength(u8 **curTrackDataCursor);
     ZunResult StopPlayback();
-    ZunResult UnprepareHeader(LPMIDIHDR pmh);
+    ZunResult UnprepareHeader(void *pmh);
 
     static u32 Ntohl(u32 x)
     {
@@ -163,7 +163,7 @@ struct MidiOutput : MidiTimer
         this->Play();
     }
 
-    MIDIHDR *midiHeaders[32];
+    // MIDIHDR *midiHeaders[32];
     i32 midiHeadersCursor;
     u8 *midiFileData[32];
     i32 numTracks;
