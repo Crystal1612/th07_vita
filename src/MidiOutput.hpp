@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+// #include <windows.h>
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
@@ -20,17 +20,17 @@ struct MidiTimer
     MidiTimer();
     ~MidiTimer();
 
-    u32 StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data);
+    //u32 StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data);
     void StartTimerDefault();
     i32 StopTimer();
 
     virtual void OnTimerElapsed();
 
-    static void CALLBACK DefaultTimerCallback(u32 delay, u32 wPeriodMin, DWORD_PTR dwUser,
-                                              DWORD_PTR dw1, DWORD_PTR dw2);
+    /*static void CALLBACK DefaultTimerCallback(u32 delay, u32 wPeriodMin, DWORD_PTR dwUser,
+                                              DWORD_PTR dw1, DWORD_PTR dw2);*/
 
     u32 timerId;
-    TIMECAPS timeCaps;
+    //TIMECAPS timeCaps;
     i32 fileIdx;
 };
 
@@ -96,7 +96,7 @@ struct MidiDevice
 
     ZunResult Close();
     u32 OpenDevice(i32 deviceID);
-    i32 SendLongMsg(LPMIDIHDR pmh);
+    //i32 SendLongMsg(LPMIDIHDR pmh);
     i32 SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte);
 
     // HMIDIOUT handle;
@@ -197,4 +197,4 @@ struct DummyMidiTimer : MidiTimer
 {
     void OnTimerElapsed();
 };
-extern LARGE_INTEGER g_PerfCounter;
+//extern LARGE_INTEGER g_PerfCounter;

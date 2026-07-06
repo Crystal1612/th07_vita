@@ -6,7 +6,7 @@
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
-LARGE_INTEGER g_PerfCounter;
+//LARGE_INTEGER g_PerfCounter;
 
 MidiDevice::MidiDevice()
 {
@@ -56,10 +56,8 @@ ZunResult MidiDevice::Close()
     return ZUN_SUCCESS;*/
 }
 
-i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
+/*i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
 {
-    return 0;
-    /*
     if (!this->handle)
     {
         return 0;
@@ -70,8 +68,8 @@ i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
         return 1;
     }
 
-    return midiOutLongMsg(this->handle, pmh, 0x40) != 0;*/
-}
+    return midiOutLongMsg(this->handle, pmh, 0x40) != 0;
+}*/
 
 union MidiShortMsg {
     struct
@@ -114,10 +112,9 @@ MidiTimer::~MidiTimer()
         timeEndPeriod(this->timeCaps.wPeriodMin);*/
 }
 
-u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
+/*u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
 {
-    return 0;
-    /*StopTimer();
+    StopTimer();
     timeBeginPeriod(this->timeCaps.wPeriodMin);
     if (cb)
     {
@@ -128,8 +125,8 @@ u32 MidiTimer::StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data)
         this->timerId = timeSetEvent(delay, this->timeCaps.wPeriodMin, DefaultTimerCallback,
                                      (DWORD_PTR)this, TIME_PERIODIC);
     }
-    return this->timerId;*/
-}
+    return this->timerId;
+}*/
 
 i32 MidiTimer::StopTimer()
 {
@@ -144,13 +141,13 @@ i32 MidiTimer::StopTimer()
     return 1;*/
 }
 
-void CALLBACK MidiTimer::DefaultTimerCallback(u32 delay, u32 wPeriodMin, DWORD_PTR dwUser,
+/*void CALLBACK MidiTimer::DefaultTimerCallback(u32 delay, u32 wPeriodMin, DWORD_PTR dwUser,
                                               DWORD_PTR dw1, DWORD_PTR dw2)
 {
-    /*MidiTimer *timer = (MidiTimer *)dwUser;
+    MidiTimer *timer = (MidiTimer *)dwUser;
 
-        timer->OnTimerElapsed();*/
-}
+    timer->OnTimerElapsed();
+}*/
 
 u16 MidiOutput::Ntohs(u16 x)
 {
