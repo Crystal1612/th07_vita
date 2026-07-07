@@ -1681,9 +1681,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 {
                     vm->pendingInterrupt = 17;
                 }
-                vm = &this->vms[(i32)((i32) & ((StageReplayData *)this->chosenReplayIdx)
-                                                      ->extendsFromPointItems +
-                                                  1)];
+                vm = &this->vms[chosenReplayIdx + 25];
                 vm->pendingInterrupt = 16;
                 this->resultScreenState = 14;
             }
