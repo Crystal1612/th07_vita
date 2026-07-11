@@ -2427,6 +2427,10 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->positionCenter.z = 0.49f;
     arg->optionsPosition[0].z = 0.49f;
     arg->optionsPosition[1].z = 0.49f;
+
+    // ZUN landmine: This loop goes for 128 iterations, but bombDamageBoxes has
+    // only 112 elements, meaning that this causes UB. In practice this makes
+    // some of it overflow into bombClearBoxes
     for (i = 0; i < 128; i++)
     {
         arg->bombDamageBoxes[i].size.x = 0.0f;

@@ -207,8 +207,8 @@ struct ResultScreen
     i32 cheatCodeStep;
     i32 isClearingReplayName;
     char replayName[8];
+    i32 unused_4c;
     i32 totalPlayCountPerCharacter[7];
-    i32 savedPlaytimeCharacter;
     u8 lastTotalSeconds;
     // pad 3
     AnmVm vms[41];
