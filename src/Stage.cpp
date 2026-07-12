@@ -747,6 +747,7 @@ ZunResult Stage::DeletedCallback(Stage *arg)
     g_AnmManager->ReleaseAnm(7);
     g_AnmManager->ReleaseAnm(8);
     g_AnmManager->ReleaseAnm(9);
+    SAFE_DELETE_ARRAY(arg->objects);
     SAFE_FREE(arg->quadVms);
     SAFE_FREE(arg->stdData);
     return ZUN_SUCCESS;
@@ -808,10 +809,12 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     this->quadCount = this->stdData->quadCount;
     this->objectInstances = (StdRawInstance *)(this->stdData->facesOffset + (u8 *)this->stdData);
     this->beginningOfScript = (StdRawInstr *)(this->stdData->scriptOffset + (u8 *)this->stdData);
-    this->objects = (StdRawObject **)(this->stdData + 1);
+
+    u32 *offsets = (u32 *)(this->stdData + 1);
+    this->objects = new StdRawObject *[this->objectsCount];
     for (i = 0; i < this->objectsCount; i++)
     {
-        this->objects[i] = (StdRawObject *)((uintptr_t)this->objects[i] + (uintptr_t)this->stdData);
+        this->objects[i] = (StdRawObject *)((u8 *)this->stdData + offsets[i]);
     }
     this->quadVms = (AnmVm *)malloc(this->quadCount * sizeof(AnmVm));
     for (i = 0, vmIdx = 0; i < this->objectsCount; i++)

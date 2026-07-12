@@ -4,7 +4,7 @@ A cross-platform port of 東方妖々夢　～ Perfect Cherry Blossom 1.00b by T
 
 This is the portable branch of the Touhou 7 decompilation. Unless you're looking specifically for an attempted cross-platform port of th07, you probably want the [main branch](https://github.com/some100/th07/tree/main). Currently, this will not produce a playable game on any platform, and is broken and unfinished right now. Rendering seems to work fine, as does sound, but there are things that don't work fine. Namely:
 
-* You cannot load into stages (on 64-bit). This is because the way ecl files, stg files, etc. are loaded in the original game is not endian or alignment independent, resulting in it breaking on any system not on 32-bit little endian.
+* You cannot load into stages (on big endian). This is because the way ecl files, stg files, etc. are loaded in the original game is not endian independent, resulting in it breaking on any system not on little endian.
 * Text rendering looks off. To be clear it does "work" but the text looks too big.
 * There is only a software renderer implemented, which is ridiculously slow particularly on debug builds.
 * Some features that the original game had, like 16 bit color mode, midi output, etc. are outright unimplemented. This may or may not be "fixed" later, but the focus currently is to produce a playable game.

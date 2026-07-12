@@ -23,6 +23,7 @@ typedef enum MsgOpcode
     MSG_FADE_IN_EFFECT = 14
 } MsgOpcode;
 
+#pragma pack(push, 1)
 struct MsgRawInstrArgPortrait
 {
     i16 portraitIdx;
@@ -71,8 +72,9 @@ struct MsgRawInstr
 struct MsgRawHeader
 {
     i32 numEntries;
-    MsgRawInstr *entries;
+    u32 offsets[];
 };
+#pragma pack(pop)
 
 struct GuiImplChildB
 {

@@ -532,7 +532,7 @@ void Player::SpawnBullets(Player *player, u32 timer)
     ShtLevel *level;
     i32 i;
 
-    level = !player->isFocus ? &player->shooterData->levels : &player->shooterDataFocus->levels;
+    level = !player->isFocus ? player->shooterData->levels : player->shooterDataFocus->levels;
 
     while ((i32)g_GameManager.globals->currentPower >= level->requiredPower)
     {
@@ -2335,8 +2335,12 @@ ZunResult Player::DeletedCallback(Player *arg)
         g_AsciiManager.GetBossMarker(1)->pendingInterrupt = 99;
         g_AsciiManager.GetBossMarker(2)->pendingInterrupt = 99;
     }
-    SAFE_FREE(g_Player.shooterData);
-    SAFE_FREE(g_Player.shooterDataFocus);
+    SAFE_DELETE_ARRAY(g_Player.shooterData->levels);
+    SAFE_DELETE_ARRAY(g_Player.shooterData->entries);
+    SAFE_DELETE(g_Player.shooterData);
+    SAFE_DELETE_ARRAY(g_Player.shooterDataFocus->levels);
+    SAFE_DELETE_ARRAY(g_Player.shooterDataFocus->entries);
+    SAFE_DELETE(g_Player.shooterDataFocus);
     return ZUN_SUCCESS;
 }
 
@@ -2376,29 +2380,66 @@ void Player::CutChain()
 
 ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
 {
-    ShtEntry *entry;
-    i32 i;
-
-    *data = (ShtData *)FileSystem::OpenFile(shtPath, 0);
-    if (!*data)
+    u8 *rawFile = FileSystem::OpenFile(shtPath, 0);
+    if (!rawFile)
     {
         return ZUN_ERROR;
     }
 
-    for (i = 0; i < (i32)(u32)(*data)->entryCount; i++)
-    {
-        (&(*data)->levels)[i].entry =
-            (ShtEntry *)((uintptr_t)(&(*data)->levels)[i].entry + (uintptr_t)*data);
+    ShtRawData *rawData = (ShtRawData *)rawFile;
 
-        entry = (&(*data)->levels)[i].entry;
-        while (entry->fireInterval >= 0)
+    ShtData *parsed = new ShtData;
+    memcpy(parsed, rawData, offsetof(ShtRawData, levels));
+
+    parsed->levels = new ShtLevel[parsed->entryCount];
+
+    i32 totalEntries = 0;
+    for (i32 i = 0; i < parsed->entryCount; i++)
+    {
+        ShtRawEntry *re = (ShtRawEntry *)(rawFile + rawData->levels[i].entryOffset);
+        while (re->fireInterval >= 0)
         {
-            entry->fireCallback = g_ShtFireFuncs[(uintptr_t)entry->fireCallback];
-            entry->updateCallback = g_ShtUpdateFuncs[(uintptr_t)entry->updateCallback];
-            entry->drawCallback = g_ShtDrawFuncs[(uintptr_t)entry->drawCallback];
-            entry->hitCallback = g_ShtHitFuncs[(uintptr_t)entry->hitCallback];
-            entry++;
+            totalEntries++;
+            re++;
         }
+        totalEntries++;
     }
+
+    parsed->entries = new ShtEntry[totalEntries];
+
+    i32 entryIdx = 0;
+    for (i32 i = 0; i < parsed->entryCount; i++)
+    {
+        parsed->levels[i].requiredPower = rawData->levels[i].requiredPower;
+        parsed->levels[i].entry = &parsed->entries[entryIdx];
+
+        ShtRawEntry *re = (ShtRawEntry *)(rawFile + rawData->levels[i].entryOffset);
+        while (re->fireInterval >= 0)
+        {
+            ShtEntry *e = &parsed->entries[entryIdx++];
+            e->fireInterval = re->fireInterval;
+            e->fireOffset = re->fireOffset;
+            e->offset = re->offset;
+            e->hitboxSize = re->hitboxSize;
+            e->angle = re->angle;
+            e->speed = re->speed;
+            e->damage = re->damage;
+            e->option = re->option;
+            e->bulletState2 = re->bulletState2;
+            e->anmFileIdx = re->anmFileIdx;
+            e->soundIdx = re->soundIdx;
+            e->fireCallback = re->fireCallback < 6 ? g_ShtFireFuncs[re->fireCallback] : NULL;
+            e->updateCallback =
+                re->updateCallback < 6 ? g_ShtUpdateFuncs[re->updateCallback] : NULL;
+            e->drawCallback = re->drawCallback < 2 ? g_ShtDrawFuncs[re->drawCallback] : NULL;
+            e->hitCallback = re->hitCallback < 4 ? g_ShtHitFuncs[re->hitCallback] : NULL;
+            re++;
+        }
+        parsed->entries[entryIdx].fireInterval = -1;
+        entryIdx++;
+    }
+
+    free(rawFile);
+    *data = parsed;
     return ZUN_SUCCESS;
 }

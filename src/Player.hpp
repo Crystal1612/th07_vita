@@ -378,5 +378,52 @@ struct ShtData
     f32 speedFocus;
     f32 speedDiagonal;
     f32 speedDiagonalFocus;
-    ShtLevel levels;
+    ShtLevel *levels;
+    ShtEntry *entries;
 };
+
+#pragma pack(push, 4)
+struct ShtRawEntry
+{
+    i16 fireInterval;
+    i16 fireOffset;
+    Float2 offset;
+    Float2 hitboxSize;
+    f32 angle;
+    f32 speed;
+    i16 damage;
+    i8 option;
+    i8 bulletState2;
+    i16 anmFileIdx;
+    i16 soundIdx;
+    u32 fireCallback;
+    u32 updateCallback;
+    u32 drawCallback;
+    u32 hitCallback;
+};
+
+struct ShtRawLevel
+{
+    u32 entryOffset;
+    i32 requiredPower;
+};
+
+struct ShtRawData
+{
+    i16 numLevels;
+    u16 entryCount;
+    f32 initialBombs;
+    i32 initialRespawnTimer;
+    f32 hitboxRadius;
+    f32 grabItemRadius;
+    f32 itemCollectSpeed;
+    f32 itemCollectRadius;
+    f32 cherryPenaltyMultiplier;
+    f32 pocY;
+    f32 speed;
+    f32 speedFocus;
+    f32 speedDiagonal;
+    f32 speedDiagonalFocus;
+    ShtRawLevel levels[];
+};
+#pragma pack(pop)

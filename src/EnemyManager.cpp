@@ -694,7 +694,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     {
         if (!arg->timelines[i].timelineInstr)
         {
-            arg->timelines[i].timelineInstr = g_EclManager.eclFile->GetTimeline(i);
+            arg->timelines[i].timelineInstr = g_EclManager.GetTimeline(i);
         }
         RunEclTimeline(&arg->timelines[i]);
     }

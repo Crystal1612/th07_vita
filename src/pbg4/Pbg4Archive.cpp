@@ -157,7 +157,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
     u32 headerSize;
     u32 fileSize;
     i32 magic;
-    size_t decompressedSize;
+    u32 decompressedSize;
     u8 *decompressedData;
 
     compressedData = NULL;
@@ -278,13 +278,13 @@ Pbg4Entry *Pbg4Archive::AllocEntries(void *param_1, i32 count, u32 dataOffset)
 
         entryData += strlen((char *)entryData) + 1;
 
-        entries[i].dataOffset = *(u32 *)entryData;
+        memcpy(&entries[i].dataOffset, entryData, 4);
         entryData += 4;
 
-        entries[i].decompressedSize = *(u32 *)entryData;
+        memcpy(&entries[i].decompressedSize, entryData, 4);
         entryData += 4;
 
-        entries[i].magicThing = *(u32 *)entryData;
+        memcpy(&entries[i].magicThing, entryData, 4);
         entryData += 4;
     }
 

@@ -14,6 +14,7 @@
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
 #include "ZunResult.hpp"
+#include "dxutil.hpp"
 #include "pbg4/Lzss.hpp"
 
 static const f32 g_DifficultyWeightsList[] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
@@ -77,7 +78,7 @@ void ResultScreen::FreeAllScores(ScoreListNode *scores)
 
 ScoreDat *ResultScreen::OpenScore(const char *path)
 {
-    ScoreDat *uncompressedData;
+    ScoreDatRaw *rawData;
     ScoreDat *scoreData;
     i32 i;
     u8 xorValue;
@@ -91,22 +92,22 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     Vrsm *parsedVrsm;
 
     Supervisor::DebugPrint("info : score load\r\n");
-    scoreData = (ScoreDat *)FileSystem::OpenFile(path, 1);
-    if (!scoreData)
+    rawData = (ScoreDatRaw *)FileSystem::OpenFile(path, 1);
+    scoreData = new ScoreDat;
+
+    if (!rawData)
     {
     RECREATE_SCORE:
         Supervisor::DebugPrint("info : score recreate\r\n");
-        if (scoreData)
-        {
-            free(scoreData);
-        }
-        scoreData = (ScoreDat *)malloc(sizeof(ScoreDat));
-        scoreData->dataOffset = sizeof(ScoreDat);
-        scoreData->fileLength = sizeof(ScoreDat);
+        SAFE_FREE(rawData);
+        SAFE_DELETE(scoreData);
+        scoreData = new ScoreDat;
+        scoreData->raw.dataOffset = sizeof(ScoreDatRaw);
+        scoreData->raw.fileLength = sizeof(ScoreDatRaw);
         goto INIT_SCORES;
     }
 
-    if (g_LastFileSize < sizeof(ScoreDat))
+    if (g_LastFileSize < sizeof(ScoreDatRaw))
     {
         Supervisor::DebugPrint("warning : score.dat size is short\r\n");
         free(scoreData);
@@ -117,7 +118,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     checksum = 0;
     xorValue = 0;
     i = 0;
-    idx = (u8 *)scoreData + 1;
+    idx = (u8 *)rawData + 1;
     while (remainingData > 0)
     {
         xorValue += idx[0];
@@ -132,35 +133,36 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         i++;
     }
 
-    if (scoreData->csum != checksum)
+    if (rawData->csum != checksum)
     {
         Supervisor::DebugPrint("warning : score.dat chksum error\r\n");
         goto RECREATE_SCORE;
     }
 
-    if (scoreData->dataOffset != sizeof(ScoreDat))
+    if (rawData->dataOffset != sizeof(ScoreDatRaw))
     {
         Supervisor::DebugPrint("warning : header size is mismatch\r\n");
         goto RECREATE_SCORE;
     }
 
-    if (scoreData->magic != 11)
+    if (rawData->magic != 11)
     {
         Supervisor::DebugPrint("warning : score.dat version mismatch\r\n");
         goto RECREATE_SCORE;
     }
 
-    uncompressedData = (ScoreDat *)malloc(0xa001c);
-    memcpy(uncompressedData, scoreData, sizeof(ScoreDat));
-    Lzss::Decompress((u8 *)scoreData + sizeof(ScoreDat), scoreData->srcLen,
-                     (u8 *)uncompressedData + sizeof(ScoreDat), scoreData->dstLen);
-    free(scoreData);
-    scoreData = uncompressedData;
+    scoreData->raw = *rawData;
+    scoreData->decodedData = (u8 *)malloc(scoreData->raw.dstLen + sizeof(ScoreDatRaw));
+    memcpy(scoreData->decodedData, rawData, sizeof(ScoreDatRaw));
+    Lzss::Decompress((u8 *)rawData + sizeof(ScoreDatRaw), scoreData->raw.srcLen,
+                     scoreData->decodedData + sizeof(ScoreDatRaw), scoreData->raw.dstLen);
+    free(rawData);
+    rawData = NULL;
 
-    cursor = scoreData->fileLength;
+    cursor = scoreData->raw.fileLength;
     isTh7k = false;
-    chunk = (Th7k *)((u8 *)scoreData + scoreData->dataOffset);
-    cursor -= scoreData->dataOffset;
+    chunk = (Th7k *)(scoreData->decodedData + scoreData->raw.dataOffset);
+    cursor -= scoreData->raw.dataOffset;
 
     while (cursor > 0)
     {
@@ -192,10 +194,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     }
 
 INIT_SCORES:
-    scoreData->scores = (ScoreListNode *)malloc(sizeof(ScoreListNode));
-    scoreData->scores->next = NULL;
-    scoreData->scores->data = NULL;
-    scoreData->scores->prev = NULL;
+    scoreData->scores = new ScoreListNode;
     return scoreData;
 }
 
@@ -214,9 +213,14 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node, u32 char
         sd->scores->prev = NULL;
     }
 
-    cursor = sd->fileLength;
-    parsedHscr = (Hscr *)(sd->xorseed + sd->dataOffset);
-    cursor -= sd->dataOffset;
+    cursor = sd->raw.fileLength;
+    if (!sd->decodedData)
+    {
+        return 100000;
+    }
+
+    parsedHscr = (Hscr *)(sd->decodedData + sd->raw.dataOffset);
+    cursor -= sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedHscr->magic == HSCR_MAGIC && parsedHscr->version == 1 &&
@@ -254,8 +258,8 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
         return ZUN_ERROR;
     }
 
-    parsedCatk = (Catk *)(sd->xorseed + sd->dataOffset);
-    cursor = sd->fileLength - sd->dataOffset;
+    parsedCatk = (Catk *)(sd->decodedData + sd->raw.dataOffset);
+    cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedCatk->magic == CATK_MAGIC && parsedCatk->version == 1)
@@ -278,8 +282,8 @@ i32 ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm)
     Lsnm *parsedLsnm;
     ScoreDat *sd = scoreDat;
 
-    parsedLsnm = (Lsnm *)(sd->xorseed + sd->dataOffset);
-    cursor = sd->fileLength - sd->dataOffset;
+    parsedLsnm = (Lsnm *)(sd->decodedData + sd->raw.dataOffset);
+    cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedLsnm->magic == LSNM_MAGIC && parsedLsnm->version == 1)
@@ -320,8 +324,8 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
             outClrd[i].difficultyClearedWithoutRetries[j] = 1;
         }
     }
-    parsedClrd = (Clrd *)(sd->xorseed + sd->dataOffset);
-    cursor = sd->fileLength - sd->dataOffset;
+    parsedClrd = (Clrd *)(sd->decodedData + sd->raw.dataOffset);
+    cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedClrd->magic == CLRD_MAGIC && parsedClrd->version == 1)
@@ -372,8 +376,8 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
             }
         }
     }
-    parsedPscr = (Pscr *)(sd->xorseed + sd->dataOffset);
-    cursor = sd->fileLength - sd->dataOffset;
+    parsedPscr = (Pscr *)(sd->decodedData + sd->raw.dataOffset);
+    cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedPscr->magic == PSCR_MAGIC && parsedPscr->version == 1)
@@ -397,8 +401,8 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
     Plst *parsedPlst;
     ScoreDat *sd = scoreDat;
 
-    parsedPlst = (Plst *)(sd->xorseed + sd->dataOffset);
-    cursor = sd->fileLength - sd->dataOffset;
+    parsedPlst = (Plst *)(sd->decodedData + sd->raw.dataOffset);
+    cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
         if (parsedPlst->magic == PLST_MAGIC && parsedPlst->version == 1)
@@ -444,8 +448,10 @@ void ResultScreen::WriteScore()
 
     fileBuffer = (u8 *)malloc(0xa0000);
 
-    memcpy(fileBuffer + sizeOfFile, this->scoreDat, sizeof(ScoreDat));
-    sizeOfFile += sizeof(ScoreDat);
+    ScoreDatRaw rawHead;
+    memset(&rawHead, 0, sizeof(rawHead));
+    memcpy(fileBuffer + sizeOfFile, &rawHead, sizeof(ScoreDatRaw));
+    sizeOfFile += sizeof(ScoreDatRaw);
 
     this->th7kHeader.magic = TH7K_MAGIC;
     this->th7kHeader.th7kLen2 = sizeof(Th7k);
@@ -559,24 +565,24 @@ void ResultScreen::WriteScore()
     sizeOfFile += sizeof(Vrsm);
 
     scoreDat = (ScoreDat *)fileBuffer;
-    scoreDat->dstLen = sizeOfFile - sizeof(ScoreDat);
-    scoreDat->fileLength = sizeOfFile;
+    scoreDat->raw.dstLen = sizeOfFile - sizeof(ScoreDatRaw);
+    scoreDat->raw.fileLength = sizeOfFile;
     compressedBuffer =
-        Lzss::Compress(fileBuffer + sizeof(ScoreDat), scoreDat->dstLen, &scoreDat->srcLen);
+        Lzss::Compress(fileBuffer + sizeof(ScoreDatRaw), scoreDat->raw.dstLen, &scoreDat->raw.srcLen);
 
-    memcpy(fileBuffer + sizeof(ScoreDat), compressedBuffer, scoreDat->srcLen);
+    memcpy(fileBuffer + sizeof(ScoreDatRaw), compressedBuffer, scoreDat->raw.srcLen);
     free(compressedBuffer);
-    sizeOfFile = scoreDat->srcLen + sizeof(ScoreDat);
+    sizeOfFile = scoreDat->raw.srcLen + sizeof(ScoreDatRaw);
 
     sd = (ScoreDat *)fileBuffer;
-    sd->dataOffset = sizeof(ScoreDat);
-    sd->csum = 0;
-    sd->xorseed[1] = g_Rng.GetRandomU16InRange(256);
-    sd->unused_6 = g_Rng.GetRandomU16InRange(256);
-    sd->magic = 11;
+    sd->raw.dataOffset = sizeof(ScoreDatRaw);
+    sd->raw.csum = 0;
+    sd->raw.xorseed[1] = g_Rng.GetRandomU16InRange(256);
+    sd->raw.unused_6 = g_Rng.GetRandomU16InRange(256);
+    sd->raw.magic = 11;
     for (remainingSize = 4; remainingSize < (i32)sizeOfFile; remainingSize++)
     {
-        sd->csum += fileBuffer[remainingSize];
+        sd->raw.csum += fileBuffer[remainingSize];
     }
     xorValue = 0;
     originalByte = 0;
@@ -1079,7 +1085,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
         this->curScore.score = g_GameManager.globals->score;
         this->curScore.numRetries = g_GameManager.globals->numRetries;
         this->curScore.version = 1;
-        this->curScore.magic = *(u32 *)&"HSCR";
+        memcpy(&this->curScore.magic, "HSCR", 4);
         if (!g_GameManager.finished)
         {
             this->curScore.stage = (u8)g_GameManager.currentStage;
@@ -2100,9 +2106,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 pos.x += 48.0f;
                 if (arg->resultScreenState == 10 && node->data->isPlayerScore)
                 {
-                    // ZUN quirk: VIRGIN strcpy vs CHAD whatever tf this is
-                    *(u32 *)&name[0] = *(u32 *)"    ";
-                    *(u32 *)&name[4] = *(u32 *)"    ";
+                    memset(name, ' ', 8);
                     name[8] = '\0';
                     name[arg->cursor >= 8 ? 7 : arg->cursor] = '_';
                     AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%8s", name);
@@ -2316,8 +2320,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                                                     (u32)g_GameManager.shotType],
                     arg->defaultReplay.data.score);
                 g_AsciiManager.color = 0xfff0f0ff;
-                *(u32 *)&name[0] = *(u32 *)"    ";
-                *(u32 *)&name[4] = *(u32 *)"    ";
+                memset(name, ' ', 8);
                 name[8] = '\0';
                 name[arg->cursor >= 8 ? 7 : arg->cursor] = '_';
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, "      %8s", name);
@@ -2370,7 +2373,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             {
                 arg->defaultScores[i][j][k].score = 100000 - k * 10000;
                 arg->defaultScores[i][j][k].slowRatePercent = 0.0f;
-                arg->defaultScores[i][j][k].magic = *(u32 *)&"DMYS";
+                memcpy(&arg->defaultScores[i][j][k].magic, "DMYS", 4);
                 arg->defaultScores[i][j][k].difficulty = (u8)i;
                 arg->defaultScores[i][j][k].version = 1;
                 arg->defaultScores[i][j][k].th7kLen2 = sizeof(Hscr);

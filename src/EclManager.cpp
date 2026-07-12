@@ -69,19 +69,25 @@ ZunResult EclManager::Load(const char *path)
 
     for (i = 0; i < 16; i++)
     {
-        this->eclFile->timelinePtr[i] =
-            (EclTimelineInstr *)((uintptr_t)this->eclFile->timelinePtr[i] + (uintptr_t)this->eclFile);
+        this->timelinePtr[i] = (EclTimelineInstr *)((uintptr_t)this->eclFile->timelineOffsets[i] +
+                                                    (uintptr_t)this->eclFile);
     }
-    this->subTable = this->eclFile->subTable;
+    this->subTable = new EclRawInstr *[this->eclFile->subCount];
     for (i = 0; i < this->eclFile->subCount; i++)
     {
-        this->subTable[i] = (EclRawInstr *)((uintptr_t)this->subTable[i] + (uintptr_t)this->eclFile);
+        this->subTable[i] = (EclRawInstr *)((uintptr_t)this->eclFile->subTableOffsets[i] +
+                                            (uintptr_t)this->eclFile);
     }
     return ZUN_SUCCESS;
 }
 
 void EclManager::Unload()
 {
+    if (this->subTable)
+    {
+        delete[] this->subTable;
+        this->subTable = NULL;
+    }
     if (this->eclFile)
     {
         free(this->eclFile);

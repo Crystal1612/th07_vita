@@ -90,18 +90,14 @@ typedef enum EclVarId
 typedef void (*EclExInstr)(struct Enemy *, struct EclRawInstr *);
 typedef void (*EclInterpFn)(struct Enemy *, struct EclInterp *, f32 t);
 
+#pragma pack(push, 4)
 #pragma warning(disable : 4200)
 struct EclRawHeader
 {
     i16 subCount;
     i16 timelineCount;
-    struct EclTimelineInstr *timelinePtr[16];
-    EclRawInstr *subTable[];
-
-    EclTimelineInstr *GetTimeline(i32 idx)
-    {
-        return this->timelinePtr[idx];
-    }
+    u32 timelineOffsets[16];
+    u32 subTableOffsets[];
 };
 
 #pragma warning(disable : 4200)
@@ -139,6 +135,7 @@ struct EclTimelineInstr
     i16 size;
     EclTimelineInstrArgs args;
 };
+#pragma pack(pop)
 
 struct EclTimeline
 {
@@ -188,6 +185,12 @@ struct EclManager
     ZunResult RunEcl(Enemy *enemy);
 
     EclRawHeader *eclFile;
+    EclTimelineInstr *timelinePtr[16];
     EclRawInstr **subTable;
+
+    EclTimelineInstr *GetTimeline(i32 idx)
+    {
+        return this->timelinePtr[idx];
+    }
 };
 extern EclManager g_EclManager;

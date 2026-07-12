@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AnmManager.hpp"
 #include "AnmVm.hpp"
 #include "ScreenEffect.hpp"
 #include "ZunResult.hpp"
@@ -14,6 +13,7 @@ struct StageAnms
 };
 extern StageAnms g_EnemyAnmStageFiles[9];
 
+#pragma pack(push, 4)
 struct StdRawHeader
 {
     i16 objectsCount;
@@ -70,6 +70,7 @@ struct StdRawInstr
     i16 size;
     StdRawInstrArgs args;
 };
+#pragma pack(pop)
 
 struct StageCameraSky
 {

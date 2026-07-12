@@ -1,6 +1,5 @@
 #include "Gui.hpp"
 
-#include <cstdint>
 #include <cstdio>
 
 #include "AnmIdx.hpp"
@@ -176,7 +175,7 @@ u32 Gui::OnDraw(Gui *arg)
         if (g_GameManager.currentStage >= 7 ||
             (g_GameManager.currentStage == 6 && !g_GameManager.practice &&
              (!g_GameManager.replay ||
-              g_ReplayManager->data->head.stageReplayData[4].data != NULL)))
+              g_ReplayManager->data->stageReplayData[4] != NULL)))
         {
             stringPos.y = stringPos.y + 16.0f;
             g_AsciiManager.color = 0xffffff80;
@@ -657,12 +656,7 @@ ZunResult Gui::LoadMsg(const char *param_1)
 
     this->impl->msg.currentMsgIdx = -1;
     this->impl->msg.curInstr = NULL;
-    for (i = 0; i < this->impl->msg.msgFile->numEntries; i++)
-    {
-        (&this->impl->msg.msgFile->entries)[i] =
-            (MsgRawInstr *)((uintptr_t)(&this->impl->msg.msgFile->entries)[i] + (uintptr_t) &
-                            this->impl->msg.msgFile->numEntries);
-    }
+
     return ZUN_SUCCESS;
 }
 
@@ -689,7 +683,7 @@ void GuiImpl::MsgRead(i32 msgIdx)
     memset(&this->msg, 0, sizeof(GuiMsgVm));
     this->msg.currentMsgIdx = msgIdx;
     this->msg.msgFile = tmpMsgFile;
-    this->msg.curInstr = (&this->msg.msgFile->entries)[msgIdx];
+    this->msg.curInstr = (MsgRawInstr *)((u8 *)tmpMsgFile + tmpMsgFile->offsets[msgIdx]);
     this->msg.dialogueLines[0].anmFileIdx = -1;
     this->msg.dialogueLines[1].anmFileIdx = -1;
     this->msg.fontSize = 15;
@@ -1244,7 +1238,7 @@ void Gui::UpdateGui()
         scoreBonus += this->impl->clearCherryMax;
         if (g_GameManager.currentStage >= 7 ||
             (g_GameManager.currentStage == 6 && !g_GameManager.practice &&
-             (!g_GameManager.replay || g_ReplayManager->data->head.stageReplayData[4].data)))
+             (!g_GameManager.replay || g_ReplayManager->data->stageReplayData[4])))
         {
             scoreBonus += (i32)g_GameManager.globals->livesRemaining * 2000000;
             scoreBonus += (i32)g_GameManager.globals->bombsRemaining * 400000;

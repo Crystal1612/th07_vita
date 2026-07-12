@@ -263,13 +263,13 @@ u32 MainMenu::OnUpdatePreInput()
                 g_GameManager.shotType = this->currentReplay->data.shotType % 2;
                 g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
                 i = 0;
-                while (!this->currentReplay->head.stageReplayData[i].data)
+                while (!this->currentReplay->stageReplayData[i])
                 {
                     i++;
                 }
 
                 g_GameManager.currentStage = i;
-                free(this->currentReplay);
+                ReplayManager::FreeReplay(this->currentReplay);
                 this->currentReplay = NULL;
                 g_Supervisor.curState = 2;
                 g_GameManager.replayStage = 0;
@@ -1820,13 +1820,11 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-bool ReplayFileMatches(const std::string& name)
+bool ReplayFileMatches(const std::string &name)
 {
-    return name.size() == 14 &&
-           name.compare(0, 6, "th7_ud") == 0 &&
+    return name.size() == 14 && name.compare(0, 6, "th7_ud") == 0 &&
            name.compare(10, 4, ".rpy") == 0;
 }
-
 
 u32 MainMenu::OnUpdateSelectReplay()
 {
@@ -1867,7 +1865,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                     strcpy(this->replayFilenames[local_10], local_54);
                     sprintf(this->replayLabels[local_10], "No.%.2d", i + 1);
                     local_10++;
-                    free(file);
+                    ReplayManager::FreeReplay(file);
                 }
             }
 
@@ -1901,7 +1899,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                     this->replays[local_10] = *file;
                     sprintf(this->replayFilenames[local_10], "./replay/%s", filename.c_str());
                     sprintf(this->replayLabels[local_10], "User ");
-                    free(file);
+                    ReplayManager::FreeReplay(file);
                     local_10++;
                 }
             }
@@ -1958,18 +1956,8 @@ u32 MainMenu::OnUpdateSelectReplay()
                 (ReplayFile *)FileSystem::OpenFile(this->replayFilenames[this->chosenReplay], 1);
             this->currentReplay =
                 ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
-            for (i = 0; i < 7; i++)
-            {
-                if (this->currentReplay->head.stageReplayData[i].offset != 0)
-                {
-                    this->currentReplay->head.stageReplayData[i].data =
-                        (StageReplayData *)((u8 *)this->currentReplay +
-                                            this->currentReplay->head.stageReplayData[i].offset);
-                }
-            }
             this->cursor = 0;
-            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
-                   NULL)
+            while (!this->currentReplay->head.stageReplayDataOffsets[this->cursor])
             {
                 this->cursor++;
                 if (this->cursor >= 7)
@@ -1992,8 +1980,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         i = MoveCursorVertical(7);
         if (i < 0)
         {
-            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
-                   NULL)
+            while (!this->replays[this->chosenReplay].head.stageReplayDataOffsets[this->cursor])
             {
                 this->cursor--;
                 if (this->cursor < 0)
@@ -2004,8 +1991,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         }
         else if (0 < i)
         {
-            while (this->replays[this->chosenReplay].head.stageReplayData[this->cursor].data ==
-                   NULL)
+            while (!this->replays[this->chosenReplay].head.stageReplayDataOffsets[this->cursor])
             {
                 this->cursor++;
                 if (this->cursor >= 7)
@@ -2029,7 +2015,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
-            free(this->currentReplay);
+            ReplayManager::FreeReplay(this->currentReplay);
             this->currentReplay = NULL;
             this->menuSubState = 1;
             this->stateTimer = 0;
@@ -2055,7 +2041,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_GameManager.character = this->currentReplay->data.shotType / 2;
             g_GameManager.shotType = this->currentReplay->data.shotType % 2;
             g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
-            free(this->currentReplay);
+            ReplayManager::FreeReplay(this->currentReplay);
             this->currentReplay = NULL;
             g_GameManager.currentStage = g_GameManager.difficulty >= 5 ? 7 : this->selectedStage;
             g_Supervisor.curState = 2;
@@ -2157,19 +2143,19 @@ i32 MainMenu::DrawReplayMenu()
                     g_AsciiManager.color = 0x60808080;
                 }
             }
-            if (this->currentReplay->head.stageReplayData[i].data)
+            if (this->currentReplay->stageReplayData[i])
             {
                 if (i < 6 || this->currentReplay->data.difficulty <= 4)
                 {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &vm->pos, "%s %9d0", g_StageReplayStrings[i],
-                        this->currentReplay->head.stageReplayData[i].data->score);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
+                                                g_StageReplayStrings[i],
+                                                this->currentReplay->stageReplayData[i]->score);
                 }
                 else
                 {
-                    AsciiManager::AddFormatText(
-                        &g_AsciiManager, &vm->pos, "%s %9d0", g_PhantasmReplayString,
-                        this->currentReplay->head.stageReplayData[i].data->score);
+                    AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "%s %9d0",
+                                                g_PhantasmReplayString,
+                                                this->currentReplay->stageReplayData[i]->score);
                 }
             }
             else

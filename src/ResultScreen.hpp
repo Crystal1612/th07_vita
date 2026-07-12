@@ -19,6 +19,7 @@
 #define LSNM_MAGIC 'MNSL'
 #define VRSM_MAGIC 'MSRV'
 
+#pragma pack(push, 4)
 struct Th7k
 {
     u32 magic;
@@ -105,6 +106,21 @@ struct Vrsm : Th7k
     i32 exeChecksum;
 };
 
+struct ScoreDatRaw
+{
+    u8 xorseed[2];
+    u16 csum;
+    u16 magic;
+    u8 unused_6;
+    u8 pad1;
+    i32 dataOffset;
+    u32 reservedPtr;
+    i32 fileLength;
+    u32 dstLen;
+    i32 srcLen;
+};
+#pragma pack(pop)
+
 struct ScoreListNode
 {
     ScoreListNode()
@@ -123,16 +139,9 @@ struct ScoreListNode
 
 struct ScoreDat
 {
-    u8 xorseed[2];
-    u16 csum;
-    u16 magic;
-    u8 unused_6;
-    // pad 1
-    i32 dataOffset;
+    ScoreDatRaw raw;
     ScoreListNode *scores;
-    i32 fileLength;
-    size_t dstLen;
-    i32 srcLen;
+    u8 *decodedData;
 };
 
 struct ResultScreen

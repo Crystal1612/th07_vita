@@ -83,6 +83,7 @@ struct AnmRawScript
     AnmRawInstr *first;
 };
 
+#pragma pack(push, 4)
 struct AnmRawSprite
 {
     i32 id;
@@ -110,9 +111,9 @@ struct AnmRawEntry
     i16 unused_36;
     i32 nextOffset;
     i32 unused_3c;
-    i32 spriteOffsets[10];
-    AnmRawScript scripts[10];
+    i32 dataOffsets[];
 };
+#pragma pack(pop)
 
 struct AnmEntry
 {

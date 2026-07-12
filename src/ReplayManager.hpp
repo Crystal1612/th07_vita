@@ -31,11 +31,7 @@ struct StageReplayData
     ReplayDataInput replayInputs[115189];
 };
 
-union StageReplayDataUnion {
-    StageReplayData *data;
-    i32 offset;
-};
-
+#pragma pack(push, 4)
 struct ReplayHeader
 {
     u32 magic;
@@ -48,8 +44,8 @@ struct ReplayHeader
     i32 replaySize;
     i32 compressedSize;
     i32 sizeWithoutHeader;
-    StageReplayDataUnion stageReplayData[7];
-    StageReplayDataUnion stageEndData[7];
+    u32 stageReplayDataOffsets[7];
+    u32 stageEndDataOffsets[7];
 };
 
 struct ReplayData
@@ -74,11 +70,15 @@ struct ReplayData
     i16 versionChar2;
     // pad 3
 };
+#pragma pack(pop)
 
 struct ReplayFile
 {
     ReplayHeader head;
     ReplayData data;
+    StageReplayData *stageReplayData[7];
+    StageReplayData *stageEndData[7];
+    u8 *rawData;
 };
 
 struct ReplayManager
@@ -101,10 +101,11 @@ struct ReplayManager
     static void SaveReplay2(const char *filename);
     static void StopRecording();
     static ReplayFile *ValidateReplayData(ReplayFile *data, i32 size);
+    static void FreeReplay(ReplayFile *replay);
 
     i32 StageReplayExists(i32 stage)
     {
-        return this->data->head.stageReplayData[stage].data != NULL;
+        return this->data->stageReplayData[stage] != NULL;
     }
 
     i32 IsDemo()
@@ -123,6 +124,7 @@ struct ReplayManager
     i16 unused_82;
     ReplayDataInput *replayInputs;
     ReplayDataInput *replayInputsByStage[7];
+    u8 *fpsCursor;
     StageReplayData *stageReplayData;
     uintptr_t replayDataEndPointers[7];
     ChainElem *calcChain;

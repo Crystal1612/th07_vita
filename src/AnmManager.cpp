@@ -411,7 +411,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
         this->textureHeights[textureIdx] ? this->textureHeights[textureIdx] : data->height;
 
     data->spriteIdxOffset = spriteIdxOffset;
-    curSprite = data->spriteOffsets;
+    curSprite = data->dataOffsets;
     for (i = 0; i < data->numSprites; i++, curSprite++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)data + *curSprite);
@@ -472,7 +472,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 
     if (this->anmFiles[anmIdx].raw)
     {
-        afterHdr = this->anmFiles[anmIdx].raw->spriteOffsets;
+        afterHdr = this->anmFiles[anmIdx].raw->dataOffsets;
         spriteIdxOffset = this->anmFiles[anmIdx].spriteIndexOffset;
         rawEntry = this->anmFiles[anmIdx].raw;
         uvX = anmIdx + 1;
