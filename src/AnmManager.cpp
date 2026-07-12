@@ -23,10 +23,10 @@
 AnmManager *g_AnmManager;
 
 // GLOBAL: TH07 0x004b9fa8
-VertexTex1DiffuseXyzrwh g_QuadVertices[4];
+VertexTex1DiffuseXyzrhw g_QuadVertices[4];
 
 // GLOBAL: TH07 0x004ba018
-VertexTex1Xyzrwh g_QuadTemplate[4];
+VertexTex1Xyzrhw g_QuadTemplate[4];
 
 // GLOBAL: TH07 0x004ba078
 VertexTex1DiffuseXyz g_Quad3DFallback[4];
@@ -1035,14 +1035,14 @@ void AnmManager::Flush()
                                             D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(
         D3DPT_TRIANGLELIST, this->spritesToDraw << 1, this->vertexBufferStartPtr,
-        sizeof(VertexTex1DiffuseXyzrwh));
+        sizeof(VertexTex1DiffuseXyzrhw));
     this->vertexBufferStartPtr = this->vertexBufferCurPtr;
     this->spritesToDraw = 0;
     this->flushesThisFrame++;
 }
 
 // FUNCTION: TH07 0x0044f690
-ZunResult AnmManager::PushSprite(VertexTex1DiffuseXyzrwh *spriteVertex)
+ZunResult AnmManager::PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex)
 {
     this->vertexBufferCurPtr[0] = spriteVertex[0];
     this->vertexBufferCurPtr[1] = spriteVertex[1];
@@ -1121,7 +1121,7 @@ ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
 }
 
 // FUNCTION: TH07 0x0044f960
-void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width,
+void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrhw *param_1, f32 width,
                                    f32 height, f32 param_4, f32 param_5,
                                    f32 xOffset, f32 yOffset)
 {
@@ -2787,14 +2787,14 @@ void AnmManager::ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount)
 
 #pragma var_order(uvY, i, vertex, startuvX, uvX, fVar4, num)
 // FUNCTION: TH07 0x00455170
-ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
+ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
                                   i32 count)
 {
     f32 num;
     f32 fVar4;
     f32 uvX;
     f32 startuvX;
-    VertexTex1DiffuseXyzrwh *vertex;
+    VertexTex1DiffuseXyzrhw *vertex;
     i32 i;
     f32 uvY;
     if (count < 3)
@@ -2832,7 +2832,7 @@ ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
 
 // FUNCTION: TH07 0x004552d0
 ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
-                                        VertexTex1DiffuseXyzrwh *vertices,
+                                        VertexTex1DiffuseXyzrhw *vertices,
                                         i32 param3)
 {
     if (!vm->visible)
@@ -2871,6 +2871,6 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
     SetRenderStateForVm(vm);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, param3 - 2,
                                             vertices,
-                                            sizeof(VertexTex1DiffuseXyzrwh));
+                                            sizeof(VertexTex1DiffuseXyzrhw));
     return ZUN_SUCCESS;
 }

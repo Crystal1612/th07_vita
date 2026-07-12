@@ -28,26 +28,26 @@ struct VertexTex1DiffuseXyz
 C_ASSERT(sizeof(VertexTex1DiffuseXyz) == 0x18);
 extern VertexTex1DiffuseXyz g_Quad3DFallback[4];
 
-struct VertexTex1Xyzrwh
+struct VertexTex1Xyzrhw
 {
     D3DXVECTOR3 pos;
     f32 w;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(VertexTex1Xyzrwh) == 0x18);
-extern VertexTex1Xyzrwh g_QuadTemplate[4];
+C_ASSERT(sizeof(VertexTex1Xyzrhw) == 0x18);
+extern VertexTex1Xyzrhw g_QuadTemplate[4];
 
-struct VertexTex1DiffuseXyzrwh
+struct VertexTex1DiffuseXyzrhw
 {
-    VertexTex1DiffuseXyzrwh() {}
+    VertexTex1DiffuseXyzrhw() {}
 
     Float3 pos;
     f32 w;
     ZunColor color;
     Float2 textureUV;
 };
-C_ASSERT(sizeof(VertexTex1DiffuseXyzrwh) == 0x1c);
-extern VertexTex1DiffuseXyzrwh g_QuadVertices[4];
+C_ASSERT(sizeof(VertexTex1DiffuseXyzrhw) == 0x1c);
+extern VertexTex1DiffuseXyzrhw g_QuadVertices[4];
 
 struct RenderVertexInfo
 {
@@ -150,7 +150,7 @@ struct AnmManager
                           i32 fontWidth, i32 fontHeight, D3DCOLOR textColor,
                           u32 outlineType, char *strToPrint, f32 scaleY,
                           f32 scaleX);
-    ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices,
+    ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
                                 i32 param3);
     static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor,
                               u32 outlineType, const char *param5, ...);
@@ -167,7 +167,7 @@ struct AnmManager
                                       i32 formatIdx, D3DCOLOR colorKey);
     ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
                                   D3DCOLOR formatIdx);
-    ZunResult PushSprite(VertexTex1DiffuseXyzrwh *spriteVertex);
+    ZunResult PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex);
     void ReleaseAnm(i32 anmIdx);
     void ReleaseSurface(i32 surfaceIdx);
     void ReleaseTexture(i32 textureIdx);
@@ -182,7 +182,7 @@ struct AnmManager
                         i32 srcHeight, i32 dstLeft, i32 dstTop, i32 dstWidth,
                         i32 dstHeight);
     void TakeScreenshotIfRequested();
-    void TranslateRotation(VertexTex1DiffuseXyzrwh *param_1, f32 width,
+    void TranslateRotation(VertexTex1DiffuseXyzrhw *param_1, f32 width,
                            f32 height, f32 param_4, f32 param_5,
                            f32 xOffset, f32 yOffset);
 
@@ -190,7 +190,7 @@ struct AnmManager
                                i16 interrupt);
     void ExecuteScripts(AnmVm *startVm, i32 count);
     void ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount);
-    ZunResult UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrwh *vertices, i32 count);
+    ZunResult UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count);
 
     // FUNCTION: TH07 0x00404f30
     void ExecuteAnmIdx(AnmVm *vm, i32 anmFileIdx)
@@ -385,9 +385,9 @@ struct AnmManager
     struct IDirect3DVertexBuffer8 *vertexBuffer;
     struct RenderVertexInfo vertexBufferContents[4];
     u32 spritesToDraw;
-    struct VertexTex1DiffuseXyzrwh spriteVertexBuffer[49152];
-    struct VertexTex1DiffuseXyzrwh *vertexBufferCurPtr;
-    struct VertexTex1DiffuseXyzrwh *vertexBufferStartPtr;
+    struct VertexTex1DiffuseXyzrhw spriteVertexBuffer[49152];
+    struct VertexTex1DiffuseXyzrhw *vertexBufferCurPtr;
+    struct VertexTex1DiffuseXyzrhw *vertexBufferStartPtr;
     i32 screenshotTextureId;
     i32 screenshotSrcLeft;
     i32 screenshotSrcTop;

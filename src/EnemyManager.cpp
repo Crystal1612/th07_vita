@@ -1260,7 +1260,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
     f32 cosAngle;
     f32 angle1;
     f32 uvStep;
-    VertexTex1DiffuseXyzrwh *trailVert;
+    VertexTex1DiffuseXyzrhw *trailVert;
     f32 prevAngle;
     f32 currentUvX;
     f32 sinAngle;

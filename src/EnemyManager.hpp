@@ -220,7 +220,7 @@ struct Enemy
     f32 unused_2f68;
     ZunTimer unused_2f6c;
     EnemyHistory enemyHistory[96];
-    VertexTex1DiffuseXyzrwh trailVertices[194];
+    VertexTex1DiffuseXyzrhw trailVertices[194];
     union {
         u8 trailFlags;
         struct
