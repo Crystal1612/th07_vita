@@ -87,8 +87,8 @@ struct MainMenu
     i32 isPracticeMode;
     char replayFilenames[60][512];
     char replayLabels[60][8];
-    ReplayHeaderAndData replays[60];
-    ReplayHeaderAndData *currentReplay;
+    ReplayFile replays[60];
+    ReplayFile *currentReplay;
     i32 replayPage;
     i32 replayFilesNum;
     i32 chosenReplay;

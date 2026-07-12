@@ -338,7 +338,7 @@ u32 MainMenu::OnUpdatePreInput()
             g_GameManager.demoIdx %= 3;
             strcpy(g_GameManager.replayFilename,
                    g_DemoReplayPaths[g_GameManager.demoIdx]);
-            this->currentReplay = (ReplayHeaderAndData *)FileSystem::OpenFile(
+            this->currentReplay = (ReplayFile *)FileSystem::OpenFile(
                 g_GameManager.replayFilename, 0);
             this->currentReplay =
                 ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
@@ -1990,13 +1990,13 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(i, local_c, local_10, local_14, local_54, local_194)
+#pragma var_order(i, local_c, local_10, file, local_54, local_194)
 // FUNCTION: TH07 0x0045a924
 u32 MainMenu::OnUpdateSelectReplay()
 {
     _WIN32_FIND_DATAA local_194;
     char local_54[64];
-    ReplayHeaderAndData *local_14;
+    ReplayFile *file;
     i32 local_10;
     HANDLE local_c;
     i32 i;
@@ -2023,22 +2023,22 @@ u32 MainMenu::OnUpdateSelectReplay()
             {
                 // STRING: TH07 0x004967bc
                 sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
-                local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(local_54, 1);
-                if (!local_14)
+                file = (ReplayFile *)FileSystem::OpenFile(local_54, 1);
+                if (!file)
                 {
                     continue;
                 }
 
-                local_14 =
-                    ReplayManager::ValidateReplayData(local_14, g_LastFileSize);
-                if (local_14)
+                file =
+                    ReplayManager::ValidateReplayData(file, g_LastFileSize);
+                if (file)
                 {
-                    this->replays[local_10] = *local_14;
+                    this->replays[local_10] = *file;
                     strcpy(this->replayFilenames[local_10], local_54);
                     // STRING: TH07 0x00496460
                     sprintf(this->replayLabels[local_10], "No.%.2d", i + 1);
                     local_10++;
-                    free(local_14);
+                    free(file);
                 }
             }
             // STRING: TH07 0x00495674
@@ -2050,25 +2050,25 @@ u32 MainMenu::OnUpdateSelectReplay()
             {
                 for (i = 0; i < 45; i++)
                 {
-                    local_14 = (ReplayHeaderAndData *)FileSystem::OpenFile(
+                    file = (ReplayFile *)FileSystem::OpenFile(
                         local_194.cFileName, 1);
-                    if (!local_14)
+                    if (!file)
                     {
                         continue;
                     }
                     else
                     {
-                        local_14 =
-                            ReplayManager::ValidateReplayData(local_14, g_LastFileSize);
-                        if (local_14)
+                        file =
+                            ReplayManager::ValidateReplayData(file, g_LastFileSize);
+                        if (file)
                         {
-                            this->replays[local_10] = *local_14;
+                            this->replays[local_10] = *file;
                             // STRING: TH07 0x00495658
                             sprintf(this->replayFilenames[local_10], "./replay/%s",
                                     local_194.cFileName);
                             // STRING: TH07 0x00495650
                             sprintf(this->replayLabels[local_10], "User ");
-                            free(local_14);
+                            free(file);
                             local_10++;
                         }
                         if (FindNextFileA(local_c, &local_194) == 0)
@@ -2130,7 +2130,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->menuSubState = 2;
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 15);
             this->vmHead[this->chosenReplay % 15 + 135].SetInterrupt(17);
-            this->currentReplay = (ReplayHeaderAndData *)FileSystem::OpenFile(
+            this->currentReplay = (ReplayFile *)FileSystem::OpenFile(
                 this->replayFilenames[this->chosenReplay], 1);
             this->currentReplay = ReplayManager::ValidateReplayData(
                 this->currentReplay, g_LastFileSize);

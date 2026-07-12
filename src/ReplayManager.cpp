@@ -163,7 +163,7 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
     arg->unused_40 = NULL;
     if (!arg->data)
     {
-        arg->data = new ReplayHeaderAndData;
+        arg->data = new ReplayFile;
         // STRING: TH07 0x00496aa8
         arg->data->head.magic = *(u32 *)&"T7RP";
         arg->data->data.shotType = g_GameManager.shotTypeAndCharacter;
@@ -238,11 +238,11 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
 #pragma var_order(dataDecompressed, i, curData, obfOffset, curByte, \
                   csum, csumPtr)
 // FUNCTION: TH07 0x004433b0
-ReplayHeaderAndData *
-ReplayManager::ValidateReplayData(ReplayHeaderAndData *data, i32 size)
+ReplayFile *
+ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
 {
-    ReplayHeaderAndData *dataDecompressed;
-    ReplayHeaderAndData *curData = data;
+    ReplayFile *dataDecompressed;
+    ReplayFile *curData = data;
     u8 *csumPtr;
     i32 csum;
     u8 *curByte;
@@ -281,7 +281,7 @@ ReplayManager::ValidateReplayData(ReplayHeaderAndData *data, i32 size)
     {
         goto bad;
     }
-    dataDecompressed = (ReplayHeaderAndData *)ZunMemory::Alloc(curData->head.sizeWithoutHeader +
+    dataDecompressed = (ReplayFile *)ZunMemory::Alloc(curData->head.sizeWithoutHeader +
                                                                sizeof(ReplayHeader));
     memcpy(dataDecompressed, data, sizeof(ReplayHeader));
     Lzss::Decompress(&curData->data.rngValue3, curData->head.compressedSize,
@@ -319,7 +319,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     arg->frameId = 0;
     if (!arg->data)
     {
-        arg->data = (ReplayHeaderAndData *)FileSystem::OpenFile(
+        arg->data = (ReplayFile *)FileSystem::OpenFile(
             arg->replayFilename, !g_GameManager.demo);
         arg->data = ValidateReplayData(arg->data, g_LastFileSize);
         if (!arg->data)
@@ -559,7 +559,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
     i32 csum;
     i32 replaySize;
     HANDLE hFile;
-    ReplayHeaderAndData replayCopy;
+    ReplayFile replayCopy;
     u8 *replayData;
     i32 stageSize;
     i32 compressedSize;
@@ -730,7 +730,7 @@ void ReplayManager::SaveReplay2(const char *filename)
     u32 csum;
     i32 replaySize;
     HANDLE hFile;
-    ReplayHeaderAndData replayCopy;
+    ReplayFile replayCopy;
     u8 *replayData;
     i32 stageSize;
     i32 compressedSize;

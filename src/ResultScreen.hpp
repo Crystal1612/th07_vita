@@ -222,7 +222,7 @@ struct ResultScreen
     Lsnm lsnmHeader;
     ChainElem *calcChain;
     ChainElem *drawChain;
-    ReplayHeaderAndData replays[15];
-    ReplayHeaderAndData defaultReplay;
+    ReplayFile replays[15];
+    ReplayFile defaultReplay;
 };
 C_ASSERT(sizeof(ResultScreen) == 0xce6c);

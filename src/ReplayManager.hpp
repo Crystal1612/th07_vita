@@ -78,12 +78,12 @@ struct ReplayData
 };
 C_ASSERT(sizeof(ReplayData) == 0x94);
 
-struct ReplayHeaderAndData
+struct ReplayFile
 {
     ReplayHeader head;
     ReplayData data;
 };
-C_ASSERT(sizeof(ReplayHeaderAndData) == 0xe8);
+C_ASSERT(sizeof(ReplayFile) == 0xe8);
 
 struct ReplayManager
 {
@@ -104,7 +104,7 @@ struct ReplayManager
     static void SaveReplay(const char *filename, char *replayName);
     static void SaveReplay2(const char *filename);
     static void StopRecording();
-    static ReplayHeaderAndData *ValidateReplayData(ReplayHeaderAndData *data,
+    static ReplayFile *ValidateReplayData(ReplayFile *data,
                                                    i32 size);
 
     i32 StageReplayExists(i32 stage)
@@ -118,7 +118,7 @@ struct ReplayManager
     }
 
     i32 frameId;
-    ReplayHeaderAndData *data;
+    ReplayFile *data;
     i32 stageReplayDataSize[7];
     i32 stageEndDataSize[7];
     void *unused_40;

@@ -1347,7 +1347,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     char replayPath2[64];
     i32 cursor;
     char replayPath[64];
-    ReplayHeaderAndData *replayFile;
+    ReplayFile *replayFile;
     i32 vmIdx;
     i32 interrupt;
     AnmVm *vm;
@@ -1458,7 +1458,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             for (vmIdx = 0; vmIdx < 15; vmIdx++)
             {
                 sprintf(replayPath, "./replay/th7_%.2d.rpy", vmIdx + 1);
-                replayFile = (ReplayHeaderAndData *)FileSystem::OpenFile(replayPath, 1);
+                replayFile = (ReplayFile *)FileSystem::OpenFile(replayPath, 1);
                 if (!replayFile)
                 {
                     continue;
