@@ -10,7 +10,6 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
-#include "utils.hpp"
 
 i32 g_FullPowerScoreBonus[30] = {10,   20,   30,   40,   50,   60,   70,   80,    90,    100,
                                  200,  300,  400,  500,  600,  700,  800,  900,   1000,  2000,
