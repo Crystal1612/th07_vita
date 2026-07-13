@@ -1,7 +1,7 @@
 #pragma once
 
-#include <d3d8.h>
-#include <d3dx8math.h>
+#include <cmath>
+#include <cstring>
 
 #include "inttypes.hpp"
 
@@ -14,14 +14,14 @@ inline void sincosf(f32 *outSin, f32 *outCos, f32 angle)
     *outSin = sinf(angle);
 }
 
-// POD versions of D3DXVECTOR2 and ZunVec3 that ZUN used for whatever
-// reason
-
-struct Float3
+struct ZunViewport
 {
-    f32 x;
-    f32 y;
-    f32 z;
+    u32 x;
+    u32 y;
+    u32 width;
+    u32 height;
+    f32 minZ;
+    f32 maxZ;
 };
 
 struct Float2
@@ -29,51 +29,6 @@ struct Float2
     f32 x;
     f32 y;
 };
-
-// Stuff that could probably help for making a portable version idk
-
-struct ZunVec2
-{
-    f32 x;
-    f32 y;
-
-    __forceinline ZunVec2()
-    {
-        x = 0.0f;
-        y = 0.0f;
-    }
-
-    __forceinline ZunVec2(f32 x, f32 y)
-    {
-        this->x = x;
-        this->y = y;
-    }
-
-    __forceinline ZunVec2 operator+(const ZunVec2 &v)
-    {
-        return ZunVec2(x + v.x, y + v.y);
-    }
-
-    __forceinline ZunVec2 operator-(const ZunVec2 &v)
-    {
-        return ZunVec2(x - v.x, y - v.y);
-    }
-
-    __forceinline ZunVec2 operator*(const ZunVec2 &v)
-    {
-        return ZunVec2(v.x * x, v.y * y);
-    }
-
-    __forceinline ZunVec2 operator*(f32 f)
-    {
-        return ZunVec2(x * f, y * f);
-    }
-};
-
-__forceinline ZunVec2 operator*(f32 f, const ZunVec2 &v)
-{
-    return ZunVec2(v.x * f, v.y * f);
-}
 
 struct ZunVec3
 {
@@ -95,116 +50,128 @@ struct ZunVec3
         this->z = z;
     }
 
-    __forceinline D3DXVECTOR3 *asD3DX()
+    inline void Project(ZunVec3 *pV, ZunViewport *pViewport, struct ZunMatrix *pProjection,
+                            struct ZunMatrix *pView, struct ZunMatrix *pWorld);
+
+    void Normalize(ZunVec3 *pV)
     {
-        return (D3DXVECTOR3 *)this;
+        f32 len = std::sqrt(pV->x * pV->x + pV->y * pV->y + pV->z * pV->z);
+
+        if (len == 0.0f)
+        {
+            x = y = z = 0.0f;
+        }
+        else
+        {
+            f32 inv = 1.0f / len;
+            x = pV->x * inv;
+            y = pV->y * inv;
+            z = pV->z * inv;
+        }
     }
 
-    __forceinline ZunVec3 *Project(ZunVec3 *pV, D3DVIEWPORT8 *pViewport,
-                                   struct ZunMatrix *pProjection, struct ZunMatrix *pView,
-                                   struct ZunMatrix *pWorld);
-
-    __forceinline ZunVec3 *Normalize(ZunVec3 *pV)
+    f32 Dot(ZunVec3 *pV) const
     {
-        return (ZunVec3 *)D3DXVec3Normalize(this->asD3DX(), pV->asD3DX());
+        return x * pV->x + y * pV->y + z * pV->z;
     }
 
-    __forceinline f32 Dot(ZunVec3 *pV)
+    void Cross(ZunVec3 *pV1, ZunVec3 *pV2)
     {
-        return D3DXVec3Dot(this->asD3DX(), pV->asD3DX());
+        f32 x = pV1->y * pV2->z - pV1->z * pV2->y;
+        f32 y = pV1->z * pV2->x - pV1->x * pV2->z;
+        f32 z = pV1->x * pV2->y - pV1->y * pV2->x;
+
+        this->x = x;
+        this->y = y;
+        this->z = z;
     }
 
-    __forceinline ZunVec3 *Cross(ZunVec3 *pV1, ZunVec3 *pV2)
+    void TransformCoord(ZunVec3 *pV, struct ZunMatrix *pM);
+
+    f32 Length() const
     {
-        return (ZunVec3 *)D3DXVec3Cross(this->asD3DX(), pV1->asD3DX(), pV2->asD3DX());
+        return std::sqrt(x * x + y * y + z * z);
     }
 
-    __forceinline ZunVec3 *TransformCoord(ZunVec3 *pV, struct ZunMatrix *pM);
-
-    __forceinline f32 Length()
+    f32 LengthSq() const
     {
-        return D3DXVec3Length(this->asD3DX());
+        return x * x + y * y + z * z;
     }
 
-    __forceinline f32 LengthSq()
-    {
-        return D3DXVec3LengthSq(this->asD3DX());
-    }
-
-    __forceinline ZunVec3 operator-()
+    ZunVec3 operator-() const
     {
         return ZunVec3(-x, -y, -z);
     }
 
-    __forceinline ZunVec3 operator+(const ZunVec3 &v)
+    ZunVec3 operator+(const ZunVec3 &v) const
     {
         return ZunVec3(x + v.x, y + v.y, z + v.z);
     }
 
-    __forceinline ZunVec3 operator-(const ZunVec3 &v)
+    ZunVec3 operator-(const ZunVec3 &v) const
     {
         return ZunVec3(x - v.x, y - v.y, z - v.z);
     }
 
-    __forceinline ZunVec3 operator*(const ZunVec3 &v)
+    ZunVec3 operator*(const ZunVec3 &v) const
     {
         return ZunVec3(x * v.x, y * v.y, z * v.z);
     }
 
-    __forceinline ZunVec3 operator/(const ZunVec3 &v)
+    ZunVec3 operator/(const ZunVec3 &v) const
     {
         return ZunVec3(x / v.x, y / v.y, z / v.z);
     }
 
-    __forceinline ZunVec3 operator+(f32 f)
+    ZunVec3 operator+(f32 f) const
     {
         return ZunVec3(x + f, y + f, z + f);
     }
 
-    __forceinline ZunVec3 operator-(f32 f)
+    ZunVec3 operator-(f32 f) const
     {
         return ZunVec3(x - f, y - f, z - f);
     }
 
-    __forceinline ZunVec3 operator*(f32 f)
+    ZunVec3 operator*(f32 f) const
     {
         return ZunVec3(x * f, y * f, z * f);
     }
 
-    __forceinline ZunVec3 operator/(f32 f)
+    ZunVec3 operator/(f32 f) const
     {
         return ZunVec3(x / f, y / f, z / f);
     }
 
-    __forceinline void operator+=(const ZunVec3 &v)
+    void operator+=(const ZunVec3 &v)
     {
         x += v.x;
         y += v.y;
         z += v.z;
     }
 
-    __forceinline void operator-=(const ZunVec3 &v)
+    void operator-=(const ZunVec3 &v)
     {
         x -= v.x;
         y -= v.y;
         z -= v.z;
     }
 
-    __forceinline void operator*=(const ZunVec3 &v)
+    void operator*=(const ZunVec3 &v)
     {
         x *= v.x;
         y *= v.y;
         z *= v.z;
     }
 
-    __forceinline void operator=(f32 f)
+    void operator=(f32 f)
     {
         x = f;
         y = f;
         z = f;
     }
 
-    __forceinline void operator*=(f32 f)
+    void operator*=(f32 f)
     {
         x *= f;
         y *= f;
@@ -212,7 +179,7 @@ struct ZunVec3
     }
 };
 
-__forceinline ZunVec3 operator*(f32 f, const ZunVec3 &v)
+inline ZunVec3 operator*(f32 f, const ZunVec3 &v)
 {
     return ZunVec3(v.x * f, v.y * f, v.z * f);
 }
@@ -223,72 +190,190 @@ struct ZunQuaternion
     f32 y;
     f32 z;
     f32 w;
-
-    D3DXQUATERNION *asD3DX()
-    {
-        return (D3DXQUATERNION *)this;
-    }
 };
 
 struct ZunMatrix
 {
     f32 m[4][4];
 
-    D3DXMATRIX *asD3DX()
+    void Identity()
     {
-        return (D3DXMATRIX *)this;
+        memset(m, 0, sizeof(m));
+        m[0][0] = 1.0f;
+        m[1][1] = 1.0f;
+        m[2][2] = 1.0f;
+        m[3][3] = 1.0f;
     }
 
-    __forceinline void Identity()
+    void RotateX(f32 angle)
     {
-        D3DXMatrixIdentity((D3DXMATRIX *)this);
+        Identity();
+
+        f32 s = sinf(angle);
+        f32 c = cosf(angle);
+
+        m[1][1] = c;
+        m[1][2] = s;
+        m[2][1] = -s;
+        m[2][2] = c;
     }
 
-    __forceinline void RotateX(f32 angle)
+    void RotateY(f32 angle)
     {
-        D3DXMatrixRotationX((D3DXMATRIX *)this, angle);
+        Identity();
+
+        f32 s = sinf(angle);
+        f32 c = cosf(angle);
+
+        m[0][0] = c;
+        m[0][2] = -s;
+        m[2][0] = s;
+        m[2][2] = c;
     }
 
-    __forceinline void RotateY(f32 angle)
+    void RotateZ(f32 angle)
     {
-        D3DXMatrixRotationY((D3DXMATRIX *)this, angle);
+        Identity();
+
+        f32 s = sinf(angle);
+        f32 c = cosf(angle);
+
+        m[0][0] = c;
+        m[0][1] = s;
+        m[1][0] = -s;
+        m[1][1] = c;
     }
 
-    __forceinline void RotateZ(f32 angle)
+    ZunMatrix operator*(const ZunMatrix &m) const
     {
-        D3DXMatrixRotationZ((D3DXMATRIX *)this, angle);
+        ZunMatrix tmp;
+
+        for (i32 r = 0; r < 4; r++)
+        {
+            for (i32 c = 0; c < 4; c++)
+            {
+                tmp.m[r][c] = this->m[r][0] * m.m[0][c] + this->m[r][1] * m.m[1][c] +
+                              this->m[r][2] * m.m[2][c] + this->m[r][3] * m.m[3][c];
+            }
+        }
+
+        return tmp;
     }
 
-    __forceinline ZunMatrix *Multiply(ZunMatrix *pM1, ZunMatrix *pM2)
+    void operator*=(const ZunMatrix &m)
     {
-        return (ZunMatrix *)D3DXMatrixMultiply(this->asD3DX(), pM1->asD3DX(), pM2->asD3DX());
+        *this = *this * m;
     }
 
-    __forceinline ZunMatrix *LookAtLH(ZunVec3 *pEye, ZunVec3 *pAt, ZunVec3 *pUp)
+    void LookAtLH(ZunVec3 *pEye, ZunVec3 *pAt, ZunVec3 *pUp)
     {
-        return (ZunMatrix *)D3DXMatrixLookAtLH(this->asD3DX(), pEye->asD3DX(), pAt->asD3DX(),
-                                               pUp->asD3DX());
+        ZunVec3 zAxis;
+
+        ZunVec3 lookAt = *pAt - *pEye;
+        zAxis.Normalize(&lookAt);
+
+        ZunVec3 xAxis;
+        xAxis.Cross(pUp, &zAxis);
+        xAxis.Normalize(&xAxis);
+
+        ZunVec3 yAxis;
+        yAxis.Cross(&zAxis, &xAxis);
+
+        m[0][0] = xAxis.x;
+        m[1][0] = xAxis.y;
+        m[2][0] = xAxis.z;
+        m[0][1] = yAxis.x;
+        m[1][1] = yAxis.y;
+        m[2][1] = yAxis.z;
+        m[3][0] = -xAxis.Dot(pEye);
+
+        m[0][2] = zAxis.x;
+        m[1][2] = zAxis.y;
+        m[2][2] = zAxis.z;
+        m[3][1] = -yAxis.Dot(pEye);
+        m[3][2] = -zAxis.Dot(pEye);
+
+        m[0][3] = 0.0f;
+        m[1][3] = 0.0f;
+        m[2][3] = 0.0f;
+        m[3][3] = 1.0f;
     }
 
-    __forceinline ZunMatrix *PerspectiveFovLH(f32 fovy, f32 Aspect, f32 zn, f32 zf)
+    void PerspectiveFovLH(f32 fovy, f32 aspect, f32 zn, f32 zf)
     {
-        return (ZunMatrix *)D3DXMatrixPerspectiveFovLH(this->asD3DX(), fovy, Aspect, zn, zf);
+        Identity();
+
+        f32 yScale = 1.0f / tanf(fovy * 0.5f);
+        f32 xScale = yScale / aspect;
+
+        m[0][0] = xScale;
+        m[1][1] = yScale;
+
+        m[2][2] = zf / (zf - zn);
+        m[2][3] = 1.0f;
+
+        m[3][2] = -zn * zf / (zf - zn);
+        m[3][3] = 0.0f;
     }
 
-    __forceinline ZunMatrix *RotationQuaternion(ZunQuaternion *pQ)
+    void RotationQuaternion(ZunQuaternion *pQ)
     {
-        return (ZunMatrix *)D3DXMatrixRotationQuaternion(this->asD3DX(), pQ->asD3DX());
+        f32 xx = pQ->x * pQ->x;
+        f32 yy = pQ->y * pQ->y;
+        f32 zz = pQ->z * pQ->z;
+
+        f32 xy = pQ->x * pQ->y;
+        f32 xz = pQ->x * pQ->z;
+        f32 yz = pQ->y * pQ->z;
+
+        f32 wx = pQ->w * pQ->x;
+        f32 wy = pQ->w * pQ->y;
+        f32 wz = pQ->w * pQ->z;
+
+        Identity();
+
+        m[0][0] = 1.0f - 2.0f * (yy + zz);
+        m[0][1] = 2.0f * (xy + wz);
+        m[0][2] = 2.0f * (xz - wy);
+
+        m[1][0] = 2.0f * (xy - wz);
+        m[1][1] = 1.0f - 2.0f * (xx + zz);
+        m[1][2] = 2.0f * (yz + wx);
+
+        m[2][0] = 2.0f * (xz + wy);
+        m[2][1] = 2.0f * (yz - wx);
+        m[2][2] = 1.0f - 2.0f * (xx + yy);
     }
 };
 
-__forceinline ZunVec3 *ZunVec3::Project(ZunVec3 *pV, D3DVIEWPORT8 *pViewport,
-                                        ZunMatrix *pProjection, ZunMatrix *pView, ZunMatrix *pWorld)
+inline void ZunVec3::Project(ZunVec3 *pV, ZunViewport *pViewport, ZunMatrix *pProjection,
+                                 ZunMatrix *pView, ZunMatrix *pWorld)
 {
-    return (ZunVec3 *)D3DXVec3Project(this->asD3DX(), pV->asD3DX(), pViewport,
-                                      pProjection->asD3DX(), pView->asD3DX(), pWorld->asD3DX());
+    ZunMatrix temp;
+    ZunMatrix wvp;
+
+    temp = *pWorld * *pView;
+    wvp = temp * *pProjection;
+
+    TransformCoord(pV, &wvp);
+
+    x = pViewport->x + (1.0f + x) * pViewport->width * 0.5f;
+    y = pViewport->y + (1.0f - y) * pViewport->height * 0.5f;
+    z = pViewport->minZ + z * (pViewport->maxZ - pViewport->minZ);
 }
 
-__forceinline ZunVec3 *ZunVec3::TransformCoord(ZunVec3 *pV, ZunMatrix *pM)
+inline void ZunVec3::TransformCoord(ZunVec3 *pV, ZunMatrix *pM)
 {
-    return (ZunVec3 *)D3DXVec3TransformCoord(this->asD3DX(), pV->asD3DX(), pM->asD3DX());
+    f32 x = pV->x * pM->m[0][0] + pV->y * pM->m[1][0] + pV->z * pM->m[2][0] + pM->m[3][0];
+    f32 y = pV->x * pM->m[0][1] + pV->y * pM->m[1][1] + pV->z * pM->m[2][1] + pM->m[3][1];
+    f32 z = pV->x * pM->m[0][2] + pV->y * pM->m[1][2] + pV->z * pM->m[2][2] + pM->m[3][2];
+    f32 w = pV->x * pM->m[0][3] + pV->y * pM->m[1][3] + pV->z * pM->m[2][3] + pM->m[3][3];
+
+    x /= w;
+    y /= w;
+    z /= w;
+
+    this->x = x;
+    this->y = y;
+    this->z = z;
 }

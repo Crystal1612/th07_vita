@@ -84,12 +84,12 @@ struct ZunTimer
         return this->current >= value;
     }
 
-    void operator++(int)
+    void operator++(i32)
     {
         this->Tick();
     }
 
-    void operator--(int)
+    void operator--(i32)
     {
         this->Decrement(1);
     }

@@ -94,6 +94,7 @@ void AnmManager::SetupVertexBuffer()
     this->vertexBufferContents[0].textureUV.y = 0.0f;
     this->vertexBufferContents[3].textureUV.y = 1.0f;
     this->vertexBufferContents[2].textureUV.y = 1.0f;
+
     g_Quad3DFallback[0].position = this->vertexBufferContents[0].position;
     g_Quad3DFallback[1].position = this->vertexBufferContents[1].position;
     g_Quad3DFallback[2].position = this->vertexBufferContents[2].position;
@@ -1132,17 +1133,17 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
         if (vm->rotation.x != 0.0)
         {
             rot.RotateX(vm->rotation.x);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         if (vm->rotation.y != 0.0)
         {
             rot.RotateY(vm->rotation.y);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         if (vm->rotation.z != 0.0)
         {
             rot.RotateZ(vm->rotation.z);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         vm->updateRotation = 0;
     }
@@ -1237,17 +1238,17 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         if (vm->rotation.x != 0.0)
         {
             rot.RotateX(vm->rotation.x);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         if (vm->rotation.y != 0.0)
         {
             rot.RotateY(vm->rotation.y);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         if (vm->rotation.z != 0.0)
         {
             rot.RotateZ(vm->rotation.z);
-            vm->worldTransformMatrix.Multiply(&vm->worldTransformMatrix, &rot);
+            vm->worldTransformMatrix *= rot;
         }
         vm->updateRotation = 0;
     }
