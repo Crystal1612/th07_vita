@@ -1,5 +1,6 @@
 #include "BulletManager.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
@@ -21,19 +22,19 @@ const BulletTypeInfo g_BulletTypeInfos[11] = {
     {0x2a8, 0x2aa, 0x2aa, 0x2aa, 0x2a9},
 };
 
-D3DCOLOR g_BulletColorsArray[28] = {
+u32 g_BulletColorsArray[28] = {
     0xFF000000, 0xFF303030, 0xFF606060, 0xFF500000, 0xFF900000, 0xFFFF2020, 0xFF400040,
     0xFF800080, 0xFFFF30FF, 0xFF000050, 0xFF000090, 0xFF2020FF, 0xFF203060, 0xFF304090,
     0xFF3080FF, 0xFF005000, 0xFF009000, 0xFF20FF20, 0xFF206000, 0xFF409010, 0xFF80FF20,
     0xFF505000, 0xFF909000, 0xFFFFFF20, 0xFF603000, 0xFF904010, 0xFFF08020, 0xFFFFFFFF};
 
-D3DCOLOR g_DefaultBulletColors[28] = {
+u32 g_DefaultBulletColors[28] = {
     0xFFF0F0F0, 0xFFF0F0F0, 0xFFFFFFFF, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFE0FF,
     0xFFFFE0FF, 0xFFFFE0FF, 0xFFE0E0FF, 0xFFE0E0FF, 0xFFE0E0FF, 0xFFE0FFFF, 0xFFE0FFFF,
     0xFFE0FFFF, 0xFFE0FFE0, 0xFFE0FFE0, 0xFFE0FFE0, 0xFFE0FFE0, 0xFFE0FFE0, 0xFFE0FFE0,
     0xFFFFFFE0, 0xFFFFFFE0, 0xFFFFFFE0, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFE0E0, 0xFFFFFFFF};
 
-D3DCOLOR *g_BulletColor = g_BulletColorsArray;
+u32 *g_BulletColor = g_BulletColorsArray;
 
 i32 g_BulletSpriteOffset16Px[16] = {0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 0};
 

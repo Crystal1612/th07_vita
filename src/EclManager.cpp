@@ -63,19 +63,19 @@ ZunResult EclManager::Load(const char *path)
     if (!this->eclFile)
     {
         g_GameErrorContext.Log(
-            "敵データの読み込みに失敗しました、データが壊れてるか失われています\r\n");
+            "敵データの読み込みに失敗しました、データが壊れてるか失われています\n");
         return ZUN_ERROR;
     }
 
     for (i = 0; i < 16; i++)
     {
         this->eclFile->timelinePtr[i] =
-            (EclTimelineInstr *)((i32)this->eclFile->timelinePtr[i] + (i32)this->eclFile);
+            (EclTimelineInstr *)((uintptr_t)this->eclFile->timelinePtr[i] + (uintptr_t)this->eclFile);
     }
     this->subTable = this->eclFile->subTable;
     for (i = 0; i < this->eclFile->subCount; i++)
     {
-        this->subTable[i] = (EclRawInstr *)((i32)this->subTable[i] + (i32)this->eclFile);
+        this->subTable[i] = (EclRawInstr *)((uintptr_t)this->subTable[i] + (uintptr_t)this->eclFile);
     }
     return ZUN_SUCCESS;
 }
@@ -601,14 +601,14 @@ void EclManager::MathLerp(Enemy *enemy, EclInterp *interp, f32 t)
 
 void EclManager::MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t)
 {
-    float h11;
-    float m1;
-    float h01;
-    float m0;
-    float p1;
-    float h10;
-    float h00;
-    float p0;
+    f32 h11;
+    f32 m1;
+    f32 h01;
+    f32 m0;
+    f32 p1;
+    f32 h10;
+    f32 h00;
+    f32 p0;
 
     p0 = GetFloatVarValue(enemy, interp->args[3].f);
     p1 = GetFloatVarValue(enemy, interp->args[4].f);
@@ -1643,7 +1643,7 @@ restart:
             case 117:
                 g_EffectManager.SpawnParticles(GET_INT_VALUE(enemy, 0), &enemy->position,
                                                GET_INT_VALUE(enemy, 1),
-                                               *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
+                                               *(u32 *)GET_INT_PTR(enemy, 2));
                 break;
             case 118:
                 particleVel.x = GET_FLOAT_VALUE(enemy, 3);
@@ -1651,7 +1651,7 @@ restart:
                 particleVel.z = GET_FLOAT_VALUE(enemy, 5);
                 g_EffectManager.SpawnMovingParticles(GET_INT_VALUE(enemy, 0), &enemy->position,
                                                      &particleVel, GET_INT_VALUE(enemy, 1),
-                                                     *(D3DCOLOR *)GET_INT_PTR(enemy, 2));
+                                                     *(u32 *)GET_INT_PTR(enemy, 2));
                 break;
             case 119:
                 numDrops = GET_INT_VALUE(enemy, 0);

@@ -1,8 +1,12 @@
 #include "MainMenu.hpp"
 
+#include <algorithm>
 #include <cstdio>
-#include <direct.h>
+#include <filesystem>
+#include <string>
+#include <vector>
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
@@ -16,7 +20,8 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
-#include "utils.hpp"
+
+namespace fs = std::filesystem;
 
 const char *g_DemoReplayPaths[3] = {
     "data/demo/demorpy0.rpy",
@@ -245,7 +250,7 @@ u32 MainMenu::OnUpdatePreInput()
                 ReplayManager::ValidateReplayData(this->currentReplay, g_LastFileSize);
             if (!this->currentReplay)
             {
-                Supervisor::DebugPrint("error : Demo Play is not ready\r\n");
+                Supervisor::DebugPrint("error : Demo Play is not ready\n");
                 this->demoFramesCount = 0;
             }
             else
@@ -1815,13 +1820,19 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
+bool ReplayFileMatches(const std::string& name)
+{
+    return name.size() == 14 &&
+           name.compare(0, 6, "th7_ud") == 0 &&
+           name.compare(10, 4, ".rpy") == 0;
+}
+
+
 u32 MainMenu::OnUpdateSelectReplay()
 {
-    _WIN32_FIND_DATAA local_194;
     char local_54[64];
     ReplayFile *file;
     i32 local_10;
-    HANDLE local_c;
     i32 i;
 
     switch (this->menuSubState)
@@ -1859,39 +1870,41 @@ u32 MainMenu::OnUpdateSelectReplay()
                     free(file);
                 }
             }
-            _mkdir("./replay");
-            _chdir("./replay");
-            local_c = FindFirstFileA("th7_ud????.rpy", &local_194);
-            if (local_c != INVALID_HANDLE_VALUE)
+
+            const fs::path replay = "./replay";
+            fs::create_directory(replay);
+
+            std::vector<fs::directory_entry> entries(fs::directory_iterator(replay),
+                                                     fs::directory_iterator{});
+            std::sort(entries.begin(), entries.end(), [](const auto &a, const auto &b) {
+                return a.path().filename() < b.path().filename();
+            });
+            for (const auto &entry : entries)
             {
-                for (i = 0; i < 45; i++)
+                const std::string filename = entry.path().filename().string();
+                if (!ReplayFileMatches(filename))
                 {
-                    file = (ReplayFile *)FileSystem::OpenFile(local_194.cFileName, 1);
-                    if (!file)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
-                        if (file)
-                        {
-                            this->replays[local_10] = *file;
-                            sprintf(this->replayFilenames[local_10], "./replay/%s",
-                                    local_194.cFileName);
-                            sprintf(this->replayLabels[local_10], "User ");
-                            free(file);
-                            local_10++;
-                        }
-                        if (FindNextFileA(local_c, &local_194) == 0)
-                        {
-                            break;
-                        }
-                    }
+                    continue;
+                }
+                if (local_10 >= 45)
+                {
+                    break;
+                }
+                file = (ReplayFile *)FileSystem::OpenFile(("./replay/" + filename).c_str(), 1);
+                if (!file)
+                {
+                    continue;
+                }
+                file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
+                if (file)
+                {
+                    this->replays[local_10] = *file;
+                    sprintf(this->replayFilenames[local_10], "./replay/%s", filename.c_str());
+                    sprintf(this->replayLabels[local_10], "User ");
+                    free(file);
+                    local_10++;
                 }
             }
-            FindClose(local_c);
-            _chdir("../");
             this->replayFilesNum = local_10;
             this->replayPage = 0;
         }
@@ -1961,7 +1974,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 this->cursor++;
                 if (this->cursor >= 7)
                 {
-                    g_GameErrorContext.Fatal("リプレイデータが異常\r\n");
+                    g_GameErrorContext.Fatal("リプレイデータが異常\n");
                     return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
                 }
             }
@@ -2114,7 +2127,7 @@ i32 MainMenu::DrawReplayMenu()
         g_AsciiManager.isSelected = 0;
         vm = &this->vmHead[133];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "       %2.3f%%",
-                                    (double)this->currentReplay->data.slowdownRate);
+                                    (f64)this->currentReplay->data.slowdownRate);
         vm = &this->vmHead[150];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "Stage    LastScore");
         replayAmount = this->chosenReplay - this->chosenReplay % 15;
@@ -2299,7 +2312,7 @@ u32 MainMenu::OnDraw(MainMenu *arg)
     AnmVm *local_c;
     i32 i;
 
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     switch (arg->gameState)
     {
@@ -2384,14 +2397,13 @@ ZunResult MainMenu::ActualAddedCallback()
         {
             g_AnmManager->SetVertexShader(255);
             g_AnmManager->SetSprite(NULL);
-            g_AnmManager->SetTexture(NULL);
+            g_AnmManager->SetTexture(0);
             g_AnmManager->SetColorOp(255);
             g_AnmManager->SetBlendMode(255);
             g_AnmManager->SetZWriteDisable(255);
             g_AnmManager->ClearFrameState();
             g_AnmManager->SetCameraMode(255);
             g_AnmManager->SetColor(0x80808080);
-            g_Supervisor.d3dDevice->BeginScene();
             g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
             if (frameCount < 60)
             {
@@ -2414,11 +2426,7 @@ ZunResult MainMenu::ActualAddedCallback()
                 ScreenEffect::DrawSquare(&local_34, local_24.color);
             }
             g_CurFrameRawInput = Controller::GetInput();
-            g_Supervisor.d3dDevice->EndScene();
-            if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-            {
-                g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-            }
+            g_Supervisor.gfxDevice->SwapBuffers();
             if (120 <= frameCount && frameCount < 840 &&
                 WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU | TH_BUTTON_BOMB))
             {
@@ -2510,7 +2518,6 @@ ZunResult MainMenu::Release()
 
 ZunResult MainMenu::DeletedCallback(MainMenu *arg)
 {
-    g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
     for (i32 i = 32; i <= 41; i++)
     {
         g_AnmManager->ReleaseAnm(i);

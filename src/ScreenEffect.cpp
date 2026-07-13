@@ -4,30 +4,30 @@
 #include "GameManager.hpp"
 #include "Rng.hpp"
 #include "Supervisor.hpp"
+#include "graphics/ZunGraphics.hpp"
 
-void ScreenEffect::Clear(D3DCOLOR color)
+void ScreenEffect::Clear(ZunColor color)
 {
-    g_Supervisor.d3dDevice->Clear(0, NULL, 3, color, 1.0f, 0);
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
+    g_Supervisor.gfxDevice->SetClearColor(color);
+    g_Supervisor.gfxDevice->Clear(CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER);
+    g_Supervisor.gfxDevice->SwapBuffers();
 }
 
-void ScreenEffect::SetViewport(D3DCOLOR color)
+void ScreenEffect::SetViewport(u32 color)
 {
     if (g_AnmManager)
     {
         g_AnmManager->Flush();
     }
-    g_Supervisor.viewport.X = 0;
-    g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 640;
-    g_Supervisor.viewport.Height = 480;
-    g_Supervisor.viewport.MinZ = 0.0f;
-    g_Supervisor.viewport.MaxZ = 1.0f;
-    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-    Clear(color);
+    g_Supervisor.viewport.x = 0;
+    g_Supervisor.viewport.y = 0;
+    g_Supervisor.viewport.width = 640;
+    g_Supervisor.viewport.height = 480;
+    g_Supervisor.viewport.minZ = 0.0f;
+    g_Supervisor.viewport.maxZ = 1.0f;
+
+    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    Clear(*(ZunColor *)&color);
 }
 
 u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
@@ -49,7 +49,7 @@ u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
     return 1;
 }
 
-void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
+void ScreenEffect::DrawSquare(ZunRect *rect, u32 color)
 {
     g_AnmManager->Flush();
 
@@ -62,38 +62,26 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     vertices[0].w = vertices[1].w = vertices[2].w = vertices[3].w = 1.0f;
     vertices[0].diffuse.color = vertices[1].diffuse.color = vertices[2].diffuse.color =
         vertices[3].diffuse.color = color;
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_DIFFUSE);
     if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+        g_Supervisor.gfxDevice->SetDepthMask(false);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
-    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
-    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
+    g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ALPHA);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
+    g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, vertices,
                                             sizeof(VertexDiffuseXyzrhw));
     g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_TEXTURE);
 }
 
-void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
-                                   D3DCOLOR param_4, D3DCOLOR param_5)
+void ScreenEffect::DrawColoredQuad(ZunRect *rect, u32 param_2, u32 param_3, u32 param_4,
+                                   u32 param_5)
 {
     g_AnmManager->Flush();
 
@@ -108,34 +96,24 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR par
     vertices[1].diffuse.color = param_3;
     vertices[2].diffuse.color = param_4;
     vertices[3].diffuse.color = param_5;
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_DIFFUSE);
     if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+        g_Supervisor.gfxDevice->SetDepthMask(false);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
-    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
-    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
-                                            sizeof(VertexDiffuseXyzrhw));
+
+    g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ALPHA);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
+
+    g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, vertices,
+                                   sizeof(VertexDiffuseXyzrhw));
     g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_TEXTURE);
 }
 
 u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
@@ -147,11 +125,11 @@ u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
     rect.right = 640.0f;
     rect.bottom = 480.0f;
     g_AnmManager->Flush();
-    g_Supervisor.viewport.X = 0;
-    g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 640;
-    g_Supervisor.viewport.Height = 480;
-    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.viewport.x = 0;
+    g_Supervisor.viewport.y = 0;
+    g_Supervisor.viewport.width = 640;
+    g_Supervisor.viewport.height = 480;
+    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
     ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | arg->args[0]);
     return 1;
 }

@@ -1,10 +1,8 @@
+#include <SDL2/SDL.h>
 #include <cstdio>
-#include <windows.h>
-#include <winnls32.h>
 
 // pull in gameerrorcontext::flush before anmmanager::releasesurfaces
 #include "AnmManager.hpp"
-#include "BulletManager.hpp"
 #include "Chain.hpp"
 #include "Controller.hpp"
 #include "FileSystem.hpp"
@@ -28,56 +26,42 @@ void AnmManager::TakeScreenshotIfRequested()
     }
 }
 
-i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdline, i32 nCmdShow)
+int main(int argc, char *argv[])
 {
-    HRESULT d3dDeviceStatus;
     i32 res;
-    tagMSG msg;
 
     res = RENDER_RESULT_KEEP_RUNNING;
-    g_Supervisor.hInstance = hInstance;
-    SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &g_GameWindow.screen_save_active, 0);
-    SystemParametersInfoA(SPI_GETLOWPOWERACTIVE, 0, &g_GameWindow.low_power_active, 0);
-    SystemParametersInfoA(SPI_GETPOWEROFFACTIVE, 0, &g_GameWindow.power_off_active, 0);
-    SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, 0, NULL, 2);
-    SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, 0, NULL, 2);
-    SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, 0, NULL, 2);
-    if (GameWindow::CheckForRunningGameInstance(hInstance) == ZUN_ERROR)
-    {
-        goto stop;
-    }
+
     if (g_Supervisor.LoadConfig("th07.cfg") != ZUN_SUCCESS)
     {
         goto stop;
     }
 
     GameWindow::ChecksumExecutable();
-    QueryPerformanceFrequency(&g_GameWindow.lpFrequency);
+    g_GameWindow.frequency = SDL_GetPerformanceFrequency();
 
 start:
-    if (GameWindow::InitD3dInterface())
+    if (GameWindow::CreateGameWindow())
     {
         goto stop;
     }
 
-    if (GameWindow::CreateGameWindow(hInstance))
+    if (GameWindow::InitInterface())
     {
         goto stop;
     }
 
-    if (GameWindow::InitD3dRendering())
+    if (GameWindow::InitRendering())
     {
         goto stop;
     }
 
     g_SoundPlayer.InitializeSound();
-    Controller::GetJoystickCaps();
     Controller::ResetKeyboard();
     g_AnmManager = new AnmManager();
     if (!g_Supervisor.cfg.windowed)
     {
-        WINNLSEnableIME(0, 0);
-        ShowCursor(0);
+        SDL_ShowCursor(SDL_DISABLE);
     }
     res = g_Supervisor.RegisterChain();
     if (res != ZUN_SUCCESS)
@@ -93,36 +77,62 @@ start:
     g_GameWindow.curFrame = -30;
     while (!g_GameWindow.isAppClosing)
     {
-        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
+        SDL_Event e;
+
+        while (SDL_PollEvent(&e))
         {
-            TranslateMessage(&msg);
-            DispatchMessageA(&msg);
-        }
-        else
-        {
-            d3dDeviceStatus = g_Supervisor.d3dDevice->TestCooperativeLevel();
-            if (d3dDeviceStatus == D3D_OK)
+            switch (e.type)
             {
-                res = g_GameWindow.Render();
-                if (res != RENDER_RESULT_KEEP_RUNNING)
+            case SDL_WINDOWEVENT:
+                switch (e.window.event)
                 {
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    g_GameWindow.isAppActive = 1;
+                    g_GameWindow.isAppInactive = 0;
+                    if (!g_Supervisor.cfg.windowed)
+                    {
+                        SDL_ShowCursor(SDL_DISABLE);
+                    }
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    g_GameWindow.isAppActive = 0;
+                    g_GameWindow.isAppInactive = 1;
+                    SDL_ShowCursor(SDL_ENABLE);
                     break;
                 }
-                g_Supervisor.flags = g_Supervisor.flags & 0xffffffef;
-            }
-            else if (d3dDeviceStatus == D3DERR_DEVICENOTRESET)
-            {
-                g_AnmManager->ReleaseSurfaces();
-                if (g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters) != 0)
+                break;
+            case SDL_CONTROLLERDEVICEADDED:
+                if (!g_Supervisor.controller)
                 {
-                    break;
+                    g_Supervisor.controller = SDL_GameControllerOpen(e.cdevice.which);
                 }
-                GameWindow::ResetRenderState();
-                g_Supervisor.renderSkipFrames = 3;
-                g_Supervisor.flags = g_Supervisor.flags | 16;
+                break;
+            case SDL_CONTROLLERDEVICEREMOVED:
+                if (g_Supervisor.controller)
+                {
+                    SDL_Joystick *joy = SDL_GameControllerGetJoystick(g_Supervisor.controller);
+
+                    if (SDL_JoystickInstanceID(joy) == e.cdevice.which)
+                    {
+                        SDL_GameControllerClose(g_Supervisor.controller);
+                        g_Supervisor.controller = nullptr;
+                    }
+                }
+                break;
+            case SDL_QUIT:
+                g_GameWindow.isAppClosing = true;
+                break;
             }
         }
+
+        res = g_GameWindow.Render();
+        if (res != RENDER_RESULT_KEEP_RUNNING)
+        {
+            break;
+        }
+        g_Supervisor.flags = g_Supervisor.flags & 0xffffffef;
     }
+
 cleanup:
     if (g_GameManager.plst.magic != 0)
     {
@@ -137,46 +147,21 @@ stop:
     delete g_AnmManager;
     g_AnmManager = NULL;
 
-    if (g_Supervisor.d3dDevice)
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
-    SAFE_RELEASE(g_Supervisor.d3dDevice);
-    SAFE_RELEASE(g_Supervisor.d3dIface);
+    SAFE_DELETE(g_Supervisor.gfxDevice);
     if (g_GameWindow.window)
     {
-        ShowWindow(g_GameWindow.window, 0);
-        MoveWindow(g_GameWindow.window, 0, 0, 0, 0, 0);
-        DestroyWindow(g_GameWindow.window);
+        SDL_DestroyWindow(g_GameWindow.window);
         g_GameWindow.window = NULL;
     }
-    ShowCursor(1);
+    SDL_ShowCursor(SDL_ENABLE);
     if (res == RENDER_RESULT_EXIT_ERROR)
     {
         g_GameErrorContext.m_BufferEnd = g_GameErrorContext.m_Buffer;
-        *g_GameErrorContext.m_BufferEnd = NULL;
-        g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\r\n");
-        if (!g_Supervisor.cfg.windowed)
-        {
-            WINNLSEnableIME(0, 1);
-        }
-        i32 i = 0;
-        while (i < 60)
-        {
-            if (PeekMessageA(&msg, NULL, 0, 0, 1))
-            {
-                TranslateMessage(&msg);
-                DispatchMessageA(&msg);
-            }
-            i++;
-        }
+        *g_GameErrorContext.m_BufferEnd = '\0';
+        g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\n");
         goto start;
     }
     FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg, sizeof(GameConfiguration));
-    SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, g_GameWindow.screen_save_active, NULL, 2);
-    SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, g_GameWindow.low_power_active, NULL, 2);
-    SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, g_GameWindow.power_off_active, NULL, 2);
-    WINNLSEnableIME(0, 1);
     g_GameErrorContext.Flush();
     return 0;
 }

@@ -17,6 +17,7 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "graphics/ZunGraphics.hpp"
 
 i32 g_RankArray[6][3] = {
     {16, 12, 20}, {16, 10, 32}, {16, 10, 32}, {16, 10, 32}, {16, 15, 16}, {16, 15, 16},
@@ -115,7 +116,7 @@ i32 GameManager::ByteCsumAccumulator(u8 *param_1, i32 param_2)
 i32 GameManager::ComputeGameIntegrityCsum()
 {
     i32 csum = ByteCsumAccumulator((u8 *)g_GameManager.globals->rng1,
-                                   (i32) & this->globals->curCsum - (i32)this->globals->rng1);
+                                   (u8 *)&this->globals->curCsum - (u8 *)this->globals->rng1);
     csum += ByteCsumAccumulator((u8 *)g_GameManager.globals->csumData,
                                 sizeof(g_GameManager.globals->csumData));
     csum += ByteCsumAccumulator((u8 *)g_GameManager.defaultCfg, sizeof(GameConfiguration));
@@ -166,12 +167,12 @@ u32 GameManager::OnUpdate(GameManager *arg)
         g_SoundPlayer.PlaySoundByIdx(SOUND_37, 0);
         g_Supervisor.UpdateTime();
     }
-    g_Supervisor.viewport.X = arg->arcadeRegionTopLeftPos.x;
-    g_Supervisor.viewport.Y = arg->arcadeRegionTopLeftPos.y;
-    g_Supervisor.viewport.Width = arg->arcadeRegionSize.x;
-    g_Supervisor.viewport.Height = arg->arcadeRegionSize.y;
-    g_Supervisor.viewport.MinZ = 0.0f;
-    g_Supervisor.viewport.MaxZ = 1.0f;
+    g_Supervisor.viewport.x = arg->arcadeRegionTopLeftPos.x;
+    g_Supervisor.viewport.y = arg->arcadeRegionTopLeftPos.y;
+    g_Supervisor.viewport.width = arg->arcadeRegionSize.x;
+    g_Supervisor.viewport.height = arg->arcadeRegionSize.y;
+    g_Supervisor.viewport.minZ = 0.0f;
+    g_Supervisor.viewport.maxZ = 1.0f;
     g_AnmManager->SetCameraMode(255);
     if (g_GameManager.replay && g_GameManager.replayStage == 1 && !g_Gui.HasCurrentMsgIdx())
     {
@@ -240,7 +241,8 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.skyFog.color.color, 1.0f, 0);
+    g_Supervisor.gfxDevice->SetClearColor(g_Stage.skyFog.color);
+    g_Supervisor.gfxDevice->Clear(CLEAR_DEPTH_BUFFER);
     if (arg->isInRetryMenu == 1 || arg->isInRetryMenu == 2 || arg->isInPauseMenu)
     {
         return CHAIN_CALLBACK_RESULT_BREAK;
@@ -354,15 +356,10 @@ void GameManager::DrawLoadingSprite()
     spritePos.y = 448.0f;
     spritePos.z = 0.0f;
     spriteVm.pos = spritePos;
-    g_Supervisor.d3dDevice->BeginScene();
     ScreenEffect::DrawSquare(&rect, 0xa0000000);
     g_AnmManager->DrawNoRotation(&spriteVm);
     g_AnmManager->Flush();
-    g_Supervisor.d3dDevice->EndScene();
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
+    g_Supervisor.gfxDevice->SwapBuffers();
 }
 
 void GameManager::InitializeRank()
@@ -484,7 +481,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     g_Supervisor.checkTiming = 0;
     arg->difficultyMask = 1 << arg->difficulty;
     arg->shotTypeAndCharacter = arg->character * 2 + arg->shotType;
-    g_Supervisor.currentTime = timeGetTime();
+    g_Supervisor.currentTime = SDL_GetTicks64();
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
     if (g_Supervisor.curState != 3)
     {

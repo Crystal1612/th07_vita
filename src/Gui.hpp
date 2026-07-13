@@ -94,8 +94,8 @@ struct GuiMsgVm
     AnmVm portraits[2];
     AnmVm dialogueLines[2];
     AnmVm introLines[2];
-    D3DCOLOR textColorsA[4];
-    D3DCOLOR textColorsB[4];
+    u32 textColorsA[4];
+    u32 textColorsB[4];
     u32 fontSize;
     u32 ignoreWaitCounter;
     u8 dialogueSkippable;

@@ -1,15 +1,12 @@
 #pragma once
 
-#include <d3d8.h>
-#include <d3dx8math.h>
-
 #include "ZunColor.hpp"
 #include "ZunMath.hpp"
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-extern const D3DFORMAT g_TextureFormatD3D8Mapping[6];
+extern const u32 g_TextureFormatD3D8Mapping[6];
 extern const i32 g_TextureBytesPerPixel[7];
 
 typedef enum AnmOpcode

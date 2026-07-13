@@ -1,7 +1,5 @@
 #pragma once
 
-// #include <windows.h>
-
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
@@ -149,14 +147,14 @@ struct MidiOutput : MidiTimer
         return *(const u32 *)tmp;
     }
 
-    __forceinline void Play(const char *path)
+    void Play(const char *path)
     {
         this->StopPlayback();
         this->LoadFile(path);
         this->Play();
     }
 
-    __forceinline void PlayLoaded(i32 idx)
+    void PlayLoaded(i32 idx)
     {
         this->StopPlayback();
         this->ParseFile(idx);

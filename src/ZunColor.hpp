@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d8.h>
-
 #include "inttypes.hpp"
 
 union ZunColor {
@@ -15,7 +13,7 @@ union ZunColor {
         return tmp;
     }
 
-    D3DCOLOR color;
+    u32 color;
     struct ColorBytes
     {
         u8 b;

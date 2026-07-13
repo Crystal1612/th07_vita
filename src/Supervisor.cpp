@@ -1,8 +1,12 @@
 #include "Supervisor.hpp"
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_gamecontroller.h>
+#include <SDL2/SDL_timer.h>
+#include <chrono>
 #include <cstdio>
-#include <dinput.h>
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
@@ -20,36 +24,30 @@
 #include "TextHelper.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "graphics/ZunGraphics.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
 ControllerMapping g_ControllerMapping = {0, 1, 2, 4, -1, -1, -1, -1, 3};
 
 u16 g_CurFrameRawInput;
-
 u16 g_CurFrameGameInput;
-
 u16 g_LastFrameRawInput;
-
 u16 g_LastFrameGameInput;
-
 u16 g_IsEighthFrameOfHeldInput;
-
 u16 g_NumOfFramesInputsWereHeld;
-
 Supervisor g_Supervisor;
-
 u32 g_FpsUpdateCounter;
-
 char g_ReplayFpsBuffer[256];
-
 char g_FpsCounterBuffer[256];
-
 u32 g_NumFramesSinceLastTime;
-
-LARGE_INTEGER g_PerformanceCounter;
+u64 g_PerformanceCounter;
 
 void Supervisor::DebugPrint(const char *fmt, ...)
 {
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
 }
 
 void Supervisor::CheckTiming()
@@ -62,30 +60,12 @@ void Supervisor::CheckTiming()
         return;
     }
 
-    QueryPerformanceCounter(&this->curPerfCounter);
-    GetLocalTime(&this->curTime);
+    this->curPerfCounter = SDL_GetPerformanceCounter();
 
-    timeDiff = (f64)this->curTime.wDay * 24.0 * 60.0 * 60.0 + (f64)(this->curTime.wHour * 60 * 60) +
-               (f64)(this->curTime.wMinute * 60) + (f64)this->curTime.wSecond;
+    this->curTime = std::chrono::system_clock::now();
 
-    perfDiff = (f64)this->prevTime.wDay * 24.0 * 60.0 * 60.0 +
-               (f64)(this->prevTime.wHour * 60 * 60) + (f64)(this->prevTime.wMinute * 60) +
-               (f64)this->prevTime.wSecond;
-
-    if (timeDiff < perfDiff)
-    {
-        timeDiff = (f64)(this->prevTime.wDay + 1) * 24.0 * 60.0 * 60.0 +
-                   (f64)(this->curTime.wHour * 60 * 60) + (f64)(this->curTime.wMinute * 60) +
-                   (f64)this->curTime.wSecond;
-    }
-
-    timeDiff -= perfDiff;
-    timeDiff =
-        timeDiff * 1000.0 + (f64)this->curTime.wMilliseconds - (f64)this->prevTime.wMilliseconds;
-    timeDiff /= 1000.0;
-
-    perfDiff = (f64)(this->curPerfCounter.LowPart - this->prevPerfCounter.LowPart) /
-               (f64)this->perfFrequency.LowPart;
+    timeDiff = std::chrono::duration<f64>(this->curTime - this->prevTime).count();
+    perfDiff = (f64)(this->curPerfCounter - this->prevPerfCounter) / (f64)this->perfFrequency;
 
     if (perfDiff >= 1.0)
     {
@@ -127,14 +107,13 @@ void Supervisor::CheckTiming()
 
 void AnmManager::ReleaseVertexBuffer()
 {
-    SAFE_RELEASE(this->vertexBuffer);
 }
 
 u32 Supervisor::OnUpdate(Supervisor *arg)
 {
     g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
@@ -298,7 +277,6 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                 arg->curState = 0;
                 ReplayManager::SaveReplay(NULL, NULL);
                 arg->curState = 1;
-                g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
                 if (MainMenu::RegisterChain(1) != ZUN_SUCCESS)
                 {
                     return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
@@ -371,104 +349,23 @@ u32 Supervisor::OnDraw(Supervisor *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1, void *param_2)
+ZunResult Supervisor::SetupInput()
 {
-    HRESULT hr;
-    if (!g_Supervisor.controller)
-    {
-        hr = g_Supervisor.directInput->CreateDevice(param_1->guidInstance, &g_Supervisor.controller,
-                                                    NULL);
-        if (FAILED(hr))
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1, void *param_2)
-{
-    DIPROPRANGE local_1c;
-    void *idk = param_2;
-
-    if (param_1->dwType & DIDFT_AXIS)
-    {
-        local_1c.diph.dwSize = sizeof(DIPROPRANGE);
-        local_1c.diph.dwHeaderSize = 16;
-        local_1c.diph.dwHow = 2;
-        local_1c.diph.dwObj = param_1->dwType;
-        local_1c.lMin = -1000;
-        local_1c.lMax = 1000;
-        if (g_Supervisor.controller->SetProperty(DIPROP_RANGE, &local_1c.diph) < 0)
-        {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-ZunResult Supervisor::SetupDInput()
-{
-    HINSTANCE hInstance = (HINSTANCE)GetWindowLongA(this->hwndGameWindow, -6);
     if ((this->cfg.opts >> 0xb & 1) != 0)
     {
         return ZUN_ERROR;
     }
 
-    if (FAILED(DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8A,
-                                  (LPVOID *)&this->directInput, NULL)))
+    if (SDL_Init(SDL_INIT_GAMECONTROLLER) == 0)
     {
-        this->directInput = NULL;
-        g_GameErrorContext.Log("DirectInput が使用できません\r\n");
-        return ZUN_ERROR;
-    }
-    else
-    {
-        if (FAILED(this->directInput->CreateDevice(GUID_SysKeyboard, &this->keyboard, NULL)))
+        g_Supervisor.controller = SDL_GameControllerOpen(0);
+        if (g_Supervisor.controller)
         {
-            SAFE_RELEASE(this->directInput);
-            g_GameErrorContext.Log("DirectInput が使用できません\r\n");
-            return ZUN_ERROR;
-        }
-        else
-        {
-            if (FAILED(this->keyboard->SetDataFormat(&c_dfDIKeyboard)))
-            {
-                SAFE_RELEASE(this->keyboard);
-                SAFE_RELEASE(this->directInput);
-                g_GameErrorContext.Log("DirectInput SetDataFormat が使用できません\r\n");
-                return ZUN_ERROR;
-            }
-            else
-            {
-                if (FAILED(this->keyboard->SetCooperativeLevel(
-                        this->hwndGameWindow,
-                        DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY)))
-                {
-                    SAFE_RELEASE(this->keyboard);
-                    SAFE_RELEASE(this->directInput);
-                    g_GameErrorContext.Log("DirectInput SetCooperativeLevel が使用できません\r\n");
-                    return ZUN_ERROR;
-                }
-                else
-                {
-                    this->keyboard->Acquire();
-                    g_GameErrorContext.Log("DirectInput は正常に初期化されました\r\n");
-                    this->directInput->EnumDevices(4, EnumGameControllersCb, NULL, 1);
-                    if (this->controller)
-                    {
-                        this->controller->SetDataFormat(&c_dfDIJoystick2);
-                        this->controller->SetCooperativeLevel(this->hwndGameWindow, 10);
-                        g_Supervisor.controllerCaps.dwSize = sizeof(DIDEVCAPS);
-                        this->controller->GetCapabilities(&g_Supervisor.controllerCaps);
-                        this->controller->EnumObjects(ControllerCallback, NULL, 0);
-                        g_GameErrorContext.Log("有効なパッドを発見しました\r\n");
-                    }
-                    return ZUN_SUCCESS;
-                }
-            }
+            g_GameErrorContext.Log("有効なパッドを発見しました\n");
         }
     }
+
+    return ZUN_SUCCESS;
 }
 
 ZunResult Supervisor::LoadGameData()
@@ -500,10 +397,10 @@ i32 Supervisor::CheckVSync()
     f32 unused;
     f32 fps;
     i32 timeDiff;
-    u32 timeEnd;
+    u64 timeEnd;
     i32 fpsCount;
     f32 fpsArray[29];
-    u32 timeStart;
+    u64 timeStart;
     i32 frameCount;
     i32 i;
 
@@ -512,23 +409,14 @@ i32 Supervisor::CheckVSync()
     fpsCount = 0;
     timeStart = 0;
 
-    timeBeginPeriod(1);
-    timeStart = timeGetTime();
-    timeEndPeriod(1);
+    timeStart = SDL_GetTicks64();
 
     while (i < 1800 && fpsCount < 8)
     {
-        g_Supervisor.d3dDevice->BeginScene();
         g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
-        g_Supervisor.d3dDevice->EndScene();
-        if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-        {
-            g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-        }
+        g_Supervisor.gfxDevice->SwapBuffers();
         i++;
-        timeBeginPeriod(1);
-        timeEnd = timeGetTime();
-        timeEndPeriod(1);
+        timeEnd = SDL_GetTicks64();
         frameCount++;
         timeDiff = timeEnd - timeStart;
 
@@ -567,6 +455,11 @@ i32 Supervisor::CheckVSync()
             fpsSum = 1000.0f;
         }
 
+        if (g_Supervisor.gfxDevice->GetType() == RENDERER_SOFTWARE)
+        {
+            return 0;
+        }
+
         if (fpsSum > 160.0f)
         {
             g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます\n");
@@ -589,21 +482,12 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     ScoreDat *scoreDat;
     i32 i;
 
-    QueryPerformanceFrequency(&arg->perfFrequency);
-    g_Supervisor.d3dDevice->BeginScene();
-    g_Supervisor.d3dDevice->Clear(0, NULL, 1, 0xff000000, 1.0f, 0);
-    g_Supervisor.d3dDevice->EndScene();
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
-    g_Supervisor.d3dDevice->BeginScene();
-    g_Supervisor.d3dDevice->Clear(0, NULL, 1, 0xff000000, 1.0f, 0);
-    g_Supervisor.d3dDevice->EndScene();
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
+    arg->perfFrequency = SDL_GetPerformanceFrequency();
+    g_Supervisor.gfxDevice->SetClearColor({0xff000000});
+    g_Supervisor.gfxDevice->Clear(CLEAR_COLOR_BUFFER);
+    g_Supervisor.gfxDevice->SwapBuffers();
+    g_Supervisor.gfxDevice->Clear(CLEAR_COLOR_BUFFER);
+    g_Supervisor.gfxDevice->SwapBuffers();
     if (LoadGameData() != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
@@ -623,22 +507,17 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
         i = 0;
         while (i < 4)
         {
-            g_Supervisor.d3dDevice->BeginScene();
             g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
-            g_Supervisor.d3dDevice->EndScene();
-            if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-            {
-                g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-            }
+            g_Supervisor.gfxDevice->SwapBuffers();
             i++;
         }
     }
     g_AnmManager->ReleaseSurface(0);
     arg->isInEnding = 0;
     arg->renderSkipFrames = 0;
-    arg->lastTotalPlayTimeUpdate = timeGetTime();
+    arg->lastTotalPlayTimeUpdate = SDL_GetTicks64();
     g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
-    arg->SetupDInput();
+    arg->SetupInput();
     if (!arg->midiOutput)
     {
         arg->midiOutput = new MidiOutput;
@@ -660,7 +539,10 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     }
 
     g_AnmManager->SetupVertexBuffer();
-    TextHelper::CreateTextBuffer();
+    if (TextHelper::CreateTextBuffer() != ZUN_SUCCESS)
+    {
+        return ZUN_ERROR;
+    }
     if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt"))
     {
         g_GameErrorContext.Log("error : BGM の初期化に失敗しました\n");
@@ -716,17 +598,10 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
     }
     ReplayManager::SaveReplay(NULL, NULL);
     TextHelper::ReleaseTextBuffer();
-    if (arg->keyboard)
-    {
-        arg->keyboard->Unacquire();
-    }
-    SAFE_RELEASE(arg->keyboard);
     if (arg->controller)
     {
-        arg->controller->Unacquire();
+        SDL_GameControllerClose(arg->controller);
     }
-    SAFE_RELEASE(arg->controller);
-    SAFE_RELEASE(arg->directInput);
     SAFE_DELETE(g_GameManager.globals);
     SAFE_DELETE(g_GameManager.defaultCfg);
     g_Pbg4Archive.Release();
@@ -767,22 +642,21 @@ void Supervisor::DrawFpsCounter(i32 param_1)
 {
     ZunVec3 local_30;
     ZunVec3 local_24;
-    LARGE_INTEGER local_18;
+    u64 local_18;
     f32 targetFps;
-    u32 curTime;
+    u64 curTime;
     f32 elapsedTimeInSecs;
     f32 fps;
 
     if (!g_GameManager.slowModeSlowActive)
     {
-        g_NumFramesSinceLastTime =
-            g_NumFramesSinceLastTime + 1 + (u32)g_Supervisor.cfg.frameskipConfig;
+        g_NumFramesSinceLastTime += 1 + (u32)g_Supervisor.cfg.frameskipConfig;
 
-        if (g_Supervisor.perfFrequency.LowPart == 0)
+        if (g_Supervisor.perfFrequency == 0)
         {
-            static u32 g_LastTime = timeGetTime();
+            static u64 g_LastTime = SDL_GetTicks64();
 
-            curTime = timeGetTime();
+            curTime = SDL_GetTicks64();
             if (curTime < g_LastTime)
             {
                 g_LastTime = curTime;
@@ -835,24 +709,21 @@ void Supervisor::DrawFpsCounter(i32 param_1)
             goto LAB_00439350;
         }
 
-        if (g_PerformanceCounter.LowPart == 0)
+        if (g_PerformanceCounter == 0)
         {
-            QueryPerformanceCounter(&g_PerformanceCounter);
+            g_PerformanceCounter = SDL_GetPerformanceCounter();
         }
-        QueryPerformanceCounter(&local_18);
-        if (local_18.LowPart < g_PerformanceCounter.LowPart)
+        local_18 = SDL_GetPerformanceCounter();
+        if (local_18 < g_PerformanceCounter)
         {
-            g_PerformanceCounter.LowPart = local_18.LowPart;
-            g_PerformanceCounter.HighPart = local_18.HighPart;
+            g_PerformanceCounter = local_18;
             g_NumFramesSinceLastTime = 0;
         }
-        if (local_18.LowPart >=
-            g_PerformanceCounter.LowPart + (g_Supervisor.perfFrequency.LowPart >> 1))
+        if (local_18 - g_PerformanceCounter >= g_Supervisor.perfFrequency / 2)
         {
-            elapsedTimeInSecs = (f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
-                                (f32)g_Supervisor.perfFrequency.LowPart;
-            g_PerformanceCounter.LowPart = local_18.LowPart;
-            g_PerformanceCounter.HighPart = local_18.HighPart;
+            elapsedTimeInSecs =
+                (f32)(local_18 - g_PerformanceCounter) / (f32)g_Supervisor.perfFrequency;
+            g_PerformanceCounter = local_18;
             g_FpsUpdateCounter++;
             if (g_FpsUpdateCounter % 8 == 0)
             {
@@ -972,94 +843,15 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
 // ZUN name: snapShotScreen
 i32 Supervisor::SnapshotScreen(const char *param_1)
 {
-    FILE *file;
-    u32 local_44;
-    D3DLOCKED_RECT local_40;
-    i32 bytesPerRow;
-    i32 x;
-    i32 y;
-    u8 *local_2c;
-    u8 *local_28;
-    i32 local_24;
-    IDirect3DSurface8 *backBuffer;
-    BITMAPINFO *local_1c;
-    void *local_18;
-    BITMAPFILEHEADER local_14;
+    u8 *pixels = new u8[640 * 480 * 4];
+    this->gfxDevice->ReadPixels(0, 0, 640, 480, pixels);
 
-    local_1c = NULL;
-    local_18 = NULL;
-    backBuffer = NULL;
-    this->d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
-    memset(&local_14, 0, sizeof(BITMAPFILEHEADER));
-    local_14.bfType = *(WORD *)&"BM";
-    local_14.bfSize = local_14.bfOffBits = 54;
-    switch (this->presentParameters.BackBufferFormat)
-    {
-    case D3DFMT_R5G6B5:
-        g_GameErrorContext.Log("16bit は取り込めない\r\n");
-        break;
-    case D3DFMT_X8R8G8B8:
-        local_1c = (BITMAPINFO *)malloc(sizeof(BITMAPINFO));
-        if (!local_1c)
-        {
-            g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
-            break;
-        }
+    SDL_Surface *surf =
+        SDL_CreateRGBSurfaceWithFormatFrom(pixels, 640, 480, 32, 640 * 4, SDL_PIXELFORMAT_RGBA32);
 
-        memset(local_1c, 0, sizeof(BITMAPINFO));
-        local_24 = 1920;
-        local_18 = malloc(local_24 * 480);
-        if (!local_18)
-        {
-            g_GameErrorContext.Log("snapShotScreen : 確保しくり\r\n");
-            break;
-        }
-
-        local_14.bfSize += local_24 * 480;
-        local_1c->bmiHeader.biBitCount = 24;
-        local_1c->bmiHeader.biSize = 40;
-        local_1c->bmiHeader.biWidth = 640;
-        local_1c->bmiHeader.biHeight = 480;
-        local_1c->bmiHeader.biPlanes = 1;
-        local_1c->bmiHeader.biCompression = 0;
-        backBuffer->LockRect(&local_40, NULL, 0);
-        bytesPerRow = 0;
-        for (y = 479; -1 < y; y--, bytesPerRow++)
-        {
-            local_2c = (u8 *)((u8 *)local_18 + local_24 * bytesPerRow);
-            local_28 = (u8 *)((u8 *)local_40.pBits + local_40.Pitch * y);
-            for (x = 0; x < 640; x++)
-            {
-                *local_2c = *local_28;
-                local_28++;
-                local_2c++;
-                *local_2c = *local_28;
-                local_28++;
-                local_2c++;
-                *local_2c = *local_28;
-                local_28 += 2;
-                local_2c++;
-            }
-        }
-        backBuffer->UnlockRect();
-        file = fopen(param_1, "wb");
-        if (!file)
-        {
-            break;
-        }
-
-        fwrite(&local_14, 14, 1, file);
-        fwrite(local_1c, 40, 1, file);
-        fwrite(local_18, local_24 * 480, 1, file);
-        fclose(file);
-        break;
-    default:
-        g_GameErrorContext.Log("error ? mother.cpp\r\n");
-        return 1;
-    }
-    SAFE_RELEASE(backBuffer);
-    free(local_1c);
-    free(local_18);
+    SDL_SaveBMP(surf, param_1);
+    SDL_FreeSurface(surf);
+    delete[] pixels;
     return 0;
 }
 
@@ -1376,42 +1168,38 @@ i32 Supervisor::CanSaveReplay()
     return g_GameManager.defaultCfg != NULL && g_GameManager.defaultCfg->slowMode;
 }
 
-HRESULT Supervisor::EnableFog()
+i32 Supervisor::EnableFog()
 {
     g_AnmManager->Flush();
     if (this->fogEnabled != 1)
     {
         this->fogEnabled = 1;
-        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, 1);
+        g_Supervisor.gfxDevice->Enable(CAPS_FOG);
+        return 1;
     }
 
     return 0;
 }
 
-HRESULT Supervisor::DisableFog()
+i32 Supervisor::DisableFog()
 {
     g_AnmManager->Flush();
     if (this->fogEnabled)
     {
         this->fogEnabled = 0;
-        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, 0);
+        g_Supervisor.gfxDevice->Disable(CAPS_FOG);
+        return 1;
     }
 
     return 0;
 }
 
-void Supervisor::SetRenderState(D3DRENDERSTATETYPE stateType, u32 param_2)
-{
-    g_AnmManager->Flush();
-    this->d3dDevice->SetRenderState(stateType, param_2);
-}
-
 void Supervisor::UpdateStartupTime()
 {
     u32 timeSinceStartup;
-    u32 time;
+    u64 time;
 
-    time = timeGetTime();
+    time = SDL_GetTicks64();
     if (time < this->lastTotalPlayTimeUpdate)
     {
         this->lastTotalPlayTimeUpdate = 0;
@@ -1445,9 +1233,9 @@ void Supervisor::UpdateStartupTime()
 void Supervisor::UpdateTime()
 {
     u32 timeSinceLastTime;
-    u32 time;
+    u64 time;
 
-    time = timeGetTime();
+    time = SDL_GetTicks64();
     if (time < this->currentTime)
     {
         this->currentTime = 0;

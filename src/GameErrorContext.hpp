@@ -1,7 +1,7 @@
 #pragma once
 
+#include <SDL2/SDL.h>
 #include <cstddef>
-#include <windows.h>
 
 #include "FileSystem.hpp"
 
@@ -29,7 +29,7 @@ struct GameErrorContext
             this->Log("---------------------------------------------------------- \n");
             if (this->m_ShowMessageBox)
             {
-                MessageBoxA(NULL, this->m_Buffer, "log", MB_ICONERROR);
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", this->m_Buffer, NULL);
             }
             FileSystem::WriteDataToFile("./log.txt", this->m_Buffer, strlen(this->m_Buffer));
         }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d8.h>
-
 #include "AnmVm.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
@@ -37,7 +35,7 @@ struct AsciiManagerPopup
 {
     u8 digits[8];
     ZunVec3 position;
-    D3DCOLOR color;
+    u32 color;
     ZunTimer timer;
     u8 inUse;
     u8 characterCount;
@@ -48,7 +46,7 @@ struct AsciiManagerString
 {
     char text[64];
     ZunVec3 position;
-    D3DCOLOR color;
+    u32 color;
     Float2 scale;
     i32 isSelected;
     i32 isGui;
@@ -69,15 +67,15 @@ struct AsciiManager
 
     static void AddFormatText(AsciiManager *manager, ZunVec3 *position, const char *fmt, ...);
     void AddString(ZunVec3 *position, const char *text);
-    void CreatePopup1(ZunVec3 *position, i32 value, D3DCOLOR color);
-    void CreatePopup2(ZunVec3 *position, i32 value, D3DCOLOR color);
+    void CreatePopup1(ZunVec3 *position, i32 value, u32 color);
+    void CreatePopup2(ZunVec3 *position, i32 value, u32 color);
     void DrawPopups();
     void DrawStrings();
     void InitializeVms();
     void InitializeOtherVms();
     void UpdateScripts();
 
-    void SetColor(D3DCOLOR color)
+    void SetColor(u32 color)
     {
         this->color = color;
     }
@@ -103,7 +101,7 @@ struct AsciiManager
         this->bossMarkers[idx].pos = *pos;
     }
 
-    void SetBossDamageTint(i32 idx, D3DCOLOR color)
+    void SetBossDamageTint(i32 idx, u32 color)
     {
         this->bossDamageTint[idx] = color;
     }
@@ -122,7 +120,7 @@ struct AsciiManager
     i32 bossDamageTint[4];
     AsciiManagerString strings[256];
     i32 numStrings;
-    D3DCOLOR color;
+    u32 color;
     Float2 scale;
     i32 isGui;
     i32 isSelected;

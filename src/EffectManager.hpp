@@ -76,10 +76,10 @@ struct EffectManager
     static void ModifyEffect1eAcceleration();
     static i32 UpdateNoOp(Effect *effect);
 
-    Effect *SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles, D3DCOLOR color);
-    Effect *SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4, D3DCOLOR color);
+    Effect *SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles, u32 color);
+    Effect *SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4, u32 color);
     Effect *SpawnMovingParticles(i32 effectId, ZunVec3 *pos, ZunVec3 *velocity, i32 numParticles,
-                                 D3DCOLOR color);
+                                 u32 color);
     i32 UpdateSpecialEffect();
 
     i32 nextIndex;

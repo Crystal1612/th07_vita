@@ -1,5 +1,6 @@
 #include "Ending.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "Chain.hpp"
 #include "Controller.hpp"
@@ -77,7 +78,7 @@ i32 Ending::ReadEndFileParameter()
 void Ending::FadingEffect()
 {
     ZunRect rect;
-    D3DCOLOR color;
+    u32 color;
 
     rect.left = 0.0f;
     rect.top = 0.0f;
@@ -401,7 +402,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     if (!this->endFileData)
     {
         g_GameErrorContext.Log(
-            "error : エンディングファイルが読み込めない、ファイルが破壊されています\r\n");
+            "error : エンディングファイルが読み込めない、ファイルが破壊されています\n");
         return ZUN_ERROR;
     }
 
@@ -427,7 +428,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
     g_GameManager.finished = 1;
     g_Supervisor.isInEnding = 1;
     g_AnmManager->LoadAnms(ANM_FILE_STAFF, "data/staff01.anm", ANM_OFFSET_STAFF);
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->SetSprite(NULL);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetVertexShader(255);

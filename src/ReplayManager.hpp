@@ -124,7 +124,7 @@ struct ReplayManager
     ReplayDataInput *replayInputs;
     ReplayDataInput *replayInputsByStage[7];
     StageReplayData *stageReplayData;
-    i32 replayDataEndPointers[7];
+    uintptr_t replayDataEndPointers[7];
     ChainElem *calcChain;
     ChainElem *drawChain;
     ChainElem *demoCalcChain;

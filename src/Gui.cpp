@@ -1,7 +1,9 @@
 #include "Gui.hpp"
 
+#include <cstdint>
 #include <cstdio>
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "BulletManager.hpp"
@@ -18,9 +20,8 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
-#include "utils.hpp"
 
-D3DCOLOR g_SpellcardTimeColors[4] = {
+u32 g_SpellcardTimeColors[4] = {
     0xa0d0ff,
     0xa080ff,
     0xe080c0,
@@ -94,17 +95,17 @@ void Gui::ShowSpellcardBonus(i32 fmtArg)
 
 void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
 {
-    RECT srcRect;
-    RECT dstRect;
+    SDL_Rect srcRect;
+    SDL_Rect dstRect;
 
-    srcRect.left = g_AnmManager->GetSprite(0x609)->startPixelInclusive.x;
-    srcRect.top = g_AnmManager->GetSprite(0x609)->startPixelInclusive.y;
-    srcRect.right = g_AnmManager->GetSprite(0x609)->endPixelInclusive.x;
-    srcRect.bottom = g_AnmManager->GetSprite(0x609)->endPixelInclusive.y;
-    dstRect.left = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
-    dstRect.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
-    dstRect.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;
-    dstRect.bottom = g_AnmManager->sprites[spriteIdx].endPixelInclusive.y;
+    srcRect.x = g_AnmManager->GetSprite(0x609)->startPixelInclusive.x;
+    srcRect.y = g_AnmManager->GetSprite(0x609)->startPixelInclusive.y;
+    srcRect.w = g_AnmManager->GetSprite(0x609)->endPixelInclusive.x - srcRect.x;
+    srcRect.h = g_AnmManager->GetSprite(0x609)->endPixelInclusive.y - srcRect.y;
+    dstRect.x = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
+    dstRect.y = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
+    dstRect.w = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x - dstRect.x;
+    dstRect.h = g_AnmManager->sprites[spriteIdx].endPixelInclusive.y - dstRect.y;
     g_AnmManager->CopyTexture(21, 22, &srcRect, &dstRect);
 }
 
@@ -436,8 +437,8 @@ ZunResult Gui::ActualAddedCallback()
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->transitionQuads[i * 12 + j],
                                                         (i + j & 1) + 1830);
                 this->impl->transitionQuads[i * 12 + j].intVars2[0] = i + j * 2;
-                this->impl->transitionQuads[i * 12 + j].pos.x = (f32)j * 32.0f - 0.5f + 16.0f;
-                this->impl->transitionQuads[i * 12 + j].pos.y = (f32)i * 32.0f - 0.5f + 16.0f;
+                this->impl->transitionQuads[i * 12 + j].pos.x = (f32)j * 32.0f + 16.0f;
+                this->impl->transitionQuads[i * 12 + j].pos.y = (f32)i * 32.0f + 16.0f;
                 this->impl->transitionQuads[i * 12 + j].pos.z = 0.0f;
                 this->impl->transitionQuads[i * 12 + j].uvScrollPos.x = (f32)j * 32.0f / 512.0f;
                 this->impl->transitionQuads[i * 12 + j].uvScrollPos.y = (f32)i * 32.0f / 512.0f;
@@ -659,7 +660,7 @@ ZunResult Gui::LoadMsg(const char *param_1)
     for (i = 0; i < this->impl->msg.msgFile->numEntries; i++)
     {
         (&this->impl->msg.msgFile->entries)[i] =
-            (MsgRawInstr *)((i32)(&this->impl->msg.msgFile->entries)[i] + (i32) &
+            (MsgRawInstr *)((uintptr_t)(&this->impl->msg.msgFile->entries)[i] + (uintptr_t) &
                             this->impl->msg.msgFile->numEntries);
     }
     return ZUN_SUCCESS;
@@ -1035,31 +1036,20 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->DrawNoRotation(&this->msg.portraits[1]);
     this->msg.portraits[1].pos = oldPos;
     g_AnmManager->Flush();
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_DISABLE);
     if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
     {
-        g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+        g_Supervisor.gfxDevice->SetDepthMask(false);
     }
-    g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
-    g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, dialogueBg,
+    g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, dialogueBg,
                                             sizeof(VertexDiffuseXyzrhw));
     g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-    {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
-    }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_MODULATE);
+    g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_MODULATE);
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[0]);
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[1]);
     g_AnmManager->DrawNoRotation(&this->msg.introLines[0]);
@@ -1303,11 +1293,11 @@ void Gui::DrawGameScene()
     f32 y;
 
     g_AnmManager->Flush();
-    g_Supervisor.viewport.X = 0;
-    g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 640;
-    g_Supervisor.viewport.Height = 480;
-    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.viewport.x = 0;
+    g_Supervisor.viewport.y = 0;
+    g_Supervisor.viewport.width = 640;
+    g_Supervisor.viewport.height = 480;
+    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
     vm = &this->impl->vms0[12];
     if ((g_Supervisor.cfg.opts >> 12 & 1) != 0 || vm->currentInstruction ||
         g_Supervisor.renderSkipFrames != 0)
@@ -1483,31 +1473,20 @@ void Gui::DrawGameScene()
 
             powerBarVerts[0].w = powerBarVerts[1].w = powerBarVerts[2].w = powerBarVerts[3].w =
                 1.0f;
-            if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-            {
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
-            }
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+            g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
+            g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_DISABLE);
             if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
             {
-                g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+                g_Supervisor.gfxDevice->SetDepthMask(false);
             }
-            g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
-            g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &powerBarVerts,
+            g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, &powerBarVerts,
                                                     sizeof(VertexDiffuseXyzrhw));
             g_AnmManager->SetVertexShader(255);
             g_AnmManager->SetColorOp(255);
             g_AnmManager->SetBlendMode(255);
             g_AnmManager->SetZWriteDisable(255);
-            if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
-            {
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
-            }
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+            g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_MODULATE);
+            g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_MODULATE);
         }
 
         ZunVec3 pos;
@@ -1545,13 +1524,13 @@ void Gui::DrawStageElements()
 {
     ZunVec3 timerPos;
     i32 markerGap;
-    D3DCOLOR timeColor;
+    u32 timeColor;
     f32 segmentEndHealth;
     i32 j;
     i32 secondsRemaining;
     ZunRect healthBarRect;
-    D3DCOLOR color1;
-    D3DCOLOR color2;
+    u32 color1;
+    u32 color2;
     i32 leadingZeroSkipped;
     i32 digitDivisor;
     i32 digit;

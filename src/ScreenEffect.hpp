@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d8.h>
-
 #include "Chain.hpp"
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
@@ -16,11 +14,11 @@ struct ZunRect
 
 namespace ScreenEffect
 {
-void Clear(D3DCOLOR color);
-void DrawSquare(ZunRect *rect, D3DCOLOR color);
-void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3, D3DCOLOR param_4,
-                     D3DCOLOR param_5);
-void SetViewport(D3DCOLOR color);
+void Clear(ZunColor color);
+void DrawSquare(ZunRect *rect, u32 color);
+void DrawColoredQuad(ZunRect *rect, u32 param_2, u32 param_3, u32 param_4,
+                     u32 param_5);
+void SetViewport(u32 color);
 } // namespace ScreenEffect
 
 struct BombEffects

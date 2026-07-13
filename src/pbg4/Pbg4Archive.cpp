@@ -1,9 +1,12 @@
 #include "Pbg4Archive.hpp"
 
-#include "../Supervisor.hpp"
-#include "../dxutil.hpp"
+#include <SDL2/SDL_stdinc.h>
+#include <cstring>
+
 #include "Lzss.hpp"
 #include "Pbg4File.hpp"
+#include "Supervisor.hpp"
+#include "dxutil.hpp"
 
 Pbg4Archive g_UnusedPbg4ArchiveArray[20];
 
@@ -62,9 +65,9 @@ void Pbg4Archive::Release()
 
 u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
 {
-    SIZE_T dstLen;
+    size_t dstLen;
     Pbg4Entry *entry;
-    SIZE_T dwBytes;
+    size_t dwBytes;
     u8 *dstBuf;
     u8 *srcBuf;
 
@@ -140,7 +143,7 @@ Pbg4Entry *Pbg4Archive::FindEntry(const char *filename)
     Pbg4Entry *entry = this->entries;
     for (i32 i = this->numOfEntries; 0 < i; --i, ++entry)
     {
-        if (stricmp(filename, entry->filename) == 0)
+        if (SDL_strcasecmp(filename, entry->filename) == 0)
         {
             return entry;
         }
@@ -154,7 +157,7 @@ bool Pbg4Archive::OpenArchive(const char *path)
     u32 headerSize;
     u32 fileSize;
     i32 magic;
-    SIZE_T decompressedSize;
+    size_t decompressedSize;
     u8 *decompressedData;
 
     compressedData = NULL;

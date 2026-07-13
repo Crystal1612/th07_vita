@@ -1,5 +1,6 @@
 #include "Player.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "BombData.hpp"
@@ -14,7 +15,6 @@
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "ZunMath.hpp"
-#include "d3dx8.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
 
@@ -1220,6 +1220,8 @@ i32 Player::HandlePlayerInputs()
             horizontalSpeed = this->shooterData->speedDiagonalFocus;
             verticalSpeed = horizontalSpeed;
             break;
+        case MOVEMENT_NONE:
+            break;
         }
     }
     else
@@ -1254,6 +1256,8 @@ i32 Player::HandlePlayerInputs()
         case MOVEMENT_DOWN_RIGHT:
             horizontalSpeed = this->shooterData->speedDiagonal;
             verticalSpeed = horizontalSpeed;
+            break;
+        case MOVEMENT_NONE:
             break;
         }
     }
@@ -2383,15 +2387,16 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
 
     for (i = 0; i < (i32)(u32)(*data)->entryCount; i++)
     {
-        (&(*data)->levels)[i].entry = (ShtEntry *)((i32)(&(*data)->levels)[i].entry + (i32)*data);
+        (&(*data)->levels)[i].entry =
+            (ShtEntry *)((uintptr_t)(&(*data)->levels)[i].entry + (uintptr_t)*data);
 
         entry = (&(*data)->levels)[i].entry;
         while (entry->fireInterval >= 0)
         {
-            entry->fireCallback = g_ShtFireFuncs[(i32)entry->fireCallback];
-            entry->updateCallback = g_ShtUpdateFuncs[(i32)entry->updateCallback];
-            entry->drawCallback = g_ShtDrawFuncs[(i32)entry->drawCallback];
-            entry->hitCallback = g_ShtHitFuncs[(i32)entry->hitCallback];
+            entry->fireCallback = g_ShtFireFuncs[(uintptr_t)entry->fireCallback];
+            entry->updateCallback = g_ShtUpdateFuncs[(uintptr_t)entry->updateCallback];
+            entry->drawCallback = g_ShtDrawFuncs[(uintptr_t)entry->drawCallback];
+            entry->hitCallback = g_ShtHitFuncs[(uintptr_t)entry->hitCallback];
             entry++;
         }
     }

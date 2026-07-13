@@ -5,7 +5,7 @@
 #include "ZunResult.hpp"
 #include "utils.hpp"
 
-extern D3DCOLOR *g_BulletColor;
+extern u32 *g_BulletColor;
 
 typedef enum BulletState
 {

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+
 #include "AnmVm.hpp"
 #include "Chain.hpp"
 #include "ReplayManager.hpp"
@@ -127,7 +131,7 @@ struct ScoreDat
     i32 dataOffset;
     ScoreListNode *scores;
     i32 fileLength;
-    SIZE_T dstLen;
+    size_t dstLen;
     i32 srcLen;
 };
 
@@ -135,7 +139,7 @@ struct ResultScreen
 {
     ResultScreen()
     {
-        memset(this, 0, sizeof(ResultScreen));
+        memset((void *)this, 0, sizeof(ResultScreen));
         this->cursor = 1;
     }
 

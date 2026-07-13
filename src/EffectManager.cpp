@@ -1,5 +1,6 @@
 #include "EffectManager.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "GameManager.hpp"
 #include "Player.hpp"
@@ -444,7 +445,7 @@ i32 EffectManager::UpdateNoOp(Effect *effect)
     return 1;
 }
 
-Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles, D3DCOLOR color)
+Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticles, u32 color)
 {
     i32 i;
     Effect *effect;
@@ -506,7 +507,7 @@ Effect *EffectManager::SpawnParticles(i32 effectId, ZunVec3 *pos, i32 numParticl
 }
 
 Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos, ZunVec3 *velocity,
-                                            i32 numParticles, D3DCOLOR color)
+                                            i32 numParticles, u32 color)
 {
     i32 i;
     Effect *effect;
@@ -568,7 +569,7 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos, ZunVec3 
 }
 
 Effect *EffectManager::SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4,
-                                   D3DCOLOR color)
+                                   u32 color)
 {
     Effect *effect;
 
@@ -701,11 +702,11 @@ u32 EffectManager::OnDraw(EffectManager *arg)
 
 i32 EffectManager::UpdateSpecialEffect()
 {
-    int temp;
+    i32 temp;
     f32 r;
     f32 g;
     f32 b;
-    int counter;
+    i32 counter;
     f32 a;
     Effect *effect;
 

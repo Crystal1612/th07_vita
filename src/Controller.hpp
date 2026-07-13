@@ -47,10 +47,6 @@ namespace Controller
 u16 GetControllerInput(u16 buttons);
 u8 *GetControllerState();
 u16 GetInput();
-u16 GetJoystickCaps();
 void ResetKeyboard();
-u32 SetButtonFromControllerInputs(u16 *outButtons, i16 controllerButtonToTest, u32 touhouButton,
-                                  u32 inputButtons);
-u32 SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controllerButtonToTest, u32 touhouButton,
-                                     u8 *inputButtons);
+u32 SetButton(u16* outButtons, i32 controllerButton, u32 thButton);
 } // namespace Controller

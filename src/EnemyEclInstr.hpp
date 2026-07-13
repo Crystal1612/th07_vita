@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d8.h>
-
 #include "EclManager.hpp"
 
 extern EclExInstr g_EclExInstr[24];

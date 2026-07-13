@@ -3,6 +3,8 @@
 #include "ZunMath.hpp"
 #include "inttypes.hpp"
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 union AnyArg {
     i32 i;
     u32 u;

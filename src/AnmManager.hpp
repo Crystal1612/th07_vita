@@ -2,14 +2,13 @@
 
 #include "AnmVm.hpp"
 
+#include <SDL2/SDL.h>
 #include <assert.h>
-#include <windef.h>
 
-#include "AnmIdx.hpp"
 #include "ZunColor.hpp"
 #include "ZunMath.hpp"
 #include "ZunResult.hpp"
-#include "dxutil.hpp"
+#include "graphics/ZunGraphics.hpp"
 
 struct VertexDiffuseXyzrhw
 {
@@ -62,7 +61,7 @@ struct ZunImageInfo
     u32 height;
     u32 depth;
     u32 mipLevels;
-    D3DFORMAT format;
+    u32 format;
 };
 
 #pragma warning(disable : 4200)
@@ -130,7 +129,7 @@ struct AnmManager
     ZunResult CalcBillboardTransform(AnmVm *vm);
     void CalcProjectedTransform(AnmVm *vm);
     void CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y);
-    void CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRect);
+    void CopyTexture(i32 dstIdx, i32 srcIdx, SDL_Rect *dstRect, SDL_Rect *srcRect);
     ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat);
     ZunResult Draw(AnmVm *vm);
     ZunResult DrawBillboard(AnmVm *vm);
@@ -141,13 +140,13 @@ struct AnmManager
     ZunResult DrawInner(AnmVm *vm, u32 drawFlags);
     ZunResult DrawNoRotation(AnmVm *vm);
     ZunResult DrawProjected(AnmVm *vm);
-    void DrawStringFormat(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text, ...);
-    void DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor, u32 outlineType, const char *text, ...);
+    void DrawStringFormat(AnmVm *vm, u32 textColor, u32 outlineType, const char *text, ...);
+    void DrawStringFormat2(AnmVm *vm, u32 textColor, u32 outlineType, const char *text, ...);
     void DrawTextToSprite(u32 spriteDstIdx, i32 x, i32 y, i32 width, i32 height, i32 fontWidth,
-                          i32 fontHeight, D3DCOLOR textColor, u32 outlineType, char *strToPrint,
+                          i32 fontHeight, u32 textColor, u32 outlineType, char *strToPrint,
                           f32 scaleY, f32 scaleX);
     ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count);
-    static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
+    static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, u32 textColor, u32 outlineType,
                               const char *str, ...);
     i32 ExecuteScript(AnmVm *vm);
     void Flush();
@@ -155,12 +154,10 @@ struct AnmManager
     i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
     void LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
-    ZunResult LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx,
-                          D3DCOLOR colorKey);
+    ZunResult LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx, u32 colorKey);
     ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath, i32 formatIdx,
-                                      D3DCOLOR colorKey);
-    ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
-                                  D3DCOLOR formatIdx);
+                                      u32 colorKey);
+    ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo, u32 formatIdx);
     ZunResult PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex);
     void ReleaseAnm(i32 anmIdx);
     void ReleaseSurface(i32 surfaceIdx);
@@ -197,17 +194,26 @@ struct AnmManager
     {
         for (i32 i = 0; i < 32; i++)
         {
-            SAFE_RELEASE(this->surfaces[i]);
+            if (this->surfaces[i])
+            {
+                SDL_FreeSurface(this->surfaces[i]);
+                this->surfaces[i] = nullptr;
+            }
+            if (this->surfacesBis[i])
+            {
+                SDL_FreeSurface(this->surfacesBis[i]);
+                this->surfacesBis[i] = nullptr;
+            }
         }
     }
 
-    void SetColor(D3DCOLOR color)
+    void SetColor(u32 color)
     {
         this->colorMulEnabled = 0;
         this->color.color = color;
     }
 
-    void SetColorWithMulEnabled(D3DCOLOR color)
+    void SetColorWithMulEnabled(u32 color)
     {
         this->colorMulEnabled = 1;
         this->color.color = color;
@@ -259,7 +265,7 @@ struct AnmManager
         }
         else
         {
-            return this->textures[vm->sprite->sourceFileIndex] != NULL;
+            return this->textures[vm->sprite->sourceFileIndex].id != 0;
         }
     }
 
@@ -273,7 +279,7 @@ struct AnmManager
         this->currentSprite = value;
     }
 
-    void SetTexture(IDirect3DTexture8 *value)
+    void SetTexture(GfxTextureHandle value)
     {
         this->currentTexture = value;
     }
@@ -352,18 +358,21 @@ struct AnmManager
     ZunMatrix matrix;
     struct AnmLoadedSprite sprites[2560];
     struct AnmVm vm;
-    struct IDirect3DTexture8 *textures[264];
+    GfxTextureHandle textures[264];
     void *imageDataArray[256];
     char *textureNames[264];
     i32 loadedSpriteCount;
     struct AnmRawInstr *scripts[2560];
     i32 spriteIndices[2560];
     struct AnmEntry anmFiles[50];
-    struct IDirect3DSurface8 *surfaces[32];
-    struct IDirect3DSurface8 *surfacesBis[32];
+    SDL_Surface *surfaces[32];
+    SDL_Surface *surfacesBis[32];
+    u32 textureWidths[264];
+    u32 textureHeights[264];
+    u32 texturePitches[264];
     struct ZunImageInfo surfaceSourceInfo[32];
     ZunColor currentTextureFactor;
-    struct IDirect3DTexture8 *currentTexture;
+    GfxTextureHandle currentTexture;
     u8 currentBlendMode;
     u8 currentColorOp;
     u8 currentVertexShader;
@@ -371,7 +380,6 @@ struct AnmManager
     u8 currentCameraMode;
     // pad 3
     struct AnmLoadedSprite *currentSprite;
-    struct IDirect3DVertexBuffer8 *vertexBuffer;
     struct RenderVertexInfo vertexBufferContents[4];
     u32 spritesToDraw;
     struct VertexTex1DiffuseXyzrhw spriteVertexBuffer[49152];

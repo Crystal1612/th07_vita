@@ -1,5 +1,6 @@
 #include "MusicRoom.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
@@ -184,7 +185,7 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
 
     local_c[0] = 127;
     local_c[1] = 0;
-    g_AnmManager->SetTexture(NULL);
+    g_AnmManager->SetTexture(0);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     g_AnmManager->DrawNoRotation(&arg->vm[0]);
     for (i = arg->listingOffset; i < arg->listingOffset + 10; i++)
@@ -244,7 +245,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
 
     arg->trackDescriptors = new TrackDescriptor[32];
     offset = -1;
-    while ((u32)((i32)curChar - (i32)firstChar) < g_LastFileSize)
+    while (((uintptr_t)curChar - (uintptr_t)firstChar) < g_LastFileSize)
     {
         if (*curChar == '@')
         {
@@ -256,7 +257,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
                 arg->trackDescriptors[offset].path[charIdx] = *curChar;
                 curChar++;
                 charIdx++;
-                if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                 {
                     goto LAB_0043b195;
                 }
@@ -264,7 +265,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
             while (*curChar == '\n' || *curChar == '\r')
             {
                 curChar++;
-                if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                 {
                     goto LAB_0043b195;
                 }
@@ -275,7 +276,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
                 arg->trackDescriptors[offset].title[charIdx] = *curChar;
                 curChar++;
                 charIdx++;
-                if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                 {
                     goto LAB_0043b195;
                 }
@@ -283,7 +284,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
             while (*curChar == '\n' && *curChar == '\r')
             {
                 curChar++;
-                if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                 {
                     goto LAB_0043b195;
                 }
@@ -303,7 +304,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
                     arg->trackDescriptors[offset].description[lineIdx][charIdx] = *curChar;
                     curChar++;
                     charIdx++;
-                    if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                    if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                     {
                         goto LAB_0043b195;
                     }
@@ -311,7 +312,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
                 while (*curChar == '\n' || *curChar == '\r')
                 {
                     curChar++;
-                    if ((u32)((i32)curChar - (i32)firstChar) >= g_LastFileSize)
+                    if (((uintptr_t)curChar - (uintptr_t)firstChar) >= g_LastFileSize)
                     {
                         goto LAB_0043b195;
                     }

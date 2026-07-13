@@ -1,83 +1,61 @@
 #include "TextHelper.hpp"
 
-#include <d3d8.h>
-#include <d3dx8tex.h>
-#include <wingdi.h>
+#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_ttf.h>
 
+#include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
-#include "dxutil.hpp"
+#include "graphics/ZunGraphics.hpp"
 #include "inttypes.hpp"
 
-FormatInfo g_FormatInfoArray[7] = {
-    {
-        D3DFMT_X8R8G8B8,
-        0x20,
-        0,
-        0x00FF0000,
-        0x0000FF00,
-        0x000000FF,
-    },
-    {
-        D3DFMT_A8R8G8B8,
-        0x20,
-        0xFF000000,
-        0x00FF0000,
-        0x0000FF00,
-        0x000000FF,
-    },
-    {
-        D3DFMT_X1R5G5B5,
-        0x10,
-        0,
-        0x00007C00,
-        0x000003E0,
-        0x0000001F,
-    },
-    {
-        D3DFMT_R5G6B5,
-        0x10,
-        0,
-        0x0000F800,
-        0x000007E0,
-        0x0000001F,
-    },
-    {
-        D3DFMT_A1R5G5B5,
-        0x10,
-        0x00008000,
-        0x00007C00,
-        0x000003E0,
-        0x0000001F,
-    },
-    {
-        D3DFMT_A4R4G4B4,
-        0x10,
-        0x0000F000,
-        0x00000F00,
-        0x000000F0,
-        0x0000000F,
-    },
-    {
-        (D3DFORMAT)-1,
-        0x0,
-        0,
-        0,
-        0,
-        0,
-    },
-};
+static TTF_Font *g_Font = nullptr;
 
-IDirect3DSurface8 *g_TextBufferSurface;
+// stolen from
+// https://stackoverflow.com/questions/3404199/how-to-find-out-the-encoding-of-a-file-c-sharp/3404317#3404317
+bool IsUtf8(const char *string)
+{
+    i32 charByteCounter = 1;
+    unsigned char curByte;
+
+    for (i32 i = 0; i < strlen(string); i++)
+    {
+        curByte = string[i];
+        if (charByteCounter == 1)
+        {
+            if (curByte >= 0x80)
+            {
+                while (((curByte <<= 1) & 0x80) != 0)
+                {
+                    charByteCounter++;
+                }
+                if (charByteCounter == 1 || charByteCounter > 6)
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            if ((curByte & 0xC0) != 0x80)
+            {
+                return false;
+            }
+            charByteCounter--;
+        }
+    }
+    if (charByteCounter > 1)
+    {
+        return false;
+    }
+
+    return true;
+}
 
 TextHelper::TextHelper()
 {
-    this->format = (D3DFORMAT)-1;
+    this->buffer = NULL;
     this->width = 0;
     this->height = 0;
-    this->hdc = NULL;
-    this->gdiobj2 = NULL;
-    this->gdiobj = NULL;
-    this->buffer = NULL;
 }
 
 TextHelper::~TextHelper()
@@ -87,321 +65,270 @@ TextHelper::~TextHelper()
 
 bool TextHelper::ReleaseBuffer()
 {
-    if (this->hdc)
+    if (this->buffer)
     {
-        SelectObject((HDC)this->hdc, this->gdiobj);
-        DeleteDC((HDC)this->hdc);
-        DeleteObject(this->gdiobj2);
-        this->format = (D3DFORMAT)-1;
+        SDL_FreeSurface(this->buffer);
+        this->buffer = NULL;
         this->width = 0;
         this->height = 0;
-        this->hdc = NULL;
-        this->gdiobj2 = NULL;
-        this->gdiobj = NULL;
-        this->buffer = NULL;
         return true;
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
-bool TextHelper::AllocateBufferWithFallback(i32 width, i32 height, D3DFORMAT format)
+bool TextHelper::AllocateBuffer(i32 width, i32 height)
 {
-    if (TryAllocateBuffer(width, height, format))
-    {
-        return true;
-    }
-    else if (format == D3DFMT_A1R5G5B5 || format == D3DFMT_A4R4G4B4)
-    {
-        return TryAllocateBuffer(width, height, D3DFMT_A8R8G8B8);
-    }
-    else if (format == D3DFMT_R5G6B5)
-    {
-        return TryAllocateBuffer(width, height, D3DFMT_X8R8G8B8);
-    }
-    else
-    {
-        return false;
-    }
-}
-
-struct ThBitmapInfo
-{
-    BITMAPINFOHEADER bmiHeader;
-    RGBQUAD bmiColors[17];
-};
-
-bool TextHelper::TryAllocateBuffer(i32 width, i32 height, D3DFORMAT format)
-{
-    i32 imageWidthInBytes;
-    HDC deviceContext;
-    HGDIOBJ originalBitmapObj;
-    u8 *bitmapData;
-    HBITMAP bitmapObj;
-    FormatInfo *formatInfo;
-    ThBitmapInfo bitmapInfo;
-
     ReleaseBuffer();
-    memset(&bitmapInfo, 0, sizeof(ThBitmapInfo));
-    formatInfo = GetFormatInfo(format);
-    if (!formatInfo)
+    this->buffer = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_RGBA32);
+    if (!this->buffer)
     {
         return false;
     }
-    imageWidthInBytes = (width * formatInfo->bitCount / 8 + 3) / 4 * 4;
-    bitmapInfo.bmiHeader.biSize = sizeof(ThBitmapInfo);
-    bitmapInfo.bmiHeader.biWidth = width;
-    bitmapInfo.bmiHeader.biHeight = -(height + 1);
-    bitmapInfo.bmiHeader.biPlanes = 1;
-    bitmapInfo.bmiHeader.biBitCount = (WORD)formatInfo->bitCount;
-    bitmapInfo.bmiHeader.biSizeImage = height * imageWidthInBytes;
-    if (format != D3DFMT_X1R5G5B5 && format != D3DFMT_X8R8G8B8)
-    {
-        bitmapInfo.bmiHeader.biCompression = 3;
-        ((u32 *)bitmapInfo.bmiColors)[0] = formatInfo->redMask;
-        ((u32 *)bitmapInfo.bmiColors)[1] = formatInfo->greenMask;
-        ((u32 *)bitmapInfo.bmiColors)[2] = formatInfo->blueMask;
-        ((u32 *)bitmapInfo.bmiColors)[3] = formatInfo->alphaMask;
-    }
-    bitmapObj = CreateDIBSection(NULL, (BITMAPINFO *)&bitmapInfo, 0, (void **)&bitmapData, NULL, 0);
-    if (!bitmapObj)
-    {
-        return false;
-    }
-    memset(bitmapData, 0, bitmapInfo.bmiHeader.biSizeImage);
-    deviceContext = CreateCompatibleDC(NULL);
-    originalBitmapObj = SelectObject(deviceContext, bitmapObj);
-    this->hdc = deviceContext;
-    this->gdiobj2 = bitmapObj;
-    this->buffer = bitmapData;
-    this->imageSizeInBytes = bitmapInfo.bmiHeader.biSizeImage;
-    this->gdiobj = originalBitmapObj;
+    SDL_FillRect(this->buffer, NULL, 0);
     this->width = width;
     this->height = height;
-    this->format = format;
-    this->imageWidthInBytes = imageWidthInBytes;
     return true;
 }
 
-FormatInfo *TextHelper::GetFormatInfo(D3DFORMAT format)
-{
-    i32 i;
-    for (i = 0; g_FormatInfoArray[i].format != -1 && g_FormatInfoArray[i].format != format; i++)
-    {
-    }
-
-    if (format == -1)
-    {
-        return NULL;
-    }
-
-    return &g_FormatInfoArray[i];
-}
-
-struct A1R5G5B5
-{
-    u16 blue : 5;
-    u16 green : 5;
-    u16 red : 5;
-    u16 alpha : 1;
-};
-
 bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight, i32 param5)
 {
-    u8 *bufferStart;
-    A1R5G5B5 *bufferCursor;
-    i32 doubleArea;
-    i32 i;
-    u8 *bufferRegion;
-
-    doubleArea = spriteWidth * fontHeight * 2;
-    bufferStart = &this->buffer[0];
-    bufferRegion = &bufferStart[y * spriteWidth * 2];
-    switch (this->format)
+    i32 doubleArea = spriteWidth * fontHeight * 2;
+    if (doubleArea == 0 || !this->buffer)
     {
-    case D3DFMT_A8R8G8B8:
-        for (i = 3; i < doubleArea; i += 4)
+        return false;
+    }
+
+    SDL_LockSurface(this->buffer);
+    u8 *pixels = (u8 *)this->buffer->pixels;
+    i32 pitch = this->buffer->pitch;
+
+    for (i32 py = 0; py < fontHeight; py++)
+    {
+        for (i32 px = 0; px < spriteWidth; px++)
         {
-            bufferRegion[i] ^= 255;
-        }
-        break;
-    case D3DFMT_A1R5G5B5:
-        for (bufferCursor = (A1R5G5B5 *)bufferRegion, i = 0; i < doubleArea; i += 2, bufferCursor++)
-        {
-            bufferCursor->alpha ^= 1;
-            if (bufferCursor->alpha)
+            u8 *p = &pixels[(py + y) * pitch + (px + x) * 4];
+            u8 r = p[0];
+            u8 g = p[1];
+            u8 b = p[2];
+            u8 a = p[3];
+
+            if (a > 0)
             {
+                i32 i = (py * spriteWidth + px) * 2;
+
                 if (!param5)
                 {
-                    if (bufferCursor->red >= bufferCursor->blue)
+                    if (r >= b)
                     {
-                        bufferCursor->red =
-                            bufferCursor->red - bufferCursor->red * i * 2 / doubleArea / 3;
-                        bufferCursor->green =
-                            bufferCursor->green - bufferCursor->green * i * 2 / doubleArea / 3;
+                        r = r - (r * i * 2) / doubleArea / 3;
+                        g = g - (g * i * 2) / doubleArea / 3;
                     }
                     else
                     {
-                        bufferCursor->blue =
-                            bufferCursor->blue - bufferCursor->blue * i / doubleArea / 2;
-                        bufferCursor->green =
-                            bufferCursor->green - bufferCursor->green * i / doubleArea / 2;
+                        b = b - (b * i) / doubleArea / 2;
+                        g = g - (g * i) / doubleArea / 2;
                     }
                 }
                 else
                 {
-                    if (bufferCursor->red >= bufferCursor->blue)
+                    if (r >= b)
                     {
-                        bufferCursor->red =
-                            bufferCursor->red - bufferCursor->red * i / doubleArea / 4;
-                        bufferCursor->green =
-                            bufferCursor->green - bufferCursor->green * i / doubleArea / 4;
+                        r = r - (r * i) / doubleArea / 4;
+                        g = g - (g * i) / doubleArea / 4;
                     }
                     else
                     {
-                        bufferCursor->blue =
-                            bufferCursor->blue - bufferCursor->blue * i / doubleArea / 4;
-                        bufferCursor->green =
-                            bufferCursor->green - bufferCursor->green * i / doubleArea / 4;
+                        b = b - (b * i) / doubleArea / 4;
+                        g = g - (g * i) / doubleArea / 4;
                     }
                 }
+
+                p[0] = r;
+                p[1] = g;
+                p[2] = b;
+                p[3] = a;
             }
             else
             {
-                bufferCursor->red = 0;
-                bufferCursor->green = 0;
-                bufferCursor->blue = 0;
+                p[0] = 0;
+                p[1] = 0;
+                p[2] = 0;
+                p[3] = 0;
             }
         }
-        break;
-    case D3DFMT_A4R4G4B4:
-        for (i = 1; i < doubleArea; i += 2)
-        {
-            bufferRegion[i] ^= 0xf0;
-        }
-        break;
-    default:
-        return false;
     }
+
+    SDL_UnlockSurface(this->buffer);
     return true;
 }
 
-bool TextHelper::CopyTextToSurface(IDirect3DSurface8 *surface)
+bool TextHelper::CopyTextToTexture(i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
+                                   i32 fontWidth, GfxTextureHandle outTexture)
 {
-    D3DLOCKED_RECT lockedRect;
-    u8 *srcBuf;
-    D3DSURFACE_DESC surfaceDesc;
-    size_t srcWidthBytes;
-    i32 i;
-    RECT rectToLock;
-    i32 dstWidthBytes;
-    u8 *dstBuf;
-
-    if (!(u8)(u32)(this->gdiobj2 != NULL))
+    SDL_Surface *outSurface =
+        SDL_CreateRGBSurfaceWithFormat(0, spriteWidth, spriteHeight, 32, SDL_PIXELFORMAT_RGBA32);
+    if (!outSurface)
     {
         return false;
     }
+    SDL_FillRect(outSurface, NULL, 0);
 
-    surface->GetDesc(&surfaceDesc);
-    rectToLock.left = 0;
-    rectToLock.top = 0;
-    rectToLock.right = this->GetWidth();
-    rectToLock.bottom = this->GetHeight();
-    if (surface->LockRect(&lockedRect, &rectToLock, 0))
+    SDL_Rect srcRect;
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = spriteWidth * 2;
+    srcRect.h = fontHeight * 2;
+    if (srcRect.w > this->width)
     {
-        return false;
+        srcRect.w = this->width;
+    }
+    if (srcRect.h > this->height)
+    {
+        srcRect.h = this->height;
     }
 
-    dstWidthBytes = lockedRect.Pitch;
-    srcWidthBytes = this->imageWidthInBytes;
-    srcBuf = this->buffer;
-    dstBuf = (u8 *)lockedRect.pBits;
-    if (surfaceDesc.Format == this->GetFormat())
-    {
-        for (i = 0; i < this->GetHeight(); i++)
-        {
-            memcpy(dstBuf, srcBuf, srcWidthBytes);
-            srcBuf += srcWidthBytes;
-            dstBuf += dstWidthBytes;
-        }
-    }
-    surface->UnlockRect();
+    SDL_Rect dstRect;
+    dstRect.x = 0;
+    dstRect.y = 0;
+    dstRect.w = spriteWidth;
+    dstRect.h = fontWidth;
+
+    SDL_SoftStretchLinear(this->buffer, &srcRect, outSurface, &dstRect);
+
+    g_Supervisor.gfxDevice->BindTexture(outTexture);
+    g_Supervisor.gfxDevice->SetTextureSubImage(0, yPos, outSurface->w, fontWidth,
+                                               outSurface->pixels);
+    SDL_FreeSurface(outSurface);
     return true;
 }
 
-void TextHelper::CreateTextBuffer()
+ZunResult TextHelper::CreateTextBuffer()
 {
-    g_Supervisor.d3dDevice->CreateImageSurface(1024, 64, D3DFMT_A1R5G5B5, &g_TextBufferSurface);
+    if (TTF_Init() < 0)
+    {
+        g_GameErrorContext.Log("TTF_Init fail : %s\n", TTF_GetError());
+        return ZUN_ERROR;
+    }
+
+    g_Font = TTF_OpenFont("msgothic.ttc", 10);
+    if (!g_Font)
+    {
+        g_GameErrorContext.Log("TTF_OpenFont fail : %s\n", TTF_GetError());
+        return ZUN_ERROR;
+    }
+    TTF_SetFontStyle(g_Font, TTF_STYLE_BOLD);
+    return ZUN_SUCCESS;
 }
 
 void TextHelper::ReleaseTextBuffer()
 {
-    SAFE_RELEASE(g_TextBufferSurface);
+    TTF_CloseFont(g_Font);
+    g_Font = nullptr;
+    TTF_Quit();
 }
 
 void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight,
-                                         i32 fontHeight, i32 fontWidth, D3DCOLOR textColor,
-                                         u32 outlineType, char *string,
-                                         IDirect3DTexture8 *outTexture)
+                                         i32 fontHeight, i32 fontWidth, u32 textColor,
+                                         u32 outlineType, char *string, GfxTextureHandle outTexture)
 {
-    IDirect3DSurface8 *dstSurface;
-    RECT dstRect;
-    RECT srcRect;
-    HGDIOBJ h;
-    D3DSURFACE_DESC textSurfaceDesc;
-    HFONT hFont;
-    HDC hdc;
+    i32 fontSize = fontHeight * 2 - 2;
+    if (fontSize <= 0)
+    {
+        return;
+    }
 
-    hFont = CreateFontA(fontHeight * 2 - 2, 0, 0, 0, FW_BOLD, false, false, false, SHIFTJIS_CHARSET,
-                        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY,
-                        FF_ROMAN | FIXED_PITCH, "ＭＳ ゴシック");
+    if (!g_Font)
+    {
+        g_Font = TTF_OpenFont("msgothic.ttc", 10);
+        if (!g_Font)
+        {
+            g_GameErrorContext.Fatal("TTF_OpenFont fail : %s\n", TTF_GetError());
+            return;
+        }
+        TTF_SetFontStyle(g_Font, TTF_STYLE_BOLD);
+    }
+
+    TTF_SetFontSize(g_Font, fontSize);
+    Supervisor::DebugPrint("font Size : %d\n", TTF_FontHeight(g_Font));
+
+    char *convStr = string;
+    bool needsFree = false;
+    if (!IsUtf8(string))
+    {
+        char *tmp = SDL_iconv_string("UTF-8", "SHIFT_JIS", string, SDL_strlen(string) + 1);
+        if (tmp)
+        {
+            convStr = tmp;
+            needsFree = true;
+        }
+    }
+
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Surface *textSurf = TTF_RenderUTF8_Blended(g_Font, convStr, white);
+    if (needsFree)
+    {
+        SDL_free(convStr);
+    }
+    if (!textSurf)
+    {
+        return;
+    }
+
+    i32 dWidth = spriteWidth * 2;
+    i32 dHeight = fontHeight * 2 + 6;
+    if (dWidth > 1024)
+    {
+        dWidth = 1024;
+    }
+    if (dHeight > 64)
+    {
+        dHeight = 64;
+    }
+    if (dWidth <= 0 || dHeight <= 0)
+    {
+        SDL_FreeSurface(textSurf);
+        return;
+    }
+
     TextHelper textHelper;
-    g_TextBufferSurface->GetDesc(&textSurfaceDesc);
-    textHelper.AllocateBufferWithFallback(textSurfaceDesc.Width, textSurfaceDesc.Height,
-                                          textSurfaceDesc.Format);
-    hdc = textHelper.hdc;
-    h = SelectObject(hdc, hFont);
-    textHelper.InvertAlpha(0, 0, spriteWidth << 1, fontHeight * 2 + 6, 0);
-    SetBkMode(hdc, 1);
+    textHelper.AllocateBuffer(dWidth, dHeight);
+
+    SDL_SetSurfaceBlendMode(textSurf, SDL_BLENDMODE_BLEND);
+
+    SDL_SetSurfaceColorMod(textSurf, 0, 0, 0);
+    SDL_Rect dstRect;
     if (outlineType != 0xffffffff)
     {
-        SetTextColor(hdc, 0);
-        TextOutA(hdc, xPos * 2 + 4, 2, string, strlen(string));
-        TextOutA(hdc, xPos << 1, 2, string, strlen(string));
-        TextOutA(hdc, xPos * 2 + 2, 0, string, strlen(string));
-        TextOutA(hdc, xPos * 2 + 2, 4, string, strlen(string));
+        i32 dx[4] = {4, 0, 2, 2};
+        i32 dy[4] = {2, 2, 0, 4};
+        for (i32 i = 0; i < 4; i++)
+        {
+            dstRect = {xPos * 2 + dx[i], dy[i], textSurf->w, textSurf->h};
+            SDL_BlitSurface(textSurf, NULL, textHelper.buffer, &dstRect);
+        }
     }
     else
     {
-        SetTextColor(hdc, 0);
-        TextOutA(hdc, xPos * 2 + 3, 2, string, strlen(string));
-        TextOutA(hdc, xPos * 2 + 1, 2, string, strlen(string));
-        TextOutA(hdc, xPos * 2 + 2, 1, string, strlen(string));
-        TextOutA(hdc, xPos * 2 + 2, 3, string, strlen(string));
+        i32 dx[4] = {3, 1, 2, 2};
+        i32 dy[4] = {2, 2, 1, 3};
+        for (i32 i = 0; i < 4; i++)
+        {
+            dstRect = {xPos * 2 + dx[i], dy[i], textSurf->w, textSurf->h};
+            SDL_BlitSurface(textSurf, NULL, textHelper.buffer, &dstRect);
+        }
     }
-    SetTextColor(hdc, textColor);
-    TextOutA(hdc, xPos * 2 + 2, 2, string, strlen(string));
-    SelectObject(hdc, h);
+
+    u8 r = (textColor >> 16) & 0xFF;
+    u8 g = (textColor >> 8) & 0xFF;
+    u8 b_col = textColor & 0xFF;
+    SDL_SetSurfaceColorMod(textSurf, r, g, b_col);
+    dstRect = {xPos * 2 + 2, 2, textSurf->w, textSurf->h};
+    SDL_BlitSurface(textSurf, NULL, textHelper.buffer, &dstRect);
+
+    SDL_FreeSurface(textSurf);
+
     textHelper.InvertAlpha(0, 0, spriteWidth << 1, fontHeight * 2 + 6,
                            (u32)(outlineType == 0xffffffff));
-    textHelper.CopyTextToSurface(g_TextBufferSurface);
-    SelectObject(hdc, h);
-    DeleteObject(hFont);
-    dstRect.left = 0;
-    dstRect.top = yPos;
-    dstRect.right = spriteWidth;
-    dstRect.bottom = yPos + fontWidth;
-    srcRect.left = 0;
-    srcRect.top = 0;
-    srcRect.right = spriteWidth << 1;
-    srcRect.bottom = fontHeight << 1;
-    if (srcRect.right > 1024)
-    {
-        srcRect.right = 1024;
-    }
-    outTexture->GetSurfaceLevel(0, &dstSurface);
-    D3DXLoadSurfaceFromSurface(dstSurface, 0, &dstRect, g_TextBufferSurface, 0, &srcRect, 4, 0);
-    SAFE_RELEASE(dstSurface);
+    textHelper.CopyTextToTexture(yPos, spriteWidth, spriteHeight, fontHeight, fontWidth,
+                                 outTexture);
 }

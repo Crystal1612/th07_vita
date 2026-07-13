@@ -1,5 +1,6 @@
 #include "EnemyManager.hpp"
 
+#include "AnmIdx.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
 #include "EclManager.hpp"

@@ -47,13 +47,13 @@ typedef enum SoundIdx
 
 struct ThWaveFormat
 {
-    WORD wFormatTag;
-    WORD nChannels;
-    DWORD nSamplesPerSec;
-    DWORD nAvgBytesPerSec;
-    WORD nBlockAlign;
-    WORD wBitsPerSample;
-    WORD cbSize;
+    u16 wFormatTag;
+    u16 nChannels;
+    u32 nSamplesPerSec;
+    u32 nAvgBytesPerSec;
+    u16 nBlockAlign;
+    u16 wBitsPerSample;
+    u16 cbSize;
 };
 
 struct ThBgmFormat
@@ -119,7 +119,7 @@ struct SoundPlayer
 
     void FadeOut(f32 duration)
     {
-        g_GameErrorContext.Log("%f\r\n", duration);
+        g_GameErrorContext.Log("%f\n", duration);
         if (this->backgroundMusic)
         {
             ma_sound_set_fade_start_in_milliseconds(

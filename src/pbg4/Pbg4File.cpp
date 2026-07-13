@@ -1,11 +1,11 @@
 #include "Pbg4File.hpp"
 
+#include <SDL2/SDL.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <windows.h>
 
-#include "../inttypes.hpp"
+#include "inttypes.hpp"
 
 const u32 g_SeekModes[3] = {0, 1, 2};
 
@@ -203,19 +203,28 @@ void *Pbg4File::ReadRemaining(u32 max)
 
 void Pbg4File::GetFullPath(char *out, const char *filename)
 {
-    if (strchr(filename, ':') != NULL)
+#ifdef _WIN32
+    if (strchr(filename, ':') != nullptr)
     {
         strcpy(out, filename);
+        return;
+    }
+#else
+    if (filename[0] == '/')
+    {
+        snprintf(out, 260, "%s", filename);
+        return;
+    }
+#endif
+
+    char *base = SDL_GetBasePath();
+    if (base)
+    {
+        snprintf(out, 260, "%s%s", base, filename);
+        SDL_free(base);
     }
     else
     {
-        GetModuleFileNameA(NULL, out, 0x104);
-        char *pcVar2 = strrchr(out, '\\');
-        if (!pcVar2)
-        {
-            strcpy(out, "");
-        }
-        pcVar2[1] = '\0';
-        strcat(out, filename);
+        snprintf(out, 260, "%s", filename);
     }
 }

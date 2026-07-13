@@ -5,7 +5,6 @@
 #include "ScreenEffect.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
-#include "d3dx8.h"
 #include "utils.hpp"
 
 struct StageAnms
@@ -108,8 +107,8 @@ struct Stage
     static u32 OnDrawHighPrio(Stage *arg);
     static u32 OnDrawLowPrio(Stage *arg);
 
-    static void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3, D3DCOLOR param_4,
-                                D3DCOLOR param_5);
+    static void DrawColoredQuad(ZunRect *rect, u32 param_2, u32 param_3, u32 param_4,
+                                u32 param_5);
     ZunResult LoadStageData(const char *stdPath);
     i32 RenderObjects(i32 param_1);
     void SmoothBlendColor(ZunColor param_1);
@@ -133,7 +132,7 @@ struct Stage
     i32 stageFrameCounter;
     u32 stage;
     ZunVec3 position;
-    D3DCOLOR color;
+    u32 color;
     StageFog skyFog;
     StageFog fogEnd;
     StageFog fogStart;

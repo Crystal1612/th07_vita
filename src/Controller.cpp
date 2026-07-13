@@ -1,37 +1,35 @@
 #include "Controller.hpp"
 
-#include <dinput.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keyboard.h>
 
-#include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
 #include "inttypes.hpp"
-
-static JOYCAPSA g_JoystickCaps;
+#include "utils.hpp"
 
 static u16 g_AutoFocusTimer;
 
-#define KEY_PRESSED(scancode, thButton) ((keyboardState[scancode] & 0x80) != 0 ? thButton : 0)
+#define KEY_PRESSED(scancode, thButton) (keys[scancode] ? thButton : 0)
 #define JOYSTICK_MIDPOINT(min, max) ((min + max) / 2)
 
-u16 Controller::GetJoystickCaps()
-{
-    joyinfoex_tag joyinfo;
+static const SDL_GameControllerButton g_DIToSDLButton[] = {
+    SDL_CONTROLLER_BUTTON_A,
+    SDL_CONTROLLER_BUTTON_B,
+    SDL_CONTROLLER_BUTTON_X,
+    SDL_CONTROLLER_BUTTON_Y,
+    SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+    SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+    SDL_CONTROLLER_BUTTON_BACK,
+    SDL_CONTROLLER_BUTTON_START,
+    SDL_CONTROLLER_BUTTON_LEFTSTICK,
+    SDL_CONTROLLER_BUTTON_RIGHTSTICK,
+    SDL_CONTROLLER_BUTTON_GUIDE,
+};
 
-    joyinfo.dwSize = 52;
-    joyinfo.dwFlags = 255;
-    if (joyGetPosEx(0, &joyinfo))
-    {
-        g_GameErrorContext.Log("使えるパッドが存在しないようです、残念\r\n");
-        return 1;
-    }
-    joyGetDevCapsA(0, &g_JoystickCaps, 0x194);
-    return 0;
-}
-
-u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controllerButtonToTest,
-                                                 u32 touhouButton, u8 *inputButtons)
+u32 Controller::SetButton(u16 *outButtons, i32 controllerButton, u32 thButton)
 {
-    if (controllerButtonToTest < 0)
+    if (controllerButton < 0 || controllerButton >= ARRAY_SIZE(g_DIToSDLButton))
     {
         return 0;
     }

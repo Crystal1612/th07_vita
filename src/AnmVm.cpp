@@ -2,9 +2,7 @@
 
 #include <stddef.h>
 
-const D3DFORMAT g_TextureFormatD3D8Mapping[6] = {
-    D3DFMT_UNKNOWN, D3DFMT_A8R8G8B8, D3DFMT_A1R5G5B5, D3DFMT_R5G6B5, D3DFMT_R8G8B8, D3DFMT_A4R4G4B4,
-};
+const u32 g_TextureFormatD3D8Mapping[6] = {0, 1, 2, 3, 4, 5};
 
 const i32 g_TextureBytesPerPixel[7] = {4, 4, 2, 2, 3, 2, 0};
 

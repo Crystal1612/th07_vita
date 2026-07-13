@@ -1,9 +1,10 @@
 #include "ResultScreen.hpp"
 
 #include <cstdio>
-#include <direct.h>
+#include <filesystem>
 #include <time.h>
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "Chain.hpp"
@@ -975,11 +976,10 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
                 }
                 arg->spellcardListVms[vmIdx % 10].color.bytes.a = 255;
             }
-            AnmManager::DrawVmTextFmt(
-                g_AnmManager, arg->spellcardListVms + 10, 0xffffff, 0,
-                "%s %3d枚中%3d枚取得（キャラ切り替え↓↑）",
-                g_CharacterList[arg->prevSpellcardListPage], 141,
-                arg->totalPlayCountPerCharacter[arg->spellcardListPage]);
+            AnmManager::DrawVmTextFmt(g_AnmManager, arg->spellcardListVms + 10, 0xffffff, 0,
+                                      "%s %3d枚中%3d枚取得（キャラ切り替え↓↑）",
+                                      g_CharacterList[arg->prevSpellcardListPage], 141,
+                                      arg->totalPlayCountPerCharacter[arg->spellcardListPage]);
             arg->spellcardListVms[10].color.bytes.a = 255;
         }
         if (arg->frameTimer < 30)
@@ -1349,7 +1349,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     case 13:
         if (this->frameTimer == 0)
         {
-            _mkdir("replay");
+            std::filesystem::create_directory("replay");
             for (vmIdx = 0; vmIdx < 15; vmIdx++)
             {
                 sprintf(replayPath, "./replay/th7_%.2d.rpy", vmIdx + 1);
@@ -1569,13 +1569,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
                 {
                     vm->pendingInterrupt = 17;
                 }
-<<<<<<< HEAD
                 vm = &this->vms[chosenReplayIdx + 25];
-=======
-                vm = &this->vms[(
-                    i32)((i32) &
-                         ((StageReplayData *)this->chosenReplayIdx)->extendsFromPointItems + 1)];
->>>>>>> b29177e (formatting + use miniaudio for sound)
                 vm->pendingInterrupt = 16;
                 this->resultScreenState = 14;
             }
@@ -1901,7 +1895,7 @@ ZunResult ResultScreen::DrawFinalStats()
     f32 rankingProbably;
     f32 clearPercent;
     f32 slowdown;
-    D3DCOLOR color;
+    u32 color;
 
     switch (this->resultScreenState)
     {
@@ -2056,11 +2050,11 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
 
     vm = arg->vms;
     g_AnmManager->Flush();
-    g_Supervisor.viewport.X = 0;
-    g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 640;
-    g_Supervisor.viewport.Height = 480;
-    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.viewport.x = 0;
+    g_Supervisor.viewport.y = 0;
+    g_Supervisor.viewport.width = 640;
+    g_Supervisor.viewport.height = 480;
+    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     for (i = 0; i < 41; i++, vm++)
     {

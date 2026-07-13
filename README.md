@@ -2,24 +2,26 @@
 
 A cross-platform port of 東方妖々夢　～ Perfect Cherry Blossom 1.00b by Team Shanghai Alice.
 
-This is the portable branch of the Touhou 7 decompilation. Currently, this will not produce a playable game on any platform other than Windows. Work is currently being done to transition the game over to being more platform-independent.
+This is the portable branch of the Touhou 7 decompilation. Unless you're looking specifically for an attempted cross-platform port of th07, you probably want the [main branch](https://github.com/some100/th07/tree/main). Currently, this will not produce a playable game on any platform, and is broken and unfinished right now. Rendering seems to work fine, as does sound, but there are things that don't work fine. Namely:
+
+* You cannot load into stages (on 64-bit). This is because the way ecl files, stg files, etc. are loaded in the original game is not endian or alignment independent, resulting in it breaking on any system not on 32-bit little endian.
+* Text rendering looks off. To be clear it does "work" but the text looks too big.
+* There is only a software renderer implemented, which is ridiculously slow particularly on debug builds.
+* Some features that the original game had, like 16 bit color mode, midi output, etc. are outright unimplemented. This may or may not be "fixed" later, but the focus currently is to produce a playable game.
+
+Work is currently being done to transition the game over to being more platform-independent.
 
 ## Building
 
 ### Dependencies
 
-* uv
-* ninja
-* wine (Linux only)
-    * Note: extracting the MSVC msi is completely broken on older versions of wine. If you face an issue with extracting, try using the latest devel version of wine.
+* cmake
+* SDL2
+* A compiler that supports C++17
 
-Run the python script in the root directory of the repo with uv:
+Run cmake on this repo, then build with whatever generator you chose.
 
-```
-uv run scripts/build.py
-```
-
-The resulting build can be found at `build/th07.exe`.
+You may also need to add a copy of `msgothic.ttc` into your game directory if you are not running this on Windows.
 
 ## Credits
 

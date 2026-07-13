@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d8.h>
-
 #include "ResultScreen.hpp"
 #include "Rng.hpp"
 #include "Supervisor.hpp"

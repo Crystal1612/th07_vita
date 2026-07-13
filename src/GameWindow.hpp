@@ -1,6 +1,6 @@
 #pragma once
 
-#include <d3d8.h>
+#include <SDL2/SDL_video.h>
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
@@ -15,28 +15,21 @@ typedef enum RenderResult
 
 struct GameWindow
 {
-    static ZunResult CheckForRunningGameInstance(HINSTANCE hInstance);
     static i32 ChecksumExecutable();
-    static i32 CreateGameWindow(HINSTANCE hInstance);
-    static char *FormatCapability(const char *capabilityName, u32 capabilityFlags, u32 mask,
-                                  char *buf);
-    static void FormatD3DCapabilities(D3DCAPS8 *caps, char *buf);
-    static i32 InitD3dInterface();
-    static i32 InitD3dRendering();
+    static ZunResult CreateGameWindow();
+    static ZunResult InitInterface();
+    static ZunResult InitRendering();
     static void Present();
     RenderResult Render();
     static void ResetRenderState();
-    static i32 ResolveIt(const char *shortcutPath, char *dstPath, i32 maxPathLen);
-    static void SetWindowActive(HWND window);
-    static LRESULT __stdcall WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam, LPARAM lParam);
 
-    HWND window;
+    SDL_Window *window;
     i32 isAppClosing;
     i32 isAppActive;
     i32 isAppInactive;
     i8 curFrame;
     // pad 3
-    LARGE_INTEGER lpFrequency;
+    i64 frequency;
     bool usesRelativePath;
     // pad 3
     u32 screen_save_active;

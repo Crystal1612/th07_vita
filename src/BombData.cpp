@@ -1,5 +1,6 @@
 #include "BombData.hpp"
 
+#include "AnmIdx.hpp"
 #include "AnmManager.hpp"
 #include "BulletManager.hpp"
 #include "GameManager.hpp"

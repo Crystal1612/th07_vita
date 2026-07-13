@@ -1,13 +1,11 @@
 #pragma once
 
-#include <basetsd.h>
-#include <d3d8.h>
-#include <d3dx8math.h>
-#include <dinput.h>
-
 #include "MidiOutput.hpp"
 #include "ZunMath.hpp"
+#include "graphics/ZunGraphics.hpp"
 #include "inttypes.hpp"
+#include <SDL2/SDL_gamecontroller.h>
+#include <chrono>
 
 extern u16 g_CurFrameRawInput;
 extern u16 g_CurFrameGameInput;
@@ -92,15 +90,14 @@ struct Supervisor
     static void DrawFpsCounter(i32 param_1);
     i32 FadeOutMusic(f32 musicFadeFrames);
     static void StopMidiTimer(MidiTimer *timer);
-    HRESULT DisableFog();
-    HRESULT EnableFog();
+    i32 DisableFog();
+    i32 EnableFog();
     i32 LoadAudio(i32 idx, const char *path);
     ZunResult LoadConfig(const char *configFilename);
     static ZunResult LoadGameData();
     ZunResult PlayAudio(const char *path);
     ZunResult PlayLoadedAudio(i32 idx);
-    void SetRenderState(D3DRENDERSTATETYPE stateType, u32 param_2);
-    ZunResult SetupDInput();
+    ZunResult SetupInput();
     i32 SnapshotScreen(const char *param_1);
     ZunResult StopAudio();
     void TickTimer(i32 *frames, f32 *subFrames);
@@ -109,26 +106,16 @@ struct Supervisor
 
     i32 CanSaveReplay();
 
-    static i32 __stdcall ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1, void *param_2);
-    static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1, void *param_2);
-
     i32 VsyncEnabled()
     {
         return this->vsyncEnabled;
     }
 
-    HINSTANCE hInstance;
-    IDirect3D8 *d3dIface;
-    LPDIRECT3DDEVICE8 d3dDevice;
-    LPDIRECTINPUT8A directInput;
-    LPDIRECTINPUTDEVICE8A keyboard;
-    LPDIRECTINPUTDEVICE8A controller;
-    DIDEVCAPS controllerCaps;
-    HWND hwndGameWindow;
+    ZunGraphics *gfxDevice;
+    SDL_GameController *controller;
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;
-    D3DVIEWPORT8 viewport;
-    D3DPRESENT_PARAMETERS presentParameters;
+    ZunViewport viewport;
     DummyMidiTimer *midiTimer;
     GameConfiguration cfg;
     i32 calcCount;
@@ -148,14 +135,13 @@ struct Supervisor
     i16 curFps;
     i16 unused_18a;
     u32 flags;
-    u32 lastTotalPlayTimeUpdate;
-    u32 currentTime;
-    D3DCAPS8 d3dCaps;
-    LARGE_INTEGER perfFrequency;
-    LARGE_INTEGER prevPerfCounter;
-    LARGE_INTEGER curPerfCounter;
-    SYSTEMTIME prevTime;
-    SYSTEMTIME curTime;
+    u64 lastTotalPlayTimeUpdate;
+    u64 currentTime;
+    u64 perfFrequency;
+    u64 prevPerfCounter;
+    u64 curPerfCounter;
+    std::chrono::time_point<std::chrono::system_clock> prevTime;
+    std::chrono::time_point<std::chrono::system_clock>  curTime;
     i32 timingErrorCount;
     i32 isFpsBad;
     i32 maxTimingError;

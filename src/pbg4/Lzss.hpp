@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../inttypes.hpp"
+#include "inttypes.hpp"
 
 #define LZSS_OFFSET_BITS 13
 #define LZSS_LENGTH_BITS 4
