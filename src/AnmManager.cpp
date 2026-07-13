@@ -347,7 +347,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 startIdx = anmIdx;
     if (!entry)
     {
-        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
+        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\n");
         return ZUN_ERROR;
     }
     while (true)
@@ -377,26 +377,25 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
     AnmLoadedSprite loadedSprite;
     i32 *curSprite;
     i32 i;
-    D3DSURFACE_DESC desc;
     AnmRawEntry *data;
     i32 id;
 
     id = 0;
     if (!rawEntry)
     {
-        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
+        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\n");
         return ZUN_ERROR;
     }
     if (textureIdx >= 50)
     {
-        g_GameErrorContext.Fatal("テクスチャ格納先が足りません\r\n");
+        g_GameErrorContext.Fatal("テクスチャ格納先が足りません\n");
         return ZUN_ERROR;
     }
     ReleaseAnm(textureIdx);
     data = rawEntry;
     if (data->version != 2)
     {
-        g_GameErrorContext.Fatal("アニメのバージョンが違います\r\n");
+        g_GameErrorContext.Fatal("アニメのバージョンが違います\n");
         return ZUN_ERROR;
     }
     data->textureIdx = textureIdx;
@@ -413,7 +412,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
             if (LoadTexture(data->textureIdx, name, data->format, data->color_key) != ZUN_SUCCESS)
             {
                 g_GameErrorContext.Fatal(
-                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -424,7 +423,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
                 ZUN_SUCCESS)
             {
                 g_GameErrorContext.Fatal(
-                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                    "テクスチャ %s が読み込めません。データが失われてるか壊れています\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -436,37 +435,39 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
                                 data->format) != ZUN_SUCCESS)
         {
             g_GameErrorContext.Fatal(
-                "テクスチャが読み込めません。データが失われてるか壊れています\r\n");
+                "テクスチャが読み込めません。データが失われてるか壊れています\n");
             return ZUN_ERROR;
         }
     }
     this->textureNames[textureIdx] = (char *)((u8 *)data + data->nameOffset);
-    this->textures[textureIdx]->SetPriority(data->priority);
-    this->textures[textureIdx]->PreLoad();
-    this->textures[textureIdx]->GetLevelDesc(0, &desc);
+
+    u32 texWidth = this->textureWidths[textureIdx] ? this->textureWidths[textureIdx] : data->width;
+    u32 texHeight =
+        this->textureHeights[textureIdx] ? this->textureHeights[textureIdx] : data->height;
+
     data->spriteIdxOffset = spriteIdxOffset;
     curSprite = data->spriteOffsets;
     for (i = 0; i < data->numSprites; i++, curSprite++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)data + *curSprite);
         loadedSprite.sourceFileIndex = data->textureIdx;
-        loadedSprite.cols = (f32)desc.Width / (f32)data->width;
-        loadedSprite.rows = (f32)desc.Height / (f32)data->height;
+        loadedSprite.cols = (f32)texWidth / (f32)data->width;
+        loadedSprite.rows = (f32)texHeight / (f32)data->height;
         loadedSprite.startPixelInclusive.x = loadedSprite.cols * rawSprite->offset.x;
         loadedSprite.startPixelInclusive.y = loadedSprite.rows * rawSprite->offset.y;
         loadedSprite.endPixelInclusive.x =
             (rawSprite->offset.x + rawSprite->size.x) * loadedSprite.cols;
         loadedSprite.endPixelInclusive.y =
             (rawSprite->offset.y + rawSprite->size.y) * loadedSprite.rows;
-        loadedSprite.textureWidth = (f32)desc.Width;
-        loadedSprite.textureHeight = (f32)desc.Height;
+        loadedSprite.textureWidth = (f32)texWidth;
+        loadedSprite.textureHeight = (f32)texHeight;
         if (id < rawSprite->id)
         {
             id = rawSprite->id;
         }
         if (rawSprite->id + spriteIdxOffset >= 2560)
         {
-            g_GameErrorContext.Fatal("スプライトが格納できません。テーブルが不足しています\r\n");
+            g_GameErrorContext.Fatal("スプライトが格納できません。テーブルが不足しています\n");
             return ZUN_ERROR;
         }
         LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
@@ -475,7 +476,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
     {
         if (*curSprite + spriteIdxOffset >= 2560)
         {
-            g_GameErrorContext.Fatal("アニメが格納できません。テーブルが不足しています\r\n");
+            g_GameErrorContext.Fatal("アニメが格納できません。テーブルが不足しています\n");
             return ZUN_ERROR;
         }
         if (id < *curSprite)

@@ -528,7 +528,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
             }
             if (filename)
             {
-                Supervisor::DebugPrint("info : Replay File write %s\r\n", filename);
+                Supervisor::DebugPrint("info : Replay File write %s\n", filename);
                 replayData = (u8 *)malloc(0x100000);
                 replayCopy = *mgr->data;
                 StopRecording();
@@ -586,7 +586,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                 replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
                 replayCopy.data.magic30 = 30;
                 memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
-                Supervisor::DebugPrint("info : original size %d\r\n", replaySize);
+                Supervisor::DebugPrint("info : original size %d\n", replaySize);
                 replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
                 lpBuffer = Lzss::Compress(replayData, replayCopy.head.sizeWithoutHeader,
                                           &replayCopy.head.compressedSize);
@@ -623,7 +623,7 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
                     fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                     fwrite(lpBuffer, compressedSize, 1, file);
                     fclose(file);
-                    Supervisor::DebugPrint("info : Size %d -> %d\r\n", replaySize,
+                    Supervisor::DebugPrint("info : Size %d -> %d\n", replaySize,
                                            compressedSize + sizeof(ReplayHeader));
                     free(lpBuffer);
                 }
@@ -676,7 +676,7 @@ void ReplayManager::SaveReplay2(const char *filename)
         }
         if (filename)
         {
-            Supervisor::DebugPrint("info : Replay File rewrite %s\r\n", filename);
+            Supervisor::DebugPrint("info : Replay File rewrite %s\n", filename);
             replayData = (u8 *)malloc(0x100000);
             replayCopy = *mgr->data;
             i = g_GameManager.currentStage - 1;
@@ -718,7 +718,7 @@ void ReplayManager::SaveReplay2(const char *filename)
             replayCopy.data.slowdownRate3 = replayCopy.data.slowdownRate + 2.34f;
             replayCopy.data.magic30 = 30;
             memcpy(replayData, &replayCopy.data.rngValue3, sizeof(ReplayData));
-            Supervisor::DebugPrint("info : original size %d\r\n", replaySize);
+            Supervisor::DebugPrint("info : original size %d\n", replaySize);
             replayCopy.head.sizeWithoutHeader = replaySize - sizeof(ReplayHeader);
             lpBuffer = Lzss::Compress(replayData, replayCopy.head.sizeWithoutHeader,
                                       &replayCopy.head.compressedSize);
@@ -755,7 +755,7 @@ void ReplayManager::SaveReplay2(const char *filename)
                 fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                 fwrite(lpBuffer, compressedSize, 1, file);
                 fclose(file);
-                Supervisor::DebugPrint("info : Size %d -> %d\r\n", replaySize,
+                Supervisor::DebugPrint("info : Size %d -> %d\n", replaySize,
                                        compressedSize + sizeof(ReplayHeader));
                 free(lpBuffer);
             }

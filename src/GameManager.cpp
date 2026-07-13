@@ -438,7 +438,7 @@ ZunResult ResultScreen::ParseScores()
     scoreDat = OpenScore("score.dat");
     if (!scoreDat)
     {
-        g_GameErrorContext.Log("error : スコアファイルの読み取りに失敗しました\r\n");
+        g_GameErrorContext.Log("error : スコアファイルの読み取りに失敗しました\n");
         return ZUN_ERROR;
     }
 
@@ -512,7 +512,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         }
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\r\n");
+            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\n");
             return ZUN_ERROR;
         }
         if (!g_GameManager.replay)
@@ -665,7 +665,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals->guiScoreDifference = 0;
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\r\n");
+            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\n");
             return ZUN_ERROR;
         }
     }
@@ -714,13 +714,13 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->stageRngSeed = g_Rng.seed;
     if (Stage::RegisterChain(arg->currentStage) != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 背景データの初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 背景データの初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
     if (BulletManager::RegisterChain("data/etama.anm") != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 敵弾の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 敵弾の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
@@ -728,25 +728,25 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                                     g_EnemyAnmStageFiles[arg->currentStage].anmPath2) !=
         ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 敵の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 敵の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
     if (g_EclManager.Load(g_EclPaths[arg->currentStage]) != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 敵頭脳の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 敵頭脳の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
     if (EffectManager::RegisterChain() != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : エフェクトの初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : エフェクトの初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
     if (Gui::RegisterChain() != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 2D表示の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 2D表示の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
@@ -780,7 +780,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     g_AsciiManager.InitializeVms();
     g_GameManager.slowModeSlowActive = 0;
     Supervisor::DrawFpsCounter(0);
-    Supervisor::DebugPrint("random seed %d %d\r\n", (u32)g_Rng.seed, g_Rng.GetGenCount());
+    Supervisor::DebugPrint("random seed %d %d\n", (u32)g_Rng.seed, g_Rng.GetGenCount());
     return ZUN_SUCCESS;
 }
 

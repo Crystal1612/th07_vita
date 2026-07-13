@@ -16,7 +16,7 @@ struct GameErrorContext
         m_BufferEnd = m_Buffer;
         m_Buffer[0] = '\0';
         m_ShowMessageBox = false;
-        Log("東方動作記録 --------------------------------------------- \r\n");
+        Log("東方動作記録 --------------------------------------------- \n");
     }
 
     const char *Fatal(const char *fmt, ...);
@@ -26,7 +26,7 @@ struct GameErrorContext
     {
         if (this->m_BufferEnd != this->m_Buffer)
         {
-            this->Log("---------------------------------------------------------- \r\n");
+            this->Log("---------------------------------------------------------- \n");
             if (this->m_ShowMessageBox)
             {
                 MessageBoxA(NULL, this->m_Buffer, "log", MB_ICONERROR);

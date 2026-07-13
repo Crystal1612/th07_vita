@@ -105,7 +105,7 @@ void Supervisor::CheckTiming()
                 this->timingBadCount++;
                 this->timingSpikeAccumulator = 0;
             }
-            Supervisor::DebugPrint("alq チェック %f / %f = %f\r\n", timeDiff, perfDiff,
+            Supervisor::DebugPrint("alq チェック %f / %f = %f\n", timeDiff, perfDiff,
                                    timeDiff / perfDiff);
         }
         else if (this->timingErrorCount != 0)
@@ -176,13 +176,12 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     if (arg->wantedState != arg->curState)
     {
         arg->prevState = arg->wantedState;
-        Supervisor::DebugPrint("scene %d -> %d\r\n", arg->wantedState, arg->curState);
+        Supervisor::DebugPrint("scene %d -> %d\n", arg->wantedState, arg->curState);
         switch (arg->wantedState)
         {
         case 0:
         CASE_0:
             arg->curState = 1;
-            g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
             if (MainMenu::RegisterChain(0) != ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
@@ -482,13 +481,13 @@ ZunResult Supervisor::LoadGameData()
         g_Supervisor.versionTableSize = g_LastFileSize;
         if (!g_Supervisor.version)
         {
-            g_GameErrorContext.Fatal("error : データのバージョンが違います\r\n");
+            g_GameErrorContext.Fatal("error : データのバージョンが違います\n");
             return ZUN_ERROR;
         }
     }
     else
     {
-        g_GameErrorContext.Fatal("error : データファイルが存在しません\r\n");
+        g_GameErrorContext.Fatal("error : データファイルが存在しません\n");
         return ZUN_ERROR;
     }
     return ZUN_SUCCESS;
@@ -570,14 +569,14 @@ i32 Supervisor::CheckVSync()
 
         if (fpsSum > 160.0f)
         {
-            g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます\r\n");
-            g_GameErrorContext.Log("強制６０フレームモードで動作します\r\n");
+            g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます\n");
+            g_GameErrorContext.Log("強制６０フレームモードで動作します\n");
             g_Supervisor.vsyncEnabled = 1;
         }
         else if (fpsSum >= 65.0f)
         {
-            g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます。\r\n");
-            g_GameErrorContext.Log("強制６０フレームモードで動作します\r\n");
+            g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます。\n");
+            g_GameErrorContext.Log("強制６０フレームモードで動作します\n");
             g_Supervisor.vsyncEnabled = 1;
             return -2;
         }
@@ -656,7 +655,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
 
     if (AsciiManager::RegisterChain() != ZUN_SUCCESS)
     {
-        g_GameErrorContext.Log("error : 文字の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : 文字の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
@@ -664,7 +663,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     TextHelper::CreateTextBuffer();
     if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt"))
     {
-        g_GameErrorContext.Log("error : BGM の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log("error : BGM の初期化に失敗しました\n");
         return ZUN_ERROR;
     }
 
@@ -1078,7 +1077,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     configFile = (u32 *)FileSystem::OpenFile((char *)configFilename, 1);
     if (!configFile)
     {
-        g_GameErrorContext.Log("コンフィグデータが見つからないので初期化しました\r\n");
+        g_GameErrorContext.Log("コンフィグデータが見つからないので初期化しました\n");
     init:
         g_Supervisor.cfg.lifeCount = 2;
         g_Supervisor.cfg.bombCount = 3;
@@ -1093,7 +1092,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             fclose(bgm2);
             if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 || bgm2Data[2] != 0x700)
             {
-                g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
+                g_GameErrorContext.Fatal("BGM データのバージョンが違います\n");
                 return ZUN_ERROR;
             }
             g_Supervisor.cfg.musicMode = MUSIC_WAV;
@@ -1101,7 +1100,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         else
         {
             g_Supervisor.cfg.musicMode = MUSIC_MIDI;
-            Supervisor::DebugPrint("wave データが無いので、midi にします\r\n");
+            Supervisor::DebugPrint("wave データが無いので、midi にします\n");
         }
         g_Supervisor.cfg.playSounds = 1;
         g_Supervisor.cfg.defaultDifficulty = (u8)DIFF_NORMAL;
@@ -1124,7 +1123,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             fclose(bgm);
             if (bgmData[0] != 0x5641575a || bgmData[1] != 1 || bgmData[2] != 0x700)
             {
-                g_GameErrorContext.Fatal("BGM データのバージョンが違います\r\n");
+                g_GameErrorContext.Fatal("BGM データのバージョンが違います\n");
                 return ZUN_ERROR;
             }
         }
@@ -1136,7 +1135,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
               g_Supervisor.cfg.shotSlow < 2 && g_Supervisor.cfg.version == 0x70002 &&
               g_LastFileSize == sizeof(GameConfiguration)))
         {
-            g_GameErrorContext.Log("コンフィグデータが異常でしたので再初期化しました\r\n");
+            g_GameErrorContext.Log("コンフィグデータが異常でしたので再初期化しました\n");
             goto init;
         }
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
@@ -1144,31 +1143,31 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     g_Supervisor.cfg.opts |= 1;
     if ((this->cfg.opts >> 1 & 1) != 0)
     {
-        g_GameErrorContext.Log("頂点バッファの使用を抑制します\r\n");
+        g_GameErrorContext.Log("頂点バッファの使用を抑制します\n");
     }
     if ((this->cfg.opts >> 10 & 1) != 0)
     {
-        g_GameErrorContext.Log("フォグの使用を抑制します\r\n");
+        g_GameErrorContext.Log("フォグの使用を抑制します\n");
     }
     if ((this->cfg.opts >> 2 & 1) != 0)
     {
-        g_GameErrorContext.Log("16Bit のテクスチャの使用を強制します\r\n");
+        g_GameErrorContext.Log("16Bit のテクスチャの使用を強制します\n");
     }
     if ((this->cfg.opts >> 4 & 1) | (this->cfg.opts >> 3 & 1))
     {
-        g_GameErrorContext.Log("バックバッファの消去を強制します\r\n");
+        g_GameErrorContext.Log("バックバッファの消去を強制します\n");
     }
     if ((this->cfg.opts >> 4 & 1) != 0)
     {
-        g_GameErrorContext.Log("ゲーム周りのアイテムの描画を抑制します\r\n");
+        g_GameErrorContext.Log("ゲーム周りのアイテムの描画を抑制します\n");
     }
     if ((this->cfg.opts >> 5 & 1) != 0)
     {
-        g_GameErrorContext.Log("グーローシェーディングを抑制します\r\n");
+        g_GameErrorContext.Log("グーローシェーディングを抑制します\n");
     }
     if ((this->cfg.opts >> 6 & 1) != 0)
     {
-        g_GameErrorContext.Log("デプステストを抑制します\r\n");
+        g_GameErrorContext.Log("デプステストを抑制します\n");
     }
     this->vsyncEnabled = 0;
     this->cfg.opts = this->cfg.opts & 0xffffff7f;
@@ -1178,34 +1177,36 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     }
     if (this->cfg.windowed)
     {
-        g_GameErrorContext.Log("ウィンドウモードで起動します\r\n");
+        g_GameErrorContext.Log("ウィンドウモードで起動します\n");
     }
     if ((this->cfg.opts >> 9 & 1) != 0)
     {
-        g_GameErrorContext.Log("リファレンスラスタライザを強制します\r\n");
+        g_GameErrorContext.Log("リファレンスラスタライザを強制します\n");
     }
     if ((this->cfg.opts >> 0xb & 1) != 0)
     {
-        g_GameErrorContext.Log("パッド、キーボードの入力に DirectInput を使用しません\r\n");
+        g_GameErrorContext.Log("パッド、キーボードの入力に DirectInput を使用しません\n");
     }
+
+    this->cfg.opts |= 1 << 0xc;
     if ((this->cfg.opts >> 0xc & 1) != 0)
     {
-        g_GameErrorContext.Log("画面周りを毎回描画します\r\n");
+        g_GameErrorContext.Log("画面周りを毎回描画します\n");
     }
     if ((this->cfg.opts >> 0xd & 1) != 0)
     {
-        g_GameErrorContext.Log("ＢＧＭをメモリに読み込みます\r\n");
+        g_GameErrorContext.Log("ＢＧＭをメモリに読み込みます\n");
     }
     if ((this->cfg.opts >> 0xe & 1) != 0)
     {
-        g_GameErrorContext.Log("垂直同期を取りません\r\n");
+        g_GameErrorContext.Log("垂直同期を取りません\n");
         g_Supervisor.vsyncEnabled = 1;
     }
     if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg, sizeof(GameConfiguration)))
     {
-        g_GameErrorContext.Fatal("ファイルが書き出せません %s\r\n", configFilename);
+        g_GameErrorContext.Fatal("ファイルが書き出せません %s\n", configFilename);
         g_GameErrorContext.Fatal("フォルダが書込み禁止属性になっているか、ディスクがいっぱいいっぱ"
-                                 "いになってませんか？\r\n");
+                                 "いになってませんか？\n");
         return ZUN_ERROR;
     }
 

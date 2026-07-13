@@ -25,7 +25,7 @@ Pbg4Archive::~Pbg4Archive()
 bool Pbg4Archive::Load(const char *filename)
 {
     Release();
-    Supervisor::DebugPrint("info : %s open arcfile\r\n", filename);
+    Supervisor::DebugPrint("info : %s open arcfile\n", filename);
 
     this->fileAbstraction = new Pbg4File();
 
@@ -42,14 +42,14 @@ bool Pbg4Archive::Load(const char *filename)
             return true;
         }
     }
-    Supervisor::DebugPrint("info : %s not found\r\n", filename);
+    Supervisor::DebugPrint("info : %s not found\n", filename);
     Release();
     return false;
 }
 
 void Pbg4Archive::Release()
 {
-    Supervisor::DebugPrint("info : %s close arcfile\r\n", this->filename);
+    Supervisor::DebugPrint("info : %s close arcfile\n", this->filename);
     if (this->filename)
     {
         free(this->filename);
@@ -110,7 +110,7 @@ u8 *Pbg4Archive::ReadDecompressEntry(const char *filename, u8 *buf)
     }
     return dstBuf;
 err:
-    Supervisor::DebugPrint("info : %s error\r\n", this->filename);
+    Supervisor::DebugPrint("info : %s error\n", this->filename);
     if (srcBuf)
     {
         free(srcBuf);
@@ -251,7 +251,7 @@ err:
         decompressedData = NULL;
     }
     SAFE_DELETE(this->fileAbstraction);
-    Supervisor::DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
+    Supervisor::DebugPrint("ファイル %s のオープン中にエラーが発生しました\n", path);
     return false;
 }
 

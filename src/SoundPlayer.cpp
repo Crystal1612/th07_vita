@@ -355,12 +355,12 @@ ZunResult SoundPlayer::InitializeSound()
 
     if (ma_engine_init(&engineConfig, this->engine) != MA_SUCCESS)
     {
-        g_GameErrorContext.Log("DirectSound オブジェクトの初期化が失敗したよ\r\n");
+        g_GameErrorContext.Log("DirectSound オブジェクトの初期化が失敗したよ\n");
         SAFE_DELETE(this->engine);
         return ZUN_ERROR;
     }
 
-    g_GameErrorContext.Log("DirectSound は正常に初期化されました\r\n");
+    g_GameErrorContext.Log("DirectSound は正常に初期化されました\n");
     return ZUN_SUCCESS;
 }
 
@@ -467,7 +467,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
 
     if (strncmp((char *)soundFileDat, "RIFF", 4) != 0)
     {
-        g_GameErrorContext.Log("Wav ファイルじゃない %s\r\n", path);
+        g_GameErrorContext.Log("Wav ファイルじゃない %s\n", path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -478,7 +478,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
     if (ma_decode_memory(soundFileDat, fileSize, &decoderConfig, &frameCount, &frames) !=
         MA_SUCCESS)
     {
-        g_GameErrorContext.Log("Wav ファイルじゃない? %s\r\n", path);
+        g_GameErrorContext.Log("Wav ファイルじゃない? %s\n", path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -503,7 +503,7 @@ ZunResult SoundPlayer::StartBGM(const char *path)
         return ZUN_ERROR;
     }
 
-    Supervisor::DebugPrint("Streming BGM Start\r\n");
+    Supervisor::DebugPrint("Streming BGM Start\n");
     StopBGM();
 
     return ZUN_SUCCESS;
@@ -535,13 +535,13 @@ ZunResult SoundPlayer::ReopenBGM(const char *name)
         SAFE_DELETE(this->bgmDataSource);
         return ZUN_ERROR;
     }
-    Supervisor::DebugPrint("Streming BGM Reopen %d\r\n", fmtIdx);
+    Supervisor::DebugPrint("Streming BGM Reopen %d\n", fmtIdx);
     return ZUN_SUCCESS;
 }
 
 ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
 {
-    LPBYTE lpBuffer;
+    u8 *lpBuffer;
     FILE *file;
     i32 fmtIdx;
 
@@ -564,21 +564,21 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
     }
 
     SAFE_FREE(this->bgmPreloadData[idx]);
-    Supervisor::DebugPrint("Streming BGM PreLoad %d\r\n", idx);
+    Supervisor::DebugPrint("Streming BGM PreLoad %d\n", idx);
     file = fopen(this->bgmArchivePath, "rb");
     if (!file)
     {
-        Supervisor::DebugPrint("error : bgmfile is not find %s\r\n", this->bgmArchivePath);
+        Supervisor::DebugPrint("error : bgmfile is not find %s\n", this->bgmArchivePath);
         return ZUN_ERROR;
     }
 
     fmtIdx = GetFmtIndexByName(path);
     fseek(file, this->bgmFmtData[fmtIdx].startOffset, SEEK_SET);
-    lpBuffer = (LPBYTE)malloc(this->bgmFmtData[fmtIdx].preloadAllocSize);
+    lpBuffer = (u8 *)malloc(this->bgmFmtData[fmtIdx].preloadAllocSize);
     if (!lpBuffer)
     {
         fclose(file);
-        Supervisor::DebugPrint("error : bgmfile is not find %s\r\n", this->bgmArchivePath);
+        Supervisor::DebugPrint("error : bgmfile is not find %s\n", this->bgmArchivePath);
         return ZUN_ERROR;
     }
 
@@ -612,7 +612,7 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
     {
         return ZUN_ERROR;
     }
-    Supervisor::DebugPrint("Streming BGM Load no %d\r\n", idx);
+    Supervisor::DebugPrint("Streming BGM Load no %d\n", idx);
     StopBGM();
 
     this->bgmDataSource = new ThBgmDataSource;
@@ -633,7 +633,7 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
         return ZUN_ERROR;
     }
 
-    Supervisor::DebugPrint("load comp\r\n");
+    Supervisor::DebugPrint("load comp\n");
     this->curBgmIdx = idx;
     return ZUN_SUCCESS;
 }
@@ -642,7 +642,7 @@ void SoundPlayer::StopBGM()
 {
     if (this->backgroundMusic)
     {
-        Supervisor::DebugPrint("Streming BGM stop\r\n");
+        Supervisor::DebugPrint("Streming BGM stop\n");
         ma_sound_stop(this->backgroundMusic);
         ma_sound_uninit(this->backgroundMusic);
         SAFE_DELETE(this->backgroundMusic);
@@ -675,7 +675,7 @@ ZunResult SoundPlayer::InitSoundBuffers()
     {
         if (LoadSound(i, g_SFXList[i]) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : Sound ファイルが読み込めない データを確認 %s\r\n",
+            g_GameErrorContext.Log("error : Sound ファイルが読み込めない データを確認 %s\n",
                                    g_SFXList[i]);
             return ZUN_ERROR;
         }
@@ -752,7 +752,7 @@ loop:
     case AUDIO_PRELOAD:
         if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0)
         {
-            Supervisor::DebugPrint("Sound : PreLoad Stage\r\n");
+            Supervisor::DebugPrint("Sound : PreLoad Stage\n");
             if (!commandCursor->arg2)
             {
                 StopBGM();
@@ -763,7 +763,7 @@ loop:
         }
         else
         {
-            Supervisor::DebugPrint("Sound : PreLoad Stage\r\n");
+            Supervisor::DebugPrint("Sound : PreLoad Stage\n");
             PreloadBGM(commandCursor->arg1, commandCursor->string);
             loopAgain = true;
             break;
@@ -775,7 +775,7 @@ loop:
         {
             if (!commandCursor->arg2)
             {
-                Supervisor::DebugPrint("Sound : Load Stage\r\n");
+                Supervisor::DebugPrint("Sound : Load Stage\n");
                 if (LoadBGM(commandCursor->arg1) != ZUN_SUCCESS)
                 {
                     break;
@@ -783,7 +783,7 @@ loop:
             }
             else if (commandCursor->arg2 == 2)
             {
-                Supervisor::DebugPrint("Sound : Reset Stage\r\n");
+                Supervisor::DebugPrint("Sound : Reset Stage\n");
                 if (this->backgroundMusic)
                 {
                     if (ma_sound_seek_to_pcm_frame(this->backgroundMusic, 0) != MA_SUCCESS)
@@ -794,11 +794,11 @@ loop:
             }
             else if (commandCursor->arg2 == 5)
             {
-                Supervisor::DebugPrint("Sound : Fill Buffer Stage\r\n");
+                Supervisor::DebugPrint("Sound : Fill Buffer Stage\n");
             }
             else if (commandCursor->arg2 == 7)
             {
-                Supervisor::DebugPrint("Sound : Play Stage\r\n");
+                Supervisor::DebugPrint("Sound : Play Stage\n");
                 if (this->backgroundMusic)
                 {
                     ma_sound_start(this->backgroundMusic);
@@ -811,27 +811,27 @@ loop:
         }
         else if (!commandCursor->arg2)
         {
-            Supervisor::DebugPrint("Sound : Stop Stage\r\n");
+            Supervisor::DebugPrint("Sound : Stop Stage\n");
             ma_sound_stop(this->backgroundMusic);
         }
         else if (commandCursor->arg2 == 1)
         {
-            Supervisor::DebugPrint("Sound : Recreate Stage\r\n");
+            Supervisor::DebugPrint("Sound : Recreate Stage\n");
         }
         else if (commandCursor->arg2 == 2)
         {
-            Supervisor::DebugPrint("Sound : ReOpen Stage\r\n");
+            Supervisor::DebugPrint("Sound : ReOpen Stage\n");
             name = commandCursor->arg1 >= 0 ? &this->bgmFileNames[commandCursor->arg1]
                                             : &commandCursor->string;
             ReopenBGM(*name);
         }
         else if (commandCursor->arg2 == 3)
         {
-            Supervisor::DebugPrint("Sound : Fill Buffer Stage\r\n");
+            Supervisor::DebugPrint("Sound : Fill Buffer Stage\n");
         }
         else if (commandCursor->arg2 == 4)
         {
-            Supervisor::DebugPrint("Sound : Play Stage\r\n");
+            Supervisor::DebugPrint("Sound : Play Stage\n");
             ma_sound_start(this->backgroundMusic);
         }
         else if (commandCursor->arg2 >= 7)
@@ -848,19 +848,19 @@ loop:
 
         if (!commandCursor->arg2)
         {
-            Supervisor::DebugPrint("Sound : Stop Stage\r\n");
+            Supervisor::DebugPrint("Sound : Stop Stage\n");
             ma_sound_stop(this->backgroundMusic);
         }
         else if (commandCursor->arg2 == 1)
         {
-            Supervisor::DebugPrint("Sound : Thread Stop Stage\r\n");
+            Supervisor::DebugPrint("Sound : Thread Stop Stage\n");
         }
         else if (commandCursor->arg2 == 2)
         {
         }
         else if (commandCursor->arg2 == 3)
         {
-            Supervisor::DebugPrint("Sound : Handle Close Stage\r\n");
+            Supervisor::DebugPrint("Sound : Handle Close Stage\n");
             StopBGM();
         }
         else if (commandCursor->arg2 == 10)
@@ -877,7 +877,7 @@ loop:
 
         if (!commandCursor->arg2)
         {
-            Supervisor::DebugPrint("Sound : Stop Stage\r\n");
+            Supervisor::DebugPrint("Sound : Stop Stage\n");
             ma_sound_stop(this->backgroundMusic);
         }
         else if (commandCursor->arg2 == 1)
@@ -887,7 +887,7 @@ loop:
         commandCursor->arg2++;
         goto loop_breakout;
     case AUDIO_FADEOUT: {
-        Supervisor::DebugPrint("Sound : Fade Out Stage %d\r\n", commandCursor->arg1);
+        Supervisor::DebugPrint("Sound : Fade Out Stage %d\n", commandCursor->arg1);
         g_SoundPlayer.FadeOut(commandCursor->arg1);
         break;
     }
@@ -971,5 +971,5 @@ void SoundPlayer::PushCommand(AudioOpcode opcode, i32 arg1, const char *arg2)
 
         break;
     }
-    Supervisor::DebugPrint("Sound Que Add %d\r\n", opcode);
+    Supervisor::DebugPrint("Sound Que Add %d\n", opcode);
 }

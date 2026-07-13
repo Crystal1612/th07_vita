@@ -802,7 +802,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     this->stdData = (StdRawHeader *)FileSystem::OpenFile(stdPath, 0);
     if (!this->stdData)
     {
-        g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\r\n");
+        g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\n");
         return ZUN_ERROR;
     }
 

@@ -40,12 +40,12 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
         g_LastFileSize = fsize;
         if (fsize == 0)
         {
-            g_GameErrorContext.Fatal("error : %s is not found in arcfile.\r\n", filename);
+            g_GameErrorContext.Fatal("error : %s is not found in arcfile.\n", filename);
             return NULL;
         }
         if (fsize != 0)
         {
-            Supervisor::DebugPrint("%s Decode ... \r\n", filename);
+            Supervisor::DebugPrint("%s Decode ... \n", filename);
             buf = (u8 *)malloc(fsize);
             if (!buf)
             {
@@ -56,11 +56,11 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
             return buf;
         }
     }
-    Supervisor::DebugPrint("%s Load ... \r\n", filepath);
+    Supervisor::DebugPrint("%s Load ... \n", filepath);
     file = fopen(filepath, "rb");
     if (!file)
     {
-        Supervisor::DebugPrint("error : %s is not found.\r\n", filepath);
+        Supervisor::DebugPrint("error : %s is not found.\n", filepath);
         return NULL;
     }
 
@@ -105,7 +105,7 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out, u32 bytes
     file = fopen(filename, "wb");
     if (!file)
     {
-        Supervisor::DebugPrint("error : %s write error\r\n", filename);
+        Supervisor::DebugPrint("error : %s write error\n", filename);
         return -1;
     }
 
@@ -113,10 +113,10 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out, u32 bytes
     if (bytesToWrite != bytesWritten)
     {
         fclose(file);
-        Supervisor::DebugPrint("error : %s write error\r\n", filename);
+        Supervisor::DebugPrint("error : %s write error\n", filename);
         return -2;
     }
     fclose(file);
-    Supervisor::DebugPrint("%s write ...\r\n", filename);
+    Supervisor::DebugPrint("%s write ...\n", filename);
     return 0;
 }
