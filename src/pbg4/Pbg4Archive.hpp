@@ -2,18 +2,16 @@
 
 #include <cstdlib>
 
-#include "../inttypes.hpp"
 #include "Pbg4File.hpp"
+#include "inttypes.hpp"
 
 struct Pbg4Entry
 {
-    // FUNCTION: TH07 0x0045c6f0 FOLDED
     Pbg4Entry()
     {
         filename = NULL;
     }
 
-    // FUNCTION: TH07 0x0045f680
     ~Pbg4Entry()
     {
         if (filename)

@@ -140,7 +140,6 @@ struct AnmVmBase
 
 struct AnmVm : AnmVmBase
 {
-    // FUNCTION: TH07 0x00401170
     AnmVm()
     {
         memset(this, 0, sizeof(AnmVm));

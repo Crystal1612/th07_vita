@@ -8,8 +8,6 @@ const D3DFORMAT g_TextureFormatD3D8Mapping[6] = {
 
 const i32 g_TextureBytesPerPixel[7] = {4, 4, 2, 2, 3, 2, 0};
 
-// this is here i guess? but why
-// FUNCTION: TH07 0x004010b0
 i32 ZunTimer::NextTick()
 {
     this->Tick();

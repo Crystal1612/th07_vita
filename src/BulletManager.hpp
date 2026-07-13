@@ -186,7 +186,6 @@ struct Bullet
 
     void Draw();
 
-    // FUNCTION: TH07 0x00417b20
     void Initialize()
     {
         this->state = BULLET_INACTIVE;

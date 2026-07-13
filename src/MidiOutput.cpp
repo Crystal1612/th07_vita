@@ -105,7 +105,6 @@ MidiTimer::MidiTimer()
         this->timerId = 0;*/
 }
 
-// FUNCTION: TH07 0x004362d0 FOLDED
 MidiTimer::~MidiTimer()
 {
     /*StopTimer();

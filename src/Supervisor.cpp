@@ -971,7 +971,6 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
 }
 
 // ZUN name: snapShotScreen
-// FUNCTION: TH07 0x004395fb
 i32 Supervisor::SnapshotScreen(const char *param_1)
 {
     FILE *file;

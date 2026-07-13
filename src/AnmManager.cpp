@@ -65,7 +65,6 @@ AnmManager::AnmManager()
     this->screenshotTextureId = -1;
 }
 
-// FUNCTION: TH07 0x0044d620 FOLDED
 AnmManager::~AnmManager()
 {
 }

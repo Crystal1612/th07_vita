@@ -183,7 +183,6 @@ struct AnmManager
     void ExecuteVmsAnms(AnmVm *vm, i32 idx, i32 vmCount);
     ZunResult UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, i32 count);
 
-    // FUNCTION: TH07 0x00404f30
     void ExecuteAnmIdx(AnmVm *vm, i32 anmFileIdx)
     {
         vm->anmFileIdx = anmFileIdx;
@@ -194,7 +193,6 @@ struct AnmManager
         SetAndExecuteScript(vm, this->scripts[anmFileIdx]);
     }
 
-    // FUNCTION: TH07 0x00433f20
     void ReleaseSurfaces()
     {
         for (i32 i = 0; i < 32; i++)
