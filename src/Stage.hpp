@@ -121,15 +121,6 @@ struct Stage
                                       D3DXVECTOR3 *param_5, D3DXVECTOR3 *param_6,
                                       D3DXVECTOR3 *param_7);
 
-    static u8 ClampColorChannel(u32 src)
-    {
-        if (src >= 256)
-        {
-            src = 255;
-        }
-        return src;
-    }
-
     AnmVm *quadVms;
     AnmVm vm1;
     AnmVm vm2;

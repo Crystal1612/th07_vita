@@ -130,7 +130,7 @@ struct AnmManager
     ZunResult CalcBillboardTransform(AnmVm *vm);
     void CalcProjectedTransform(AnmVm *vm);
     void CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y);
-    void CopyTexture(i32 param1, i32 param2, RECT *param3, RECT *param4);
+    void CopyTexture(i32 dstIdx, i32 srcIdx, RECT *dstRect, RECT *srcRect);
     ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
                                  i32 textureFormat);
     ZunResult Draw(AnmVm *vm);
@@ -139,7 +139,7 @@ struct AnmManager
     void DrawEndingRect(i32 surfaceIdx, i32 rectX, i32 rectY, i32 rectLeft,
                         i32 rectTop, i32 width, i32 height);
     ZunResult DrawFacingCamera(AnmVm *vm);
-    ZunResult DrawInner(AnmVm *vm, u32 param2);
+    ZunResult DrawInner(AnmVm *vm, u32 drawFlags);
     ZunResult DrawNoRotation(AnmVm *vm);
     ZunResult DrawProjected(AnmVm *vm);
     void DrawStringFormat(AnmVm *vm, D3DCOLOR textColor, u32 outlineType,
@@ -151,13 +151,13 @@ struct AnmManager
                           u32 outlineType, char *strToPrint, f32 scaleY,
                           f32 scaleX);
     ZunResult DrawTriangleStrip(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices,
-                                i32 param3);
+                                i32 count);
     static void DrawVmTextFmt(AnmManager *manager, AnmVm *vm, D3DCOLOR textColor,
-                              u32 outlineType, const char *param5, ...);
+                              u32 outlineType, const char *str, ...);
     i32 ExecuteScript(AnmVm *vm);
     void Flush();
     i32 LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
-                u32 param_4);
+                u32 ownsMemory);
     i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
     void LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
@@ -182,8 +182,8 @@ struct AnmManager
                         i32 srcHeight, i32 dstLeft, i32 dstTop, i32 dstWidth,
                         i32 dstHeight);
     void TakeScreenshotIfRequested();
-    void TranslateRotation(VertexTex1DiffuseXyzrhw *param_1, f32 width,
-                           f32 height, f32 param_4, f32 param_5,
+    void TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width,
+                           f32 height, f32 sine, f32 cosine,
                            f32 xOffset, f32 yOffset);
 
     void SetInterruptActiveVms(AnmVm *vm, i32 vmCount,

@@ -603,9 +603,9 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     else
     {
         fogColor.color = arg->skyFog.color.color;
-        fogColor.bytes.r = ClampColorChannel((u32)(fogColor.bytes.r * g_AnmManager->color.bytes.r) >> 7);
-        fogColor.bytes.g = ClampColorChannel((u32)(fogColor.bytes.g * g_AnmManager->color.bytes.g) >> 7);
-        fogColor.bytes.b = ClampColorChannel((u32)(fogColor.bytes.b * g_AnmManager->color.bytes.b) >> 7);
+        fogColor.bytes.r = ZunColor::Multiply(fogColor.bytes.r, g_AnmManager->color.bytes.r);
+        fogColor.bytes.g = ZunColor::Multiply(fogColor.bytes.g, g_AnmManager->color.bytes.g);
+        fogColor.bytes.b = ZunColor::Multiply(fogColor.bytes.b, g_AnmManager->color.bytes.b);
         g_Supervisor.SetRenderState(D3DRS_FOGCOLOR, fogColor.color);
     }
     g_Supervisor.SetRenderState(D3DRS_FOGSTART, *(DWORD *)&arg->skyFog.nearPlane);
