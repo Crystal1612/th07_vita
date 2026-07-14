@@ -249,7 +249,6 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
     }
 
     TTF_SetFontSize(g_Font, fontSize);
-    Supervisor::DebugPrint("font Size : %d\n", TTF_FontHeight(g_Font));
 
     char *convStr = string;
     bool needsFree = false;
@@ -331,4 +330,37 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
                            (u32)(outlineType == 0xffffffff));
     textHelper.CopyTextToTexture(yPos, spriteWidth, spriteHeight, fontHeight, fontWidth,
                                  outTexture);
+}
+
+i32 TextHelper::GetLogicalStringWidth(const char *str)
+{
+    i32 width = 0;
+    while (*str)
+    {
+        if ((*str & 0x80) == 0)
+        {
+            width += 1;
+            str += 1;
+        }
+        else if ((*str & 0xE0) == 0xC0)
+        {
+            width += 2;
+            str += 2;
+        }
+        else if ((*str & 0xF0) == 0xE0)
+        {
+            width += 2;
+            str += 3;
+        }
+        else if ((*str & 0xF8) == 0xF0)
+        {
+            width += 2;
+            str += 4;
+        }
+        else
+        {
+            str++;
+        }
+    }
+    return width;
 }

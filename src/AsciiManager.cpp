@@ -292,7 +292,7 @@ void AsciiManager::DrawStrings()
                 g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
                 g_Supervisor.viewport.width = g_GameManager.arcadeRegionSize.x;
                 g_Supervisor.viewport.height = g_GameManager.arcadeRegionSize.y;
-                g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+                g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
             }
             else
             {
@@ -300,7 +300,7 @@ void AsciiManager::DrawStrings()
                 g_Supervisor.viewport.y = 0;
                 g_Supervisor.viewport.width = 640;
                 g_Supervisor.viewport.height = 480;
-                g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+                g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
             }
         }
         while (*(u8 *)text != 0)
@@ -791,7 +791,7 @@ void RetryMenu::OnDraw()
         g_Supervisor.viewport.y = (u32)g_GameManager.arcadeRegionTopLeftPos.y;
         g_Supervisor.viewport.width = (u32)g_GameManager.arcadeRegionSize.x;
         g_Supervisor.viewport.height = (u32)g_GameManager.arcadeRegionSize.y;
-        g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+        g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
         if ((g_Supervisor.flags >> 1 & 1) != 0 && this->curState != 0)
         {
             AnmVm local_25c = this->menuBackground;
@@ -1012,7 +1012,7 @@ void PauseMenu::OnDraw()
         g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
         g_Supervisor.viewport.width = g_GameManager.arcadeRegionSize.x;
         g_Supervisor.viewport.height = g_GameManager.arcadeRegionSize.y;
-        g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+        g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
         if ((g_Supervisor.flags >> 1 & 1) != 0 && (this->curState != 0 || 2 < this->numFrames))
         {
             g_AnmManager->DrawNoRotation(&this->menuBackground);

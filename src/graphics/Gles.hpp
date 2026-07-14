@@ -1,38 +1,17 @@
 #pragma once
 
-// software renderer. this is horrifyingly slow, unless you're running on release (where it is still
-// slower but at least not horrible)
-
-#include <SDL2/SDL.h>
-#include <unordered_map>
-#include <vector>
+#include <GLES3/gl3.h>
+#include <SDL_video.h>
 
 #include "AnmManager.hpp"
 #include "ZunGraphics.hpp"
 
-struct SoftTexture
-{
-    u32 width = 0;
-    u32 height = 0;
-    std::vector<u32> pixels;
-};
-
-struct SoftwareVertex
-{
-    f32 x, y, z, w;
-    f32 fogCoord;
-    ZunColor color;
-    f32 u, v;
-    bool textured;
-    bool screenSpace;
-};
-
-class SoftwareGraphics : public ZunGraphics
+class GlesGraphics : public ZunGraphics
 {
   public:
     static ZunGraphics *Init();
 
-    ~SoftwareGraphics() override
+    ~GlesGraphics() override
     {
         Exit();
     }
@@ -41,7 +20,7 @@ class SoftwareGraphics : public ZunGraphics
 
     RendererType GetType() override
     {
-        return RENDERER_SOFTWARE;
+        return RENDERER_OPENGLES;
     }
 
     void SetFogRange(f32 nearPlane, f32 farPlane) override;
@@ -83,44 +62,32 @@ class SoftwareGraphics : public ZunGraphics
     void SwapBuffers() override;
 
   private:
-    SDL_Renderer *renderer = nullptr;
-    SDL_Texture *screenTexture = nullptr;
-
-    std::vector<u32> colorBuffer;
-    std::vector<f32> depthBuffer;
-
-    std::unordered_map<u32, SoftTexture> textures;
-    u32 textureCounter = 1;
-    u32 currentTexture = 0;
-
-    ZunMatrix transforms[4];
-    ZunViewport viewport;
-
-    bool depthTest = false;
-    bool depthMask = true;
-    bool blend = false;
-    bool fog = false;
-    bool alphaTest = false;
-
-    DepthFunc depthFunc = DEPTH_FUNC_LEQUAL;
-    BlendMode srcBlend = BLEND_ALPHA;
-    BlendMode dstBlend = BLEND_ALPHA;
-
+    SDL_GLContext ctx;
+    u32 shaderProgram;
+    u32 vao, vbo;
+    u8 alphaRef = 0;
+    TextureArg texArg = TEX_ARG_DIFFUSE;
+    ZunColor textureFactor = {0xFFFFFFFF};
     ColorOp colorOpRgb = COLOR_OP_MODULATE;
     ColorOp colorOpAlpha = COLOR_OP_MODULATE;
 
-    TextureArg texArg = TEX_ARG_DIFFUSE;
-
-    ZunColor clearColor = {0};
-    f32 clearDepth = 1.0f;
-    u8 alphaRef = 0;
-
+    ZunMatrix transforms[4];
+    ZunViewport viewport;
+    bool fogEnabled = false;
     f32 fogNear = 0.0f;
     f32 fogFar = 1.0f;
     ZunColor fogColor = {0};
+    bool alphaTestEnabled = false;
+    bool depthMaskEnabled = true;
 
-    ZunColor textureFactor = {0xFFFFFFFF};
-    bool textureFactorWasSet = false;
+    GLint u_Model, u_View, u_Proj, u_TextureMatrix;
+    GLint u_ScreenSpace, u_Viewport;
+    GLint u_UseTexture, u_Texture;
+    GLint u_ColorOpRgb, u_ColorOpAlpha, u_TexArg, u_TextureFactor;
+    GLint u_AlphaTest, u_AlphaRef;
+    GLint u_FogEnabled, u_FogColor, u_FogNear, u_FogFar;
+
+    u64 prevTicks = 0;
 
     void Flush()
     {
@@ -130,10 +97,21 @@ class SoftwareGraphics : public ZunGraphics
         }
     }
 
-    SoftwareVertex TransformVertex(const void *vData, i32 stride);
-    void DrawTriangle(const SoftwareVertex &v0, SoftwareVertex &v1, SoftwareVertex &v2);
-    u32 Blend(u32 src, u32 dst);
-    u32 ApplyFog(u32 color, f32 z);
-    ZunColor SampleTexture(f32 u, f32 v);
-    ZunColor GetTexArgColor(ZunColor diffuse);
+    static GLuint CompileShader(GLenum type, const char *source)
+    {
+        u32 shader = glCreateShader(type);
+        glShaderSource(shader, 1, &source, nullptr);
+        glCompileShader(shader);
+
+        GLint isCompiled = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+        if (!isCompiled)
+        {
+            char log[512];
+            glGetShaderInfoLog(shader, 512, nullptr, log);
+            Supervisor::DebugPrint("shader compile error: %s\n", log);
+            return 0;
+        }
+        return shader;
+    }
 };

@@ -2,11 +2,10 @@
 
 A cross-platform port of 東方妖々夢　～ Perfect Cherry Blossom 1.00b by Team Shanghai Alice.
 
-This is the portable branch of the Touhou 7 decompilation. Unless you're looking specifically for an attempted cross-platform port of th07, you probably want the [main branch](https://github.com/some100/th07/tree/main). Currently, this will not produce a playable game on any platform, and is broken and unfinished right now. Rendering seems to work fine, as does sound, but there are things that don't work fine. Namely:
+This is the portable branch of the Touhou 7 decompilation. Unless you're looking specifically for an attempted cross-platform port of th07, you probably want the [main branch](https://github.com/some100/th07/tree/main). Currently, this may produce a playable game on little endian platforms, but it's possible you may run into some unexpected bugs. Rendering seems to work fine, as does sound, and you can play the game. There are a few bugs though, namely:
 
-* You cannot load into stages (on big endian). This is because the way ecl files, stg files, etc. are loaded in the original game is not endian independent, resulting in it breaking on any system not on little endian.
+* You cannot load into stages on big endian machines. This is because the way ecl files, stg files, etc. are loaded in the original game is not endian independent, resulting in it breaking on any system not on little endian.
 * Text rendering looks off. To be clear it does "work" but the text looks too big.
-* There is only a software renderer implemented, which is ridiculously slow particularly on debug builds.
 * Some features that the original game had, like 16 bit color mode, midi output, etc. are outright unimplemented. This may or may not be "fixed" later, but the focus currently is to produce a playable game.
 
 Work is currently being done to transition the game over to being more platform-independent.
@@ -17,11 +16,17 @@ Work is currently being done to transition the game over to being more platform-
 
 * cmake
 * SDL2
+* OpenGL ES 3.0+
 * A compiler that supports C++17
 
 Run cmake on this repo, then build with whatever generator you chose.
 
 You may also need to add a copy of `msgothic.ttc` into your game directory if you are not running this on Windows.
+
+## Todo
+
+* Try to get the text rendering closer to the original
+* Make the game endian independent
 
 ## Credits
 

@@ -2060,7 +2060,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_Supervisor.viewport.y = 0;
     g_Supervisor.viewport.width = 640;
     g_Supervisor.viewport.height = 480;
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     for (i = 0; i < 41; i++, vm++)
     {

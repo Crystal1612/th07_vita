@@ -7,7 +7,7 @@
 enum RendererType
 {
     RENDERER_SOFTWARE,
-    RENDERER_OPENGLES, // SOON.........................
+    RENDERER_OPENGLES,
 };
 
 enum DepthFunc
@@ -62,7 +62,7 @@ enum TransformMatrix
 enum BlendMode
 {
     BLEND_ALPHA,
-    BLEND_ADD,
+    BLEND_ONE,
     BLEND_NONE
 };
 
@@ -135,8 +135,8 @@ class ZunGraphics
     virtual void SetTextureArg(TextureArg arg) = 0;
     virtual void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix) = 0;
     virtual void SetTextureFilter() = 0;
-    virtual void GetViewport(ZunViewport *viewport) = 0;
-    virtual void SetViewport(ZunViewport *viewport) = 0;
+    virtual void GetViewport(ZunViewport &viewport) = 0;
+    virtual void SetViewport(const ZunViewport &viewport) = 0;
     virtual void Enable(Capabilities cap) = 0;
     virtual void Disable(Capabilities cap) = 0;
     virtual void SetBlendMode(BlendMode srcMode, BlendMode dstMode) = 0;

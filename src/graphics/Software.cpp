@@ -5,10 +5,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include "AnmManager.hpp"
 #include "GameWindow.hpp"
 #include "Supervisor.hpp"
-#include "graphics/ZunGraphics.hpp"
 
 ZunGraphics *SoftwareGraphics::Init()
 {
@@ -18,6 +16,7 @@ ZunGraphics *SoftwareGraphics::Init()
                                        SDL_RENDERER_SOFTWARE | SDL_RENDERER_PRESENTVSYNC);
     if (!gfx->renderer)
     {
+        delete gfx;
         Supervisor::DebugPrint("sdl renderer create failed: %s\n", SDL_GetError());
         return nullptr;
     }
@@ -26,6 +25,7 @@ ZunGraphics *SoftwareGraphics::Init()
                                            SDL_TEXTUREACCESS_STREAMING, 640, 480);
     if (!gfx->screenTexture)
     {
+        delete gfx;
         Supervisor::DebugPrint("sdl texture create failed: %s\n", SDL_GetError());
         return nullptr;
     }
@@ -108,53 +108,51 @@ void SoftwareGraphics::SetTextureFilter()
 {
 }
 
-void SoftwareGraphics::GetViewport(ZunViewport *viewport)
+void SoftwareGraphics::GetViewport(ZunViewport &viewport)
 {
-    *viewport = this->viewport;
+    viewport = this->viewport;
 }
 
-void SoftwareGraphics::SetViewport(ZunViewport *viewport)
+void SoftwareGraphics::SetViewport(const ZunViewport &viewport)
 {
-    this->viewport = *viewport;
+    this->viewport = viewport;
 }
 
 void SoftwareGraphics::Enable(Capabilities cap)
 {
-    if (cap == CAPS_BLEND)
+    switch (cap)
     {
+    case CAPS_BLEND:
         blend = true;
-    }
-    else if (cap == CAPS_ALPHA_TEST)
-    {
+        break;
+    case CAPS_ALPHA_TEST:
         alphaTest = true;
-    }
-    else if (cap == CAPS_DEPTH_TEST)
-    {
+        break;
+    case CAPS_DEPTH_TEST:
         depthTest = true;
-    }
-    else if (cap == CAPS_FOG)
-    {
+        break;
+    case CAPS_FOG:
         fog = true;
+        break;
     }
 }
 
 void SoftwareGraphics::Disable(Capabilities cap)
 {
-    if (cap == CAPS_BLEND)
+    switch (cap)
     {
+    case CAPS_BLEND:
         blend = false;
-    }
-    else if (cap == CAPS_ALPHA_TEST)
-    {
+        break;
+    case CAPS_ALPHA_TEST:
         alphaTest = false;
-    }
-    else if (cap == CAPS_DEPTH_TEST)
-    {
+        break;
+    case CAPS_DEPTH_TEST:
         depthTest = false;
-    }
-    else if (cap == CAPS_FOG)
-    {
+        break;
+    case CAPS_FOG:
         fog = false;
+        break;
     }
 }
 
@@ -436,7 +434,7 @@ u32 SoftwareGraphics::Blend(u32 srcColor, u32 dstColor)
         sb = s.bytes.b * srcAlpha;
         sa = s.bytes.a * srcAlpha;
     }
-    else if (srcBlend == BLEND_ADD)
+    else if (srcBlend == BLEND_ONE)
     {
         sr = s.bytes.r;
         sg = s.bytes.g;
@@ -458,7 +456,7 @@ u32 SoftwareGraphics::Blend(u32 srcColor, u32 dstColor)
         db = d.bytes.b * invSrcAlpha;
         da = d.bytes.a * invSrcAlpha;
     }
-    else if (dstBlend == BLEND_ADD)
+    else if (dstBlend == BLEND_ONE)
     {
         dr = d.bytes.r;
         dg = d.bytes.g;
@@ -772,22 +770,14 @@ ZunColor SoftwareGraphics::SampleTexture(f32 u, f32 v)
     f32 w11 = fracU * fracV;
 
     ZunColor result;
-    result.bytes.r = (u8)(t00.bytes.r * w00 + t10.bytes.r * w10 +
-                          t01.bytes.r * w01 + t11.bytes.r * w11 + 0.5f);
-    result.bytes.g = (u8)(t00.bytes.g * w00 + t10.bytes.g * w10 +
-                          t01.bytes.g * w01 + t11.bytes.g * w11 + 0.5f);
-    result.bytes.b = (u8)(t00.bytes.b * w00 + t10.bytes.b * w10 +
-                          t01.bytes.b * w01 + t11.bytes.b * w11 + 0.5f);
-    result.bytes.a = (u8)(t00.bytes.a * w00 + t10.bytes.a * w10 +
-                          t01.bytes.a * w01 + t11.bytes.a * w11 + 0.5f);
+    result.bytes.r =
+        (u8)(t00.bytes.r * w00 + t10.bytes.r * w10 + t01.bytes.r * w01 + t11.bytes.r * w11 + 0.5f);
+    result.bytes.g =
+        (u8)(t00.bytes.g * w00 + t10.bytes.g * w10 + t01.bytes.g * w01 + t11.bytes.g * w11 + 0.5f);
+    result.bytes.b =
+        (u8)(t00.bytes.b * w00 + t10.bytes.b * w10 + t01.bytes.b * w01 + t11.bytes.b * w11 + 0.5f);
+    result.bytes.a =
+        (u8)(t00.bytes.a * w00 + t10.bytes.a * w10 + t01.bytes.a * w01 + t11.bytes.a * w11 + 0.5f);
 
     return result;
-}
-
-void SoftwareGraphics::Flush()
-{
-    if (g_AnmManager && g_AnmManager->spritesToDraw != 0)
-    {
-        g_AnmManager->Flush();
-    }
 }

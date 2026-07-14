@@ -597,7 +597,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         }
         else
         {
-            g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ADD);
+            g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ONE);
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
@@ -647,12 +647,12 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         if (!this->currentCameraMode)
         {
             g_Stage.SetupCameraStageBackground();
-            g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+            g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
         }
         else
         {
             g_Stage.UpdateCamera();
-            g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+            g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
         }
     }
     this->renderStateChangesThisFrame++;
@@ -669,7 +669,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         }
         else
         {
-            g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ADD);
+            g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ONE);
         }
     }
     if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
@@ -2068,7 +2068,7 @@ void AnmManager::DrawStringFormat(AnmVm *vm, u32 textColor, u32 outlineType, con
                            outlineType, (char *)" ", vm->sprite->cols, vm->sprite->rows);
 
     x = vm->sprite->startPixelInclusive.x + vm->sprite->widthPx * vm->sprite->cols -
-        (f32)strlen(buf) * (f32)fontWidth * vm->sprite->cols / 2.0f;
+        (f32)TextHelper::GetLogicalStringWidth(buf) * (f32)fontWidth * vm->sprite->cols / 2.0f;
 
     this->DrawTextToSprite(vm->sprite->sourceFileIndex, x, vm->sprite->startPixelInclusive.y,
                            vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth,
@@ -2096,7 +2096,7 @@ void AnmManager::DrawStringFormat2(AnmVm *vm, u32 textColor, u32 outlineType, co
                            outlineType, (char *)" ", vm->sprite->cols, vm->sprite->rows);
 
     x = (i32)(vm->sprite->startPixelInclusive.x + vm->sprite->widthPx * vm->sprite->cols / 2.0f -
-              (f32)strlen(buf) * fontWidth * vm->sprite->cols / 4.0f);
+              (f32)TextHelper::GetLogicalStringWidth(buf) * fontWidth * vm->sprite->cols / 4.0f);
 
     this->DrawTextToSprite(vm->sprite->sourceFileIndex, x, vm->sprite->startPixelInclusive.y,
                            vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth,

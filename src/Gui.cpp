@@ -1291,7 +1291,7 @@ void Gui::DrawGameScene()
     g_Supervisor.viewport.y = 0;
     g_Supervisor.viewport.width = 640;
     g_Supervisor.viewport.height = 480;
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     vm = &this->impl->vms0[12];
     if ((g_Supervisor.cfg.opts >> 12 & 1) != 0 || vm->currentInstruction ||
         g_Supervisor.renderSkipFrames != 0)
@@ -1674,7 +1674,7 @@ void Gui::DrawStageElements()
             color2 = this->bossHealthBarAlpha << 24 | ((i32)this->bossColor[j] >> 2 & 0x3f3f3fU);
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }
-        g_AnmManager->DrawNoRotation(&this->impl->vms0[11]);
+        g_AnmManager->DrawNoRotation(&this->impl->vms0[11]); // what is responsible for drawing name
         healthBarRect.left = 33.0f;
         healthBarRect.top = 19.0f;
         healthBarRect.right = healthBarRect.left + 3.0f;

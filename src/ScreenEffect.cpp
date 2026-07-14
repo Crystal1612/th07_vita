@@ -26,7 +26,7 @@ void ScreenEffect::SetViewport(u32 color)
     g_Supervisor.viewport.minZ = 0.0f;
     g_Supervisor.viewport.maxZ = 1.0f;
 
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     Clear(*(ZunColor *)&color);
 }
 
@@ -130,7 +130,7 @@ u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
     g_Supervisor.viewport.y = 0;
     g_Supervisor.viewport.width = 640;
     g_Supervisor.viewport.height = 480;
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | arg->args[0]);
     return 1;
 }

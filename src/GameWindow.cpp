@@ -15,6 +15,7 @@
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "Supervisor.hpp"
+#include "graphics/Gles.hpp"
 #include "graphics/Software.hpp"
 #include "graphics/ZunGraphics.hpp"
 
@@ -24,6 +25,7 @@ f64 g_LastFrameTime;
 u64 g_LastPerfCounter;
 
 static GfxInit g_RenderingBackends[] = {
+    GlesGraphics::Init,
     SoftwareGraphics::Init,
 };
 
@@ -88,7 +90,7 @@ RenderResult GameWindow::Render()
         g_Supervisor.viewport.y = 0;
         g_Supervisor.viewport.width = 640;
         g_Supervisor.viewport.height = 480;
-        g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+        g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
 
         chainRes = g_Chain.RunCalcChain();
         g_SoundPlayer.ProcessQueues();
@@ -105,7 +107,7 @@ RenderResult GameWindow::Render()
         this->curFrame++;
     }
 
-    if (g_Supervisor.cfg.windowed || g_Supervisor.VsyncEnabled())
+    if (g_Supervisor.VsyncEnabled())
     {
         if (this->curFrame != 0)
         {
@@ -137,7 +139,7 @@ RenderResult GameWindow::Render()
         }
     }
 
-    if (!g_Supervisor.cfg.windowed && !g_Supervisor.VsyncEnabled())
+    if (!g_Supervisor.VsyncEnabled())
     {
         if ((i32)g_Supervisor.cfg.frameskipConfig >= (i32)this->curFrame)
         {
@@ -156,12 +158,6 @@ RenderResult GameWindow::Render()
 
 ZunResult GameWindow::InitInterface()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        g_GameErrorContext.Fatal("Direct3D オブジェクトは何故か作成出来なかった\n");
-        return ZUN_ERROR;
-    }
-
     for (auto gfxInit : g_RenderingBackends)
     {
         g_Supervisor.gfxDevice = gfxInit();
@@ -179,7 +175,13 @@ ZunResult GameWindow::InitInterface()
 
 ZunResult GameWindow::CreateGameWindow()
 {
-    u32 flags = SDL_WINDOW_SHOWN;
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        g_GameErrorContext.Fatal("Direct3D オブジェクトは何故か作成出来なかった\n");
+        return ZUN_ERROR;
+    }
+
+    u32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
     if (!g_Supervisor.cfg.windowed)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
@@ -188,6 +190,10 @@ ZunResult GameWindow::CreateGameWindow()
     g_GameWindow.isAppActive = 1;
     g_GameWindow.isAppInactive = 0;
     g_LastPerfCounter = SDL_GetPerformanceCounter();
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
     g_GameWindow.window =
         SDL_CreateWindow("東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
@@ -242,7 +248,7 @@ ZunResult GameWindow::InitRendering()
     g_Supervisor.viewport.height = 480;
     g_Supervisor.viewport.minZ = 0.0f;
     g_Supervisor.viewport.maxZ = 1.0f;
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
 
     ResetRenderState();
     ScreenEffect::SetViewport(0xff000000);

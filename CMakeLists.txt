@@ -9,6 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_image REQUIRED)
+find_package(OpenGL COMPONENTS GLES3 REQUIRED)
 
 set(SOURCES
     src/AnmManager.cpp
@@ -42,6 +43,7 @@ set(SOURCES
     src/Supervisor.cpp
     src/TextHelper.cpp
     src/main.cpp
+    src/graphics/Gles.cpp
     src/graphics/Software.cpp
     src/pbg4/Lzss.cpp
     src/pbg4/Pbg4Archive.cpp
@@ -53,4 +55,4 @@ add_executable(th07 ${SOURCES})
 
 target_include_directories(th07 PRIVATE src src/pbg4)
 
-target_link_libraries(th07 PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image)
+target_link_libraries(th07 PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image OpenGL::GLES3)

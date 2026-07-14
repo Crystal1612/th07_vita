@@ -498,12 +498,12 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
         viewport.y = 16;
         viewport.width = 384;
         viewport.height = 448;
-        g_Supervisor.gfxDevice->SetViewport(&viewport);
+        g_Supervisor.gfxDevice->SetViewport(viewport);
         g_Supervisor.gfxDevice->SetClearColor({0xff000000});
         g_Supervisor.gfxDevice->Clear(CLEAR_COLOR_BUFFER);
         arg->clearBackground = 0;
     }
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     if (arg->color2.bytes.a > 0)
     {
         g_AnmManager->SetColorWithMulEnabled(arg->color2.color);
@@ -614,7 +614,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     }
     AnmManager::SetCameraModeStatic(g_AnmManager, 0);
     arg->SetupCameraStageBackground();
-    g_Supervisor.gfxDevice->SetViewport(&g_Supervisor.viewport);
+    g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     g_Supervisor.gfxDevice->SetFogRange(1000.0f, 2000.0f);
     if (!arg->isDarkening)
     {
