@@ -64,7 +64,8 @@ class GlesGraphics : public ZunGraphics
   private:
     SDL_GLContext ctx;
     u32 shaderProgram;
-    u32 vao, vbo;
+    u32 vaos[3];
+    u32 vbo;
     u8 alphaRef = 0;
     TextureArg texArg = TEX_ARG_DIFFUSE;
     ZunColor textureFactor = {0xFFFFFFFF};
