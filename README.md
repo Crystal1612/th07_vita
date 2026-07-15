@@ -6,6 +6,8 @@ A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfe
 
 The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect byte accuracy is an eventual goal.
 
+This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead.
+
 ## Building
 
 This project requires the original th07.exe 1.00b executable for extracting the icon. Copy it to the resources directory of the repository.
