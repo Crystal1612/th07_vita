@@ -64,7 +64,6 @@ struct ZunImageInfo
     u32 format;
 };
 
-#pragma warning(disable : 4200)
 struct ZunImageInfoEmbedded
 {
     i16 magic;
@@ -76,20 +75,15 @@ struct ZunImageInfoEmbedded
     i32 unused_c;
     u8 data[];
 };
+static_assert(sizeof(ZunImageInfoEmbedded) == 0x10);
 
-struct AnmRawScript
-{
-    u32 id;
-    AnmRawInstr *first;
-};
-
-#pragma pack(push, 4)
 struct AnmRawSprite
 {
     i32 id;
     Float2 offset;
     Float2 size;
 };
+static_assert(sizeof(AnmRawSprite) == 0x14);
 
 struct AnmRawEntry
 {
@@ -113,7 +107,7 @@ struct AnmRawEntry
     i32 unused_3c;
     i32 dataOffsets[];
 };
-#pragma pack(pop)
+static_assert(sizeof(AnmRawEntry) == 0x40);
 
 struct AnmEntry
 {

@@ -55,6 +55,7 @@ struct ThWaveFormat
     u16 wBitsPerSample;
     u16 cbSize;
 };
+static_assert(sizeof(ThWaveFormat) == 0x14);
 
 struct ThBgmFormat
 {
@@ -64,8 +65,8 @@ struct ThBgmFormat
     i32 introLength;
     i32 totalLength;
     ThWaveFormat format;
-    // pad 2
 };
+static_assert(sizeof(ThBgmFormat) == 0x34);
 
 struct SoundBufferIdxVolume
 {

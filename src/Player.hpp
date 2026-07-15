@@ -382,7 +382,6 @@ struct ShtData
     ShtEntry *entries;
 };
 
-#pragma pack(push, 4)
 struct ShtRawEntry
 {
     i16 fireInterval;
@@ -401,12 +400,14 @@ struct ShtRawEntry
     u32 drawCallback;
     u32 hitCallback;
 };
+static_assert(sizeof(ShtRawEntry) == 0x34);
 
 struct ShtRawLevel
 {
     u32 entryOffset;
     i32 requiredPower;
 };
+static_assert(sizeof(ShtRawLevel) == 0x8);
 
 struct ShtRawData
 {
@@ -426,4 +427,4 @@ struct ShtRawData
     f32 speedDiagonalFocus;
     ShtRawLevel levels[];
 };
-#pragma pack(pop)
+static_assert(sizeof(ShtRawData) == 0x34);

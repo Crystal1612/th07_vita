@@ -335,6 +335,11 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
 
 i32 TextHelper::GetLogicalStringWidth(const char *str)
 {
+    if (!IsUtf8(str))
+    {
+        return strlen(str);
+    }
+
     i32 width = 0;
     while (*str)
     {

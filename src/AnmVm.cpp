@@ -14,7 +14,7 @@ i32 ZunTimer::NextTick()
 
 void AnmVm::Initialize()
 {
-    memset(this, 0, offsetof(AnmVm, pos));
+    memset(this, 0, (u8 *)&this->pos - (u8 *)this);
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
     this->color.color = 0xffffffff;

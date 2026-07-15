@@ -14,20 +14,6 @@ extern u16 g_LastFrameGameInput;
 extern u16 g_IsEighthFrameOfHeldInput;
 extern u16 g_NumOfFramesInputsWereHeld;
 
-struct ControllerMapping
-{
-    i16 shootButton;
-    i16 bombButton;
-    i16 focusButton;
-    i16 menuButton;
-    i16 upButton;
-    i16 downButton;
-    i16 leftButton;
-    i16 rightButton;
-    i16 skipButton;
-};
-extern ControllerMapping g_ControllerMapping;
-
 typedef enum MusicMode
 {
     MUSIC_OFF = 0,
@@ -52,10 +38,25 @@ typedef enum EffectQuality
     QUALITY_BEAUTIFUL = 2
 } EffectQuality;
 
+struct ControllerMapping
+{
+    i16 shootButton;
+    i16 bombButton;
+    i16 focusButton;
+    i16 menuButton;
+    i16 upButton;
+    i16 downButton;
+    i16 leftButton;
+    i16 rightButton;
+    i16 skipButton;
+};
+static_assert(sizeof(ControllerMapping) == 0x12);
+extern ControllerMapping g_ControllerMapping;
+
 struct GameConfiguration
 {
     ControllerMapping controllerMapping;
-    // pad 2
+    u8 pad[2];
     i32 version;
     i16 padAxisX;
     i16 padAxisY;
@@ -73,6 +74,7 @@ struct GameConfiguration
     u8 unused_27[13];
     u32 opts;
 };
+static_assert(sizeof(GameConfiguration) == 0x38);
 
 struct Supervisor
 {

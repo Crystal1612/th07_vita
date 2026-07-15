@@ -19,7 +19,6 @@
 #define LSNM_MAGIC 'MNSL'
 #define VRSM_MAGIC 'MSRV'
 
-#pragma pack(push, 4)
 struct Th7k
 {
     u32 magic;
@@ -27,11 +26,13 @@ struct Th7k
     u16 th7kLen2;
     u8 version;
     u8 isPlayerScore;
-    // pad 2
+    u8 pad[2];
 };
+static_assert(sizeof(Th7k) == 0xc);
 
-struct Catk : Th7k
+struct Catk
 {
+    Th7k base;
     u32 highScorePerShot[7];
     u16 idx;
     u8 nameCsum;
@@ -39,9 +40,11 @@ struct Catk : Th7k
     u16 numAttemptsPerShot[7];
     u16 numSuccessesPerShot[7];
 };
+static_assert(sizeof(Catk) == 0x78);
 
-struct Hscr : Th7k
+struct Hscr
 {
+    Th7k base;
     u32 score;
     f32 slowRatePercent;
     u8 character;
@@ -50,26 +53,31 @@ struct Hscr : Th7k
     char name[9];
     char date[6];
     i8 numRetries;
-    // pad 1
+    u8 pad;
 };
+static_assert(sizeof(Hscr) == 0x28);
 
-struct Clrd : Th7k
+struct Clrd
 {
+    Th7k base;
     u8 difficultyClearedWithRetries[6];
     u8 difficultyClearedWithoutRetries[6];
     u8 characterShotType;
-    // pad 3
+    u8 pad[3];
 };
+static_assert(sizeof(Clrd) == 0x1c);
 
-struct Pscr : Th7k
+struct Pscr
 {
+    Th7k base;
     i32 playCount;
     i32 score;
     u8 character;
     u8 difficulty;
     u8 stage;
-    // pad 1
+    u8 pad;
 };
+static_assert(sizeof(Pscr) == 0x18);
 
 struct PlstPlayCounts
 {
@@ -80,9 +88,11 @@ struct PlstPlayCounts
     u32 retryCount;
     u32 extraClearCount;
 };
+static_assert(sizeof(PlstPlayCounts) == 0x2c);
 
-struct Plst : Th7k
+struct Plst
 {
+    Th7k base;
     u32 totalHours;
     u32 totalMinutes;
     u32 totalSeconds;
@@ -93,18 +103,23 @@ struct Plst : Th7k
     u32 gameMilliseconds;
     PlstPlayCounts playDataByDifficulty[7]; // 7 is Total
 };
+static_assert(sizeof(Plst) == 0x160);
 
-struct Lsnm : Th7k
+struct Lsnm
 {
+    Th7k base;
     char name[12];
 };
+static_assert(sizeof(Lsnm) == 0x18);
 
-struct Vrsm : Th7k
+struct Vrsm
 {
+    Th7k base;
     char versionStr[6];
     i32 exeSize;
     i32 exeChecksum;
 };
+static_assert(sizeof(Vrsm) == 0x1c);
 
 struct ScoreDatRaw
 {
@@ -119,7 +134,7 @@ struct ScoreDatRaw
     u32 dstLen;
     i32 srcLen;
 };
-#pragma pack(pop)
+static_assert(sizeof(ScoreDatRaw) == 0x1c);
 
 struct ScoreListNode
 {
@@ -211,7 +226,7 @@ struct ResultScreen
     i32 unused_4c;
     i32 totalPlayCountPerCharacter[7];
     u8 lastTotalSeconds;
-    // pad 3
+    u8 pad[3];
     AnmVm vms[41];
     AnmVm spellcardListVms[15];
     AnmVm leftArrowVm;

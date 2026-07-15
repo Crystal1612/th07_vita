@@ -9,6 +9,7 @@ struct ReplayDataInput
     u16 frameNum;
     u16 inputKey;
 };
+static_assert(sizeof(ReplayDataInput) == 0x4);
 
 struct StageReplayData
 {
@@ -30,23 +31,24 @@ struct StageReplayData
     i32 unused_28;
     ReplayDataInput replayInputs[115189];
 };
+static_assert(sizeof(StageReplayData) == 0x70800);
 
-#pragma pack(push, 4)
 struct ReplayHeader
 {
     u32 magic;
     u16 version;
-    // pad 2
+    u8 pad1[2];
     i32 checksum;
     u8 rngValue1;
     u8 key;
-    // pad 2
+    u8 pad2[2];
     i32 replaySize;
     i32 compressedSize;
     i32 sizeWithoutHeader;
     u32 stageReplayDataOffsets[7];
     u32 stageEndDataOffsets[7];
 };
+static_assert(sizeof(ReplayHeader) == 0x54);
 
 struct ReplayData
 {
@@ -68,9 +70,8 @@ struct ReplayData
     i32 exeChecksum;
     char replayStr[4];
     i16 versionChar2;
-    // pad 3
 };
-#pragma pack(pop)
+static_assert(sizeof(ReplayData) == 0x94);
 
 struct ReplayFile
 {

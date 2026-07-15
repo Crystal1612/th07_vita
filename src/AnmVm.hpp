@@ -111,7 +111,6 @@ struct AnmLoadedSprite
     i32 spriteId;
 };
 
-#pragma warning(disable : 4200)
 struct AnmRawInstr
 {
     i16 opcode;
@@ -120,6 +119,7 @@ struct AnmRawInstr
     u16 flags;
     AnyArg args[];
 };
+static_assert(sizeof(AnmRawInstr) == 0x8);
 
 struct AnmVmBase
 {

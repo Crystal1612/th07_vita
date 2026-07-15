@@ -570,9 +570,9 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     }
     scoreDat = ResultScreen::OpenScore("score.dat");
     memset(&g_GameManager.plst, 0, sizeof(g_GameManager.plst));
-    g_GameManager.plst.th7kLen2 = g_GameManager.plst.th7kLen = sizeof(Plst);
-    g_GameManager.plst.magic = PLST_MAGIC;
-    g_GameManager.plst.version = 1;
+    g_GameManager.plst.base.th7kLen2 = g_GameManager.plst.base.th7kLen = sizeof(Plst);
+    g_GameManager.plst.base.magic = PLST_MAGIC;
+    g_GameManager.plst.base.version = 1;
     ResultScreen::ParsePlst(scoreDat, &g_GameManager.plst);
     ResultScreen::ReleaseScoreDat(scoreDat);
     g_Supervisor.midiTimer = new DummyMidiTimer;

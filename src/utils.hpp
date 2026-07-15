@@ -14,6 +14,7 @@ union AnyArg {
     i8 c[4];
     u8 b[4];
 };
+static_assert(sizeof(AnyArg) == 4);
 
 namespace utils
 {

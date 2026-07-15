@@ -13,7 +13,6 @@ struct StageAnms
 };
 extern StageAnms g_EnemyAnmStageFiles[9];
 
-#pragma pack(push, 4)
 struct StdRawHeader
 {
     i16 objectsCount;
@@ -25,6 +24,7 @@ struct StdRawHeader
     char bgmNames[4][128];
     char bgmPaths[4][128];
 };
+static_assert(sizeof(StdRawHeader) == 0x490);
 
 struct StdRawQuadBasic
 {
@@ -35,6 +35,7 @@ struct StdRawQuadBasic
     ZunVec3 pos;
     Float2 size;
 };
+static_assert(sizeof(StdRawQuadBasic) == 0x1c);
 
 struct StdRawObject
 {
@@ -45,6 +46,7 @@ struct StdRawObject
     ZunVec3 size;
     StdRawQuadBasic firstQuad;
 };
+static_assert(sizeof(StdRawObject) == 0x38);
 
 struct StdRawInstance
 {
@@ -52,6 +54,7 @@ struct StdRawInstance
     i16 field1_0x2;
     ZunVec3 pos;
 };
+static_assert(sizeof(StdRawInstance) == 0x10);
 
 struct StdRawInstrArgs
 {
@@ -62,6 +65,7 @@ struct StdRawInstrArgs
         return (ZunVec3 *)args;
     }
 };
+static_assert(sizeof(StdRawInstrArgs) == 0xc);
 
 struct StdRawInstr
 {
@@ -70,7 +74,7 @@ struct StdRawInstr
     i16 size;
     StdRawInstrArgs args;
 };
-#pragma pack(pop)
+static_assert(sizeof(StdRawInstr) == 0x14);
 
 struct StageCameraSky
 {

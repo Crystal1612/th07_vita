@@ -90,8 +90,6 @@ typedef enum EclVarId
 typedef void (*EclExInstr)(struct Enemy *, struct EclRawInstr *);
 typedef void (*EclInterpFn)(struct Enemy *, struct EclInterp *, f32 t);
 
-#pragma pack(push, 4)
-#pragma warning(disable : 4200)
 struct EclRawHeader
 {
     i16 subCount;
@@ -99,8 +97,8 @@ struct EclRawHeader
     u32 timelineOffsets[16];
     u32 subTableOffsets[];
 };
+static_assert(sizeof(EclRawHeader) == 0x44);
 
-#pragma warning(disable : 4200)
 struct EclRawInstr
 {
     u32 time;
@@ -116,6 +114,7 @@ struct EclRawInstr
         return this->args[1];
     }
 };
+static_assert(sizeof(EclRawInstr) == 0xc);
 
 struct EclTimelineInstrArgs
 {
@@ -126,6 +125,7 @@ struct EclTimelineInstrArgs
         return (ZunVec3 *)&this->args;
     }
 };
+static_assert(sizeof(EclTimelineInstrArgs) == 0x18);
 
 struct EclTimelineInstr
 {
@@ -135,7 +135,7 @@ struct EclTimelineInstr
     i16 size;
     EclTimelineInstrArgs args;
 };
-#pragma pack(pop)
+static_assert(sizeof(EclTimelineInstr) == 0x20);
 
 struct EclTimeline
 {

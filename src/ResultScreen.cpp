@@ -223,7 +223,7 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node, u32 char
     cursor -= sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedHscr->magic == HSCR_MAGIC && parsedHscr->version == 1 &&
+        if (parsedHscr->base.magic == HSCR_MAGIC && parsedHscr->base.version == 1 &&
             parsedHscr->character == character && parsedHscr->difficulty == difficulty)
         {
             if (node)
@@ -235,8 +235,8 @@ u32 ResultScreen::GetHighScore(ScoreDat *scoreDat, ScoreListNode *node, u32 char
                 LinkScore(sd->scores, parsedHscr);
             }
         }
-        cursor -= parsedHscr->th7kLen;
-        parsedHscr = (Hscr *)((u8 *)parsedHscr + parsedHscr->th7kLen);
+        cursor -= parsedHscr->base.th7kLen;
+        parsedHscr = (Hscr *)((u8 *)parsedHscr + parsedHscr->base.th7kLen);
     }
     if (numRetries != 0)
     {
@@ -262,7 +262,7 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
     cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedCatk->magic == CATK_MAGIC && parsedCatk->version == 1)
+        if (parsedCatk->base.magic == CATK_MAGIC && parsedCatk->base.version == 1)
         {
             if (parsedCatk->idx >= 141)
             {
@@ -270,8 +270,8 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
             }
             outCatk[parsedCatk->idx] = *parsedCatk;
         }
-        cursor -= parsedCatk->th7kLen;
-        parsedCatk = (Catk *)((u8 *)parsedCatk + parsedCatk->th7kLen);
+        cursor -= parsedCatk->base.th7kLen;
+        parsedCatk = (Catk *)((u8 *)parsedCatk + parsedCatk->base.th7kLen);
     }
     return ZUN_SUCCESS;
 }
@@ -286,13 +286,13 @@ i32 ResultScreen::ParseLsnm(ScoreDat *scoreDat, Lsnm *outLsnm)
     cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedLsnm->magic == LSNM_MAGIC && parsedLsnm->version == 1)
+        if (parsedLsnm->base.magic == LSNM_MAGIC && parsedLsnm->base.version == 1)
         {
             *outLsnm = *parsedLsnm;
             return 1;
         }
-        cursor -= parsedLsnm->th7kLen;
-        parsedLsnm = (Lsnm *)((u8 *)parsedLsnm + parsedLsnm->th7kLen);
+        cursor -= parsedLsnm->base.th7kLen;
+        parsedLsnm = (Lsnm *)((u8 *)parsedLsnm + parsedLsnm->base.th7kLen);
     }
     return 0;
 }
@@ -313,10 +313,10 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
     for (i = 0; i < 6; i++)
     {
         memset(outClrd + i, 0, sizeof(Clrd));
-        outClrd[i].magic = CLRD_MAGIC;
-        outClrd[i].th7kLen2 = sizeof(Clrd);
-        outClrd[i].th7kLen = sizeof(Clrd);
-        outClrd[i].version = 1;
+        outClrd[i].base.magic = CLRD_MAGIC;
+        outClrd[i].base.th7kLen2 = sizeof(Clrd);
+        outClrd[i].base.th7kLen = sizeof(Clrd);
+        outClrd[i].base.version = 1;
         outClrd[i].characterShotType = (u8)i;
         for (j = 0; j < 5; j++)
         {
@@ -328,7 +328,7 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
     cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedClrd->magic == CLRD_MAGIC && parsedClrd->version == 1)
+        if (parsedClrd->base.magic == CLRD_MAGIC && parsedClrd->base.version == 1)
         {
             if (parsedClrd->characterShotType >= 6)
             {
@@ -336,8 +336,8 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
             }
             outClrd[parsedClrd->characterShotType] = *parsedClrd;
         }
-        cursor -= parsedClrd->th7kLen;
-        parsedClrd = (Clrd *)((u8 *)parsedClrd + parsedClrd->th7kLen);
+        cursor -= parsedClrd->base.th7kLen;
+        parsedClrd = (Clrd *)((u8 *)parsedClrd + parsedClrd->base.th7kLen);
     }
     return ZUN_SUCCESS;
 }
@@ -365,10 +365,10 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
             for (k = 0; k < 4; k++, pscr++)
             {
                 memset(pscr, 0, sizeof(Pscr));
-                pscr->magic = PSCR_MAGIC;
-                pscr->th7kLen2 = sizeof(Pscr);
-                pscr->th7kLen = sizeof(Pscr);
-                pscr->version = 1;
+                pscr->base.magic = PSCR_MAGIC;
+                pscr->base.th7kLen2 = sizeof(Pscr);
+                pscr->base.th7kLen = sizeof(Pscr);
+                pscr->base.version = 1;
                 pscr->character = i;
                 pscr->difficulty = k;
                 pscr->stage = j;
@@ -380,7 +380,7 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
     cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedPscr->magic == PSCR_MAGIC && parsedPscr->version == 1)
+        if (parsedPscr->base.magic == PSCR_MAGIC && parsedPscr->base.version == 1)
         {
             pscr = parsedPscr;
             if (pscr->character >= 6 || (pscr->difficulty >= 5 || pscr->stage >= 7))
@@ -389,8 +389,8 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
             }
             outPscr[pscr->character * 6 * 4 + pscr->stage * 4 + pscr->difficulty] = *pscr;
         }
-        cursor -= parsedPscr->th7kLen;
-        parsedPscr = (Pscr *)((u8 *)parsedPscr + parsedPscr->th7kLen);
+        cursor -= parsedPscr->base.th7kLen;
+        parsedPscr = (Pscr *)((u8 *)parsedPscr + parsedPscr->base.th7kLen);
     }
     return ZUN_SUCCESS;
 }
@@ -405,12 +405,12 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
     cursor = sd->raw.fileLength - sd->raw.dataOffset;
     while (cursor > 0)
     {
-        if (parsedPlst->magic == PLST_MAGIC && parsedPlst->version == 1)
+        if (parsedPlst->base.magic == PLST_MAGIC && parsedPlst->base.version == 1)
         {
             *outPlst = *parsedPlst;
         }
-        cursor -= parsedPlst->th7kLen;
-        parsedPlst = (Plst *)((u8 *)parsedPlst + parsedPlst->th7kLen);
+        cursor -= parsedPlst->base.th7kLen;
+        parsedPlst = (Plst *)((u8 *)parsedPlst + parsedPlst->base.th7kLen);
     }
     return ZUN_SUCCESS;
 }
@@ -472,14 +472,14 @@ void ResultScreen::WriteScore()
             {
                 if (currentCharacter)
                 {
-                    if (currentCharacter->data->magic == HSCR_MAGIC)
+                    if (currentCharacter->data->base.magic == HSCR_MAGIC)
                     {
                         currentCharacter->data->character = character;
                         currentCharacter->data->difficulty = difficulty;
-                        currentCharacter->data->th7kLen2 = sizeof(Hscr);
-                        currentCharacter->data->th7kLen = sizeof(Hscr);
-                        currentCharacter->data->version = 1;
-                        currentCharacter->data->isPlayerScore = 0;
+                        currentCharacter->data->base.th7kLen2 = sizeof(Hscr);
+                        currentCharacter->data->base.th7kLen = sizeof(Hscr);
+                        currentCharacter->data->base.version = 1;
+                        currentCharacter->data->base.isPlayerScore = 0;
 
                         memcpy(fileBuffer + sizeOfFile, currentCharacter->data, sizeof(Hscr));
                         sizeOfFile += sizeof(Hscr);
@@ -505,10 +505,10 @@ void ResultScreen::WriteScore()
     clrd = g_GameManager.clrd;
     for (difficulty = 0; difficulty < 6; difficulty++, clrd++)
     {
-        clrd->magic = CLRD_MAGIC;
-        clrd->th7kLen2 = sizeof(Clrd);
-        clrd->th7kLen = sizeof(Clrd);
-        clrd->version = 1;
+        clrd->base.magic = CLRD_MAGIC;
+        clrd->base.th7kLen2 = sizeof(Clrd);
+        clrd->base.th7kLen = sizeof(Clrd);
+        clrd->base.version = 1;
 
         memcpy(fileBuffer + sizeOfFile, clrd, sizeof(Clrd));
         sizeOfFile += sizeof(Clrd);
@@ -517,12 +517,12 @@ void ResultScreen::WriteScore()
     catk = g_GameManager.catk;
     for (difficulty = 0; difficulty < 141; difficulty++, catk++)
     {
-        if (catk->magic == CATK_MAGIC)
+        if (catk->base.magic == CATK_MAGIC)
         {
             catk->idx = difficulty;
-            catk->th7kLen2 = sizeof(Catk);
-            catk->th7kLen = sizeof(Catk);
-            catk->version = 1;
+            catk->base.th7kLen2 = sizeof(Catk);
+            catk->base.th7kLen = sizeof(Catk);
+            catk->base.version = 1;
 
             memcpy(fileBuffer + sizeOfFile, catk, sizeof(Catk));
             sizeOfFile += sizeof(Catk);
@@ -552,11 +552,11 @@ void ResultScreen::WriteScore()
     memcpy(fileBuffer + sizeOfFile, &g_GameManager.plst, sizeof(Plst));
     sizeOfFile += sizeof(Plst);
 
-    vrsm.magic = VRSM_MAGIC;
-    vrsm.version = 1;
-    vrsm.th7kLen2 = sizeof(Vrsm);
-    vrsm.th7kLen = sizeof(Vrsm);
-    vrsm.isPlayerScore = 0;
+    vrsm.base.magic = VRSM_MAGIC;
+    vrsm.base.version = 1;
+    vrsm.base.th7kLen2 = sizeof(Vrsm);
+    vrsm.base.th7kLen = sizeof(Vrsm);
+    vrsm.base.isPlayerScore = 0;
     strcpy(vrsm.versionStr, "0100b");
     vrsm.exeSize = g_Supervisor.exeSize;
     vrsm.exeChecksum = g_Supervisor.exeChecksum;
@@ -580,10 +580,12 @@ void ResultScreen::WriteScore()
     sd->raw.xorseed[1] = g_Rng.GetRandomU16InRange(256);
     sd->raw.unused_6 = g_Rng.GetRandomU16InRange(256);
     sd->raw.magic = 11;
+
     for (remainingSize = 4; remainingSize < (i32)sizeOfFile; remainingSize++)
     {
         sd->raw.csum += fileBuffer[remainingSize];
     }
+
     xorValue = 0;
     originalByte = 0;
 
@@ -1084,8 +1086,8 @@ ZunResult ResultScreen::HandleResultKeyboard()
         this->curScore.difficulty = (u8)this->diffPlayed;
         this->curScore.score = g_GameManager.globals->score;
         this->curScore.numRetries = g_GameManager.globals->numRetries;
-        this->curScore.version = 1;
-        memcpy(&this->curScore.magic, "HSCR", 4);
+        this->curScore.base.version = 1;
+        memcpy(&this->curScore.base.magic, "HSCR", 4);
         if (!g_GameManager.finished)
         {
             this->curScore.stage = (u8)g_GameManager.currentStage;
@@ -1094,7 +1096,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
         {
             this->curScore.stage = 99;
         }
-        this->curScore.isPlayerScore = 1;
+        this->curScore.base.isPlayerScore = 1;
         strcpy(this->curScore.name, this->lsnmHeader.name);
         GetDate(this->curScore.date);
         slowRateFactor =
@@ -2089,7 +2091,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             {
                 if (arg->resultScreenState == 10)
                 {
-                    if (node->data->isPlayerScore)
+                    if (node->data->base.isPlayerScore)
                     {
                         g_AsciiManager.color = 0xfff0f0ff;
                     }
@@ -2104,7 +2106,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 }
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%2d", i + 1);
                 pos.x += 48.0f;
-                if (arg->resultScreenState == 10 && node->data->isPlayerScore)
+                if (arg->resultScreenState == 10 && node->data->base.isPlayerScore)
                 {
                     memset(name, ' ', 8);
                     name[8] = '\0';
@@ -2373,13 +2375,12 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             {
                 arg->defaultScores[i][j][k].score = 100000 - k * 10000;
                 arg->defaultScores[i][j][k].slowRatePercent = 0.0f;
-                memcpy(&arg->defaultScores[i][j][k].magic, "DMYS", 4);
-                arg->defaultScores[i][j][k].difficulty = (u8)i;
-                arg->defaultScores[i][j][k].version = 1;
-                arg->defaultScores[i][j][k].th7kLen2 = sizeof(Hscr);
-                arg->defaultScores[i][j][k].th7kLen = sizeof(Hscr);
+                memcpy(&arg->defaultScores[i][j][k].base.magic, "DMYS", 4);
+                arg->defaultScores[i][j][k].base.version = 1;
+                arg->defaultScores[i][j][k].base.th7kLen2 = sizeof(Hscr);
+                arg->defaultScores[i][j][k].base.th7kLen = sizeof(Hscr);
                 arg->defaultScores[i][j][k].stage = 1;
-                arg->defaultScores[i][j][k].isPlayerScore = 0;
+                arg->defaultScores[i][j][k].base.isPlayerScore = 0;
                 arg->defaultScores[i][j][k].numRetries = 0;
                 arg->LinkScoreEx(arg->defaultScores[i][j] + k, i, j);
                 strcpy(arg->defaultScores[i][j][k].name, "--------");
@@ -2425,10 +2426,10 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             GetHighScore(arg->scoreDat, arg->scoreLists[i] + j, j, i, NULL);
         }
     }
-    arg->lsnmHeader.magic = LSNM_MAGIC;
-    arg->lsnmHeader.version = 1;
-    arg->lsnmHeader.th7kLen2 = sizeof(Lsnm);
-    arg->lsnmHeader.th7kLen = sizeof(Lsnm);
+    arg->lsnmHeader.base.magic = LSNM_MAGIC;
+    arg->lsnmHeader.base.version = 1;
+    arg->lsnmHeader.base.th7kLen2 = sizeof(Lsnm);
+    arg->lsnmHeader.base.th7kLen = sizeof(Lsnm);
     strcpy(arg->lsnmHeader.name, "        ");
     arg->isClearingReplayName = ParseLsnm(arg->scoreDat, &arg->lsnmHeader);
     if (arg->resultScreenState != 10 && arg->resultScreenState != 18)
@@ -2459,7 +2460,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         arg->totalPlayCountPerCharacter[i] = 0;
         for (catkIdx = 0; catkIdx < 141; catkIdx++, catk++)
         {
-            if (catk->magic != CATK_MAGIC || catk->version != 1)
+            if (catk->base.magic != CATK_MAGIC || catk->base.version != 1)
             {
                 continue;
             }

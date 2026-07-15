@@ -420,10 +420,10 @@ ZunResult ResultScreen::ParseScores()
     memset(g_GameManager.catk, 0, sizeof(g_GameManager.catk));
     for (local_c = 0; local_c < 141; local_c++, local_8++)
     {
-        local_8->magic = 0x4b544143;
-        local_8->th7kLen2 = sizeof(Catk);
-        local_8->th7kLen = sizeof(Catk);
-        local_8->version = 1;
+        local_8->base.magic = 0x4b544143;
+        local_8->base.th7kLen2 = sizeof(Catk);
+        local_8->base.th7kLen = sizeof(Catk);
+        local_8->base.version = 1;
         local_8->idx = (i16)local_c;
         for (local_14 = 0; local_14 < 7; local_14++)
         {
