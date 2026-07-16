@@ -158,7 +158,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     checksum = 0;
     xorValue = 0;
     i = 0;
-    idx = scoreData->xorseed + 1;
+    idx = (u8 *)scoreData + 1;
     while (remainingData > 0)
     {
         xorValue += idx[0];
@@ -651,7 +651,7 @@ void ResultScreen::WriteScore()
     sd->magic = 11;
     for (remainingSize = 4; remainingSize < (i32)sizeOfFile; remainingSize++)
     {
-        sd->csum += ((ScoreDat *)fileBuffer)->xorseed[remainingSize];
+        sd->csum += fileBuffer[remainingSize];
     }
     xorValue = 0;
     originalByte = 0;
