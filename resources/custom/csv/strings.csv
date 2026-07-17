@@ -1,0 +1,114 @@
+address|text|type|size
+0040812c|%d|string|3
+00408130|thbgm.dat|string|10
+0040813c|th07.cfg|string|9
+00408148|rb|string|3
+0040814c|環境を書き換えました|string|21
+00408164|確認|string|5
+0040816c|ファイルが吐き出せません\n書き込み禁止属性かついていませんか？|string|62
+004081ac|error|string|6
+004081b4|wb|string|3
+004081b8|右 |string|4
+004081bc|左 |string|4
+004081c0|下 |string|4
+004081c4|上 |string|4
+00408254|(null)|string|7
+0040825c|CorExitProcess|string|15
+0040826c|mscoree.dll|string|12
+00408278|Microsoft Visual C++ Runtime Library|string|37
+004082a0|Program: |string|10
+004082b4|<program name unknown>|string|23
+004082d0|A buffer overrun has been detected which has corrupted the program\'s\ninternal state.  The program cannot safely continue execution and must\nnow be terminated.\n|string|160
+00408370|Buffer overrun detected!|string|25
+00408390|A security error of unknown cause has been detected which has\ncorrupted the program\'s internal state.  The program cannot safely\ncontinue execution and must now be terminated.\n|string|177
+00408444|Unknown security failure detected!|string|35
+00408474|runtime error |string|16
+00408488|TLOSS error\r\n|string|16
+00408498|SING error\r\n|string|16
+004084a8|DOMAIN error\r\n|string|16
+004084b8|R6028\r\n- unable to initialize heap\r\n|string|40
+004084e0|R6027\r\n- not enough space for lowio initialization\r\n|string|56
+00408518|R6026\r\n- not enough space for stdio initialization\r\n|string|56
+00408550|R6025\r\n- pure virtual function call\r\n|string|40
+00408578|R6024\r\n- not enough space for _onexit/atexit table\r\n|string|56
+004085b0|R6019\r\n- unable to open console device\r\n|string|44
+004085dc|R6018\r\n- unexpected heap error\r\n|string|36
+00408600|R6017\r\n- unexpected multithread lock error\r\n|string|48
+00408630|R6016\r\n- not enough space for thread data\r\n|string|44
+00408660|\r\nThis application has requested the Runtime to terminate it in an unusual way.\nPlease contact the application\'s support team for more information.\r\n|string|152
+004086f8|R6009\r\n- not enough space for environment\r\n|string|44
+00408724|R6008\r\n- not enough space for arguments\r\n|string|44
+00408750|R6002\r\n- floating point not loaded\r\n|string|40
+00408778|Runtime Error!\n\nProgram: |string|26
+00408bc4|GetProcessWindowStation|string|24
+00408bdc|GetUserObjectInformationA|string|26
+00408bf8|GetLastActivePopup|string|19
+00408c0c|GetActiveWindow|string|16
+00408c1c|MessageBoxA|string|12
+00408c28|user32.dll|string|11
+00408e26|SetDlgItemTextA|string|16
+00408e38|SendMessageA|string|13
+00408e48|GetDlgItem|string|11
+00408e56|SetTimer|string|9
+00408e62|MessageBoxA|string|12
+00408e70|IsDlgButtonChecked|string|19
+00408e86|EndDialog|string|10
+00408e92|KillTimer|string|10
+00408e9e|GetDlgItemTextA|string|16
+00408eb0|DialogBoxParamA|string|16
+00408ec0|USER32.dll|string|11
+00408ece|ExitProcess|string|12
+00408edc|GetModuleHandleA|string|17
+00408ef0|GetStartupInfoA|string|16
+00408f02|GetCommandLineA|string|16
+00408f14|GetVersionExA|string|14
+00408f24|GetLastError|string|13
+00408f34|ReadFile|string|9
+00408f40|HeapFree|string|9
+00408f4c|CloseHandle|string|12
+00408f5a|GetProcAddress|string|15
+00408f6c|TerminateProcess|string|17
+00408f80|GetCurrentProcess|string|18
+00408f94|SetHandleCount|string|15
+00408fa6|GetStdHandle|string|13
+00408fb6|GetFileType|string|12
+00408fc4|SetFilePointer|string|15
+00408fd6|QueryPerformanceCounter|string|24
+00408ff0|GetTickCount|string|13
+00409000|GetCurrentThreadId|string|19
+00409016|GetCurrentProcessId|string|20
+0040902c|GetSystemTimeAsFileTime|string|24
+00409046|GetModuleFileNameA|string|19
+0040905c|WriteFile|string|10
+00409068|UnhandledExceptionFilter|string|25
+00409084|FreeEnvironmentStringsA|string|24
+0040909e|GetEnvironmentStrings|string|22
+004090b6|FreeEnvironmentStringsW|string|24
+004090d0|WideCharToMultiByte|string|20
+004090e6|GetEnvironmentStringsW|string|23
+00409100|HeapDestroy|string|12
+0040910e|HeapCreate|string|11
+0040911c|VirtualFree|string|12
+0040912a|HeapAlloc|string|10
+00409136|VirtualAlloc|string|13
+00409146|HeapReAlloc|string|12
+00409154|SetStdHandle|string|13
+00409164|FlushFileBuffers|string|17
+00409178|CreateFileA|string|12
+00409186|LoadLibraryA|string|13
+00409196|GetStringTypeA|string|15
+004091a8|MultiByteToWideChar|string|20
+004091be|GetStringTypeW|string|15
+004091d0|GetACP|string|7
+004091da|GetOEMCP|string|9
+004091e6|GetCPInfo|string|10
+004091f2|HeapSize|string|9
+004091fe|SetEndOfFile|string|13
+0040920e|RtlUnwind|string|10
+0040921a|GetLocaleInfoA|string|15
+0040922c|VirtualProtect|string|15
+0040923e|GetSystemInfo|string|14
+0040924e|VirtualQuery|string|13
+0040925e|LCMapStringA|string|13
+0040926e|LCMapStringW|string|13
+0040927c|KERNEL32.dll|string|13

@@ -1,7 +1,7 @@
 targets:
   TH07:
     filename: th07.exe
-    source_root: src
+    source_root: src/th07
     hash:
       sha256: 35467eaf8dc7fc85f024f16fb2037255f151cefda33cf4867bc9122aaa2e80ca
     encoding: "shift_jis"
@@ -10,6 +10,23 @@ targets:
         - resources/csv/funcs.csv
         - resources/csv/globals.csv
         - resources/csv/strings.csv
+    ghidra:
+      ignore_types: []
+      ignore_functions: []
+      name_substitutions: []
+      allow_hash_mismatch: false
+    report:
+      ignore_functions: []
+  CUSTOM:
+    filename: custom.exe
+    source_root: src/custom
+    hash:
+      sha256: ae36be0c4ff88b5100c65ff63819442e34d60df818da5cc05fdbb61e77ae9fb7
+    encoding: "shift_jis"
+    data_sources:
+        - resources/custom/csv/funcs.csv
+        - resources/custom/csv/globals.csv
+        - resources/custom/csv/strings.csv
     ghidra:
       ignore_types: []
       ignore_functions: []

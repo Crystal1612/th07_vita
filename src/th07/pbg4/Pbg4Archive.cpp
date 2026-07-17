@@ -1,9 +1,9 @@
 #include "Pbg4Archive.hpp"
 
-#include "../dsutil.hpp"
-#include "../dxutil.hpp"
 #include "Lzss.hpp"
 #include "Pbg4File.hpp"
+#include "dsutil.hpp"
+#include "dxutil.hpp"
 
 // GLOBAL: TH07 0x004b9e68
 Pbg4Archive g_UnusedPbg4ArchiveArray[20];

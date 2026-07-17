@@ -72,7 +72,27 @@ struct GameConfiguration
     u8 slowMode;
     u8 shotSlow;
     u8 unused_27[13];
-    u32 opts;
+    union {
+        u32 opts;
+        struct
+        {
+            u32 loaded : 1;
+            u32 noVertexBuffers : 1;
+            u32 use16BitTextures : 1;
+            u32 forceBackBufferClear : 1;
+            u32 disableItemDrawAroundPlayfield : 1;
+            u32 disableGouraud : 1;
+            u32 disableZBuffer : 1;
+            u32 unused : 1;
+            u32 disableTextureBlend : 1;
+            u32 forceReferenceRender : 1;
+            u32 disableFog : 1;
+            u32 disableDinput : 1;
+            u32 redrawEveryFrame : 1;
+            u32 preloadBgm : 1;
+            u32 enableVsync : 1;
+        };
+    };
 };
 C_ASSERT(sizeof(GameConfiguration) == 0x38);
 
@@ -115,6 +135,11 @@ struct Supervisor
                                             void *param_2);
     static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
                                                void *param_2);
+
+    i32 IsClearingBackbuffer()
+    {
+        return this->cfg.forceBackBufferClear | this->cfg.disableItemDrawAroundPlayfield;
+    }
 
     i32 VsyncEnabled()
     {

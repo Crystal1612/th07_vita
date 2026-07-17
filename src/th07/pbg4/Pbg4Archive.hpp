@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../inttypes.hpp"
 #include "Pbg4File.hpp"
+#include "inttypes.hpp"
 
 struct Pbg4Entry
 {

@@ -258,7 +258,7 @@ void AsciiManager::AddString(D3DXVECTOR3 *position, const char *text)
     curString->scale.y = this->scale.y;
     curString->isGui = this->isGui;
 
-    if ((g_Supervisor.cfg.opts & 1) | (g_Supervisor.cfg.opts >> 8 & 1))
+    if (g_Supervisor.cfg.loaded | g_Supervisor.cfg.disableTextureBlend)
     {
         curString->isSelected = this->isSelected;
     }
@@ -1091,7 +1091,7 @@ void AsciiManager::DrawPopups()
     AsciiManagerPopup *popup;
 
     popup = this->popups;
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.DisableFog();
     }

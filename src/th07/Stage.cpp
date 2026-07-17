@@ -546,7 +546,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     g_AnmManager->SetZWriteDisable(255);
     g_AnmManager->ClearFrameState();
     g_AnmManager->SetCameraMode(255);
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.DisableFog();
     }
@@ -610,7 +610,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     }
     g_Supervisor.SetRenderState(D3DRS_FOGSTART, *(DWORD *)&arg->skyFog.nearPlane);
     g_Supervisor.SetRenderState(D3DRS_FOGEND, *(DWORD *)&arg->skyFog.farPlane);
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.EnableFog();
     }
@@ -640,7 +640,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
         {
             arg->RenderObjects(2);
             arg->RenderObjects(3);
-            if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+            if (!g_Supervisor.cfg.disableFog)
             {
                 g_Supervisor.DisableFog();
             }
@@ -654,7 +654,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
                 alpha = arg->ticksSinceSpellcardStarted * 255 / 60;
                 g_AnmManager->Flush();
                 g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
-                if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+                if (!g_Supervisor.cfg.disableFog)
                 {
                     g_Supervisor.SetRenderState(D3DRS_FOGENABLE, 0);
                 }
@@ -664,7 +664,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     }
     g_AnmManager->Flush();
     g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.DisableFog();
     }
@@ -1091,7 +1091,7 @@ i32 Stage::RenderObjects(i32 zLevel)
                                 {
                                     if (fogState != 0)
                                     {
-                                        if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+                                        if (!g_Supervisor.cfg.disableFog)
                                         {
                                             g_Supervisor.DisableFog();
                                         }
@@ -1103,9 +1103,9 @@ i32 Stage::RenderObjects(i32 zLevel)
                             }
                             else
                             {
-                                if ((g_Supervisor.cfg.opts >> 10 & 1) == 0 && fogState != 1)
+                                if (!g_Supervisor.cfg.disableFog && fogState != 1)
                                 {
-                                    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+                                    if (!g_Supervisor.cfg.disableFog)
                                     {
                                         g_Supervisor.EnableFog();
                                     }

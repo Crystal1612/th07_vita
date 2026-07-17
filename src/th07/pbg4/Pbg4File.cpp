@@ -1,6 +1,6 @@
 #include "Pbg4File.hpp"
 
-#include "../inttypes.hpp"
+#include "inttypes.hpp"
 
 // GLOBAL: TH07 0x00495120
 const u32 g_SeekModes[3] = {0, 1, 2};

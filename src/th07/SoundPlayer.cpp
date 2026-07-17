@@ -430,7 +430,7 @@ ZunResult SoundPlayer::PreloadBGM(i32 idx, const char *path)
         }
     }
     strcpy(g_SoundPlayer.bgmFileNames[idx], path);
-    if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0)
+    if (!g_Supervisor.cfg.preloadBgm)
     {
         return ZUN_SUCCESS;
     }
@@ -497,7 +497,7 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
         return ZUN_ERROR;
     }
 
-    if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0)
+    if (!g_Supervisor.cfg.preloadBgm)
     {
         return ReopenBGM(this->bgmFileNames[idx]);
     }
@@ -655,7 +655,7 @@ loop:
     switch (commandCursor->opcode)
     {
     case AUDIO_PRELOAD:
-        if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0)
+        if (g_Supervisor.cfg.preloadBgm)
         {
             // STRING: TH07 0x00495e60
             DebugPrint("Sound : PreLoad Stage\r\n");
@@ -677,7 +677,7 @@ loop:
         commandCursor->arg2++;
         goto loop_breakout;
     case AUDIO_START:
-        if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0 && commandCursor->arg1 >= 0)
+        if (g_Supervisor.cfg.preloadBgm && commandCursor->arg1 >= 0)
         {
             if (!commandCursor->arg2)
             {

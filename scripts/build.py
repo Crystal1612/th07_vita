@@ -4,7 +4,6 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 from download_deps import conv_path, download_dx8, download_msvc, install_hackery
 
@@ -16,10 +15,11 @@ os.chdir(PROJ_DIR)
 SRC_DIR = PROJ_DIR / "src"
 BUILD_DIR = PROJ_DIR / "build"
 RESOURCE_DIR = PROJ_DIR / "resources"
+CUSTOM_RESOURCE_DIR = PROJ_DIR / "resources" / "custom"
 MSVC_PATH = PROJ_DIR / "thirdparty" / "msvc"
 DX8_PATH = PROJ_DIR / "thirdparty" / "dx8"
 EXE_PATH = RESOURCE_DIR / "th07.exe"
-BUILD_PATH = BUILD_DIR / "th07.exe"
+CUSTOM_EXE_PATH = RESOURCE_DIR / "custom.exe"
 
 VS_PATH = MSVC_PATH / "Program Files" / "Microsoft Visual Studio .NET"
 VC_PATH = VS_PATH / "Vc7"
@@ -27,84 +27,79 @@ CL_PATH = VC_PATH / "bin" / "cl.exe"
 LINK_PATH = VC_PATH / "bin" / "link.exe"
 RC_PATH = VC_PATH / "bin" / "rc.exe"
 
-SOURCES: List[Path] = list(
-    map(
-        lambda x: Path(x),
-        [
-            "AnmVm.cpp",
-            "AsciiManager.cpp",
-            "Stage.cpp",
-            "BombData.cpp",
-            "EclManager.cpp",
-            "EnemyEclInstr.cpp",
-            "EffectManager.cpp",
-            "Ending.cpp",
-            "EnemyManager.cpp",
-            "BulletManager.cpp",
-            "Gui.cpp",
-            "GameManager.cpp",
-            "Chain.cpp",
-            "Controller.cpp",
-            "FileSystem.cpp",
-            "GameErrorContext.cpp",
-            "Rng.cpp",
-            "utils.cpp",
-            "TextHelper.cpp",
-            "ItemManager.cpp",
-            "main.cpp",
-            "GameWindow.cpp",
-            "MidiOutput.cpp",
-            "Supervisor.cpp", # ZUN name: mother.cpp
-            "MusicRoom.cpp",
-            "Player.cpp",
-            "ReplayManager.cpp",
-            "ResultScreen.cpp",
-            "ScreenEffect.cpp",
-            "SoundPlayer.cpp",
-            "AnmManager.cpp",
-            "MainMenu.cpp",
-            "dsutil.cpp",
-            "pbg4/Pbg4File.cpp",
-            "pbg4/Lzss.cpp",
-            "pbg4/Pbg4Archive.cpp",
-        ],
-    )
-)
+TH07_SOURCES = [
+    "AnmVm.cpp",
+    "AsciiManager.cpp",
+    "Stage.cpp",
+    "BombData.cpp",
+    "EclManager.cpp",
+    "EnemyEclInstr.cpp",
+    "EffectManager.cpp",
+    "Ending.cpp",
+    "EnemyManager.cpp",
+    "BulletManager.cpp",
+    "Gui.cpp",
+    "GameManager.cpp",
+    "Chain.cpp",
+    "Controller.cpp",
+    "FileSystem.cpp",
+    "GameErrorContext.cpp",
+    "Rng.cpp",
+    "utils.cpp",
+    "TextHelper.cpp",
+    "ItemManager.cpp",
+    "main.cpp",
+    "GameWindow.cpp",
+    "MidiOutput.cpp",
+    "Supervisor.cpp",
+    "MusicRoom.cpp",
+    "Player.cpp",
+    "ReplayManager.cpp",
+    "ResultScreen.cpp",
+    "ScreenEffect.cpp",
+    "SoundPlayer.cpp",
+    "AnmManager.cpp",
+    "MainMenu.cpp",
+    "dsutil.cpp",
+    "pbg4/Pbg4File.cpp",
+    "pbg4/Lzss.cpp",
+    "pbg4/Pbg4Archive.cpp",
+]
 
-SMALL_SOURCES: List[Path] = list(
-    map(
-        lambda x: Path(x),
-        [
-            "GameManager.cpp",
-            "Gui.cpp",
-            "MainMenu.cpp",
-            "MusicRoom.cpp",
-            "ResultScreen.cpp",
-            "Supervisor.cpp",
-            "TextHelper.cpp",
-        ],
-    )
-)
+TH07_SMALL = [
+    "GameManager.cpp",
+    "Gui.cpp",
+    "MainMenu.cpp",
+    "MusicRoom.cpp",
+    "ResultScreen.cpp",
+    "Supervisor.cpp",
+    "TextHelper.cpp",
+]
 
-SMALL_NON_INTRINSIC_SOURCES: List[Path] = list(
-    map(
-        lambda x: Path(x),
-        [
-            "MainMenu.cpp",
-            "ResultScreen.cpp",
-            "TextHelper.cpp",
-        ]
-    )
-)
+TH07_SMALL_NON_INTRINSIC = [
+    "MainMenu.cpp",
+    "ResultScreen.cpp",
+    "TextHelper.cpp",
+]
+
+CUSTOM_SOURCES = [
+    "init.cpp",
+    "main.cpp",
+]
 
 parser = argparse.ArgumentParser()
-_ = parser.add_argument(
+parser.add_argument(
     "--no-icon",
     action="store_true",
     help="build without requiring an icon from the original executable",
 )
-_ = parser.add_argument(
+parser.add_argument(
     "--no-matching", action="store_true", help="build without attempting matching"
+)
+parser.add_argument(
+    "--with-custom",
+    action="store_true",
+    help="use reccmp on custom (configuration tool) as well",
 )
 subparsers = parser.add_subparsers(dest="command")
 
@@ -117,36 +112,30 @@ parser_roadmap = subparsers.add_parser(
     "roadmap", help="compare symbol locations with roadmap"
 )
 
-_ = parser_reccmp.add_argument(
+parser_reccmp.add_argument(
     "address",
     nargs="?",
     default=None,
     help="optional function address for displaying diff",
 )
-_ = parser_reccmp.add_argument(
-    "--init",
-    action="store_true",
-    help="initialize reccmp project",
+parser_reccmp.add_argument(
+    "--init", action="store_true", help="initialize reccmp project"
 )
-_ = parser_reccmp.add_argument(
-    "--svg", action="store_true", help="generate progress svg"
-)
-_ = parser_stackcmp.add_argument(
+parser_reccmp.add_argument("--svg", action="store_true", help="generate progress svg")
+parser_stackcmp.add_argument(
     "address", help="function address for displaying stack layout"
 )
 args = parser.parse_args()
 
 
-def extract_icon(path: Path) -> Path:
-    """Extract the icon from a PE file located at path"""
-    ico_path = BUILD_DIR / path.with_suffix(".ico").name
+def extract_icon(path: Path, id: int, output: Path):
+    cmd = ["icoextract", "-i", str(id), str(path), output]
+    subprocess.check_call(cmd)
 
-    # icoextract doesn't have an actual scripting API, so it has to be shelled out to instead.
-    # should be fine since you're running this through uv anyways which puts the venv in PATH
-    cmd = ["icoextract", str(path), ico_path]
-    _ = subprocess.check_call(cmd)
-    return ico_path
 
+if not CUSTOM_EXE_PATH.exists():
+    if args.with_custom:
+        sys.exit("custom.exe should exist when building custom.exe")
 
 if not EXE_PATH.exists():
     if args.command:
@@ -161,52 +150,68 @@ download_dx8(DX8_PATH)
 download_msvc(MSVC_PATH, VS_PATH, VC_PATH)
 install_hackery(CL_PATH, MSVC_PATH, VC_PATH)
 
-cflags = [
-    "/nologo",
-    "/W3",
-    "/MT",
+INCLUDES = [
+    VC_PATH / "include",
+    VC_PATH / "PlatformSDK" / "include",
+    DX8_PATH / "include",
+    SRC_DIR / "th07",
+    SRC_DIR / "custom",
+    BUILD_DIR / "obj" / "custom",
+]
+
+LIB_PATHS = [
+    VC_PATH / "lib",
+    VC_PATH / "PlatformSDK" / "lib",
+    DX8_PATH / "lib",
+]
+
+cflags_base = ["/nologo", "/W3", "/GF", "/Zi"] + [
+    f'/I"{conv_path(p)}"' for p in INCLUDES
+]
+
+lflags_base = [f'/LIBPATH:"{conv_path(p)}"' for p in LIB_PATHS] + [
+    "/INCREMENTAL:NO",
+    "/MAP",
+    "/DEBUG",
+    "/OPT:REF",
+    "/OPT:ICF",
+]
+
+libs_base = ["dinput8.lib", "user32.lib"]
+
+cflags_th07 = cflags_base + [
     "/Ob1",
+    "/MT",
     "/EHsc",
     "/Gr",
     "/GL",
     "/Gy",
-    "/GF",
-    "/Zi",
     "/DNDEBUG",
     "/wd4060",
-    "/wd4101", # these just got really annoying
+    "/wd4101",
     "/wd4244",
-    f'/I"{conv_path(VC_PATH / "include")}"',
-    f'/I"{conv_path(VC_PATH / "PlatformSDK" / "include")}"',
-    f'/I"{conv_path(DX8_PATH / "include")}"',
 ]
 
 if args.no_matching:
-    cflags.append("/DNON_MATCHING")
+    cflags_th07.append("/DNON_MATCHING")
 
-lflags = [
-    f'/LIBPATH:"{conv_path(VC_PATH / "lib")}"',
-    f'/LIBPATH:"{conv_path(VC_PATH / "PlatformSDK" / "lib")}"',
-    f'/LIBPATH:"{conv_path(DX8_PATH / "lib")}"',
-    "/LTCG",
-    "/INCREMENTAL:NO",
-    "/MAP",
-    "/OPT:REF",
-    "/OPT:ICF",
-    "/DEBUG",
-]
+lflags_th07 = lflags_base + ["/LTCG"]
 
-libs = [
-    "dinput8.lib",
+libs_th07 = libs_base + [
     "dsound.lib",
     "d3d8.lib",
     "d3dx8.lib",
     "dxguid.lib",
     "gdi32.lib",
-    "user32.lib",
     "winmm.lib",
     "ole32.lib",
 ]
+
+cflags_custom = cflags_base + ["/ML", "/O1", "/Ob0", "/GS"]
+lflags_custom = lflags_base
+libs_custom = libs_base
+
+rcflags = [f'/i "{conv_path(p)}"' for p in INCLUDES]
 
 os.makedirs(BUILD_DIR, exist_ok=True)
 os.chdir(BUILD_DIR)
@@ -224,13 +229,21 @@ with open("build.ninja", "w") as f:
         f.write(f'cl = "{conv_path(CL_PATH)}"\n')
 
     f.write(f'link = {wine_cmd}"{conv_path(LINK_PATH)}"\n')
-    f.write(f'rc = {wine_cmd}"{conv_path(RC_PATH)}"\n')
+    f.write(f'rc = {wine_cmd}"{conv_path(RC_PATH)}"\n\n')
 
-    f.write(f"cflags = {'/Od /Oi ' + ' '.join(cflags)}\n")
-    f.write(f"cflags_small = {'/Os /Oi ' + ' '.join(cflags)}\n")
-    f.write(f"cflags_small_nonintrinsic = {'/Os ' + ' '.join(cflags)}\n")
-    f.write(f"lflags = {' '.join(lflags)}\n")
-    f.write(f"libs = {' '.join(libs)}\n\n")
+    f.write(f"cflags_th07 = {' '.join(cflags_th07)}\n")
+    f.write(f"cflags_th07_normal = /Od /Oi $cflags_th07\n")
+    f.write(f"cflags_th07_small = /Os /Oi $cflags_th07\n")
+    f.write(f"cflags_th07_small_nonintrinsic = /Os $cflags_th07\n")
+    f.write(f"cflags_custom = {' '.join(cflags_custom)}\n\n")
+
+    f.write(f"lflags_th07 = {' '.join(lflags_th07)}\n")
+    f.write(f"lflags_custom = {' '.join(lflags_custom)}\n\n")
+
+    f.write(f"libs_th07 = {' '.join(libs_th07)}\n")
+    f.write(f"libs_custom = {' '.join(libs_custom)}\n\n")
+
+    f.write(f"rcflags = {' '.join(rcflags)}\n\n")
 
     f.write("rule cxx\n")
     f.write("  command = $cl /showIncludes $in_cflags /c $in /Fo$out /Fd$pdb\n")
@@ -238,58 +251,89 @@ with open("build.ninja", "w") as f:
     f.write("  deps = msvc\n\n")
 
     f.write("rule rc\n")
-    f.write("  command = $rc /fo$out $in\n")
+    f.write("  command = $rc $rcflags /fo$out $in\n")
     f.write("  description = rc $out\n\n")
 
     f.write("rule link\n")
-    f.write("  command = $link $in $lflags $libs /order:@$order /OUT:$out\n")
+    f.write("  command = $link $in $in_lflags $in_libs $order_arg /OUT:$out\n")
     f.write("  description = link $out\n\n")
 
-    objects = []
-    for src in SOURCES:
-        src_name = src.as_posix()
-        obj_name = "obj/" + src.with_suffix(".obj").as_posix()
-        pdb_name = "obj/" + src.with_suffix(".pdb").as_posix()
-        f.write(f"build {obj_name}: cxx ../src/{src_name}\n")
-        if src not in SMALL_SOURCES:
-            f.write("  in_cflags = $cflags\n")
-        elif src in SMALL_NON_INTRINSIC_SOURCES:
-            f.write("  in_cflags = $cflags_small_nonintrinsic\n")
-        else:
-            f.write("  in_cflags = $cflags_small\n")
-        f.write(f"  pdb = {pdb_name}\n")
-        objects.append(obj_name)
+    th07_objects = []
+    for src in TH07_SOURCES:
+        src_path = f"../src/th07/{src}"
+        obj_path = f"obj/th07/{Path(src).with_suffix('.obj').as_posix()}"
+        pdb_path = f"obj/th07/{Path(src).with_suffix('.pdb').as_posix()}"
+
+        cflags_to_use = "$cflags_th07_normal"
+        if src in TH07_SMALL_NON_INTRINSIC:
+            cflags_to_use = "$cflags_th07_small_nonintrinsic"
+        elif src in TH07_SMALL:
+            cflags_to_use = "$cflags_th07_small"
+
+        f.write(f"build {obj_path}: cxx {src_path}\n")
+        f.write(f"  in_cflags = {cflags_to_use}\n")
+        f.write(f"  pdb = {pdb_path}\n")
+        th07_objects.append(obj_path)
     f.write("\n")
 
     if not args.no_icon:
-        icon_path = extract_icon(EXE_PATH)
+        icon_path = BUILD_DIR / EXE_PATH.with_suffix(".ico").name
+        extract_icon(EXE_PATH, 105, icon_path)
         try:
             with open("resources.rc", "x") as g:
-                g.write(f'1 ICON "{icon_path.name}"\n')
+                g.write(f'105 ICON "{icon_path.name}"\n')
         except FileExistsError:
             pass
 
         f.write("build resources.res: rc resources.rc\n\n")
-        objects.append("resources.res")
+        th07_objects.append("resources.res")
 
-    f.write(f"build th07.exe: link {' '.join(objects)}\n")
-    f.write(f"  order = {conv_path(RESOURCE_DIR / 'order.txt')}\n")
+    f.write(f"build th07.exe: link {' '.join(th07_objects)}\n")
+    f.write(f"  in_lflags = $lflags_th07\n")
+    f.write(f"  in_libs = $libs_th07\n")
+    f.write(f"  order_arg = /order:@{conv_path(RESOURCE_DIR / 'order.txt')}\n\n")
 
-_ = subprocess.check_call(["ninja"])
+    if args.with_custom:
+        custom_objects = []
+        for src in CUSTOM_SOURCES:
+            src_path = f"../src/custom/{src}"
+            obj_path = f"obj/custom/{Path(src).with_suffix('.obj').as_posix()}"
+            pdb_path = f"obj/custom/{Path(src).with_suffix('.pdb').as_posix()}"
+
+            f.write(f"build {obj_path}: cxx {src_path}\n")
+            f.write("  in_cflags = $cflags_custom\n")
+            f.write(f"  pdb = {pdb_path}\n")
+            custom_objects.append(obj_path)
+        f.write("\n")
+
+        os.makedirs(BUILD_DIR / "obj" / "custom", exist_ok=True)
+
+        icon107_path = BUILD_DIR / "obj" / "custom" / "ICON107_1.ico"
+        icon108_path = BUILD_DIR / "obj" / "custom" / "ICON108_1.ico"
+        extract_icon(CUSTOM_EXE_PATH, 107, icon107_path)
+        extract_icon(CUSTOM_EXE_PATH, 108, icon108_path)
+
+        f.write("build obj/custom/resource.res: rc ../src/custom/resource.rc\n")
+        custom_objects.append("obj/custom/resource.res")
+
+        f.write(f"build custom.exe: link {' '.join(custom_objects)}\n")
+        f.write(f"  in_lflags = $lflags_custom\n")
+        f.write(f"  in_libs = $libs_custom\n")
+        f.write(f"  order_arg =\n")
+
+subprocess.check_call(["ninja"])
 
 match args.command:
     case "reccmp":
         if args.init:
             os.chdir(PROJ_DIR)
-            _ = subprocess.check_call(
+            subprocess.check_call(
                 ["reccmp-project", "detect", "--search-path", RESOURCE_DIR]
             )
             os.chdir(BUILD_DIR)
-            _ = subprocess.check_call(
-                ["reccmp-project", "detect", "--what", "recompiled"]
-            )
+            subprocess.check_call(["reccmp-project", "detect", "--what", "recompiled"])
         elif args.svg:
-            _ = subprocess.check_call(
+            subprocess.check_call(
                 [
                     "reccmp-reccmp",
                     "--target",
@@ -301,12 +345,26 @@ match args.command:
                     "--nolib",
                 ]
             )
+            if args.with_custom:
+                subprocess.check_call(
+                    [
+                        "reccmp-reccmp",
+                        "--target",
+                        "CUSTOM",
+                        "--svg",
+                        CUSTOM_RESOURCE_DIR / "progress.svg",
+                        "--svg-icon",
+                        CUSTOM_RESOURCE_DIR / "svgicon.png",
+                        "--nolib",
+                    ]
+                )
         elif args.address:
-            _ = subprocess.check_call(
+            target = "CUSTOM" if args.with_custom else "TH07"
+            subprocess.check_call(
                 [
                     "reccmp-reccmp",
                     "--target",
-                    "TH07",
+                    target,
                     "--html",
                     "index.html",
                     "--nolib",
@@ -315,33 +373,25 @@ match args.command:
                 ]
             )
         else:
-            _ = subprocess.check_call(
+            subprocess.check_call(
                 ["reccmp-reccmp", "--target", "TH07", "--html", "index.html", "--nolib"]
             )
+            if args.with_custom:
+                subprocess.check_call(
+                    [
+                        "reccmp-reccmp",
+                        "--target",
+                        "CUSTOM",
+                        "--html",
+                        "custom.html",
+                        "--nolib",
+                    ]
+                )
     case "stackcmp":
-        _ = subprocess.call(
-            [
-                "reccmp-stackcmp",
-                "--target",
-                "TH07",
-                args.address,
-            ]
-        )
+        subprocess.call(["reccmp-stackcmp", "--target", "TH07", args.address])
     case "datacmp":
-        _ = subprocess.call(
-            [
-                "reccmp-datacmp",
-                "--target",
-                "TH07",
-            ]
-        )
+        subprocess.call(["reccmp-datacmp", "--target", "TH07"])
     case "roadmap":
-        _ = subprocess.call(
-            [
-                "reccmp-roadmap",
-                "--target",
-                "TH07",
-            ]
-        )
+        subprocess.call(["reccmp-roadmap", "--target", "TH07"])
     case _:
         pass

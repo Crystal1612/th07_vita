@@ -1,0 +1,91 @@
+#include <winresrc.h>
+#include <windef.h>
+#include <wingdi.h>
+
+#include "resource.h"
+
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+
+IDR_MAINMENU MENU
+{
+    POPUP "ファイル(&F)"
+    {
+        MENUITEM "アプリケーションの終了(&X)", IDM_EXIT
+    }
+    POPUP "ヘルプ(&H)"
+    {
+        MENUITEM "バージョン情報 ...(&A)", IDM_ABOUT
+    }
+}
+
+103 DIALOGEX 22, 17, 323, 154
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION
+CAPTION "東方妖々夢　環境カスタムプログラム"
+FONT 10, "ＭＳ ゴシック", FW_NORMAL, FALSE, 128
+{
+    AUTOCHECKBOX "頂点バッファを使用しない", IDC_DISABLE_VERTEX_BUFFERS, 4, 5, 112, 10
+    AUTOCHECKBOX "フォグを使用しない", IDC_DISABLE_FOG, 4, 16, 88, 10
+    AUTOCHECKBOX "16Bitsのテクスチャ使用を強制", IDC_USE_16BIT_TEX, 4, 27, 140, 10
+    AUTOCHECKBOX "パッドの入力にDirectInputを使用しない", IDC_DISABLE_DINPUT, 4, 38, 150, 10
+    AUTOCHECKBOX "ＢＧＭをメモリに読み込む", IDC_PRELOAD_BGM, 4, 49, 130, 10
+    AUTOCHECKBOX "テクスチャに一切のカラー合成をしない", IDC_DISABLE_TEXTURE_BLEND, 175, 5, 146, 10
+    AUTOCHECKBOX "デプステストをOFFにする", IDC_DISABLE_DEPTH_TEST, 175, 16, 109, 10
+    AUTOCHECKBOX "リファレンスラスタライザモードで起動", IDC_USE_REF_RASTERIZER, 175, 27, 145, 10
+    AUTOCHECKBOX "画面周りを毎回描画", IDC_REDRAW_EVERY_FRAME, 175, 38, 130, 10
+    AUTOCHECKBOX "垂直同期を取らない", IDC_DISABLE_VSYNC, 175, 49, 130, 10
+    AUTORADIOBUTTON "フルスクリーン(推奨)", IDC_FULLSCREEN, 11, 71, 88, 10, WS_GROUP
+    AUTORADIOBUTTON "ウィンドウ", IDC_WINDOWED, 97, 70, 56, 10
+    AUTORADIOBUTTON "最低", IDC_QUALITY_WORST, 11, 93, 26, 10, WS_GROUP
+    AUTORADIOBUTTON "控えめ", IDC_QUALITY_MEDIUM, 43, 93, 39, 10
+    AUTORADIOBUTTON "美麗(推奨)", IDC_QUALITY_BEAUTIFUL, 87, 93, 49, 10
+    AUTORADIOBUTTON "毎回（通常）", IDC_FRAMESKIP_NONE, 161, 93, 50, 10, WS_GROUP
+    AUTORADIOBUTTON "１／２回", IDC_FRAMESKIP_HALF, 219, 93, 50, 10
+    AUTORADIOBUTTON "１／３回", IDC_FRAMESKIP_THIRD, 271, 92, 49, 10
+    AUTORADIOBUTTON "３２Ｂｉｔｓ(推奨)", IDC_COLOR_MODE_32BIT, 159, 69, 79, 10, WS_GROUP
+    AUTORADIOBUTTON "１６Ｂｉｔｓ", IDC_COLOR_MODE_16BIT, 243, 69, 64, 10
+    PUSHBUTTON "決定", IDC_OK, 284, 137, 36, 14
+    PUSHBUTTON "キャンセル", IDC_CANCEL, 238, 137, 44, 14
+    GROUPBOX "ウィンドウスタイル", IDC_STATIC, 4, 61, 148, 21
+    GROUPBOX "エフェクトの質", IDC_STATIC, 4, 85, 147, 21
+    GROUPBOX "描画間隔", IDC_STATIC, 156, 85, 164, 21
+    GROUPBOX "画面モード", IDC_STATIC, 156, 61, 164, 21
+    EDITTEXT IDC_JOY_DEADZONE_X, 110, 112, 35, 12, ES_AUTOHSCROLL
+    EDITTEXT IDC_JOY_DEADZONE_Y, 110, 124, 35, 12, ES_AUTOHSCROLL
+    LTEXT "パッドの遊び左右(1～1000)", IDC_STATIC, 4, 112, 99, 8
+    LTEXT "パッドの遊び上下(1～1000)", IDC_STATIC, 4, 123, 99, 8
+    LTEXT "パッド十字キーの確認", IDC_STATIC, 4, 143, 81, 8
+    EDITTEXT IDC_ACTIVE_JOY_DIR, 103, 139, 100, 12, ES_AUTOHSCROLL
+}
+
+STRINGTABLE
+{
+  103, "th_custom"
+  109, "TH_CUSTOM"
+  IDS_VSYNC_HELP, "リフレッシュレートを変更できない場合等でチェックすると60FPSになります"
+  IDS_DISABLE_VERTEX_BUFFERS_HELP, "キャラがうまく出ない場合等でチェックします。\n但し、処理が重くなります"
+  IDS_DISABLE_FOG_HELP, "画面全体が真っ白（真っ黒）なってしまう場合等でチェックします\n 但し、見た目が著しく汚くなります。また、背景の色が濃くなり、弾も見づらくなります\n一部の背景が、突然現れたり、おかしな表示になったりします。"
+  IDS_USE_16BIT_TEX_HELP, "32Bitに対応していない、もしくはVRAMが少なく処理落ちが激しい場合等でチェックします\n 見た目が若干汚くなります"
+  IDS_DISABLE_DINPUT_HELP, "処理が重たいときにパッドが滑ったりする場合にチェックします\n これをチェックすると逆におかしくなる場合はチェックを外します"
+  IDS_DISABLE_TEXTURE_BLEND_HELP, "どうしてもキャラが出ない（おかしい）場合、チェックしてみてください\n但し、ゲームの演出全般が無くなると思ってください"
+  IDS_DISABLE_DEPTH_TEST_HELP, "タイトル画面などで、妙なちらつきが現れた場合、チェックしてみてください\n 通常はチェックしないで下さい"
+  IDS_REF_RASTERIZER_HELP, "リファレンスラスタライザモードで起動します。\n 通常はチェックしないで下さい。"
+  IDS_FULLSCREEN_HELP, "フルスクリーンモードで起動します（推奨）"
+  IDS_WINDOWED_HELP, "ウィンドウモードで起動します"
+  IDS_QUALITY_WORST_HELP, "エフェクトが大幅に減ります。雪や桜も降りません。\n処理が重い場合、まずは描画間隔の方を弄った方が効果的です"
+  IDS_QUALITY_MEDIUM_HELP, "エフェクトが減ります。あんまり効果ないかも。\n処理が重い場合、まずは描画間隔の方を弄った方が効果的です"
+  IDS_QUALITY_BEAUTIFUL_HELP, "一番きれいです。通常はこれを選択します"
+  IDS_FRAMESKIP_NONE_HELP, "毎回描画します。通常はこれを選択します"
+  IDS_FRAMESKIP_HALF_HELP, "２回に１回描画します。描画処理が重い場合は改善されます"
+  IDS_FRAMESKIP_THIRD_HELP, "３回に１回描画します。描画処理が重い場合は劇的に改善されます"
+  IDS_COLOR_MODE_32BIT_HELP, "32Bits で描画します。綺麗ですが重たいです\n＊フルスクリーンでしか有効ではありません"
+  IDS_COLOR_MODE_16BIT_HELP, "16Bits で描画します。画面は汚くなりますが若干軽いです\n＊フルスクリーンでしか有効ではありません"
+}
+
+IDR_ACCELERATOR ACCELERATORS
+{
+	"?", IDM_ABOUT, ALT
+	"/", IDM_ABOUT, ALT
+}
+
+IDI_ICON107 ICON "ICON107_1.ico"
+IDI_ICON108 ICON "ICON108_1.ico"

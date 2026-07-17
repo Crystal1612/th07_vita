@@ -13,6 +13,8 @@ Now, you can finally start diffing. After each (re)build, run `uv run reccmp-rec
 
 For convenience purposes, you can also use `uv run scripts/build.py reccmp` to rebuild and run reccmp at the same time, or `uv run scripts/build.py reccmp 0x00FNADDR` to rebuild and diff a function at the same time.
 
+If you also have `custom.exe`, or the configuration tool bundled in, you can also copy that into the resources directory. After that, reinit `reccmp` with `uv run scripts/build.py reccmp --init`, then run any command with reccmp with `--with-custom`, like `uv run scripts/build.py --with-custom reccmp`. Technically since the program is already 100% matched this would be kind of pointless but it could be helpful for if you make a change to it and want to verify if its still matching.
+
 # Matching
 
 Matching functions can range from being nearly trivial to extremely difficult, but `reccmp` makes this process slightly easier.

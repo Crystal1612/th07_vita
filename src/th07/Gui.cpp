@@ -1133,14 +1133,14 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->DrawNoRotation(&this->msg.portraits[1]);
     this->msg.portraits[1].pos = oldPos;
     g_AnmManager->Flush();
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
     }
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
@@ -1151,7 +1151,7 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
@@ -1437,7 +1437,7 @@ void Gui::DrawGameScene()
     g_Supervisor.viewport.Height = 480;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     vm = &this->impl->vms0[12];
-    if ((g_Supervisor.cfg.opts >> 12 & 1) != 0 ||
+    if (g_Supervisor.cfg.redrawEveryFrame ||
         vm->currentInstruction ||
         g_Supervisor.renderSkipFrames != 0)
     {
@@ -1477,7 +1477,7 @@ void Gui::DrawGameScene()
         this->showPoint = 2;
         this->showPower = 2;
     }
-    if ((g_Supervisor.cfg.opts >> 4 & 1) == 0)
+    if (!g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         vm = &this->impl->vms0[13];
         x = 496.0f;
@@ -1588,14 +1588,14 @@ void Gui::DrawGameScene()
         g_AsciiManager.scale.y = 1.0f;
     }
     if (this->showGraze ||
-        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+        g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = D3DXVECTOR3(496.0f, 160.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d",
                                     g_GameManager.globals->grazeInTotal);
     }
     if (this->showPoint ||
-        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+        g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = D3DXVECTOR3(496.0f, 176.0f, 0.0f);
         AsciiManager::AddFormatText(
@@ -1605,7 +1605,7 @@ void Gui::DrawGameScene()
     }
     g_AnmManager->Flush();
     if (this->showPower ||
-        (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+        g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
 
@@ -1620,14 +1620,14 @@ void Gui::DrawGameScene()
             powerBarVerts[1].diffuse.color = powerBarVerts[3].diffuse.color = 0x80e0e0ff;
 
             powerBarVerts[0].w = powerBarVerts[1].w = powerBarVerts[2].w = powerBarVerts[3].w = 1.0f;
-            if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+            if (!g_Supervisor.cfg.disableTextureBlend)
             {
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
             }
             g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
             g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
-            if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+            if (!g_Supervisor.cfg.disableZBuffer)
             {
                 g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
             }
@@ -1638,7 +1638,7 @@ void Gui::DrawGameScene()
             g_AnmManager->SetColorOp(255);
             g_AnmManager->SetBlendMode(255);
             g_AnmManager->SetZWriteDisable(255);
-            if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+            if (!g_Supervisor.cfg.disableTextureBlend)
             {
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);

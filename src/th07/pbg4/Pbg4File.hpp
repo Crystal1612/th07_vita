@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-#include "../inttypes.hpp"
+#include "inttypes.hpp"
 
 extern const u32 g_SeekModes[3];
 extern const char *g_AccessModes[3];

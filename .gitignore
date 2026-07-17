@@ -5,6 +5,7 @@
 .venv*
 build
 thirdparty/*
+resources/custom.exe
 resources/th07.exe
 reccmp-user.yml
 reccmp-build.yml

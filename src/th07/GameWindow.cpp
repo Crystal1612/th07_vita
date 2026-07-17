@@ -344,7 +344,7 @@ i32 GameWindow::InitD3dRendering()
     g_Supervisor.d3dIface->GetAdapterDisplayMode(0, &displayMode);
     if (!g_Supervisor.cfg.windowed)
     {
-        if ((g_Supervisor.cfg.opts >> 2 & 1) == 1)
+        if (g_Supervisor.cfg.use16BitTextures == 1)
         {
             presentParams.BackBufferFormat = D3DFMT_R5G6B5;
             g_Supervisor.cfg.colorMode16bit = 1;
@@ -409,7 +409,7 @@ i32 GameWindow::InitD3dRendering()
     retryWithoutRefreshRate = 0;
     for (;;)
     {
-        if ((g_Supervisor.cfg.opts >> 9 & 1) != 0)
+        if (g_Supervisor.cfg.forceReferenceRender)
         {
             goto fallback_to_software;
         }
@@ -515,12 +515,12 @@ i32 GameWindow::InitD3dRendering()
                                          &g_Supervisor.projectionMatrix);
     g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
-    if ((g_Supervisor.cfg.opts & 1) == 0 &&
+    if (!g_Supervisor.cfg.loaded &&
         (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
         // STRING: TH07 0x00497948
         g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
-        g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | 1;
+        g_Supervisor.cfg.loaded = 1;
     }
     if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
     {
@@ -529,7 +529,7 @@ i32 GameWindow::InitD3dRendering()
     }
     FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
     g_GameErrorContext.Log(capsBuffer);
-    if ((g_Supervisor.cfg.opts >> 2 & 1) == 0 && usingD3dHal)
+    if (!g_Supervisor.cfg.use16BitTextures && usingD3dHal)
     {
         if (g_Supervisor.d3dIface->CheckDeviceFormat(
                 0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
@@ -540,7 +540,7 @@ i32 GameWindow::InitD3dRendering()
         else
         {
             g_Supervisor.flags &= 0xfffffffb;
-            g_Supervisor.cfg.opts |= 4;
+            g_Supervisor.cfg.use16BitTextures = 1;
             // STRING: TH07 0x004978b0
             g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
         }
@@ -710,7 +710,7 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
 // FUNCTION: TH07 0x004356a0
 void GameWindow::ResetRenderState()
 {
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZENABLE, 1);
     }
@@ -721,7 +721,7 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_LIGHTING, 0);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_CULLMODE, 1);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
-    if ((g_Supervisor.cfg.opts >> 5 & 1) == 0)
+    if (!g_Supervisor.cfg.disableGouraud)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, 2);
     }
@@ -735,7 +735,7 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, 1);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHAREF, 4);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHAFUNC, 7);
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, 1);
     }
@@ -758,7 +758,7 @@ void GameWindow::ResetRenderState()
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_EDGEANTIALIAS, 0);
     }
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, 0);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
     }
@@ -767,7 +767,7 @@ void GameWindow::ResetRenderState()
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
     }
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
     }
@@ -775,7 +775,7 @@ void GameWindow::ResetRenderState()
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
     }
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
     }
@@ -784,7 +784,7 @@ void GameWindow::ResetRenderState()
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
     }
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
     }

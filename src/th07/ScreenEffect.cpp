@@ -75,14 +75,14 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
         vertices[1].diffuse.color =
             vertices[2].diffuse.color =
                 vertices[3].diffuse.color = color;
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
     }
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
@@ -96,7 +96,7 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
@@ -123,14 +123,14 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
     vertices[1].diffuse.color = param_3;
     vertices[2].diffuse.color = param_4;
     vertices[3].diffuse.color = param_5;
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
     }
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
@@ -144,7 +144,7 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
     g_AnmManager->SetColorOp(255);
     g_AnmManager->SetBlendMode(255);
     g_AnmManager->SetZWriteDisable(255);
-    if ((g_Supervisor.cfg.opts >> 8 & 1) == 0)
+    if (!g_Supervisor.cfg.disableTextureBlend)
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);

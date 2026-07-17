@@ -1,0 +1,6 @@
+address|name|type|size
+0040a040|g_CustomControllerMapping|global|18
+0040a060|__security_cookie|global|4
+0040a70c|g_Controller|global|4
+0040a7e8|g_Config|global|56
+0040a820|g_PadState|global|2

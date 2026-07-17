@@ -130,7 +130,7 @@ void AnmManager::SetupVertexBuffer()
         this->vertexBufferContents[3].textureUV.x;
     g_Quad3DFallback[3].textureUV.y =
         this->vertexBufferContents[3].textureUV.y;
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         g_Supervisor.d3dDevice->CreateVertexBuffer(
             sizeof(this->vertexBufferContents), 0, D3DFVF_TEX1 | D3DFVF_XYZ,
@@ -151,7 +151,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
     u8 *srcData;
 
     ReleaseTexture(textureIdx);
-    if ((g_Supervisor.cfg.opts >> 2 & 1) != 0)
+    if (g_Supervisor.cfg.use16BitTextures)
     {
         if (g_TextureFormatD3D8Mapping[formatIdx] == D3DFMT_A8R8G8B8 ||
             g_TextureFormatD3D8Mapping[formatIdx] == D3DFMT_UNKNOWN)
@@ -196,7 +196,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     IDirect3DSurface8 *surf;
 
     ReleaseTexture(textureIdx);
-    if ((g_Supervisor.cfg.opts >> 2 & 1) != 0)
+    if (g_Supervisor.cfg.use16BitTextures)
     {
         if (g_TextureFormatD3D8Mapping[formatIdx] == D3DFMT_A8R8G8B8 ||
             g_TextureFormatD3D8Mapping[formatIdx] == D3DFMT_UNKNOWN)
@@ -713,7 +713,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (g_Supervisor.cfg.noVertexBuffers)
     {
         if (this->colorMulEnabled)
         {
@@ -747,7 +747,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         g_Quad3DFallback[2].diffuse = color;
         g_Quad3DFallback[3].diffuse = color;
     }
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
+    if (!g_Supervisor.cfg.disableZBuffer &&
         (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
@@ -793,7 +793,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
             g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 2);
         }
     }
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
+    if (!g_Supervisor.cfg.disableZBuffer &&
         (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
@@ -1487,7 +1487,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
 
     if (this->currentVertexShader != 2)
     {
-        if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+        if (!g_Supervisor.cfg.noVertexBuffers)
         {
             g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_XYZ);
             g_Supervisor.d3dDevice->SetStreamSource(0, this->vertexBuffer, 20);
@@ -1503,7 +1503,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         this->currentVertexShader = 2;
     }
 
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         g_Supervisor.d3dDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
     }
