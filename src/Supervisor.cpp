@@ -351,7 +351,7 @@ u32 Supervisor::OnDraw(Supervisor *arg)
 
 ZunResult Supervisor::SetupInput()
 {
-    if ((this->cfg.opts >> 0xb & 1) != 0)
+    if (this->cfg.disableDinput)
     {
         return ZUN_ERROR;
     }
@@ -439,7 +439,7 @@ i32 Supervisor::CheckVSync()
         }
     }
 
-    if ((g_Supervisor.cfg.opts >> 0xe & 1) == 0)
+    if (!g_Supervisor.cfg.enableVsync)
     {
         fpsSum = 0.0f;
         if (fpsCount >= 2)
@@ -551,7 +551,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
 
     if (g_SoundPlayer.bgmSeekOffset == 0)
     {
-        if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0)
+        if (!g_Supervisor.cfg.preloadBgm)
         {
             g_SoundPlayer.StartBGM("thbgm.dat");
         }
@@ -560,7 +560,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
             memcpy(g_SoundPlayer.bgmArchivePath, "thbgm.dat", 10);
         }
     }
-    else if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0)
+    else if (!g_Supervisor.cfg.preloadBgm)
     {
         g_SoundPlayer.StartBGM("th07.dat");
     }
@@ -932,38 +932,38 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         }
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
-    g_Supervisor.cfg.opts |= 1;
-    if ((this->cfg.opts >> 1 & 1) != 0)
+    g_Supervisor.cfg.loaded = 1;
+    if (this->cfg.noVertexBuffers)
     {
         g_GameErrorContext.Log("頂点バッファの使用を抑制します\n");
     }
-    if ((this->cfg.opts >> 10 & 1) != 0)
+    if (this->cfg.disableFog)
     {
         g_GameErrorContext.Log("フォグの使用を抑制します\n");
     }
-    if ((this->cfg.opts >> 2 & 1) != 0)
+    if (this->cfg.use16BitTextures)
     {
         g_GameErrorContext.Log("16Bit のテクスチャの使用を強制します\n");
     }
-    if ((this->cfg.opts >> 4 & 1) | (this->cfg.opts >> 3 & 1))
+    if (this->IsClearingBackbuffer())
     {
         g_GameErrorContext.Log("バックバッファの消去を強制します\n");
     }
-    if ((this->cfg.opts >> 4 & 1) != 0)
+    if (this->cfg.disableItemDrawAroundPlayfield)
     {
         g_GameErrorContext.Log("ゲーム周りのアイテムの描画を抑制します\n");
     }
-    if ((this->cfg.opts >> 5 & 1) != 0)
+    if (this->cfg.disableGouraud)
     {
         g_GameErrorContext.Log("グーローシェーディングを抑制します\n");
     }
-    if ((this->cfg.opts >> 6 & 1) != 0)
+    if (this->cfg.disableZBuffer)
     {
         g_GameErrorContext.Log("デプステストを抑制します\n");
     }
     this->vsyncEnabled = 0;
-    this->cfg.opts = this->cfg.opts & 0xffffff7f;
-    if ((this->cfg.opts >> 8 & 1) != 0)
+    this->cfg.unused = 0;
+    if (this->cfg.disableTextureBlend)
     {
         g_GameErrorContext.Log("テクスチャの色合成を抑制しますn");
     }
@@ -971,25 +971,25 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     {
         g_GameErrorContext.Log("ウィンドウモードで起動します\n");
     }
-    if ((this->cfg.opts >> 9 & 1) != 0)
+    if (this->cfg.forceReferenceRender)
     {
         g_GameErrorContext.Log("リファレンスラスタライザを強制します\n");
     }
-    if ((this->cfg.opts >> 0xb & 1) != 0)
+    if (this->cfg.disableDinput)
     {
         g_GameErrorContext.Log("パッド、キーボードの入力に DirectInput を使用しません\n");
     }
 
-    this->cfg.opts |= 1 << 0xc;
-    if ((this->cfg.opts >> 0xc & 1) != 0)
+    this->cfg.redrawEveryFrame = 1;
+    if (this->cfg.redrawEveryFrame)
     {
         g_GameErrorContext.Log("画面周りを毎回描画します\n");
     }
-    if ((this->cfg.opts >> 0xd & 1) != 0)
+    if (this->cfg.preloadBgm)
     {
         g_GameErrorContext.Log("ＢＧＭをメモリに読み込みます\n");
     }
-    if ((this->cfg.opts >> 0xe & 1) != 0)
+    if (this->cfg.enableVsync)
     {
         g_GameErrorContext.Log("垂直同期を取りません\n");
         g_Supervisor.vsyncEnabled = 1;
@@ -1051,7 +1051,7 @@ ZunResult Supervisor::PlayLoadedAudio(i32 idx)
     }
     if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
     {
-        if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0)
+        if (g_Supervisor.cfg.preloadBgm)
         {
             g_SoundPlayer.PushCommand(AUDIO_SHUTDOWN, 0, "dummy");
         }
@@ -1109,7 +1109,7 @@ ZunResult Supervisor::StopAudio()
     {
         if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
         {
-            if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0)
+            if (g_Supervisor.cfg.preloadBgm)
             {
                 g_SoundPlayer.PushCommand(AUDIO_SHUTDOWN, 0, "dummy");
             }

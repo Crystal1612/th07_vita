@@ -174,8 +174,7 @@ u32 Gui::OnDraw(Gui *arg)
                                     arg->impl->clearCherryMax * 10);
         if (g_GameManager.currentStage >= 7 ||
             (g_GameManager.currentStage == 6 && !g_GameManager.practice &&
-             (!g_GameManager.replay ||
-              g_ReplayManager->data->stageReplayData[4] != NULL)))
+             (!g_GameManager.replay || g_ReplayManager->data->stageReplayData[4] != NULL)))
         {
             stringPos.y = stringPos.y + 16.0f;
             g_AsciiManager.color = 0xffffff80;
@@ -1032,7 +1031,7 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->Flush();
     g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
     g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_DISABLE);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.gfxDevice->SetDepthMask(false);
     }
@@ -1293,7 +1292,7 @@ void Gui::DrawGameScene()
     g_Supervisor.viewport.height = 480;
     g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     vm = &this->impl->vms0[12];
-    if ((g_Supervisor.cfg.opts >> 12 & 1) != 0 || vm->currentInstruction ||
+    if (g_Supervisor.cfg.redrawEveryFrame || vm->currentInstruction ||
         g_Supervisor.renderSkipFrames != 0)
     {
         for (y = 0.0f; y < 464.0f; y = y + 32.0f)
@@ -1332,7 +1331,7 @@ void Gui::DrawGameScene()
         this->showPoint = 2;
         this->showPower = 2;
     }
-    if ((g_Supervisor.cfg.opts >> 4 & 1) == 0)
+    if (!g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         vm = &this->impl->vms0[13];
         x = 496.0f;
@@ -1436,13 +1435,13 @@ void Gui::DrawGameScene()
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
     }
-    if (this->showGraze || (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+    if (this->showGraze || g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = ZunVec3(496.0f, 160.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d",
                                     g_GameManager.globals->grazeInTotal);
     }
-    if (this->showPoint || (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+    if (this->showPoint || g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = ZunVec3(496.0f, 176.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d/%d",
@@ -1450,7 +1449,7 @@ void Gui::DrawGameScene()
                                     g_GameManager.globals->nextNeededPointItemsForExtend);
     }
     g_AnmManager->Flush();
-    if (this->showPower || (g_Supervisor.cfg.opts >> 4 & 1) != 0)
+    if (this->showPower || g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
 
@@ -1469,7 +1468,7 @@ void Gui::DrawGameScene()
                 1.0f;
             g_Supervisor.gfxDevice->SetColorOp(COMPONENT_RGB, COLOR_OP_DISABLE);
             g_Supervisor.gfxDevice->SetColorOp(COMPONENT_ALPHA, COLOR_OP_DISABLE);
-            if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+            if (!g_Supervisor.cfg.disableZBuffer)
             {
                 g_Supervisor.gfxDevice->SetDepthMask(false);
             }

@@ -559,7 +559,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             {
                 g_Supervisor.cfg.musicMode--;
             }
-            if ((g_Supervisor.cfg.opts >> 0xd & 1) == 0 && g_Supervisor.cfg.musicMode == MUSIC_MIDI)
+            if (!g_Supervisor.cfg.preloadBgm && g_Supervisor.cfg.musicMode == MUSIC_MIDI)
             {
                 g_SoundPlayer.StartBGM("thbgm.dat");
             }

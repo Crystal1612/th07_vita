@@ -601,7 +601,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
-    if ((g_Supervisor.cfg.opts >> 1 & 1) == 0)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         if (this->colorMulEnabled)
         {
@@ -634,7 +634,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         g_Quad3DFallback[2].diffuse = color;
         g_Quad3DFallback[3].diffuse = color;
     }
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
+    if (!g_Supervisor.cfg.disableZBuffer &&
         (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
@@ -672,7 +672,7 @@ void AnmManager::SyncRenderState(AnmVm *vm)
             g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ONE);
         }
     }
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0 &&
+    if (!g_Supervisor.cfg.disableZBuffer &&
         (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;

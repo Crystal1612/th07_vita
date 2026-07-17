@@ -263,7 +263,7 @@ void GameWindow::ResetRenderState()
 {
     ZunColor fogColor;
 
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.gfxDevice->Enable(CAPS_DEPTH_TEST);
     }
@@ -278,7 +278,7 @@ void GameWindow::ResetRenderState()
     g_Supervisor.gfxDevice->Enable(CAPS_ALPHA_TEST);
     g_Supervisor.gfxDevice->SetAlphaTestRef(4);
 
-    if ((g_Supervisor.cfg.opts >> 10 & 1) == 0)
+    if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.gfxDevice->Enable(CAPS_FOG);
     }

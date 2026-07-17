@@ -103,7 +103,7 @@ i32 MusicRoom::ProcessInput()
     if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
     {
         this->selectedIdx = this->cursor;
-        if ((g_Supervisor.cfg.opts >> 0xd & 1) != 0)
+        if (g_Supervisor.cfg.preloadBgm)
         {
             g_SoundPlayer.StartBGM("thbgm.dat");
         }

@@ -63,7 +63,7 @@ void ScreenEffect::DrawSquare(ZunRect *rect, u32 color)
     vertices[0].diffuse.color = vertices[1].diffuse.color = vertices[2].diffuse.color =
         vertices[3].diffuse.color = color;
     g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_DIFFUSE);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.gfxDevice->SetDepthMask(false);
     }
@@ -98,7 +98,7 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, u32 param_2, u32 param_3, u32 
     vertices[2].diffuse.color = param_4;
     vertices[3].diffuse.color = param_5;
     g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_DIFFUSE);
-    if ((g_Supervisor.cfg.opts >> 6 & 1) == 0)
+    if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.gfxDevice->SetDepthMask(false);
     }
