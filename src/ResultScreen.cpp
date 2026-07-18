@@ -567,8 +567,8 @@ void ResultScreen::WriteScore()
     scoreDat = (ScoreDat *)fileBuffer;
     scoreDat->raw.dstLen = sizeOfFile - sizeof(ScoreDatRaw);
     scoreDat->raw.fileLength = sizeOfFile;
-    compressedBuffer =
-        Lzss::Compress(fileBuffer + sizeof(ScoreDatRaw), scoreDat->raw.dstLen, &scoreDat->raw.srcLen);
+    compressedBuffer = Lzss::Compress(fileBuffer + sizeof(ScoreDatRaw), scoreDat->raw.dstLen,
+                                      &scoreDat->raw.srcLen);
 
     memcpy(fileBuffer + sizeof(ScoreDatRaw), compressedBuffer, scoreDat->raw.srcLen);
     free(compressedBuffer);
@@ -1063,12 +1063,7 @@ ZunResult ResultScreen::HandleResultKeyboard()
     AnmVm *vm;
     i32 vmIdx;
 
-<<<<<<< HEAD:src/ResultScreen.cpp
-    if (g_Supervisor.CanSaveReplay() || (g_Supervisor.flags >> 3 & 1) != 0)
-=======
-    if (g_Supervisor.IsSlowMode() ||
-        (g_Supervisor.flags >> 3 & 1) != 0)
->>>>>>> bf9553f (rename cansavereplay to isslowmode):src/th07/ResultScreen.cpp
+    if (g_Supervisor.IsSlowMode() || (g_Supervisor.flags >> 3 & 1) != 0)
     {
         this->resultScreenState = 16;
         this->frameTimer = 0;
@@ -1271,12 +1266,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     case 11:
         if (this->frameTimer == 60)
         {
-<<<<<<< HEAD:src/ResultScreen.cpp
-            if (g_Supervisor.CanSaveReplay() || (g_Supervisor.flags >> 3 & 1) != 0)
-=======
-            if (g_Supervisor.IsSlowMode() ||
-                (g_Supervisor.flags >> 3 & 1) != 0)
->>>>>>> bf9553f (rename cansavereplay to isslowmode):src/th07/ResultScreen.cpp
+            if (g_Supervisor.IsSlowMode() || (g_Supervisor.flags >> 3 & 1) != 0)
             {
                 interrupt = 19;
             }
