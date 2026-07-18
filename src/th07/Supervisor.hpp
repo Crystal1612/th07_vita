@@ -129,7 +129,7 @@ struct Supervisor
     void UpdateStartupTime();
     void UpdateTime();
 
-    i32 CanSaveReplay();
+    i32 IsSlowMode();
 
     static i32 __stdcall ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
                                             void *param_2);

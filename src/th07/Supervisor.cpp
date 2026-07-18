@@ -1492,7 +1492,7 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
 }
 
 // FUNCTION: TH07 0x0043a18d
-i32 Supervisor::CanSaveReplay()
+i32 Supervisor::IsSlowMode()
 {
     return g_GameManager.defaultCfg != NULL &&
            g_GameManager.defaultCfg->slowMode;

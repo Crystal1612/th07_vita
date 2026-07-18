@@ -408,7 +408,7 @@ address|name|type
 00439f4d|Supervisor::PlayAudio|function
 0043a05f|Supervisor::StopAudio|function
 0043a0d6|Supervisor::FadeOutMusic|function
-0043a18d|Supervisor::CanSaveReplay|function
+0043a18d|Supervisor::IsSlowMode|function
 0043a1bd|Supervisor::EnableFog|function
 0043a207|Supervisor::DisableFog|function
 0043a24e|Supervisor::SetRenderState|function
