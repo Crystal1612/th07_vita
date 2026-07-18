@@ -126,7 +126,7 @@ struct Supervisor
     void UpdateStartupTime();
     void UpdateTime();
 
-    i32 CanSaveReplay();
+    i32 IsSlowMode();
 
     i32 IsClearingBackbuffer()
     {

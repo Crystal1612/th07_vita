@@ -1163,7 +1163,7 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
     return 0;
 }
 
-i32 Supervisor::CanSaveReplay()
+i32 Supervisor::IsSlowMode()
 {
     return g_GameManager.defaultCfg != NULL && g_GameManager.defaultCfg->slowMode;
 }
