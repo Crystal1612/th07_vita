@@ -7,9 +7,9 @@
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
 
-struct RetryMenu
+struct PauseMenu
 {
-    RetryMenu();
+    PauseMenu();
 
     void OnDraw();
     i32 OnUpdate();
@@ -19,11 +19,11 @@ struct RetryMenu
     AnmVm menuSprites[10];
     AnmVm menuBackground;
 };
-C_ASSERT(sizeof(RetryMenu) == 0x194c);
+C_ASSERT(sizeof(PauseMenu) == 0x194c);
 
-struct PauseMenu
+struct RetryMenu
 {
-    PauseMenu();
+    RetryMenu();
 
     i32 OnUpdate();
     void OnDraw();
@@ -33,7 +33,7 @@ struct PauseMenu
     AnmVm menuSprites[6];
     AnmVm menuBackground;
 };
-C_ASSERT(sizeof(PauseMenu) == 0x101c);
+C_ASSERT(sizeof(RetryMenu) == 0x101c);
 
 struct AsciiManagerPopup
 {
@@ -135,8 +135,8 @@ struct AsciiManager
     i32 nextPopupIndex1;
     i32 nextPopupIndex2;
     i32 unused_74e4;
-    RetryMenu retryMenu;
     PauseMenu pauseMenu;
+    RetryMenu retryMenu;
     AnmVm vm;
     AsciiManagerPopup popups[723];
 };

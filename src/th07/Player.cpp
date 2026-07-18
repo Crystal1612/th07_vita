@@ -1861,7 +1861,7 @@ i32 Player::UpdateDeath()
                                                     1024);
             if ((i32)g_GameManager.globals->livesRemaining <= 0)
             {
-                g_GameManager.isInPauseMenu = 1;
+                g_GameManager.isInRetryMenu = 1;
             }
             else
             {
@@ -2282,7 +2282,7 @@ u32 Player::OnDrawHighPrio(Player *arg)
             arg->bombInfo.drawFocus(arg);
         }
     }
-    if (!g_GameManager.isInPauseMenu)
+    if (!g_GameManager.isInRetryMenu)
     {
         arg->playerSprite.pos.x =
             g_GameManager.arcadeRegionTopLeftPos.x + arg->positionCenter.x;

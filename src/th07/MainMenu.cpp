@@ -2771,7 +2771,7 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     // ZUN bloat: memset it twice just to be nice
     memset(mgr, 0, sizeof(MainMenu));
 
-    g_GameManager.isInRetryMenu = 0;
+    g_GameManager.isInPauseMenu = 0;
     mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
     mgr->calcChain->arg = mgr;
     mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;

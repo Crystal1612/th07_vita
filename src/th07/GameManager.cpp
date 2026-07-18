@@ -172,11 +172,11 @@ u32 GameManager::OnUpdate(GameManager *arg)
     u32 i;
     i32 csum;
 
-    if (arg->isInPauseMenu == 0 && arg->isInRetryMenu == 0 &&
+    if (arg->isInRetryMenu == 0 && arg->isInPauseMenu == 0 &&
         arg->demo == 0 &&
         (arg->slowModeSlowActive == 0 && WAS_PRESSED_RAW(TH_BUTTON_MENU)))
     {
-        arg->isInRetryMenu = 1;
+        arg->isInPauseMenu = 1;
         g_GameManager.arcadeRegionTopLeftPos.x = 32.0f;
         g_GameManager.arcadeRegionTopLeftPos.y = 16.0f;
         g_GameManager.arcadeRegionSize.x = 384.0f;
@@ -250,7 +250,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             g_GameManager.csumFloat = -9999.0f;
         }
     }
-    arg->notInMenu = !arg->isInPauseMenu && !arg->isInRetryMenu;
+    arg->notInMenu = !arg->isInRetryMenu && !arg->isInPauseMenu;
     for (i = 0; i < 2; i++)
     {
         if (arg->globals->rngFloat1[i] < 6543.0f ||
@@ -267,8 +267,8 @@ u32 GameManager::OnUpdate(GameManager *arg)
         }
     }
     g_Supervisor.d3dDevice->Clear(0, NULL, 2, g_Stage.skyFog.color.color, 1.0f, 0);
-    if (arg->isInRetryMenu == 1 || arg->isInRetryMenu == 2 ||
-        arg->isInPauseMenu)
+    if (arg->isInPauseMenu == 1 || arg->isInPauseMenu == 2 ||
+        arg->isInRetryMenu)
     {
         return CHAIN_CALLBACK_RESULT_BREAK;
     }
@@ -362,9 +362,9 @@ u32 GameManager::OnUpdate(GameManager *arg)
 // FUNCTION: TH07 0x0042e1d4
 u32 GameManager::OnDraw(GameManager *arg)
 {
-    if (arg->isInRetryMenu)
+    if (arg->isInPauseMenu)
     {
-        arg->isInRetryMenu = 2;
+        arg->isInPauseMenu = 2;
     }
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
@@ -736,7 +736,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->subrank = 0;
     arg->globals->pointItemsCollectedThisStage = 0;
     arg->globals->grazeInStage = 0;
-    arg->isInRetryMenu = 0;
+    arg->isInPauseMenu = 0;
     arg->currentStage = arg->currentStage + 1;
     if (!g_GameManager.replay)
     {
@@ -842,7 +842,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     }
     while (g_SoundPlayer.ProcessQueues())
         ;
-    arg->isInPauseMenu = 0;
+    arg->isInRetryMenu = 0;
     arg->notInMenu = 1;
     if (g_Supervisor.curState != 3)
     {

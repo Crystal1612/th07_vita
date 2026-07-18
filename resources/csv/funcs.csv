@@ -8,8 +8,8 @@ address|name|type
 00401390|GameManager::SetBombsRemainingAndComputeCsum|function
 00401400|AsciiManager::UpdateScripts|function
 004014a0|AsciiManager::AsciiManager|function
-00401690|RetryMenu::RetryMenu|function
-00401720|PauseMenu::PauseMenu|function
+00401690|PauseMenu::PauseMenu|function
+00401720|RetryMenu::RetryMenu|function
 004017b0|AsciiManager::IncrementCapped|function
 004017e0|AsciiManager::OnUpdate|function
 00401970|AsciiManager::OnDrawMenus|function
@@ -25,10 +25,10 @@ address|name|type
 004020b0|AsciiManager::DrawStrings|function
 004024f0|AsciiManager::CreatePopup1|function
 00402630|AsciiManager::CreatePopup2|function
-00402780|RetryMenu::OnUpdate|function
-00403a20|RetryMenu::OnDraw|function
-00403b60|PauseMenu::OnUpdate|function
-00404560|PauseMenu::OnDraw|function
+00402780|PauseMenu::OnUpdate|function
+00403a20|PauseMenu::OnDraw|function
+00403b60|RetryMenu::OnUpdate|function
+00404560|RetryMenu::OnDraw|function
 00404690|AsciiManager::DrawPopups|function
 00404e70|D3DXVec3Length|function
 00404eb0|D3DXVec3Cross|function
@@ -450,7 +450,7 @@ address|name|type
 0043d790|Player::DrawBulletExplosions|function
 0043d880|Player::UpdateFireBulletTimer|function
 0043d990|Player::StartFireBulletTimer|function
-0043d9e0|Player::CalcDamageToEnemy|function
+0043d9e0|Player::CheckCollisionWithEnemy|function
 0043e0a0|Player::CheckBombGraze|function
 0043e260|Player::CalcKillboxCollision|function
 0043e3b0|Player::CheckGraze|function

@@ -42,11 +42,11 @@ AsciiManager::AsciiManager()
 {
 }
 
-RetryMenu::RetryMenu()
+PauseMenu::PauseMenu()
 {
 }
 
-PauseMenu::PauseMenu()
+RetryMenu::RetryMenu()
 {
 }
 
@@ -66,7 +66,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     i32 i;
     AsciiManagerPopup *curPopup;
 
-    if (!g_GameManager.isInRetryMenu && !g_GameManager.isInPauseMenu)
+    if (!g_GameManager.isInPauseMenu && !g_GameManager.isInRetryMenu)
     {
         curPopup = arg->popups;
         for (i = 0; i < 723; i++, curPopup++)
@@ -84,13 +84,13 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
             }
         }
     }
-    else if (g_GameManager.isInRetryMenu)
-    {
-        arg->retryMenu.OnUpdate();
-    }
-    if (g_GameManager.isInPauseMenu)
+    else if (g_GameManager.isInPauseMenu)
     {
         arg->pauseMenu.OnUpdate();
+    }
+    if (g_GameManager.isInRetryMenu)
+    {
+        arg->retryMenu.OnUpdate();
     }
     arg->UpdateScripts();
     if (g_GameManager.demo)
@@ -113,8 +113,8 @@ u32 AsciiManager::OnDrawMenus(AsciiManager *arg)
 {
     arg->DrawStrings();
     arg->numStrings = 0;
-    arg->retryMenu.OnDraw();
     arg->pauseMenu.OnDraw();
+    arg->retryMenu.OnDraw();
     if (arg->vm.anmFileIdx != 0)
     {
         g_AnmManager->DrawNoRotation(&arg->vm);
@@ -135,8 +135,8 @@ void AsciiManager::InitializeVms()
     memset(&this->vm1, 0, sizeof(AnmVm));
     memset(&this->vm0, 0, sizeof(AnmVm));
     memset(&this->strings, 0, sizeof(this->strings));
-    memset(&this->retryMenu, 0, sizeof(RetryMenu));
     memset(&this->pauseMenu, 0, sizeof(PauseMenu));
+    memset(&this->retryMenu, 0, sizeof(RetryMenu));
     memset(&this->popups, 0, sizeof(this->popups));
     this->numStrings = 0;
     this->isGui = 0;
@@ -467,7 +467,7 @@ void AsciiManager::CreatePopup2(D3DXVECTOR3 *position, i32 value,
 }
 
 // FUNCTION: TH07 0x00402780
-i32 RetryMenu::OnUpdate()
+i32 PauseMenu::OnUpdate()
 {
     u32 i;
 
@@ -681,7 +681,7 @@ i32 RetryMenu::OnUpdate()
         if (this->numFrames >= 20)
         {
             this->curState = 0;
-            g_GameManager.isInRetryMenu = 0;
+            g_GameManager.isInPauseMenu = 0;
             for (i = 0; i < 10; i++)
             {
                 this->menuSprites[i].SetInvisible();
@@ -780,7 +780,7 @@ i32 RetryMenu::OnUpdate()
         if (this->numFrames >= 20)
         {
             this->curState = 0;
-            g_GameManager.isInRetryMenu = 0;
+            g_GameManager.isInPauseMenu = 0;
             g_Supervisor.curState = 1;
             for (i = 0; i < 10; i++)
             {
@@ -793,7 +793,7 @@ i32 RetryMenu::OnUpdate()
         if (this->numFrames >= 20)
         {
             this->curState = 0;
-            g_GameManager.isInRetryMenu = 0;
+            g_GameManager.isInPauseMenu = 0;
             g_Supervisor.curState = 10;
             for (i = 0; i < 10; i++)
             {
@@ -815,11 +815,11 @@ i32 RetryMenu::OnUpdate()
 }
 
 // FUNCTION: TH07 0x00403a20
-void RetryMenu::OnDraw()
+void PauseMenu::OnDraw()
 {
     u32 i;
 
-    if (g_GameManager.isInRetryMenu)
+    if (g_GameManager.isInPauseMenu)
     {
         g_AnmManager->Flush();
         g_Supervisor.viewport.X = (u32)g_GameManager.arcadeRegionTopLeftPos.x;
@@ -844,20 +844,20 @@ void RetryMenu::OnDraw()
 }
 
 // FUNCTION: TH07 0x00403b60
-i32 PauseMenu::OnUpdate()
+i32 RetryMenu::OnUpdate()
 {
     i32 i;
 
     if (g_GameManager.practice)
     {
-        g_GameManager.isInPauseMenu = 0;
+        g_GameManager.isInRetryMenu = 0;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         g_Supervisor.curState = 6;
         return 1;
     }
     if (g_GameManager.replay)
     {
-        g_GameManager.isInPauseMenu = 0;
+        g_GameManager.isInRetryMenu = 0;
         g_Supervisor.curState = 7;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         return 1;
@@ -865,7 +865,7 @@ i32 PauseMenu::OnUpdate()
     if ((i32)(u32)g_GameManager.globals->numRetries >= g_GameManager.maxRetries ||
         g_GameManager.difficulty >= 4)
     {
-        g_GameManager.isInPauseMenu = 0;
+        g_GameManager.isInRetryMenu = 0;
         g_Supervisor.curState = 6;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         return 1;
@@ -962,7 +962,7 @@ i32 PauseMenu::OnUpdate()
         {
             this->curState = 0;
             this->numFrames = 0;
-            g_GameManager.isInPauseMenu = 0;
+            g_GameManager.isInRetryMenu = 0;
             g_Supervisor.curState = 6;
             for (i = 0; i < 5; i++)
             {
@@ -978,7 +978,7 @@ i32 PauseMenu::OnUpdate()
         {
             this->curState = 0;
             this->numFrames = 0;
-            g_GameManager.isInPauseMenu = 0;
+            g_GameManager.isInRetryMenu = 0;
             for (i = 0; i < 5; i++)
             {
                 this->menuSprites[i].SetInvisible();
@@ -1041,11 +1041,11 @@ i32 PauseMenu::OnUpdate()
 }
 
 // FUNCTION: TH07 0x00404560
-void PauseMenu::OnDraw()
+void RetryMenu::OnDraw()
 {
     i32 i;
 
-    if (g_GameManager.isInPauseMenu)
+    if (g_GameManager.isInRetryMenu)
     {
         g_AnmManager->Flush();
         g_Supervisor.viewport.X = g_GameManager.arcadeRegionTopLeftPos.x;
