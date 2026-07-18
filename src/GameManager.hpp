@@ -212,8 +212,8 @@ struct GameManager
             u32 finished : 1;
         };
     };
-    u8 isInRetryMenu;
     u8 isInPauseMenu;
+    u8 isInRetryMenu;
     u8 demoIdx;
     u8 replayStage;
     i32 demoFrames;
