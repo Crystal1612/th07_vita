@@ -745,7 +745,7 @@ LAB_00456e08:
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-void MainMenu::SwapMapping(i16 btnPressed, i16 oldMapping, i16 idk)
+void MainMenu::SwapMapping(i16 btnPressed, i16 oldMapping)
 {
     if (this->controlMapping.shootButton == btnPressed)
     {
@@ -898,39 +898,39 @@ u32 MainMenu::OnUpdateKeyConfig()
             switch (this->cursor)
             {
             case 0:
-                SwapMapping(btnPressed, this->controlMapping.shootButton, 1);
+                SwapMapping(btnPressed, this->controlMapping.shootButton);
                 this->controlMapping.shootButton = btnPressed;
                 break;
             case 1:
-                SwapMapping(btnPressed, this->controlMapping.bombButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.bombButton);
                 this->controlMapping.bombButton = btnPressed;
                 break;
             case 2:
-                SwapMapping(btnPressed, this->controlMapping.focusButton, 1);
+                SwapMapping(btnPressed, this->controlMapping.focusButton);
                 this->controlMapping.focusButton = btnPressed;
                 break;
             case 4:
-                SwapMapping(btnPressed, this->controlMapping.menuButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.menuButton);
                 this->controlMapping.menuButton = btnPressed;
                 break;
             case 5:
-                SwapMapping(btnPressed, this->controlMapping.upButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.upButton);
                 this->controlMapping.upButton = btnPressed;
                 break;
             case 6:
-                SwapMapping(btnPressed, this->controlMapping.downButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.downButton);
                 this->controlMapping.downButton = btnPressed;
                 break;
             case 7:
-                SwapMapping(btnPressed, this->controlMapping.leftButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.leftButton);
                 this->controlMapping.leftButton = btnPressed;
                 break;
             case 8:
-                SwapMapping(btnPressed, this->controlMapping.rightButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.rightButton);
                 this->controlMapping.rightButton = btnPressed;
                 break;
             case 3:
-                SwapMapping(btnPressed, this->controlMapping.skipButton, 0);
+                SwapMapping(btnPressed, this->controlMapping.skipButton);
                 this->controlMapping.skipButton = btnPressed;
                 break;
             default:
@@ -2518,7 +2518,7 @@ ZunResult MainMenu::DeletedCallback(MainMenu *arg)
     return ZUN_SUCCESS;
 }
 
-ZunResult MainMenu::RegisterChain(u32 param_1)
+ZunResult MainMenu::RegisterChain()
 {
     MainMenu *mgr = new MainMenu;
 

@@ -46,7 +46,7 @@ RetryMenu::RetryMenu()
 
 void IncrementCapped(u32 *param, u32 cap)
 {
-    if (*param < 999999)
+    if (*param < cap)
     {
         (*param)++;
     }
@@ -176,6 +176,8 @@ ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
 
 ZunResult AsciiManager::DeletedCallback(AsciiManager *arg)
 {
+    (void)arg;
+
     g_AnmManager->ReleaseAnm(1);
     g_AnmManager->ReleaseAnm(2);
     g_AnmManager->ReleaseAnm(4);
@@ -264,7 +266,6 @@ void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position, const
 
 void AsciiManager::DrawStrings()
 {
-    i32 idk[3];
     f32 charWidth;
     i32 guiString;
     char *text;
@@ -1037,7 +1038,6 @@ void AsciiManager::DrawPopups()
     bool hasNonZeroDigit;
     i32 xInc;
     i32 cherry;
-    i32 unused[3];
     u8 *digits;
     i32 i;
     i32 j;

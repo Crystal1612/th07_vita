@@ -61,8 +61,6 @@ void GameWindow::Present()
 
 RenderResult GameWindow::Render()
 {
-    f64 timeDiff;
-    f64 curTime;
     f64 perfDiff;
     u64 perfCounter;
     i32 chainRes;
@@ -213,14 +211,11 @@ ZunResult GameWindow::InitRendering()
     ZunVec3 pEye;
     ZunVec3 pAt;
     ZunVec3 pUp;
-    char capsBuffer[8192];
     f32 fov;
     f32 aspectRatio;
     f32 halfWidth;
     f32 halfHeight;
     f32 halfCameraDistance;
-    bool usingD3dHal;
-    i32 retryWithoutRefreshRate;
 
     halfWidth = 320.0f;
     halfHeight = 240.0f;

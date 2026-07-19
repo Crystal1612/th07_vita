@@ -42,9 +42,7 @@ i32 MusicRoom::ProcessInput()
 {
     char local_54[66];
     i32 i;
-    i32 unusedListingOffset;
 
-    unusedListingOffset = this->listingOffset;
     if (WAS_PRESSED_RAW(TH_BUTTON_UP))
     {
         this->cursor--;

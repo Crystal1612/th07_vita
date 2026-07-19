@@ -54,6 +54,8 @@ void EnemyEclInstr::ExInsSetPosToBoss(Enemy *enemy, EclRawInstr *instr)
 
 void EnemyEclInstr::ExInsAliceCurveBullets(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+
     f32 local_10;
     Bullet *bullet;
     i32 i;
@@ -170,10 +172,14 @@ void EnemyEclInstr::ExInsTurnBulletsIntoOtherBullets(Enemy *enemy, EclRawInstr *
 
 void EnemyEclInstr::ExInsNoOp(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+    (void)instr;
 }
 
 void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
@@ -199,6 +205,8 @@ void EnemyEclInstr::ExInsDespawnLargeBulletAndSavePos(Enemy *enemy, EclRawInstr 
 
 void EnemyEclInstr::ExInsCopyMainBossMovement(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Enemy *boss = g_EnemyManager.bosses[0];
     enemy->moveInterpStartPos = boss->position;
     enemy->moveRadius = boss->moveRadius;
@@ -207,6 +215,8 @@ void EnemyEclInstr::ExInsCopyMainBossMovement(Enemy *enemy, EclRawInstr *instr)
 
 void EnemyEclInstr::ExInsSplitBulletsOrShootBackwards(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+
     Bullet *bullet = g_BulletManager.bullets;
     i32 i;
     EnemyBulletShooter bulletProps;
@@ -323,6 +333,8 @@ i32 IsPointInRotatedRect(ZunVec3 *point, ZunVec3 *center, ZunVec3 *size, ZunVec3
 
 void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     ZunVec3 center;
     f32 cosine;
     i32 i;
@@ -402,6 +414,8 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy, EclRawInstr *ins
 
 void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     ZunVec3 center;
     f32 cosine;
     i32 i;
@@ -490,12 +504,17 @@ void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy, EclRawInstr *instr
 
 void EnemyEclInstr::ExInsEffect1eAccel(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+    (void)instr;
+
     BombEffects::RegisterChain(1, 80, 8, 0, 0);
     EffectManager::ModifyEffect1eAcceleration();
 }
 
 void EnemyEclInstr::ExInsYoumuSetGameSpeed(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+
     Bullet *bullet;
     i32 i;
 
@@ -522,6 +541,8 @@ void EnemyEclInstr::ExInsYoumuSetGameSpeed(Enemy *enemy, EclRawInstr *instr)
 
 void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+
     Bullet *bullet;
     f32 fps;
     i32 i;
@@ -629,6 +650,8 @@ void EnemyEclInstr::ExInsBurstLargeBullets(Enemy *enemy, EclRawInstr *instr)
 
 void EnemyEclInstr::ExInsYoumuCurveBulletsBelow(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet;
     i32 i;
 
@@ -652,6 +675,9 @@ void EnemyEclInstr::ExInsYoumuCurveBulletsBelow(Enemy *enemy, EclRawInstr *instr
 
 void EnemyEclInstr::ExInsYoumuRedirectBulletsToPlayer(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+    (void)instr;
+
     Bullet *bullet;
     i32 i;
 
@@ -676,11 +702,15 @@ void EnemyEclInstr::ExInsYoumuRedirectBulletsToPlayer(Enemy *enemy, EclRawInstr 
 
 void EnemyEclInstr::ExInsFlashScreen(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+
     BombEffects::RegisterChain(3, instr->args[1].i, 1, 0xd0cfcfff, 0);
 }
 
 void EnemyEclInstr::ExInsYuyukoTransformButterflyBullets(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet = g_BulletManager.bullets;
     EnemyBulletShooter bulletProps;
     i32 i;
@@ -711,6 +741,8 @@ void EnemyEclInstr::ExInsYuyukoTransformButterflyBullets(Enemy *enemy, EclRawIns
 
 void EnemyEclInstr::ExInsYuyukoButterflySpawnEnemy(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     f32 angleOffset;
     EclContextArgs args;
     Bullet *bullet;
@@ -746,6 +778,8 @@ void EnemyEclInstr::ExInsYuyukoButterflySpawnEnemy(Enemy *enemy, EclRawInstr *in
 
 void EnemyEclInstr::ExInsYuyukoCountButterflyBullets(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet;
     i32 i;
 
@@ -831,11 +865,17 @@ void EnemyEclInstr::ExInsBurstLargeBullets2(Enemy *enemy, EclRawInstr *instr)
 
 void EnemyEclInstr::ExInsYuyukoFadeOutMusic(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+    (void)instr;
+
     g_Supervisor.FadeOutMusic(3.0f);
 }
 
 void EnemyEclInstr::ExInsYuyukoPlayResurrectionButterflyBgm(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)enemy;
+    (void)instr;
+
     if (g_Supervisor.PlayLoadedAudio(2) != ZUN_SUCCESS)
     {
         g_Supervisor.PlayAudio("bgm/th07_13b.mid");
@@ -844,6 +884,8 @@ void EnemyEclInstr::ExInsYuyukoPlayResurrectionButterflyBgm(Enemy *enemy, EclRaw
 
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet = g_BulletManager.bullets;
     u32 timerMod2;
     EnemyBulletShooter bulletProps;
@@ -909,6 +951,8 @@ void EnemyEclInstr::ExInsSpawnBulletsWithDirChange(Enemy *enemy, EclRawInstr *in
 
 void EnemyEclInstr::ExInsSpawnBulletsWithDirChange2(Enemy *enemy, EclRawInstr *instr)
 {
+    (void)instr;
+
     Bullet *bullet = g_BulletManager.bullets;
     i32 timerMod3;
     EnemyBulletShooter bulletProps;

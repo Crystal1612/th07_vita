@@ -27,11 +27,10 @@ struct MainMenu
 {
     MainMenu()
     {
-        i32 idk[2];
         memset(this, 0, sizeof(MainMenu));
     }
 
-    static ZunResult RegisterChain(u32 param_1);
+    static ZunResult RegisterChain();
 
     static ZunResult AddedCallback(MainMenu *arg);
     static ZunResult DeletedCallback(MainMenu *arg);
@@ -56,7 +55,7 @@ struct MainMenu
     i32 MoveCursorHorizontal(i32 max);
     i32 MoveCursorVertical(i32 max);
     ZunResult Release();
-    void SwapMapping(i16 btnPressed, i16 oldMapping, i16 idk);
+    void SwapMapping(i16 btnPressed, i16 oldMapping);
     ZunResult UpdateMenuDigits(AnmVm *param_1, i16 param_2);
     void SetGameState(GameState state);
 

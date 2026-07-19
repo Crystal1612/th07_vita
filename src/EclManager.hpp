@@ -181,7 +181,7 @@ struct EclManager
     static void MathLerp(Enemy *enemy, EclInterp *interp, f32 t);
     static void MathCubicInterp(Enemy *enemy, EclInterp *interp, f32 t);
     static void BeginSpellcard(Enemy *enemy, EclRawInstr *instr);
-    static void EndSpellcard(Enemy *enemy, EclRawInstr *instr);
+    static void EndSpellcard();
     ZunResult RunEcl(Enemy *enemy);
 
     EclRawHeader *eclFile;

@@ -186,7 +186,7 @@ struct Player
 
     void ActivateBorder();
     f32 AngleToPlayer(ZunVec3 *pos);
-    void BreakBorder(u32 unused);
+    void BreakBorder();
     void BreakBorderNaturally();
 
     i32 CalcItemBoxCollision(ZunVec3 *center, ZunVec3 *size);

@@ -104,6 +104,8 @@ i32 ShtData::FireBulletDefault(Player *player, PlayerBullet *bullet, i32 fireTim
 i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet, i32 fireTime,
                                     ShtEntry *shtEntry)
 {
+    (void)fireTime;
+
     i32 fireOffset = shtEntry->fireOffset;
 
     if (player->timers[fireOffset].bullet)
@@ -135,6 +137,8 @@ i32 ShtData::FireOrbBulletUnfocused(Player *player, PlayerBullet *bullet, i32 fi
 i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet, i32 fireTime,
                                   ShtEntry *shtEntry)
 {
+    (void)fireTime;
+
     i32 fireOffset = shtEntry->fireOffset;
 
     if (player->timers[fireOffset].bullet)
@@ -310,6 +314,8 @@ i32 ShtData::UpdateHomingBulletFocused(Player *player, PlayerBullet *bullet)
 
 i32 ShtData::UpdateUpwardAcceleratingBullet(Player *player, PlayerBullet *bullet)
 {
+    (void)player;
+
     if (bullet->bulletState == 1)
     {
         bullet->velocity.y = bullet->velocity.y - (g_Rng.GetRandomFloatInRange(0.1f) + 0.27f);
@@ -413,6 +419,8 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
 
 i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
 {
+    (void)player;
+
     i32 i;
     i32 origAlpha;
 
@@ -441,6 +449,8 @@ i32 ShtData::DrawBulletWithTrail(Player *player, PlayerBullet *bullet)
 
 i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet, ZunVec3 *pos)
 {
+    (void)player;
+
     f32 angle;
 
     if (bullet->bulletState == 2)
@@ -934,7 +944,7 @@ i32 Player::CalcKillboxCollision(ZunVec3 *center, ZunVec3 *size)
     g_ReplayManager->replayEventFlags = g_ReplayManager->replayEventFlags | 2;
     if (this->playerState == PLAYER_STATE_BORDER)
     {
-        g_Player.BreakBorder(0);
+        g_Player.BreakBorder();
         return 1;
     }
     if (this->playerState != PLAYER_STATE_ALIVE)
@@ -1058,7 +1068,7 @@ LASER_COLLISION:
     if (this->playerState == PLAYER_STATE_BORDER)
     {
         // this is already a member function of Player though
-        g_Player.BreakBorder(0);
+        g_Player.BreakBorder();
         return 1;
     }
     if (this->playerState != PLAYER_STATE_ALIVE)
@@ -1144,11 +1154,9 @@ i32 Player::HandlePlayerInputs()
     f32 optionOffsetY;
     f32 horizontalSpeed;
     f32 verticalSpeed;
-    PlayerDirection direction;
 
     horizontalSpeed = 0.0f;
     verticalSpeed = 0.0f;
-    direction = this->playerDirection;
     this->playerDirection = MOVEMENT_NONE;
 
     if (IS_PRESSED_GAME(TH_BUTTON_UP))
@@ -1582,7 +1590,7 @@ void Player::UpdateBorderAndBombState()
     if (this->hasBorder != BORDER_NONE && !this->bombInfo.isInUse &&
         IS_PRESSED_GAME(TH_BUTTON_BOMB))
     {
-        BreakBorder(1);
+        BreakBorder();
         this->isBombing = 0;
         g_ItemManager.RemoveAllItems();
     }
@@ -1662,7 +1670,7 @@ i32 Player::UpdateDeath()
     {
         if (this->hasBorder == BORDER_ACTIVE)
         {
-            BreakBorder(0);
+            BreakBorder();
             return 0;
         }
         this->respawnTimer--;
@@ -1972,7 +1980,7 @@ void Player::ActivateBorder()
     case PLAYER_STATE_DEAD:
         if (this->respawnTimer != 0)
         {
-            BreakBorder(0);
+            BreakBorder();
             return;
         }
 
@@ -2011,7 +2019,7 @@ void Player::ActivateBorder()
     }
 }
 
-void Player::BreakBorder(u32 unused)
+void Player::BreakBorder()
 {
     f32 angle;
     i32 i;
@@ -2326,6 +2334,8 @@ ZunResult Player::AddedCallback(Player *arg)
 
 ZunResult Player::DeletedCallback(Player *arg)
 {
+    (void)arg;
+
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {

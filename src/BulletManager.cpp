@@ -87,7 +87,6 @@ void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite, AnmVm *bulletType
 
 i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32 y, f32 angle)
 {
-    u32 unused;
     f32 bulletAngle;
     Bullet *bullet;
     i32 i;
@@ -126,11 +125,11 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32
     case 1:
         if ((bulletProps->count1 & 1U) != 0)
         {
-            bulletAngle += bulletProps->angle2 * (f32)((x + 1) / 2);
+            bulletAngle += bulletProps->angle2 * (f32)((i32)((x + 1) / 2));
         }
         else
         {
-            bulletAngle += (f32)(x / 2) * bulletProps->angle2 + bulletProps->angle2 * 0.5f;
+            bulletAngle += (f32)(i32)(x / 2) * bulletProps->angle2 + bulletProps->angle2 * 0.5f;
         }
         if ((x & 1U) != 0)
         {
@@ -231,7 +230,6 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32
         }
     }
 
-    unused = bulletProps->flags;
     if (bulletProps->flags & 2)
     {
         AnmVm::AssignVm(&bullet->sprites.spriteSpawnEffectFast,
@@ -1357,6 +1355,8 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
 
 ZunResult BulletManager::DeletedCallback(BulletManager *arg)
 {
+    (void)arg;
+
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {

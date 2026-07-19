@@ -102,7 +102,6 @@ u32 ReplayManager::OnUpdateDemoHighPrio(ReplayManager *arg)
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
 
-    i32 idk = 0;
     g_LastFrameGameInput = g_CurFrameGameInput;
     g_CurFrameGameInput = arg->replayInputs->frameNum;
     arg->replayInputs = arg->replayInputs + 1;
@@ -154,7 +153,8 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
         arg->data->head.version = 0x1100;
         arg->data->data.replayVersion = 256;
         arg->data->data.versionChar1 = 'b';
-        strcpy(arg->data->data.replayStr, "0100b");
+        memcpy(arg->data->data.replayStr, "0100", 4);
+        arg->data->data.versionChar2 = 'b';
         arg->data->data.exeSize = g_Supervisor.exeSize;
         arg->data->data.exeChecksum = g_Supervisor.exeChecksum;
         arg->data->data.difficulty = g_GameManager.difficulty;
@@ -224,7 +224,6 @@ ReplayFile *ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
 {
     ReplayFile *parsed;
     u8 *dataDecompressed;
-    ReplayFile *curData = data;
     u8 *csumPtr;
     i32 csum;
     u8 *curByte;
@@ -567,7 +566,6 @@ void ReplayManager::SaveReplay(const char *filename, char *replayName)
     i32 compressedSize;
     f32 slowdown;
     u8 *lpBuffer;
-    u32 bytesWritten;
     ReplayManager *mgr;
     i32 i;
 
@@ -711,7 +709,6 @@ void ReplayManager::SaveReplay2(const char *filename)
     i32 stageSize;
     i32 compressedSize;
     u8 *lpBuffer;
-    u32 bytesWritten;
     ReplayManager *mgr;
     i32 i;
 

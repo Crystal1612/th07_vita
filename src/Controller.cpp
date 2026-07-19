@@ -29,7 +29,7 @@ static const SDL_GameControllerButton g_DIToSDLButton[] = {
 
 u32 Controller::SetButton(u16 *outButtons, i32 controllerButton, u32 thButton)
 {
-    if (controllerButton < 0 || controllerButton >= ARRAY_SIZE(g_DIToSDLButton))
+    if (controllerButton < 0 || (size_t)controllerButton >= ARRAY_SIZE(g_DIToSDLButton))
     {
         return 0;
     }
@@ -145,7 +145,7 @@ u8 *Controller::GetControllerState()
         return g_ControllerData;
     }
 
-    for (i32 i = 0; i < ARRAY_SIZE(g_DIToSDLButton); ++i)
+    for (size_t i = 0; i < ARRAY_SIZE(g_DIToSDLButton); ++i)
     {
         if (SDL_GameControllerGetButton(g_Supervisor.controller, g_DIToSDLButton[i]))
         {

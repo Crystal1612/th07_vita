@@ -108,7 +108,6 @@ void BombData::ComputeBombCherryDrain(Player *player, i32 minCost, f32 scale)
 void BombData::BombReimuACalc(Player *player)
 {
     i32 j;
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;
@@ -558,7 +557,6 @@ void BombData::BombReimuBDraw(Player *player)
 
 void BombData::BombReimuBCalcFocus(Player *player)
 {
-    i32 unused[3];
     AnmVm *vm;
     i32 i;
 
@@ -631,7 +629,6 @@ void BombData::BombReimuBDrawFocus(Player *player)
 void BombData::BombMarisaACalc(Player *player)
 {
     f32 angle;
-    i32 unused[3];
     AnmVm *vm;
     i32 i;
 
@@ -729,7 +726,6 @@ void BombData::BombMarisaACalcFocus(Player *player)
 {
     f32 angle;
     i32 j;
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;
@@ -863,7 +859,6 @@ void BombData::BombMarisaBCalc(Player *player)
 {
     f32 accel;
     i32 j;
-    i32 unused[3];
     BombProjectile *projectile;
     f32 offset;
     PlayerBombSubInfo *subInfo;
@@ -977,7 +972,6 @@ void BombData::BombMarisaBDraw(Player *player)
 
 void BombData::BombMarisaBCalcFocus(Player *player)
 {
-    i32 unused[3];
     AnmVm *vm;
     i32 i;
 
@@ -1071,7 +1065,6 @@ void BombData::BombSakuyaACalc(Player *player)
 {
     i32 spawnsRemaining;
     f32 angle;
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;
@@ -1193,7 +1186,6 @@ void BombData::BombSakuyaADraw(Player *player)
 void BombData::BombSakuyaACalcFocus(Player *player)
 {
     f32 angle;
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;
@@ -1345,7 +1337,6 @@ void BombData::BombSakuyaADrawFocus(Player *player)
 
 void BombData::BombSakuyaBCalc(Player *player)
 {
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;
@@ -1460,7 +1451,6 @@ void BombData::BombSakuyaBDraw(Player *player)
 void BombData::BombSakuyaBCalcFocus(Player *player)
 {
     i32 j;
-    i32 unused[3];
     AnmVm *vm;
     PlayerBombSubInfo *subInfo;
     i32 i;

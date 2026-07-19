@@ -18,7 +18,7 @@ bool IsUtf8(const char *string)
     unsigned char curByte;
 
     size_t len = strlen(string);
-    for (i32 i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         curByte = string[i];
         if (charByteCounter == 1)

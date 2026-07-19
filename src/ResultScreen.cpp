@@ -110,7 +110,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     if (g_LastFileSize < sizeof(ScoreDatRaw))
     {
         Supervisor::DebugPrint("warning : score.dat size is short\r\n");
-        free(scoreData);
+        delete scoreData;
         goto RECREATE_SCORE;
     }
 
@@ -176,6 +176,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
             if (chunk->version == 1)
             {
                 parsedVrsm = (Vrsm *)chunk;
+                (void)parsedVrsm;
             }
         }
         if (chunk->th7kLen == 0)
@@ -1915,12 +1916,10 @@ ZunResult ResultScreen::DrawFinalStats()
         g_AsciiManager.color = color;
         rankingProbably = 0.0f;
 
-        // Please do not write code like this
-        clearPercent = g_GameManager.difficulty < DIFF_EXTRA
-                           ? (f32)g_GameManager.playTimeAll / 180621.0f
-                           : clearPercent = g_GameManager.difficulty == DIFF_EXTRA
-                                                ? (f32)g_GameManager.playTimeAll / 80000.0f
-                                                : (f32)g_GameManager.playTimeAll / 85000.0f;
+        clearPercent =
+            g_GameManager.difficulty < DIFF_EXTRA    ? (f32)g_GameManager.playTimeAll / 180621.0f
+            : g_GameManager.difficulty == DIFF_EXTRA ? (f32)g_GameManager.playTimeAll / 80000.0f
+                                                     : (f32)g_GameManager.playTimeAll / 85000.0f;
 
         pos = vm->pos;
         pos.x += 210.0f;
@@ -2035,6 +2034,8 @@ ZunResult ResultScreen::DrawFinalStats()
         {
             rankingProbably += 12.5f;
         }
+
+        (void)rankingProbably; // only for it to NEVER be used
 
         g_AsciiManager.color = 0xffffffff;
         break;
@@ -2222,11 +2223,11 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
                 }
                 else if (arg->frameTimer < 20)
                 {
-                    pos.y += (f32)((20 - arg->frameTimer) * 33 / 20);
+                    pos.y += (f32)((i32)((20 - arg->frameTimer) * 33 / 20));
                 }
                 else
                 {
-                    pos.y += (f32)((arg->frameTimer - 20) * 33 / 20);
+                    pos.y += (f32)((i32)((arg->frameTimer - 20) * 33 / 20));
                 }
             }
             if (arg->frameTimer >= 40)

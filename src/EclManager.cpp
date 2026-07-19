@@ -721,7 +721,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
+void EclManager::EndSpellcard()
 {
     i32 j;
     i32 newCsum;
@@ -829,10 +829,8 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
     ZunVec3 local_d8;
     ZunVec3 relEnemySpawnPos;
     AnyArg relSpawnInstrArgs[7];
-    Enemy *unusedEnemyRel;
     ZunVec3 absEnemySpawnPos;
     AnyArg absSpawnInstrArgs[7];
-    Enemy *unusedEnemyAbs;
     ZunVec3 pointItemPos;
     i32 pointItemIdx;
     i32 numPointItems;
@@ -1615,7 +1613,7 @@ restart:
                 BeginSpellcard(enemy, instr);
                 break;
             case 91:
-                EndSpellcard(enemy, instr);
+                EndSpellcard();
                 break;
             case 111:
                 enemy->timer = GET_INT_VALUE(enemy, 0);
@@ -1724,10 +1722,10 @@ restart:
                     absEnemySpawnPos.x = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 1, 1);
                     absEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 2, 2);
                     absEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, absSpawnInstrArgs, 3, 3);
-                    unusedEnemyAbs = g_EnemyManager.SpawnEnemyEx(
-                        absSpawnInstrArgs[0].i, &absEnemySpawnPos, GET_INT_VALUE(enemy, 4),
-                        GET_INT_VALUE(enemy, 5), GET_INT_VALUE(enemy, 6),
-                        &enemy->currentContext.eclContextArgs);
+                    g_EnemyManager.SpawnEnemyEx(absSpawnInstrArgs[0].i, &absEnemySpawnPos,
+                                                GET_INT_VALUE(enemy, 4), GET_INT_VALUE(enemy, 5),
+                                                GET_INT_VALUE(enemy, 6),
+                                                &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 93:
@@ -1738,10 +1736,10 @@ restart:
                     relEnemySpawnPos.y = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 2, 2);
                     relEnemySpawnPos.z = GET_FLOAT_VALUE_D(enemy, relSpawnInstrArgs, 3, 3);
                     relEnemySpawnPos += enemy->position;
-                    unusedEnemyRel = g_EnemyManager.SpawnEnemyEx(
-                        relSpawnInstrArgs[0].i, &relEnemySpawnPos, GET_INT_VALUE(enemy, 4),
-                        GET_INT_VALUE(enemy, 5), GET_INT_VALUE(enemy, 6),
-                        &enemy->currentContext.eclContextArgs);
+                    g_EnemyManager.SpawnEnemyEx(relSpawnInstrArgs[0].i, &relEnemySpawnPos,
+                                                GET_INT_VALUE(enemy, 4), GET_INT_VALUE(enemy, 5),
+                                                GET_INT_VALUE(enemy, 6),
+                                                &enemy->currentContext.eclContextArgs);
                 }
                 break;
             case 94:

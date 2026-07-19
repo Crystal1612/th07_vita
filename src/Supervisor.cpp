@@ -161,7 +161,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
         case 0:
         CASE_0:
             arg->curState = 1;
-            if (MainMenu::RegisterChain(0) != ZUN_SUCCESS)
+            if (MainMenu::RegisterChain() != ZUN_SUCCESS)
             {
                 return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
             }
@@ -277,7 +277,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                 arg->curState = 0;
                 ReplayManager::SaveReplay(NULL, NULL);
                 arg->curState = 1;
-                if (MainMenu::RegisterChain(1) != ZUN_SUCCESS)
+                if (MainMenu::RegisterChain() != ZUN_SUCCESS)
                 {
                     return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
                 }
@@ -345,6 +345,8 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
 
 u32 Supervisor::OnDraw(Supervisor *arg)
 {
+    (void)arg;
+
     DrawFpsCounter(1);
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
@@ -394,7 +396,6 @@ i32 Supervisor::CheckVSync()
 {
     f32 fpsSum;
     i32 j;
-    f32 unused;
     f32 fps;
     i32 timeDiff;
     u64 timeEnd;
@@ -427,7 +428,6 @@ i32 Supervisor::CheckVSync()
         }
         else if (timeDiff >= 500)
         {
-            unused = (f32)timeDiff / 1000.0f;
             fps = frameCount * 1000.0f / (f32)timeDiff;
             if (fps >= 57.0f)
             {
@@ -858,10 +858,8 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
 ZunResult Supervisor::LoadConfig(const char *configFilename)
 {
     i32 bgmData[4];
-    u32 bytesRead;
     FILE *bgm;
     i32 bgm2Data[4];
-    u32 bytesRead2;
     FILE *bgm2;
     u32 *configFile;
 

@@ -124,8 +124,6 @@ void EnemyManager::Initialize()
 
 EnemyManager::EnemyManager()
 {
-    i32 idk[8];
-
     Initialize();
 }
 
@@ -1305,7 +1303,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                     {
                         uvDiff =
                             enemy->primaryVm.sprite->uvEnd.x - enemy->primaryVm.sprite->uvStart.x;
-                        uvStep = uvDiff / (f32)((vertexCount + 1) / 2 - 1);
+                        uvStep = uvDiff / (f32)(i32)((vertexCount + 1) / 2 - 1);
                         currentUvX =
                             enemy->primaryVm.sprite->uvEnd.x + enemy->primaryVm.uvScrollPos.x;
                         trailVert = enemy->trailVertices;
@@ -1409,9 +1407,6 @@ u32 EnemyManager::OnDraw2(EnemyManager *arg)
 
 ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 {
-    Enemy *enemy;
-
-    enemy = &arg->enemies[0];
     if (arg->stgEnmAnmFilename && g_AnmManager->LoadAnms(ANM_FILE_ENEMY, arg->stgEnmAnmFilename,
                                                          ANM_OFFSET_ENEMY) != ZUN_SUCCESS)
     {
@@ -1437,6 +1432,8 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 
 ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
 {
+    (void)arg;
+
     g_AnmManager->ReleaseAnm(16);
     g_AnmManager->ReleaseAnm(15);
     ZunVec3 vec = ZunVec3(-999.0f, -999.0f, -999.0f);

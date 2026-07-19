@@ -442,6 +442,7 @@ i32 EffectManager::UpdateAttachToCamera(Effect *effect)
 
 i32 EffectManager::UpdateNoOp(Effect *effect)
 {
+    (void)effect;
     return 1;
 }
 
@@ -571,6 +572,8 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, ZunVec3 *pos, ZunVec3 
 Effect *EffectManager::SpawnEffect(i32 effectId, ZunVec3 *pos, i32 param_3, i32 param_4,
                                    u32 color)
 {
+    (void)param_4;
+
     Effect *effect;
 
     effect = &this->effects[param_3 + 400];
@@ -869,6 +872,8 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
 
 ZunResult EffectManager::DeletedCallback(EffectManager *arg)
 {
+    (void)arg;
+
     g_AnmManager->ReleaseAnm(17);
     g_AnmManager->ReleaseAnm(18);
     g_AnmManager->ReleaseAnm(19);

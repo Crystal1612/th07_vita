@@ -52,6 +52,7 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *srcLen)
     u8 inBitMask = 0x80;
     u32 curByte = 0;
     u32 checksum = 0;
+    (void)checksum;
 
     u8 *dst = (u8 *)malloc(dstLen * 2);
     if (dst == NULL)
@@ -210,6 +211,7 @@ u8 *Lzss::Decompress(u8 *src, i32 srcLen, u8 *dst, u32 decompressedSize)
     u8 inBitMask = 0x80;
     u32 curByte = 0;
     u32 checksum = 0;
+    (void)checksum;
     i32 size = srcLen;
 
     if (dst == NULL)
@@ -308,8 +310,8 @@ i32 Lzss::InsertNode(i32 node, i32 *matchPosition)
     {
         for (i = 0; i < 0x12; i++)
         {
-            delta = (u32)g_LzssDictionary[node + i & 0x1fff] -
-                    (u32)g_LzssDictionary[testNode + i & 0x1fff];
+            delta = (u32)g_LzssDictionary[(node + i) & 0x1fff] -
+                    (u32)g_LzssDictionary[(testNode + i) & 0x1fff];
             if (delta != 0)
             {
                 break;

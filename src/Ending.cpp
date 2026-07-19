@@ -156,9 +156,7 @@ ZunResult Ending::ParseEndFile()
     i32 i;
     i32 local_58;
     char local_54[68];
-    i32 lineDisplayed;
 
-    lineDisplayed = 0;
     local_58 = 0;
     memset(local_54, 0, sizeof(local_54));
     if (this->timer3 > 0)
@@ -246,7 +244,6 @@ ZunResult Ending::ParseEndFile()
                     return ZUN_ERROR;
                 }
                 local_58 = 0;
-                lineDisplayed = 0;
                 for (execOuter = 0; execOuter < 6; execOuter++)
                 {
                     for (execInner = 0; execInner < 4; execInner++)
@@ -421,10 +418,8 @@ ZunResult Ending::AddedCallback(Ending *arg)
 {
     i32 i;
     u32 shotType;
-    u32 unusedShotType;
     const char *endingPath;
 
-    unusedShotType = g_GameManager.shotTypeAndCharacter;
     g_GameManager.finished = 1;
     g_Supervisor.isInEnding = 1;
     g_AnmManager->LoadAnms(ANM_FILE_STAFF, "data/staff01.anm", ANM_OFFSET_STAFF);

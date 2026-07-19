@@ -342,7 +342,6 @@ u32 GameManager::OnDraw(GameManager *arg)
 
 void GameManager::DrawLoadingSprite()
 {
-    i32 unused[3];
     ZunVec3 spritePos;
     AnmVm spriteVm;
     ZunRect rect;
@@ -466,7 +465,7 @@ ZunResult ResultScreen::ParseScores()
 void IncrementCappedAgain(u32 *param, u32 cap)
 {
     // cap seemingly completely unused here
-    if (*param < 999999)
+    if (*param < cap)
     {
         (*param)++; // otherwise duplicate of incrementcapped from asciimanager
     }
@@ -912,7 +911,6 @@ void GameManager::AddCherry(i32 amount)
 
 void GameManager::IncreaseCherry(i32 amount)
 {
-    i32 idk = this->cherry;
     this->cherry = this->cherry + amount;
     if (this->cherry > this->cherryMax)
     {

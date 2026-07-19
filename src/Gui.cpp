@@ -433,7 +433,7 @@ ZunResult Gui::ActualAddedCallback()
             for (j = 0; j < 12; j++)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->transitionQuads[i * 12 + j],
-                                                        (i + j & 1) + 1830);
+                                                        ((i + j) & 1) + 1830);
                 this->impl->transitionQuads[i * 12 + j].intVars2[0] = i + j * 2;
                 this->impl->transitionQuads[i * 12 + j].pos.x = (f32)j * 32.0f + 16.0f;
                 this->impl->transitionQuads[i * 12 + j].pos.y = (f32)i * 32.0f + 16.0f;
@@ -643,8 +643,6 @@ ZunResult Gui::ActualAddedCallback()
 
 ZunResult Gui::LoadMsg(const char *param_1)
 {
-    i32 i;
-
     FreeMsgFile();
     this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(param_1, 0);
     if (!this->impl->msg.msgFile)
@@ -958,7 +956,7 @@ ZunResult GuiImpl::RunMsg()
             else
             {
                 if (g_GameManager.currentStage == 8 &&
-                    g_GameManager.globals->score != g_ReplayManager->data->data.score)
+                    g_GameManager.globals->score != (u32)g_ReplayManager->data->data.score)
                 {
                     ReplayManager::SaveReplay2(g_GameManager.replayFilename);
                 }
@@ -1685,7 +1683,7 @@ void Gui::DrawStageElements()
             healthBarRect.left = (f32)j * 26.0f / (f32)secondsRemaining + 35.0f;
             healthBarRect.right =
                 (f32)(j + 1) * 26.0f / (f32)secondsRemaining + 35.0f - (f32)markerGap;
-            color1 = this->bossHealthBarAlpha << 24 | 0xffffff - j * 255 / 9;
+            color1 = this->bossHealthBarAlpha << 24 | (0xffffff - j * 255 / 9);
             color2 = this->bossHealthBarAlpha << 24 | 0x202020;
             ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
         }

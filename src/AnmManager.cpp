@@ -68,8 +68,6 @@ AnmManager::~AnmManager()
 
 void AnmManager::SetupVertexBuffer()
 {
-    RenderVertexInfo *vertexData;
-
     this->vertexBufferContents[2].position.x = -128.0f;
     this->vertexBufferContents[0].position.x = -128.0f;
     this->vertexBufferContents[3].position.x = 128.0f;
@@ -105,8 +103,7 @@ void AnmManager::SetupVertexBuffer()
     g_Quad3DFallback[3].textureUV.y = this->vertexBufferContents[3].textureUV.y;
 }
 
-ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx,
-                                  u32 colorKey)
+ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath, u32 colorKey)
 {
     u8 *srcData;
 
@@ -153,12 +150,9 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath, i32 f
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
-                                          u32 formatIdx)
+ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo)
 {
     SDL_Surface *surface;
-    i32 i;
-    ZunImageInfoEmbedded *info;
 
     ReleaseTexture(textureIdx);
 
@@ -219,8 +213,7 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath,
-                                              i32 formatIdx, u32 colorKey)
+ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath)
 {
     u8 *data;
 
@@ -260,7 +253,6 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     }
 
     u8 *alphaPixels = (u8 *)converted->pixels;
-    u32 totalPixels = converted->w * converted->h;
 
     for (u32 y = 0; y < this->textureHeights[textureIdx]; y++)
     {
@@ -282,7 +274,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     return ZUN_SUCCESS;
 }
 
-ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat)
+ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height)
 {
     ReleaseTexture(textureIdx);
     this->textures[textureIdx] = g_Supervisor.gfxDevice->CreateTexture();
@@ -370,11 +362,11 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
         name = (char *)((u8 *)data + data->nameOffset);
         if (*name == '@')
         {
-            CreateEmptyTexture(data->textureIdx, data->width, data->height, data->format);
+            CreateEmptyTexture(data->textureIdx, data->width, data->height);
         }
         else
         {
-            if (LoadTexture(data->textureIdx, name, data->format, data->color_key) != ZUN_SUCCESS)
+            if (LoadTexture(data->textureIdx, name, data->format) != ZUN_SUCCESS)
             {
                 g_GameErrorContext.Fatal(
                     "テクスチャ %s が読み込めません。データが失われてるか壊れています\n", name);
@@ -384,7 +376,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
         if (data->mipmapNameOffset != 0)
         {
             name = (char *)((u8 *)data + data->mipmapNameOffset);
-            if (LoadTextureAlphaChannel(data->textureIdx, name, data->format, data->color_key) !=
+            if (LoadTextureAlphaChannel(data->textureIdx, name) !=
                 ZUN_SUCCESS)
             {
                 g_GameErrorContext.Fatal(
@@ -396,8 +388,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
     else
     {
         if (LoadTextureEmbedded(data->textureIdx,
-                                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
-                                data->format) != ZUN_SUCCESS)
+                                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset)) != ZUN_SUCCESS)
         {
             g_GameErrorContext.Fatal(
                 "テクスチャが読み込めません。データが失われてるか壊れています\n");
@@ -565,8 +556,6 @@ ZunResult AnmManager::SetActiveSprite(AnmVm *vm, i32 spriteIdx)
 
 void AnmManager::SetAndExecuteScript(AnmVm *vm, AnmRawInstr *beginningOfScript)
 {
-    i32 idk;
-
     if (!beginningOfScript)
     {
         memset(vm, 0, sizeof(AnmVm));
@@ -634,8 +623,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         g_Quad3DFallback[2].diffuse = color;
         g_Quad3DFallback[3].diffuse = color;
     }
-    if (!g_Supervisor.cfg.disableZBuffer &&
-        (u32)this->currentZWriteDisable != vm->zWriteDisable)
+    if (!g_Supervisor.cfg.disableZBuffer && (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
         g_Supervisor.gfxDevice->SetDepthMask(this->currentZWriteDisable == 0);
@@ -672,16 +660,13 @@ void AnmManager::SyncRenderState(AnmVm *vm)
             g_Supervisor.gfxDevice->SetBlendMode(BLEND_ALPHA, BLEND_ONE);
         }
     }
-    if (!g_Supervisor.cfg.disableZBuffer &&
-        (u32)this->currentZWriteDisable != vm->zWriteDisable)
+    if (!g_Supervisor.cfg.disableZBuffer && (u32)this->currentZWriteDisable != vm->zWriteDisable)
     {
         this->currentZWriteDisable = vm->zWriteDisable;
         g_Supervisor.gfxDevice->SetDepthMask(this->currentZWriteDisable == 0);
     }
     this->renderStateChangesThisFrame++;
 }
-
-static const f32 g_ZeroPointFive = 0.5;
 
 ZunResult AnmManager::DrawInner(AnmVm *vm, u32 drawFlags)
 {
@@ -863,8 +848,8 @@ ZunResult AnmManager::DrawNoRotation(AnmVm *vm)
     return DrawInner(vm, 1);
 }
 
-void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width, f32 height,
-                                   f32 sine, f32 cosine, f32 xOffset, f32 yOffset)
+void AnmManager::TranslateRotation(VertexTex1DiffuseXyzrhw *vertex, f32 width, f32 height, f32 sine,
+                                   f32 cosine, f32 xOffset, f32 yOffset)
 {
     vertex->pos.x = width * cosine - height * sine + xOffset;
     vertex->pos.y = width * sine + height * cosine + yOffset;
@@ -1553,7 +1538,7 @@ WHY_NOT_JUST_CONTINUE:
                     (i32)vm->pendingInterrupt != instr->args[0].i) &&
                    instr->opcode != ANM_EXIT_HIDE)
             {
-                if (instr->opcode == ANM_INTERRUPT_LABEL && instr->args[0].i == 0xffffffff)
+                if (instr->opcode == ANM_INTERRUPT_LABEL && instr->args[0].i == -1)
                 {
                     nextInstr = instr;
                 }
@@ -2419,7 +2404,7 @@ ZunResult AnmManager::UpdateTrail(AnmVm *vm, VertexTex1DiffuseXyzrhw *vertices, 
     num = vm->sprite->uvEnd.x - vm->sprite->uvStart.x;
     uvY = vm->sprite->uvStart.y + vm->uvScrollPos.y;
     vertex = vertices;
-    fVar4 = num / (f32)((count + 1) / 2 - 1);
+    fVar4 = num / (f32)((i32)((count + 1) / 2) - 1);
 
     for (i = 0, uvX = startuvX; i < count; i += 2, vertex += 2, uvX = uvX - fVar4)
     {

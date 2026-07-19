@@ -140,8 +140,6 @@ struct ScoreListNode
 {
     ScoreListNode()
     {
-        i32 unused[4];
-
         prev = NULL;
         next = NULL;
         data = NULL;

@@ -153,7 +153,7 @@ static ma_result ThBgmDataSource_seek(ma_data_source *pDataSource, ma_uint64 fra
     ma_uint32 frameSize = ma_get_bytes_per_frame(pBgm->format, pBgm->channels);
     ma_uint64 targetByteOffset = frameIndex * frameSize;
 
-    if (targetByteOffset < pBgm->pFmt->totalLength)
+    if (targetByteOffset < (ma_uint64)pBgm->pFmt->totalLength)
     {
         pBgm->currentOffset = (u32)targetByteOffset;
         if (!pBgm->isMemory && pBgm->file)
@@ -272,9 +272,13 @@ static ma_result ThBgmDataSource_get_length(ma_data_source *pDataSource, ma_uint
     return MA_SUCCESS;
 }
 
-static ma_data_source_vtable g_ThBgmDataSourceVtable = {
-    ThBgmDataSource_read, ThBgmDataSource_seek, ThBgmDataSource_get_format,
-    ThBgmDataSource_get_cursor, ThBgmDataSource_get_length};
+static ma_data_source_vtable g_ThBgmDataSourceVtable = {ThBgmDataSource_read,
+                                                        ThBgmDataSource_seek,
+                                                        ThBgmDataSource_get_format,
+                                                        ThBgmDataSource_get_cursor,
+                                                        ThBgmDataSource_get_length,
+                                                        NULL,
+                                                        0};
 
 static void InitBgmData(ThBgmDataSource *pBgm, ThBgmFormat *pFmt)
 {
@@ -706,6 +710,8 @@ ZunResult SoundPlayer::InitSoundBuffers()
 
 void SoundPlayer::PlaySoundByIdx(i32 idx, u32 param_2)
 {
+    (void)param_2;
+
     i32 iVar1;
     i32 i;
 

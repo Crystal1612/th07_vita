@@ -256,6 +256,9 @@ void SoftwareGraphics::DeleteTexture(GfxTextureHandle handle)
 void SoftwareGraphics::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelDataType type,
                                        const void *data)
 {
+    (void)fmt;
+    (void)type;
+
     auto &tex = textures[currentTexture];
     tex.width = width;
     tex.height = height;
@@ -536,12 +539,6 @@ void SoftwareGraphics::DrawTriangle(const SoftwareVertex &v0, SoftwareVertex &v1
                         (i32)std::ceil(std::max({v0.y, v1.y, v2.y})));
 
     bool useTex = v0.textured && currentTexture != 0;
-    auto it = textures.find(currentTexture);
-    SoftTexture *tex = nullptr;
-    if (useTex && it != textures.end())
-    {
-        tex = &it->second;
-    }
 
     for (i32 y = minY; y <= maxY; ++y)
     {

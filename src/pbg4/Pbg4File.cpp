@@ -30,7 +30,6 @@ Pbg4File::~Pbg4File()
 
 bool Pbg4File::Open(const char *path, const char *mode)
 {
-    u32 local_118;
     char local_114[264];
     i32 local_c;
     const char *local_8;
@@ -42,21 +41,18 @@ bool Pbg4File::Open(const char *path, const char *mode)
         if (*local_8 == 'r')
         {
             this->access = "rb";
-            local_118 = 3;
             break;
         }
         if (*local_8 == 'w')
         {
             remove(path);
             this->access = "wb";
-            local_118 = 2;
             break;
         }
         if (*local_8 == 'a')
         {
             local_c = 1;
             this->access = "ab";
-            local_118 = 4;
             break;
         }
     }

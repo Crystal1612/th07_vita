@@ -125,7 +125,7 @@ struct AnmManager
     void CalcProjectedTransform(AnmVm *vm);
     void CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y);
     void CopyTexture(i32 dstIdx, i32 srcIdx, SDL_Rect *dstRect, SDL_Rect *srcRect);
-    ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat);
+    ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height);
     ZunResult Draw(AnmVm *vm);
     ZunResult DrawBillboard(AnmVm *vm);
     ZunResult Draw3(AnmVm *vm);
@@ -149,10 +149,9 @@ struct AnmManager
     i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
     void LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
-    ZunResult LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx, u32 colorKey);
-    ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath, i32 formatIdx,
-                                      u32 colorKey);
-    ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo, u32 formatIdx);
+    ZunResult LoadTexture(i32 textureIdx, const char *texturePath, u32 colorKey);
+    ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath);
+    ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo);
     ZunResult PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex);
     void ReleaseAnm(i32 anmIdx);
     void ReleaseSurface(i32 surfaceIdx);

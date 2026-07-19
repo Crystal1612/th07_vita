@@ -569,7 +569,6 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     i32 i;
     ZunRect local_1c;
     i32 alpha;
-    f32 fog;
 
     if (arg->spellCardState <= 1)
     {
@@ -840,7 +839,6 @@ ZunResult Stage::UpdateObjects()
     AnmVm *vm;
     i32 i;
     i32 vmCount;
-    StdRawQuadBasic *local_8;
 
     for (i = 0; i < this->objectsCount; i++)
     {
@@ -858,7 +856,6 @@ ZunResult Stage::UpdateObjects()
                     g_AnmManager->ExecuteScript(vm);
                     break;
                 case 1:
-                    local_8 = quad;
                     g_AnmManager->ExecuteScript(vm);
                     break;
                 }
@@ -883,7 +880,6 @@ i32 Stage::RenderObjects(i32 zLevel)
     f32 var_98;
     ZunVec3 projectSrc;
     f32 radius;
-    i32 didDraw;
     StdRawQuadBasic *curQuad;
     ZunVec3 diffPos;
     ZunVec3 quadPos;
@@ -893,12 +889,9 @@ i32 Stage::RenderObjects(i32 zLevel)
     ZunMatrix worldMatrix;
     i32 fogState;
     StdRawInstance *instance;
-    i32 instancesDrawn;
     AnmVm *curQuadVm;
 
     instance = this->objectInstances;
-    instancesDrawn = 0;
-    didDraw = 0;
     projectSrc.x = 0.0f;
     projectSrc.y = 0.0f;
     projectSrc.z = 0.0f;
@@ -939,7 +932,6 @@ i32 Stage::RenderObjects(i32 zLevel)
                 else
                 {
                     obj->flags |= 2;
-                    didDraw = 1;
 
                     while (curQuad->type >= 0)
                     {
@@ -1067,7 +1059,6 @@ i32 Stage::RenderObjects(i32 zLevel)
                     skip_draw:
                         curQuad = (StdRawQuadBasic *)((u8 *)curQuad + curQuad->byteSize);
                     }
-                    instancesDrawn++;
                 }
             }
         }

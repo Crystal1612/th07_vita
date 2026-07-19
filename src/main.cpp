@@ -28,6 +28,9 @@ void AnmManager::TakeScreenshotIfRequested()
 
 int main(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     i32 res;
 
     res = RENDER_RESULT_KEEP_RUNNING;
