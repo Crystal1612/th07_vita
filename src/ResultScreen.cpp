@@ -417,9 +417,10 @@ ZunResult ResultScreen::ParsePlst(ScoreDat *scoreDat, Plst *outPlst)
 
 void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
 {
+    free(scoreDat->decodedData);
     FreeAllScores(scoreDat->scores);
-    free(scoreDat->scores);
-    free(scoreDat);
+    delete scoreDat->scores;
+    delete scoreDat;
 }
 
 void ResultScreen::WriteScore()

@@ -166,13 +166,13 @@ u8 *Lzss::Compress(u8 *src, i32 dstLen, i32 *srcLen)
 #define DEC_HANDLE_FETCH_NEW_BYTE()                                                                \
     if (inBitMask == 0x80)                                                                         \
     {                                                                                              \
-        curByte = *srcCursor;                                                                      \
         if (srcCursor - src >= size)                                                               \
         {                                                                                          \
             curByte = 0;                                                                           \
         }                                                                                          \
         else                                                                                       \
         {                                                                                          \
+            curByte = *srcCursor;                                                                  \
             srcCursor++;                                                                           \
         }                                                                                          \
         checksum += curByte;                                                                       \
