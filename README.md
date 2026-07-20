@@ -9,7 +9,7 @@ This repository builds two executables, th07.exe (the main game) and custom.exe 
 
 The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect byte accuracy is an eventual goal.
 
-This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead.
+This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a desktop cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead. Also, see the [reallyportable branch](https://github.com/some100/th07/tree/reallyportable) for an even more portable version (including web builds and Android support).
 
 ## Building
 
