@@ -1,7 +1,4 @@
-# too lazy to get my ghidra project out of there
-*.gpr
 *.lock
-*.rep
 .venv*
 build
 thirdparty/*
