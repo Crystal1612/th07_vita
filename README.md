@@ -7,13 +7,13 @@ A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfe
 
 This repository builds two executables, th07.exe (the main game) and custom.exe (the configuration tool).
 
-The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect byte accuracy is an eventual goal.
+The game should be fully playable, given it is 100% implemented. The vast majority of functions are either functionally or completely matched with the original, but there are still a few (mostly constructors) that are not currently matching. The behavior of the program should be functionally identical to the original binary, but there may be bugs or differences not present within the original. Perfect functional accuracy is an eventual goal.
 
-This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a desktop cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead. Also, see the [reallyportable branch](https://github.com/some100/th07/tree/reallyportable) for an even more portable version (including web builds and Android support).
+This branch is for a matching decompilation only. It will not compile on any platform other than 32-bit Windows with the MSVC 2002 toolchain. For a desktop cross-platform port of the game, you can use the [portable branch](https://github.com/some100/th07/tree/portable) instead. Also, see the [reallyportable branch](https://github.com/some100/th07/tree/reallyportable) for an even more portable version (including iOS/Android support, macOS support, and web builds).
 
 ## Building
 
-This project requires the original th07.exe 1.00b executable for extracting the icon. Copy it to the resources directory of the repository. If building custom.exe, you will also need to place the original executable in resources/custom to extract icons as well.
+This project requires the original th07.exe 1.00b executable for extracting the icon. Copy it to the resources directory of the repository. If building custom.exe, you will also need to place the original executable in resources/custom.exe to extract icons as well.
 
 ### Dependencies
 
