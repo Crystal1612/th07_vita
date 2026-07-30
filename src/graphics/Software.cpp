@@ -45,6 +45,9 @@ ZunGraphics *SoftwareGraphics::Init()
     gfx->viewport.minZ = 0.0f;
     gfx->viewport.maxZ = 1.0f;
 
+    // vertex buffers? whats that?
+    g_Supervisor.cfg.noVertexBuffers = true;
+
     Supervisor::DebugPrint("using software rendering. this will be kinda hell\n");
 
     return gfx;
@@ -677,6 +680,11 @@ void SoftwareGraphics::DrawTriangle(const SoftwareVertex &v0, SoftwareVertex &v1
             }
         }
     }
+}
+
+void SoftwareGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primitiveCount)
+{
+    assert(false);
 }
 
 void SoftwareGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount,

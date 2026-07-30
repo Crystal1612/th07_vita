@@ -154,6 +154,7 @@ class ZunGraphics
     virtual void SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 height,
                                     const void *data) = 0;
     virtual void ReadPixels(i32 x, i32 y, i32 width, i32 height, void *pixels) = 0;
+    virtual void DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primitiveCount) = 0;
     virtual void DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const void *vertexData,
                                  i32 vertexStride) = 0;
     virtual void SwapBuffers() = 0;

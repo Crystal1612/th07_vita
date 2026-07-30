@@ -376,8 +376,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
         if (data->mipmapNameOffset != 0)
         {
             name = (char *)((u8 *)data + data->mipmapNameOffset);
-            if (LoadTextureAlphaChannel(data->textureIdx, name) !=
-                ZUN_SUCCESS)
+            if (LoadTextureAlphaChannel(data->textureIdx, name) != ZUN_SUCCESS)
             {
                 g_GameErrorContext.Fatal(
                     "テクスチャ %s が読み込めません。データが失われてるか壊れています\n", name);
@@ -388,7 +387,8 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffs
     else
     {
         if (LoadTextureEmbedded(data->textureIdx,
-                                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset)) != ZUN_SUCCESS)
+                                (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset)) !=
+            ZUN_SUCCESS)
         {
             g_GameErrorContext.Fatal(
                 "テクスチャが読み込めません。データが失われてるか壊れています\n");
@@ -1244,8 +1244,15 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
         this->currentVertexShader = 2;
     }
 
-    g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, g_Quad3DFallback,
-                                            sizeof(VertexTex1DiffuseXyz));
+    if (!g_Supervisor.cfg.noVertexBuffers)
+    {
+        g_Supervisor.gfxDevice->DrawPrimitive(PRIM_TRIANGLE_STRIP, 0, 2);
+    }
+    else
+    {
+        g_Supervisor.gfxDevice->DrawPrimitiveUP(PRIM_TRIANGLE_STRIP, 2, g_Quad3DFallback,
+                                                sizeof(VertexTex1DiffuseXyz));
+    }
     return ZUN_SUCCESS;
 }
 

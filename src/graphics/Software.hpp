@@ -77,6 +77,7 @@ class SoftwareGraphics : public ZunGraphics
                             const void *data) override;
 
     void ReadPixels(i32 x, i32 y, i32 width, i32 height, void *pixels) override;
+    void DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primitiveCount) override;
     void DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const void *vertexData,
                          i32 vertexStride) override;
 

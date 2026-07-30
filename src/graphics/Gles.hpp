@@ -56,6 +56,7 @@ class GlesGraphics : public ZunGraphics
                             const void *data) override;
 
     void ReadPixels(i32 x, i32 y, i32 width, i32 height, void *pixels) override;
+    void DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primitiveCount) override;
     void DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const void *vertexData,
                          i32 vertexStride) override;
 
@@ -71,6 +72,9 @@ class GlesGraphics : public ZunGraphics
     ZunColor textureFactor = {0xFFFFFFFF};
     ColorOp colorOpRgb = COLOR_OP_MODULATE;
     ColorOp colorOpAlpha = COLOR_OP_MODULATE;
+
+    GLuint unitQuadVao = 0;
+    GLuint unitQuadVbo = 0;
 
     ZunMatrix transforms[4];
     ZunViewport viewport;
