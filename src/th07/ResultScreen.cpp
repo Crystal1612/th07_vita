@@ -1332,6 +1332,13 @@ void ResultScreen::GetDate(char *outDate)
     time_t seconds;
     tm *timeinfo;
 
+    // ZUN bug: This is susceptible to the Year 2038 problem, meaning that your
+    // game will probably crash when this function is called (like saving a
+    // replay). This is because time_t here is a 32 bit signed integer, since
+    // it's compiling for a 32 bit target. After 03:14:07, January 19, 2038,
+    // UTC, the value stored in seconds will become negative. Passing this into
+    // localtime will give you a NULL pointer for timeinfo, which then becomes
+    // a null pointer dereference crash in strftime.
     time(&seconds);
     timeinfo = localtime(&seconds);
     // STRING: TH07 0x004967dc
