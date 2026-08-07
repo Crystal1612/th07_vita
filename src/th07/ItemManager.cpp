@@ -30,18 +30,18 @@ u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
 ItemManager g_ItemManager;
 
 // FUNCTION: TH07 0x004325c0
-void AngleToVector(D3DXVECTOR3 *vec, f32 angle, f32 speed)
+void Float3::FromAngleMagnitude(f32 angle, f32 magnitude)
 {
-    /* vec->x = cosf(angle) * speed;
-     * vec->y = sinf(angle) * speed;
+    /* this->x = cosf(angle) * magnitude;
+     * this->y = sinf(angle) * magnitude;
      */
     __asm {
-        mov eax, vec
+        mov eax, this
         fld [angle]
         fsincos
-        fmul [speed]
+        fmul [magnitude]
         fstp float ptr [eax]
-        fmul [speed]
+        fmul [magnitude]
         fstp float ptr [eax + 4]
     }
 }
@@ -74,7 +74,7 @@ Item::Item()
 
 #pragma var_order(i, item)
 // FUNCTION: TH07 0x004326f0
-Item *ItemManager::SpawnItem(D3DXVECTOR3 *heading, i32 itemType, i32 state)
+Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)
 {
     Item *item;
     i32 i;
@@ -159,8 +159,8 @@ void ItemManager::OnUpdate()
     i32 i;
 
     item = this->items;
-    D3DXVECTOR3 local_20(g_Player.shooterData->itemCollectRadius,
-                         g_Player.shooterData->itemCollectRadius, 16.0f);
+    Float3 local_20(g_Player.shooterData->itemCollectRadius,
+                    g_Player.shooterData->itemCollectRadius, 16.0f);
     itemAcquired = 0;
     this->activeItemCount = 0;
     this->listTail = &this->listHead;
@@ -186,7 +186,7 @@ void ItemManager::OnUpdate()
             }
             else if (item->timer == 60)
             {
-                item->startPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+                item->startPosition = Float3(0.0f, 0.0f, 0.0f);
                 item->state = 0;
             }
         }
@@ -197,7 +197,7 @@ void ItemManager::OnUpdate()
                 if (g_Player.playerState != 1)
                 {
                     playerAngle = g_Player.AngleToPlayer(&item->currentPosition);
-                    AngleToVector(&item->startPosition, playerAngle, g_Player.shooterData->itemCollectSpeed);
+                    item->startPosition.FromAngleMagnitude(playerAngle, g_Player.shooterData->itemCollectSpeed);
                     item->state = 1;
                     if (g_Player.hasBorder == 1)
                     {
@@ -542,7 +542,7 @@ void ItemManager::RemoveAllItems()
         }
 
         item->state = 1;
-        item->startPosition = D3DXVECTOR3(0.0f, -0.5f, 0.0f);
+        item->startPosition = Float3(0.0f, -0.5f, 0.0f);
     }
 }
 
