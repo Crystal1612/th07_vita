@@ -3,6 +3,16 @@
 #include "AnmVm.hpp"
 #include "ZunResult.hpp"
 
+typedef enum GuiDisplayArg
+{
+    GUI_DISPLAY_HIDDEN = 0,
+    GUI_DISPLAY_SHOWN = 1,
+    GUI_DISPLAY_FULL_POWER = 1,
+    GUI_DISPLAY_BORDER = 2,
+    GUI_DISPLAY_CHERRY_MAX = 3,
+    GUI_DISPLAY_BORDER_BONUS = 4,
+} GuiDisplayArg;
+
 // values from https://pytouhou.linkmauve.fr/doc/06/msg.xml
 typedef enum MsgOpcode
 {
@@ -80,7 +90,7 @@ struct GuiImplChildB
 {
     ZunVec3 pos;
     i32 fmtArg;
-    i32 isShown;
+    i32 displayArg;
     ZunTimer timer;
 };
 
@@ -138,7 +148,7 @@ struct GuiImpl
     i32 stageClearBonus;
     i32 transitionToScoreScreen;
     GuiImplChildB bonusScore;
-    GuiImplChildB fullPowerMode;
+    GuiImplChildB statusPopup;
     GuiImplChildB spellCardBonus;
     i32 clearPower;
     i32 clearPointItems;
@@ -173,7 +183,7 @@ struct Gui
     void EndPlayerSpellcard();
     void ShowBombNamePortrait(i32 sprite, const char *name);
     void ShowBonusScore(i32 score);
-    void ShowFullPowerMode(i32 fmtArg, i32 isShown);
+    void ShowStatusPopup(i32 fmtArg, i32 popupType);
     void ShowSpellcard(i32 spellcardSprite, const char *spellcardName);
     void ShowSpellcardBonus(i32 fmtArg);
     void UpdateGui();

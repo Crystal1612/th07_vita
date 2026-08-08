@@ -143,7 +143,7 @@ ZunGraphics *GlesGraphics::Init()
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
-                          (void *)offsetof(RenderVertexInfo, position));
+                          (void *)offsetof(RenderVertexInfo, pos));
     glDisableVertexAttribArray(1);
     glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
     glEnableVertexAttribArray(2);
@@ -207,7 +207,7 @@ ZunGraphics *GlesGraphics::Init()
     glBindVertexArray(gfx->vaos[1]);
     glBindBuffer(GL_ARRAY_BUFFER, gfx->vbo);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyz, position));
+                          (void *)offsetof(VertexTex1DiffuseXyz, pos));
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
                           (void *)offsetof(VertexTex1DiffuseXyz, diffuse));
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexStride,

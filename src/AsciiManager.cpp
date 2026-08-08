@@ -67,7 +67,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
                 continue;
             }
 
-            curPopup->position.y -= 0.5f * g_Supervisor.effectiveFramerateMultiplier;
+            curPopup->pos.y -= 0.5f * g_Supervisor.effectiveFramerateMultiplier;
             curPopup->timer++;
             if (curPopup->timer > 60)
             {
@@ -220,7 +220,7 @@ void AsciiManager::CutChain()
     g_Chain.Cut(&g_AsciiManagerOnDrawPopupsChain);
 }
 
-void AsciiManager::AddString(ZunVec3 *position, const char *text)
+void AsciiManager::AddString(ZunVec3 *pos, const char *text)
 {
     if (this->numStrings >= 256)
     {
@@ -236,7 +236,7 @@ void AsciiManager::AddString(ZunVec3 *position, const char *text)
     this->numStrings++;
 
     strcpy(curString->text, text);
-    curString->position = *position;
+    curString->pos = *pos;
     curString->color = this->color;
     curString->scale.x = this->scale.x;
     curString->scale.y = this->scale.y;
@@ -252,14 +252,14 @@ void AsciiManager::AddString(ZunVec3 *position, const char *text)
     }
 }
 
-void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *position, const char *fmt, ...)
+void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *pos, const char *fmt, ...)
 {
     char str[508];
     va_list args;
 
     va_start(args, fmt);
     vsprintf(str, fmt, args);
-    manager->AddString(position, str);
+    manager->AddString(pos, str);
 
     va_end(args);
 }
@@ -278,7 +278,7 @@ void AsciiManager::DrawStrings()
     this->vm0.anchor = 3;
     for (i = 0; i < this->numStrings; i++, string++)
     {
-        this->vm0.pos = string->position;
+        this->vm0.pos = string->pos;
         text = string->text;
         this->vm0.scale.x = string->scale.x;
         this->vm0.scale.y = string->scale.y;
@@ -309,7 +309,7 @@ void AsciiManager::DrawStrings()
             if (*(u8 *)text == '\n')
             {
                 this->vm0.pos.y += 16.0f * string->scale.y;
-                this->vm0.pos.x = string->position.x;
+                this->vm0.pos.x = string->pos.x;
             }
             else if (*(u8 *)text == ' ')
             {
@@ -364,7 +364,7 @@ void AsciiManager::DrawStrings()
     }
 }
 
-void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value, u32 color)
+void AsciiManager::CreatePopup1(ZunVec3 *pos, i32 value, u32 color)
 {
     i32 characterCount;
     AsciiManagerPopup *popup;
@@ -395,13 +395,13 @@ void AsciiManager::CreatePopup1(ZunVec3 *position, i32 value, u32 color)
     popup->characterCount = (u8)characterCount;
     popup->color = color;
     popup->timer = 0;
-    popup->position = *position;
-    popup->position.x += g_GameManager.arcadeRegionTopLeftPos.x;
-    popup->position.y += g_GameManager.arcadeRegionTopLeftPos.y;
+    popup->pos = *pos;
+    popup->pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
+    popup->pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
     this->nextPopupIndex1++;
 }
 
-void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value, u32 color)
+void AsciiManager::CreatePopup2(ZunVec3 *pos, i32 value, u32 color)
 {
     i32 characterCount;
     AsciiManagerPopup *popup;
@@ -432,9 +432,9 @@ void AsciiManager::CreatePopup2(ZunVec3 *position, i32 value, u32 color)
     popup->characterCount = (u8)characterCount;
     popup->color = color;
     popup->timer = 0;
-    popup->position = *position;
-    popup->position.x += g_GameManager.arcadeRegionTopLeftPos.x;
-    popup->position.y += g_GameManager.arcadeRegionTopLeftPos.y;
+    popup->pos = *pos;
+    popup->pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
+    popup->pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
     this->nextPopupIndex2++;
 }
 
@@ -1060,12 +1060,12 @@ void AsciiManager::DrawPopups()
             continue;
         }
 
-        this->vm1.pos.x = popup->position.x - (f32)(popup->characterCount << 2);
-        this->vm1.pos.y = popup->position.y;
+        this->vm1.pos.x = popup->pos.x - (f32)(popup->characterCount << 2);
+        this->vm1.pos.y = popup->pos.y;
         this->vm1.color.color = popup->color;
 
-        dx = g_Player.positionCenter.x - popup->position.x;
-        dy = g_Player.positionCenter.y - popup->position.y;
+        dx = g_Player.positionCenter.x - popup->pos.x;
+        dy = g_Player.positionCenter.y - popup->pos.y;
         alpha = (i32)(dx * dx + dy * dy);
 
         if (alpha > 4096)

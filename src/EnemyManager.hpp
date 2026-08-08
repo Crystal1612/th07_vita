@@ -10,7 +10,7 @@ extern u32 g_SpellcardScore[141];
 
 struct EnemyHistory
 {
-    ZunVec3 position;
+    ZunVec3 pos;
     ZunVec3 axisSpeed;
     f32 angle;
 };
@@ -24,9 +24,9 @@ struct EnemyEclContext
     EclExInstr func;
     EclRawInstr *eclExInstr;
     EclContextArgs eclContextArgs;
-    ZunTimer timer2;
+    ZunTimer waitTimer;
     EclInterp interps[8];
-    i32 compareRegister;
+    i32 laserNotInUse;
     i32 isPeriodicSub;
     i16 subId;
     // pad 2
@@ -104,7 +104,7 @@ struct Enemy
     i32 deathCallbackSub;
     i32 interrupts[32];
     i32 runInterrupt;
-    ZunVec3 position;
+    ZunVec3 pos;
     ZunVec3 axisSpeed;
     ZunVec3 prevPos;
     ZunVec3 deltaPos;

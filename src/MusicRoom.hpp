@@ -34,8 +34,8 @@ struct MusicRoom
     ZunResult CheckInputEnable();
     i32 ProcessInput();
 
-    struct ChainElem *calcChain;
-    struct ChainElem *drawChain;
+    ChainElem *calcChain;
+    ChainElem *drawChain;
     i32 waitFramesCounter;
     i32 enableInput;
     i32 cursor;

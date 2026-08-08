@@ -121,8 +121,8 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32
     }
     switch (bulletProps->aimMode)
     {
-    case 0:
-    case 1:
+    case BULLET_AIM_SPREAD_AIMED:
+    case BULLET_AIM_SPREAD_ABSOLUTE:
         if ((bulletProps->count1 & 1U) != 0)
         {
             bulletAngle += bulletProps->angle2 * (f32)((i32)((x + 1) / 2));
@@ -135,36 +135,36 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32
         {
             bulletAngle *= -1.0f;
         }
-        if (bulletProps->aimMode == 0)
+        if (bulletProps->aimMode == BULLET_AIM_SPREAD_AIMED)
         {
             bulletAngle += angle;
         }
         bulletAngle += bulletProps->angle1;
         break;
-    case 2:
+    case BULLET_AIM_RING_AIMED:
         bulletAngle += angle;
-    case 3:
+    case BULLET_AIM_RING_ABSOLUTE:
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)y * bulletProps->angle2 + bulletProps->angle1;
         break;
-    case 4:
+    case BULLET_AIM_RING_SHIFTED_AIMED:
         bulletAngle += angle;
-    case 5:
+    case BULLET_AIM_RING_SHIFTED_ABSOLUTE:
         bulletAngle += ZUN_PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += bulletProps->angle1;
         break;
-    case 6:
+    case BULLET_AIM_ANGLE_RANDOM:
         bulletAngle = g_Rng.GetRandomFloatInRange(bulletProps->angle1 - bulletProps->angle2) +
                       bulletProps->angle2;
         break;
-    case 7:
+    case BULLET_AIM_RING_SPEED_RANDOM:
         bulletSpeed = g_Rng.GetRandomFloatInRange(bulletProps->speed1 - bulletProps->speed2) +
                       bulletProps->speed2;
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)y * bulletProps->angle2 + bulletProps->angle1;
         break;
-    case 8:
+    case BULLET_AIM_RANDOM:
         bulletAngle = g_Rng.GetRandomFloatInRange(bulletProps->angle1 - bulletProps->angle2) +
                       bulletProps->angle2;
         bulletSpeed = g_Rng.GetRandomFloatInRange(bulletProps->speed1 - bulletProps->speed2) +
@@ -177,7 +177,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x, i32
     bullet->timer2 = 0;
     bullet->speed = bulletSpeed;
     bullet->angle = utils::AddNormalizeAngle(bulletAngle, 0.0f);
-    bullet->pos = bulletProps->position;
+    bullet->pos = bulletProps->pos;
     bullet->pos.z = 0.1f;
     AngleToVector(&bullet->velocity, bulletAngle,
                   bulletSpeed * g_Supervisor.effectiveFramerateMultiplier);
@@ -556,7 +556,7 @@ i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
     }
 
     bulletProps->sprites = this->bulletTypeTemplates + bulletProps->sprite;
-    angle = g_Player.AngleToPlayer(&bulletProps->position);
+    angle = g_Player.AngleToPlayer(&bulletProps->pos);
     for (x = 0; x < bulletProps->count2; x++)
     {
         for (y = 0; y < bulletProps->count1; y++)
@@ -599,13 +599,13 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         g_AnmManager->InitializeAndSetActiveSprite(
             &laser->vm1, g_BulletSpriteOffset16Px[laserShooter->spriteOffset] + 658);
         laser->vm1.blendMode = 1;
-        laser->pos = laserShooter->position;
+        laser->pos = laserShooter->pos;
         laser->color = laserShooter->spriteOffset;
         laser->inUse = 1;
         laser->angle = laserShooter->angle1;
         if (laserShooter->type == 0)
         {
-            laser->angle = g_Player.AngleToPlayer(&laserShooter->position) + laser->angle;
+            laser->angle = g_Player.AngleToPlayer(&laserShooter->pos) + laser->angle;
         }
         laser->flags = laserShooter->flags;
         laser->timer = 0;

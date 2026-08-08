@@ -34,7 +34,7 @@ struct RetryMenu
 struct AsciiManagerPopup
 {
     u8 digits[8];
-    ZunVec3 position;
+    ZunVec3 pos;
     u32 color;
     ZunTimer timer;
     u8 inUse;
@@ -45,7 +45,7 @@ struct AsciiManagerPopup
 struct AsciiManagerString
 {
     char text[64];
-    ZunVec3 position;
+    ZunVec3 pos;
     u32 color;
     Float2 scale;
     i32 isSelected;
@@ -65,10 +65,10 @@ struct AsciiManager
     static u32 OnDrawMenus(AsciiManager *arg);
     static u32 OnDrawPopups(AsciiManager *arg);
 
-    static void AddFormatText(AsciiManager *manager, ZunVec3 *position, const char *fmt, ...);
-    void AddString(ZunVec3 *position, const char *text);
-    void CreatePopup1(ZunVec3 *position, i32 value, u32 color);
-    void CreatePopup2(ZunVec3 *position, i32 value, u32 color);
+    static void AddFormatText(AsciiManager *manager, ZunVec3 *pos, const char *fmt, ...);
+    void AddString(ZunVec3 *pos, const char *text);
+    void CreatePopup1(ZunVec3 *pos, i32 value, u32 color);
+    void CreatePopup2(ZunVec3 *pos, i32 value, u32 color);
     void DrawPopups();
     void DrawStrings();
     void InitializeVms();

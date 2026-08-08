@@ -66,7 +66,7 @@ void BombData::SpawnBombInvulnEffect(Player *player)
     Effect *effect = g_EffectManager.SpawnEffect(25, &player->positionCenter, 0, 1, 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = player->invulnerabilityTimer;
-    effect->vm.interpModes[4] = 0;
+    effect->vm.easeModes[4] = 0;
     effect->vm.scaleInterpInitial = effect->vm.scale;
     effect->vm.scaleInterpFinal.x = 0.0625;
     effect->vm.scaleInterpFinal.y = 0.0625;

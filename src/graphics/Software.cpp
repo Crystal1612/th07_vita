@@ -372,14 +372,14 @@ SoftwareVertex SoftwareGraphics::TransformVertex(const void *vData, i32 stride)
         ZunMatrix temp = transforms[MATRIX_MODEL] * transforms[MATRIX_VIEW];
         ZunMatrix wvp = temp * transforms[MATRIX_PROJECTION];
 
-        f32 x = v->position.x * wvp.m[0][0] + v->position.y * wvp.m[1][0] +
-                v->position.z * wvp.m[2][0] + wvp.m[3][0];
-        f32 y = v->position.x * wvp.m[0][1] + v->position.y * wvp.m[1][1] +
-                v->position.z * wvp.m[2][1] + wvp.m[3][1];
-        f32 z = v->position.x * wvp.m[0][2] + v->position.y * wvp.m[1][2] +
-                v->position.z * wvp.m[2][2] + wvp.m[3][2];
-        f32 w = v->position.x * wvp.m[0][3] + v->position.y * wvp.m[1][3] +
-                v->position.z * wvp.m[2][3] + wvp.m[3][3];
+        f32 x = v->pos.x * wvp.m[0][0] + v->pos.y * wvp.m[1][0] +
+                v->pos.z * wvp.m[2][0] + wvp.m[3][0];
+        f32 y = v->pos.x * wvp.m[0][1] + v->pos.y * wvp.m[1][1] +
+                v->pos.z * wvp.m[2][1] + wvp.m[3][1];
+        f32 z = v->pos.x * wvp.m[0][2] + v->pos.y * wvp.m[1][2] +
+                v->pos.z * wvp.m[2][2] + wvp.m[3][2];
+        f32 w = v->pos.x * wvp.m[0][3] + v->pos.y * wvp.m[1][3] +
+                v->pos.z * wvp.m[2][3] + wvp.m[3][3];
 
         f32 rhw = (w != 0.0f) ? (1.0f / w) : 1.0f;
         out.x = viewport.x + (1.0f + x * rhw) * viewport.width * 0.5f;

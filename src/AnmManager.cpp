@@ -68,18 +68,18 @@ AnmManager::~AnmManager()
 
 void AnmManager::SetupVertexBuffer()
 {
-    this->vertexBufferContents[2].position.x = -128.0f;
-    this->vertexBufferContents[0].position.x = -128.0f;
-    this->vertexBufferContents[3].position.x = 128.0f;
-    this->vertexBufferContents[1].position.x = 128.0f;
-    this->vertexBufferContents[1].position.y = -128.0f;
-    this->vertexBufferContents[0].position.y = -128.0f;
-    this->vertexBufferContents[3].position.y = 128.0f;
-    this->vertexBufferContents[2].position.y = 128.0f;
-    this->vertexBufferContents[3].position.z = 0.0f;
-    this->vertexBufferContents[2].position.z = 0.0f;
-    this->vertexBufferContents[1].position.z = 0.0f;
-    this->vertexBufferContents[0].position.z = 0.0f;
+    this->vertexBufferContents[2].pos.x = -128.0f;
+    this->vertexBufferContents[0].pos.x = -128.0f;
+    this->vertexBufferContents[3].pos.x = 128.0f;
+    this->vertexBufferContents[1].pos.x = 128.0f;
+    this->vertexBufferContents[1].pos.y = -128.0f;
+    this->vertexBufferContents[0].pos.y = -128.0f;
+    this->vertexBufferContents[3].pos.y = 128.0f;
+    this->vertexBufferContents[2].pos.y = 128.0f;
+    this->vertexBufferContents[3].pos.z = 0.0f;
+    this->vertexBufferContents[2].pos.z = 0.0f;
+    this->vertexBufferContents[1].pos.z = 0.0f;
+    this->vertexBufferContents[0].pos.z = 0.0f;
     this->vertexBufferContents[2].textureUV.x = 0.0f;
     this->vertexBufferContents[0].textureUV.x = 0.0f;
     this->vertexBufferContents[3].textureUV.x = 1.0f;
@@ -89,10 +89,10 @@ void AnmManager::SetupVertexBuffer()
     this->vertexBufferContents[3].textureUV.y = 1.0f;
     this->vertexBufferContents[2].textureUV.y = 1.0f;
 
-    g_Quad3DFallback[0].position = this->vertexBufferContents[0].position;
-    g_Quad3DFallback[1].position = this->vertexBufferContents[1].position;
-    g_Quad3DFallback[2].position = this->vertexBufferContents[2].position;
-    g_Quad3DFallback[3].position = this->vertexBufferContents[3].position;
+    g_Quad3DFallback[0].pos = this->vertexBufferContents[0].pos;
+    g_Quad3DFallback[1].pos = this->vertexBufferContents[1].pos;
+    g_Quad3DFallback[2].pos = this->vertexBufferContents[2].pos;
+    g_Quad3DFallback[3].pos = this->vertexBufferContents[3].pos;
     g_Quad3DFallback[0].textureUV.x = this->vertexBufferContents[0].textureUV.x;
     g_Quad3DFallback[0].textureUV.y = this->vertexBufferContents[0].textureUV.y;
     g_Quad3DFallback[1].textureUV.x = this->vertexBufferContents[1].textureUV.x;
@@ -1109,13 +1109,13 @@ void AnmManager::CalcProjectedTransform(AnmVm *vm)
     }
     world.m[3][2] = vm->pos.z;
 
-    g_QuadVertices[0].pos.Project(&this->vertexBufferContents[0].position, &g_Supervisor.viewport,
+    g_QuadVertices[0].pos.Project(&this->vertexBufferContents[0].pos, &g_Supervisor.viewport,
                                   &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[1].pos.Project(&this->vertexBufferContents[1].position, &g_Supervisor.viewport,
+    g_QuadVertices[1].pos.Project(&this->vertexBufferContents[1].pos, &g_Supervisor.viewport,
                                   &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[2].pos.Project(&this->vertexBufferContents[2].position, &g_Supervisor.viewport,
+    g_QuadVertices[2].pos.Project(&this->vertexBufferContents[2].pos, &g_Supervisor.viewport,
                                   &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
-    g_QuadVertices[3].pos.Project(&this->vertexBufferContents[3].position, &g_Supervisor.viewport,
+    g_QuadVertices[3].pos.Project(&this->vertexBufferContents[3].pos, &g_Supervisor.viewport,
                                   &g_Supervisor.projectionMatrix, &g_Supervisor.viewMatrix, &world);
 
     this->matrix = world;
@@ -1260,25 +1260,25 @@ f32 AnmVm::GetFloatVarValue(f32 arg)
 {
     switch ((i32)arg)
     {
-    case 10000:
+    case ANM_VAR_INT1_1:
         return (f32)this->intVars1[0];
-    case 10001:
+    case ANM_VAR_INT1_2:
         return (f32)this->intVars1[1];
-    case 10002:
+    case ANM_VAR_INT1_3:
         return (f32)this->intVars1[2];
-    case 10003:
+    case ANM_VAR_INT1_4:
         return (f32)this->intVars1[3];
-    case 10004:
+    case ANM_VAR_FLOAT_1:
         return this->floatVars[0];
-    case 10005:
+    case ANM_VAR_FLOAT_2:
         return this->floatVars[1];
-    case 10006:
+    case ANM_VAR_FLOAT_3:
         return this->floatVars[2];
-    case 10007:
+    case ANM_VAR_FLOAT_4:
         return this->floatVars[3];
-    case 10008:
+    case ANM_VAR_INT2_1:
         return (f32)this->intVars2[0];
-    case 10009:
+    case ANM_VAR_INT2_2:
         return (f32)this->intVars2[1];
     default:
         return arg;
@@ -1289,25 +1289,25 @@ i32 AnmVm::GetVarValue(i32 arg)
 {
     switch (arg)
     {
-    case 10000:
+    case ANM_VAR_INT1_1:
         return this->intVars1[0];
-    case 10001:
+    case ANM_VAR_INT1_2:
         return this->intVars1[1];
-    case 10002:
+    case ANM_VAR_INT1_3:
         return this->intVars1[2];
-    case 10003:
+    case ANM_VAR_INT1_4:
         return this->intVars1[3];
-    case 10004:
+    case ANM_VAR_FLOAT_1:
         return this->floatVars[0];
-    case 10005:
+    case ANM_VAR_FLOAT_2:
         return this->floatVars[1];
-    case 10006:
+    case ANM_VAR_FLOAT_3:
         return this->floatVars[2];
-    case 10007:
+    case ANM_VAR_FLOAT_4:
         return this->floatVars[3];
-    case 10008:
+    case ANM_VAR_INT2_1:
         return this->intVars2[0];
-    case 10009:
+    case ANM_VAR_INT2_2:
         return this->intVars2[1];
     default:
         return arg;
@@ -1323,13 +1323,13 @@ f32 *AnmVm::GetFloatVar(f32 *paramId, u16 mask, u32 idx)
 
     switch ((u32)*paramId)
     {
-    case 10004:
+    case ANM_VAR_FLOAT_1:
         return &this->floatVars[0];
-    case 10005:
+    case ANM_VAR_FLOAT_2:
         return &this->floatVars[1];
-    case 10006:
+    case ANM_VAR_FLOAT_3:
         return &this->floatVars[2];
-    case 10007:
+    case ANM_VAR_FLOAT_4:
         return &this->floatVars[3];
     default:
         return paramId;
@@ -1345,17 +1345,17 @@ i32 *AnmVm::GetVar(i32 *paramId, u16 mask, u32 idx)
 
     switch (*paramId)
     {
-    case 10000:
+    case ANM_VAR_INT1_1:
         return &this->intVars1[0];
-    case 10001:
+    case ANM_VAR_INT1_2:
         return &this->intVars1[1];
-    case 10002:
+    case ANM_VAR_INT1_3:
         return &this->intVars1[2];
-    case 10003:
+    case ANM_VAR_INT1_4:
         return &this->intVars1[3];
-    case 10008:
+    case ANM_VAR_INT2_1:
         return &this->intVars2[0];
-    case 10009:
+    case ANM_VAR_INT2_2:
         return &this->intVars2[1];
     default:
         return paramId;
@@ -1466,7 +1466,7 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_INTERP_SCALE:
             vm->interpStartTimes[4] = 0;
             vm->interpEndTimes[4] = GET_INT_VALUE(2);
-            vm->interpModes[4] = 0;
+            vm->easeModes[4] = 0;
             vm->scaleInterpInitial = vm->scale;
             vm->scaleInterpFinal.x = GET_FLOAT_VALUE(0);
             vm->scaleInterpFinal.y = GET_FLOAT_VALUE(1);
@@ -1476,7 +1476,7 @@ WHY_NOT_JUST_CONTINUE:
             vm->colorInterpFinalColor.bytes.a = instr->args[0].b[0];
             vm->interpStartTimes[2] = 0;
             vm->interpEndTimes[2] = GET_INT_VALUE(1);
-            vm->interpModes[2] = 0;
+            vm->easeModes[2] = 0;
             break;
         case ANM_SET_BLEND:
             vm->blendMode = instr->args[0].i;
@@ -1492,13 +1492,13 @@ WHY_NOT_JUST_CONTINUE:
             }
             break;
         case ANM_POS_TIME_ACCEL:
-            vm->interpModes[0] = 6;
+            vm->easeModes[0] = 6;
             goto interp_pos;
         case ANM_POS_TIME_DECEL:
-            vm->interpModes[0] = 4;
+            vm->easeModes[0] = 4;
             goto interp_pos;
         case ANM_POS_TIME_LINEAR:
-            vm->interpModes[0] = 0;
+            vm->easeModes[0] = 0;
         interp_pos:
             if (!vm->useOffset)
             {
@@ -1620,7 +1620,7 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_INTERP_POS:
             vm->interpStartTimes[0] = 0;
             vm->interpEndTimes[0] = GET_INT_VALUE(0);
-            vm->interpModes[0] = instr->args[1].b[0];
+            vm->easeModes[0] = instr->args[1].b[0];
             if (!vm->useOffset)
             {
                 vm->posInterpInitial = vm->pos;
@@ -1636,7 +1636,7 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_INTERP_COLOR:
             vm->interpStartTimes[1] = 0;
             vm->interpEndTimes[1] = GET_INT_VALUE(0);
-            vm->interpModes[1] = instr->args[1].b[0];
+            vm->easeModes[1] = instr->args[1].b[0];
             vm->colorInterpInitialColor.bytes.r = vm->color.bytes.r;
             vm->colorInterpInitialColor.bytes.g = vm->color.bytes.g;
             vm->colorInterpInitialColor.bytes.b = vm->color.bytes.b;
@@ -1647,14 +1647,14 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_INTERP_ALPHA:
             vm->interpStartTimes[2] = 0;
             vm->interpEndTimes[2] = GET_INT_VALUE(0);
-            vm->interpModes[2] = instr->args[1].b[0];
+            vm->easeModes[2] = instr->args[1].b[0];
             vm->colorInterpInitialColor.bytes.a = vm->color.bytes.a;
             vm->colorInterpFinalColor.bytes.a = instr->args[2].b[0];
             break;
         case ANM_INTERP_ROTATE:
             vm->interpStartTimes[3] = 0;
             vm->interpEndTimes[3] = GET_INT_VALUE(0);
-            vm->interpModes[3] = instr->args[1].b[0];
+            vm->easeModes[3] = instr->args[1].b[0];
             vm->rotateInterpInitial = vm->rotation;
             vm->rotateInterpFinal.x = GET_FLOAT_VALUE(2);
             vm->rotateInterpFinal.y = GET_FLOAT_VALUE(3);
@@ -1664,7 +1664,7 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_INTERP_SCALE_2:
             vm->interpStartTimes[4] = 0;
             vm->interpEndTimes[4] = GET_INT_VALUE(0);
-            vm->interpModes[4] = instr->args[1].b[0];
+            vm->easeModes[4] = instr->args[1].b[0];
             vm->scaleInterpInitial = vm->scale;
             vm->scaleInterpFinal.x = GET_FLOAT_VALUE(2);
             vm->scaleInterpFinal.y = GET_FLOAT_VALUE(3);
@@ -1757,7 +1757,7 @@ WHY_NOT_JUST_CONTINUE:
         case ANM_ATAN:
             *GET_FLOAT_PTR(0) = atanf(GET_FLOAT_VALUE(1));
             break;
-        case ANM_ADD_NORMALIZE_ANGLE:
+        case ANM_NORMALIZE_ANGLE:
             *GET_FLOAT_PTR(0) = utils::AddNormalizeAngle(GET_FLOAT_VALUE(0), 0.0f);
             break;
         case ANM_JUMP_IF_EQ:
@@ -1877,29 +1877,29 @@ stop:
             {
                 t = vm->interpStartTimes[i].AsFloat() / vm->interpEndTimes[i].AsFloat();
             }
-            switch (vm->interpModes[i])
+            switch (vm->easeModes[i])
             {
-            case 1:
+            case ANM_EASE_IN_QUAD:
                 t = t * t;
                 break;
-            case 2:
+            case ANM_EASE_IN_CUBIC:
                 t = t * t * t;
                 break;
-            case 3:
+            case ANM_EASE_IN_QUART:
                 t = t * t;
                 t = t * t;
                 break;
-            case 4:
+            case ANM_EASE_OUT_QUAD:
                 t = 1.0f - t;
                 t = t * t;
                 t = 1.0f - t;
                 break;
-            case 5:
+            case ANM_EASE_OUT_CUBIC:
                 t = 1.0f - t;
                 t = t * t * t;
                 t = 1.0f - t;
                 break;
-            case 6:
+            case ANM_EASE_OUT_QUART:
                 t = 1.0f - t;
                 t = t * t;
                 t = t * t;

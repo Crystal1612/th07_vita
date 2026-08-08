@@ -50,6 +50,12 @@ struct ZunVec3
         this->z = z;
     }
 
+    void FromAngleMagnitude(f32 angle, f32 magnitude)
+    {
+        this->x = cosf(angle) * magnitude;
+        this->y = sinf(angle) * magnitude;
+    }
+
     inline void Project(ZunVec3 *pV, ZunViewport *pViewport, struct ZunMatrix *pProjection,
                             struct ZunMatrix *pView, struct ZunMatrix *pWorld);
 

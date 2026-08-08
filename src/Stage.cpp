@@ -73,30 +73,30 @@ void Stage::UpdateScriptAndCamera(Stage *stage, i32 param_2, ZunVec3 *param_3, Z
         t = 1.0f;
         stage->timersMax[param_2] = 0;
     }
-    switch (stage->interpModes[param_2])
+    switch (stage->easeModes[param_2])
     {
-    case 1:
+    case STAGE_EASE_OUT_QUAD:
         t = 1.0f - t;
         t = 1.0f - t * t;
         break;
-    case 2:
+    case STAGE_EASE_OUT_CUBIC:
         t = 1.0f - t;
         t = 1.0f - t * t * t;
         break;
-    case 3:
+    case STAGE_EASE_OUT_QUART:
         t = 1.0f - t;
         t = 1.0f - t * t * t * t;
         break;
-    case 4:
+    case STAGE_EASE_IN_QUAD:
         t = t * t;
         break;
-    case 5:
+    case STAGE_EASE_IN_CUBIC:
         t = t * t * t;
         break;
-    case 6:
+    case STAGE_EASE_IN_QUART:
         t = t * t * t * t;
     }
-    if (stage->interpModes[param_2] != 7)
+    if (stage->easeModes[param_2] != STAGE_EASE_CUBIC_INTERP)
     {
         *param_3 = *param_5 - *param_4;
         *param_3 = t * *param_3 + *param_4;
@@ -146,16 +146,16 @@ loop_begin:
             if (curInstr->frame == -1)
             {
                 arg->positionInterpInitial = *curInstr->args.AsVec();
-                arg->position.x = arg->positionInterpInitial.x;
-                arg->position.y = arg->positionInterpInitial.y;
-                arg->position.z = arg->positionInterpInitial.z;
+                arg->pos.x = arg->positionInterpInitial.x;
+                arg->pos.y = arg->positionInterpInitial.y;
+                arg->pos.z = arg->positionInterpInitial.z;
             }
             else
             {
                 pos = *curInstr->args.AsVec();
-                arg->position.x = pos.x;
-                arg->position.y = pos.y;
-                arg->position.z = pos.z;
+                arg->pos.x = pos.x;
+                arg->pos.y = pos.y;
+                arg->pos.z = pos.z;
                 arg->positionInterpInitial = pos;
                 arg->positionInterpStartTime = curInstr->frame;
                 curInstr++;
@@ -195,7 +195,7 @@ loop_begin:
         case 6:
             arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
-            arg->interpModes[0] = curInstr->args.args[1].i;
+            arg->easeModes[0] = curInstr->args.args[1].i;
             break;
         case 7:
             arg->camStart.lookAt = arg->camEnd.lookAt;
@@ -208,7 +208,7 @@ loop_begin:
         case 8:
             arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
-            arg->interpModes[1] = curInstr->args.args[1].i;
+            arg->easeModes[1] = curInstr->args.args[1].i;
             break;
         case 9:
             arg->camStart.up = arg->camEnd.up;
@@ -220,7 +220,7 @@ loop_begin:
             break;
         case 10:
             arg->timersMax[2] = curInstr->args.args[0].i;
-            arg->interpModes[2] = curInstr->args.args[1].i;
+            arg->easeModes[2] = curInstr->args.args[1].i;
             arg->timers[2] = 0;
             break;
         case 11:
@@ -234,7 +234,7 @@ loop_begin:
         case 12:
             arg->timersMax[3] = curInstr->args.args[0].i;
             arg->timers[3] = 0;
-            arg->interpModes[3] = curInstr->args.args[1].i;
+            arg->easeModes[3] = curInstr->args.args[1].i;
             break;
         case 13:
             arg->color = curInstr->args.args[0].u;
@@ -267,7 +267,7 @@ loop_begin:
         case 18:
             arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
-            arg->interpModes[0] = 7;
+            arg->easeModes[0] = STAGE_EASE_CUBIC_INTERP;
             break;
         case 19:
             arg->camStart.lookAt = *curInstr->args.AsVec();
@@ -284,7 +284,7 @@ loop_begin:
         case 23:
             arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
-            arg->interpModes[1] = 7;
+            arg->easeModes[1] = STAGE_EASE_CUBIC_INTERP;
             break;
         case 24:
             arg->camStart.up = *curInstr->args.AsVec();
@@ -301,7 +301,7 @@ loop_begin:
         case 28:
             arg->timersMax[2] = curInstr->args.args[0].i;
             arg->timers[2] = 0;
-            arg->interpModes[2] = 7;
+            arg->easeModes[2] = STAGE_EASE_CUBIC_INTERP;
             break;
         case 29:
             if (curInstr->args.args[0].i >= 0)
@@ -367,27 +367,27 @@ LAB_004061aa: {
             t = 1.0f;
             arg->timersMax[camIdx] = 0;
         }
-        switch (arg->interpModes[camIdx])
+        switch (arg->easeModes[camIdx])
         {
-        case 1:
+        case STAGE_EASE_OUT_QUAD:
             t = 1.0f - t;
             t = 1.0f - t * t;
             break;
-        case 2:
+        case STAGE_EASE_OUT_CUBIC:
             t = 1.0f - t;
             t = 1.0f - t * t * t;
             break;
-        case 3:
+        case STAGE_EASE_OUT_QUART:
             t = 1.0f - t;
             t = 1.0f - t * t * t * t;
             break;
-        case 4:
+        case STAGE_EASE_IN_QUAD:
             t = t * t;
             break;
-        case 5:
+        case STAGE_EASE_IN_CUBIC:
             t = t * t * t;
             break;
-        case 6:
+        case STAGE_EASE_IN_QUART:
             t = t * t * t * t;
         }
         fovDiff = arg->camEnd.fov - arg->camStart.fov;
@@ -629,9 +629,9 @@ ZunResult Stage::AddedCallback(Stage *arg)
 
     arg->scriptTime = 0;
     arg->instructionIndex = 0;
-    arg->position.x = 0.0f;
-    arg->position.y = 0.0f;
-    arg->position.z = 0.0f;
+    arg->pos.x = 0.0f;
+    arg->pos.y = 0.0f;
+    arg->pos.z = 0.0f;
     arg->spellCardState = 0;
     arg->skyFogInterpDuration = 0;
     switch (g_GameManager.currentStage)
@@ -910,9 +910,9 @@ i32 Stage::RenderObjects(i32 zLevel)
         {
             curQuad = &obj->firstQuad;
 
-            quadPos.x = obj->pos.x + instance->pos.x - this->position.x + obj->size.x / 2.0f;
-            quadPos.y = obj->pos.y + instance->pos.y - this->position.y + obj->size.y / 2.0f;
-            quadPos.z = obj->pos.z + instance->pos.z - this->position.z + obj->size.z / 2.0f;
+            quadPos.x = obj->pos.x + instance->pos.x - this->pos.x + obj->size.x / 2.0f;
+            quadPos.y = obj->pos.y + instance->pos.y - this->pos.y + obj->size.y / 2.0f;
+            quadPos.z = obj->pos.z + instance->pos.z - this->pos.z + obj->size.z / 2.0f;
 
             quadPos = quadPos - this->cam.pos;
 
@@ -940,11 +940,11 @@ i32 Stage::RenderObjects(i32 zLevel)
                         {
                         case 0:
                             curQuadVm->pos.x = curQuadVm->offset.x + curQuad->pos.x +
-                                               instance->pos.x - this->position.x;
+                                               instance->pos.x - this->pos.x;
                             curQuadVm->pos.y = curQuadVm->offset.y + curQuad->pos.y +
-                                               instance->pos.y - this->position.y;
+                                               instance->pos.y - this->pos.y;
                             curQuadVm->pos.z = curQuadVm->offset.z + curQuad->pos.z +
-                                               instance->pos.z - this->position.z;
+                                               instance->pos.z - this->pos.z;
 
                             if (curQuad->size.x != 0.0f)
                             {

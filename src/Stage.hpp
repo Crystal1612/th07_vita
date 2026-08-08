@@ -6,6 +6,17 @@
 #include "ZunTimer.hpp"
 #include "utils.hpp"
 
+typedef enum StageEaseMode
+{
+    STAGE_EASE_OUT_QUAD = 1,
+    STAGE_EASE_OUT_CUBIC = 2,
+    STAGE_EASE_OUT_QUART = 3,
+    STAGE_EASE_IN_QUAD = 4,
+    STAGE_EASE_IN_CUBIC = 5,
+    STAGE_EASE_IN_QUART = 6,
+    STAGE_EASE_CUBIC_INTERP = 7, // this is not actually an easing mode
+} StageEaseMode;
+
 struct StageAnms
 {
     const char *anmPath1;
@@ -136,7 +147,7 @@ struct Stage
     i32 instructionIndex;
     i32 stageFrameCounter;
     u32 stage;
-    ZunVec3 position;
+    ZunVec3 pos;
     u32 color;
     StageFog skyFog;
     StageFog fogEnd;
@@ -160,7 +171,7 @@ struct Stage
     StageCamera cam;
     i32 timersMax[4];
     ZunTimer timers[4];
-    i32 interpModes[4];
+    i32 easeModes[4];
     ZunVec3 positionStart;
     i32 positionInterpEndTime;
     ZunVec3 positionInterpInitial;

@@ -19,7 +19,7 @@ struct VertexDiffuseXyzrhw
 
 struct VertexTex1DiffuseXyz
 {
-    ZunVec3 position;
+    ZunVec3 pos;
     ZunColor diffuse;
     Float2 textureUV;
 };
@@ -51,7 +51,7 @@ extern VertexTex1DiffuseXyzrhw g_QuadVertices[4];
 
 struct RenderVertexInfo
 {
-    ZunVec3 position;
+    ZunVec3 pos;
     Float2 textureUV;
 };
 
