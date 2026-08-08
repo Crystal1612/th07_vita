@@ -4,6 +4,7 @@
 #include "Chain.hpp"
 #include "EffectManager.hpp"
 #include "GameManager.hpp"
+#include "ZunMath.hpp"
 #include "inttypes.hpp"
 
 extern const char *g_ShooterTable[6];
@@ -113,6 +114,7 @@ struct PlayerBombInfo
     BombCallback bombFocusCalc;
     BombCallback drawFocus;
     PlayerBombSubInfo subInfo[128];
+    Float3 startPos;
 };
 
 struct PlayerBullet
@@ -297,7 +299,6 @@ struct Player
     i32 unused_16a18;
     i32 unused_16a1c;
     PlayerBombInfo bombInfo;
-    Float3 bombStartPos;
     f32 optionAngle;
     ChainElem *calcChain;
     ChainElem *drawChain1;
