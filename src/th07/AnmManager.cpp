@@ -713,7 +713,7 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
-    if (g_Supervisor.cfg.noVertexBuffers)
+    if (!g_Supervisor.cfg.noVertexBuffers)
     {
         if (this->colorMulEnabled)
         {

@@ -474,7 +474,7 @@ void EnemyEclInstr::ExInsShootBulletsAlongLaser(Enemy *enemy,
             continue;
         }
 
-        if (i % 3 != enemy->timer.current % 3)
+        if (enemy->timer.GetCurrentMod3() != i % 3)
         {
             continue;
         }

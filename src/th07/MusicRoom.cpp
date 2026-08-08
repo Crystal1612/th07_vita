@@ -7,6 +7,7 @@
 #include "FileSystem.hpp"
 #include "SoundPlayer.hpp"
 #include "Supervisor.hpp"
+#include "utils.hpp"
 
 // FUNCTION: TH07 0x0043a760
 ZunResult MusicRoom::CheckInputEnable()
@@ -397,8 +398,8 @@ ZunResult MusicRoom::DeletedCallback(MusicRoom *arg)
 // FUNCTION: TH07 0x0043b4db
 ZunResult MusicRoom::RegisterChain()
 {
-    static MusicRoom g_MusicRoom;
-    MusicRoom *musicRoom = &g_MusicRoom;
+    static MusicRoom s_MusicRoom;
+    MusicRoom *musicRoom = &s_MusicRoom;
 
     // ZUN bloat:
     // Once would have sufficed
@@ -418,5 +419,10 @@ ZunResult MusicRoom::RegisterChain()
     musicRoom->drawChain = g_Chain.CreateElem((ChainCallback)OnDraw);
     musicRoom->drawChain->arg = musicRoom;
     g_Chain.AddToDrawChain(musicRoom->drawChain, 0);
+
+    UselessStack::EightBytes();
+    UselessStack::EightBytes();
+    UselessStack::EightBytes();
+
     return ZUN_SUCCESS;
 }

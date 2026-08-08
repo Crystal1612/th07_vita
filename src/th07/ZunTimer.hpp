@@ -32,6 +32,11 @@ struct ZunTimer
         return this->current;
     }
 
+    i32 GetCurrentMod3()
+    {
+        return this->current % 3;
+    }
+
     f32 AsFloat()
     {
         return (f32)this->current + this->subFrame;

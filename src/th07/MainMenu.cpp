@@ -2786,6 +2786,5 @@ ZunResult MainMenu::RegisterChain(u32 param_1)
     mgr->drawChain->arg = mgr;
     g_Chain.AddToDrawChain(mgr->drawChain, 0);
 
-    UselessStack::EightBytes();
     return ZUN_SUCCESS;
 }
