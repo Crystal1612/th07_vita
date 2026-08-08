@@ -189,6 +189,30 @@ struct EclManager
     static void EndSpellcard(Enemy *enemy, EclRawInstr *instr);
     ZunResult RunEcl(Enemy *enemy);
 
+    i32 GetFirstIntValue(EclRawInstr *instr, Enemy *enemy)
+    {
+        if ((instr->paramMask & 1) != 0)
+        {
+            return GetVarValue(enemy, instr->args[0].i);
+        }
+        else
+        {
+            return instr->args[0].i;
+        }
+    }
+
+    i32 GetFourthIntValue(EclRawInstr *instr, Enemy *enemy)
+    {
+        if ((instr->paramMask & 8) != 0)
+        {
+            return GetVarValue(enemy, instr->args[3].i);
+        }
+        else
+        {
+            return instr->args[3].i;
+        }
+    }
+
     EclRawHeader *eclFile;
     EclRawInstr **subTable;
 };

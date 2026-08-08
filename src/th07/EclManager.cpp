@@ -17,6 +17,7 @@
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
 #include "dsutil.hpp"
+#include "utils.hpp"
 
 #define GET_INT_PTR(enemy, argIdx) \
     GetVar(enemy, &instr->args[argIdx].i, instr->paramMask, argIdx)
@@ -1152,7 +1153,7 @@ restart:
                     goto LAB_00411f00;
                 }
                 break;
-            case 39: {
+            case 39:
                 if (GET_FLOAT_VALUE(enemy, 0) >= GET_FLOAT_VALUE(enemy, 1))
                 {
                     goto LAB_00411f00;
@@ -1705,7 +1706,7 @@ restart:
                                         (f32)enemy->maxLife,
                                     GET_INT_VALUE(enemy, 2) /
                                         (f32)enemy->maxLife);
-                g_Gui.bossColor[bossIdx] = GET_INT_VALUE(enemy, 3);
+                g_Gui.bossColor[bossIdx] = GetFourthIntValue(instr, enemy);
                 break;
             case 90:
                 BeginSpellcard(enemy, instr);
@@ -1819,7 +1820,7 @@ restart:
                 g_Stage.scriptWaitTime = GET_INT_VALUE(enemy, 0);
                 break;
             case 126:
-                g_Gui.bossLifeMarkers = GET_INT_VALUE(enemy, 0);
+                g_Gui.bossLifeMarkers = GetFirstIntValue(instr, enemy);
                 g_GameManager.playTimeAll += 1800;
                 break;
             case 92:
@@ -1980,7 +1981,6 @@ restart:
             case 161:
                 enemy->freezeEclDuringBombs = GET_INT_VALUE(enemy, 0);
                 break;
-            }
             }
 
         skip:
