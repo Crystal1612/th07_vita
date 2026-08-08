@@ -25,6 +25,19 @@ typedef enum LaserState
     LASER_DESPAWNING = 2
 } LaserState;
 
+typedef enum BulletAimMode
+{
+    BULLET_AIM_SPREAD_AIMED = 0,
+    BULLET_AIM_SPREAD_ABSOLUTE = 1,
+    BULLET_AIM_RING_AIMED = 2,
+    BULLET_AIM_RING_ABSOLUTE = 3,
+    BULLET_AIM_RING_SHIFTED_AIMED = 4,
+    BULLET_AIM_RING_SHIFTED_ABSOLUTE = 5,
+    BULLET_AIM_ANGLE_RANDOM = 6,
+    BULLET_AIM_RING_SPEED_RANDOM = 7,
+    BULLET_AIM_RANDOM = 8,
+} BulletAimMode;
+
 struct BulletTypeInfo
 {
     i32 anmFileIdx;

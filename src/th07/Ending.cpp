@@ -107,7 +107,7 @@ void Ending::FadingEffect()
     rect.bottom = 480.0f;
     switch (this->fadeType)
     {
-    case 1:
+    case ENDING_FADE_OUT_BLACK:
         if (this->timeFading >= this->fadeFrames)
         {
             this->fadeType = 0;
@@ -119,7 +119,7 @@ void Ending::FadingEffect()
         this->endingFadeRectColor.color = color * 0x1000000;
         this->timeFading++;
         break;
-    case 2:
+    case ENDING_FADE_IN_BLACK:
         if (this->timeFading >= this->fadeFrames)
         {
             this->endingFadeRectColor.color = 0xff000000;
@@ -131,7 +131,7 @@ void Ending::FadingEffect()
             color << 24;
         this->timeFading++;
         break;
-    case 3:
+    case ENDING_FADE_OUT_WHITE:
         if (this->timeFading >= this->fadeFrames)
         {
             this->fadeType = 0;
@@ -143,7 +143,7 @@ void Ending::FadingEffect()
         this->endingFadeRectColor.color = color * 0x1000000 | 0xffffff;
         this->timeFading++;
         break;
-    case 4:
+    case ENDING_FADE_IN_WHITE:
         if (this->timeFading >= this->fadeFrames)
         {
             this->endingFadeRectColor.color = 0xffffffff;
@@ -154,7 +154,7 @@ void Ending::FadingEffect()
         this->endingFadeRectColor.color = color << 24 | 0xffffff;
         this->timeFading++;
         break;
-    case 0:
+    case ENDING_FADE_NONE:
         this->endingFadeRectColor.color = 0;
         break;
     }

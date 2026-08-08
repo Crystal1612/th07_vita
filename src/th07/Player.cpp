@@ -2010,7 +2010,7 @@ void Player::BreakBorderNaturally()
     cherryDiff = g_GameManager.cherry - g_GameManager.globals->cherryStart;
     cherryDiff *= 10;
     g_GameManager.AddScore(cherryDiff);
-    g_Gui.ShowFullPowerMode(cherryDiff, 4);
+    g_Gui.ShowStatusPopup(cherryDiff, 4);
     g_GameManager.cherryPlus = g_GameManager.globals->cherryStart;
     g_SoundPlayer.PlaySoundByIdx(SOUND_BORDER_BREAK, 0);
     if (this->playerState == PLAYER_STATE_SPAWNING)
@@ -2127,7 +2127,7 @@ void Player::ActivateBorder()
                                                     0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
-        spawnedEffect->vm.interpModes[4] = 0;
+        spawnedEffect->vm.easeModes[4] = 0;
         spawnedEffect->vm.scaleInterpInitial.y = 1.0f;
         spawnedEffect->vm.scaleInterpInitial.x = 1.0f;
         spawnedEffect->vm.scaleInterpFinal.x = 0.25f;
@@ -2135,7 +2135,7 @@ void Player::ActivateBorder()
         spawnedEffect->vm.intVars1[0] = this->invulnerabilityTimer.GetCurrent();
         spawnedEffect->vm.angleVel.z *= -1.0f;
         this->borderEffect = spawnedEffect;
-        g_Gui.ShowFullPowerMode(0, 2);
+        g_Gui.ShowStatusPopup(0, 2);
         g_SoundPlayer.PlaySoundByIdx(SOUND_BORDER_ACTIVATE, 0);
         g_SoundPlayer.PlaySoundByIdx(SOUND_BORDER_ACTIVATE2, 0);
         g_ReplayManager->replayEventFlags |= 8;
@@ -2160,14 +2160,14 @@ void Player::BreakBorder(u32 unused)
                                          0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
-    effect->vm.interpModes[4] = 0;
+    effect->vm.easeModes[4] = 0;
     effect->vm.scaleInterpInitial.x = 0.0625f;
     effect->vm.scaleInterpInitial.y = 0.0625f;
     effect->vm.scaleInterpFinal.x = 1.3f;
     effect->vm.scaleInterpFinal.y = 1.3f;
     effect->vm.interpStartTimes[2] = 0;
     effect->vm.interpEndTimes[2] = 30;
-    effect->vm.interpModes[2] = 1;
+    effect->vm.easeModes[2] = 1;
     effect->vm.colorInterpInitialColor.bytes.a = effect->vm.color.bytes.a;
     effect->vm.colorInterpFinalColor.bytes.a = 0;
     effect->vm.intVars1[0] = 30;

@@ -78,19 +78,19 @@ i32 Gui::IsDialogueSkippable()
 void Gui::ShowBonusScore(i32 score)
 {
     this->impl->bonusScore.pos = Float3(416.0f, 48.0f, 0.0f);
-    this->impl->bonusScore.isShown = 1;
+    this->impl->bonusScore.displayArg = GUI_DISPLAY_SHOWN;
     this->impl->bonusScore.timer = 0;
     this->impl->bonusScore.fmtArg = score;
     g_Supervisor.renderSkipFrames = 2;
 }
 
 // FUNCTION: TH07 0x00427c81
-void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
+void Gui::ShowStatusPopup(i32 fmtArg, i32 popupType)
 {
-    this->impl->fullPowerMode.pos = Float3(416.0f, 168.0f, 0.0f);
-    this->impl->fullPowerMode.isShown = isShown;
-    this->impl->fullPowerMode.timer = 0;
-    this->impl->fullPowerMode.fmtArg = fmtArg;
+    this->impl->statusPopup.pos = Float3(416.0f, 168.0f, 0.0f);
+    this->impl->statusPopup.displayArg = popupType;
+    this->impl->statusPopup.timer = 0;
+    this->impl->statusPopup.fmtArg = fmtArg;
     g_Supervisor.renderSkipFrames = 2;
 }
 
@@ -98,7 +98,7 @@ void Gui::ShowFullPowerMode(i32 fmtArg, i32 isShown)
 void Gui::ShowSpellcardBonus(i32 fmtArg)
 {
     this->impl->spellCardBonus.pos = Float3(224.0f, 16.0f, 0.0f);
-    this->impl->spellCardBonus.isShown = 1;
+    this->impl->spellCardBonus.displayArg = GUI_DISPLAY_SHOWN;
     this->impl->spellCardBonus.timer = 0;
     this->impl->spellCardBonus.fmtArg = fmtArg;
     g_Supervisor.renderSkipFrames = 2;
@@ -267,55 +267,55 @@ u32 Gui::OnDraw(Gui *arg)
     arg->DrawStageElements();
     arg->DrawGameScene();
     g_AsciiManager.isGui = 1;
-    if (arg->impl->bonusScore.isShown)
+    if (arg->impl->bonusScore.displayArg != GUI_DISPLAY_HIDDEN)
     {
         g_AsciiManager.color = 0xffffff80;
         AsciiManager::AddFormatText(&g_AsciiManager, &arg->impl->bonusScore.pos,
                                     "BONUS %8d", arg->impl->bonusScore.fmtArg);
         g_AsciiManager.color = 0xffffffff;
     }
-    switch (arg->impl->fullPowerMode.isShown)
+    switch (arg->impl->statusPopup.displayArg)
     {
-    case 1:
+    case GUI_DISPLAY_FULL_POWER:
         g_AsciiManager.color = 0xffc0b0ff;
         AsciiManager::AddFormatText(
-            &g_AsciiManager, &arg->impl->fullPowerMode.pos, "Full Power Mode!");
+            &g_AsciiManager, &arg->impl->statusPopup.pos, "Full Power Mode!");
         g_AsciiManager.color = 0xffffffff;
         break;
-    case 2:
+    case GUI_DISPLAY_BORDER:
         g_AsciiManager.scale.x = 0.9f;
         g_AsciiManager.scale.y = 1.0f;
         g_AsciiManager.fontSpacing = 11;
         g_AsciiManager.color = 0xffe0b0ff;
         AsciiManager::AddFormatText(&g_AsciiManager,
-                                    &arg->impl->fullPowerMode.pos,
+                                    &arg->impl->statusPopup.pos,
                                     "Supernatural Border!!");
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
         g_AsciiManager.fontSpacing = 14;
         break;
-    case 3:
+    case GUI_DISPLAY_CHERRY_MAX:
         g_AsciiManager.color = 0xffc0b0ff;
         AsciiManager::AddFormatText(
-            &g_AsciiManager, &arg->impl->fullPowerMode.pos, "CherryPoint Max!");
+            &g_AsciiManager, &arg->impl->statusPopup.pos, "CherryPoint Max!");
         g_AsciiManager.color = 0xffffffff;
         break;
-    case 4:
+    case GUI_DISPLAY_BORDER_BONUS:
         g_AsciiManager.scale.x = 0.9f;
         g_AsciiManager.scale.y = 1.0f;
         g_AsciiManager.fontSpacing = 11;
         g_AsciiManager.color = 0xffe0b0ff;
         AsciiManager::AddFormatText(
-            &g_AsciiManager, &arg->impl->fullPowerMode.pos, "Border Bonus %7d",
-            arg->impl->fullPowerMode.fmtArg);
+            &g_AsciiManager, &arg->impl->statusPopup.pos, "Border Bonus %7d",
+            arg->impl->statusPopup.fmtArg);
         g_AsciiManager.color = 0xffffffff;
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
         g_AsciiManager.fontSpacing = 14;
         break;
     }
-    if (arg->impl->spellCardBonus.isShown)
+    if (arg->impl->spellCardBonus.displayArg != GUI_DISPLAY_HIDDEN)
     {
         g_AsciiManager.color = 0xffff0000;
         arg->impl->spellCardBonus.pos.x = (384.0f - strlen("Spell Card Bonus!") * 16.0f) / 2.0f + 32.0f;
@@ -683,9 +683,9 @@ ZunResult Gui::ActualAddedCallback()
     this->impl->enemySpellcardName.fontHeight = 15;
     this->impl->msg.currentMsgIdx = -1;
     this->impl->finishedStage = 0;
-    this->impl->bonusScore.isShown = 0;
-    this->impl->fullPowerMode.isShown = 0;
-    this->impl->spellCardBonus.isShown = 0;
+    this->impl->bonusScore.displayArg = GUI_DISPLAY_HIDDEN;
+    this->impl->statusPopup.displayArg = GUI_DISPLAY_HIDDEN;
+    this->impl->spellCardBonus.displayArg = GUI_DISPLAY_HIDDEN;
     this->showLives = 2;
     this->showBombs = 2;
     this->showGraze = 2;
@@ -1307,7 +1307,7 @@ void Gui::UpdateGui()
         }
         this->impl->activeTransitionQuads = activeTransitionQuads;
     }
-    if (this->impl->bonusScore.isShown)
+    if (this->impl->bonusScore.displayArg != GUI_DISPLAY_HIDDEN)
     {
         if (this->impl->bonusScore.timer < 30)
         {
@@ -1323,35 +1323,35 @@ void Gui::UpdateGui()
         }
         if (this->impl->bonusScore.timer >= 250)
         {
-            this->impl->bonusScore.isShown = 0;
+            this->impl->bonusScore.displayArg = GUI_DISPLAY_HIDDEN;
         }
         ++this->impl->bonusScore.timer;
     }
-    if (this->impl->fullPowerMode.isShown)
+    if (this->impl->statusPopup.displayArg != GUI_DISPLAY_HIDDEN)
     {
-        if (this->impl->fullPowerMode.timer < 30)
+        if (this->impl->statusPopup.timer < 30)
         {
-            this->impl->fullPowerMode.pos.x =
-                this->impl->fullPowerMode.timer.AsFloat() *
+            this->impl->statusPopup.pos.x =
+                this->impl->statusPopup.timer.AsFloat() *
                     -312.0f /
                     30.0f +
                 416.0f;
         }
         else
         {
-            this->impl->fullPowerMode.pos.x = 104.0f;
+            this->impl->statusPopup.pos.x = 104.0f;
         }
-        if (this->impl->fullPowerMode.timer >= 180)
+        if (this->impl->statusPopup.timer >= 180)
         {
-            this->impl->fullPowerMode.isShown = 0;
+            this->impl->statusPopup.displayArg = GUI_DISPLAY_HIDDEN;
         }
-        ++this->impl->fullPowerMode.timer;
+        ++this->impl->statusPopup.timer;
     }
-    if (this->impl->spellCardBonus.isShown)
+    if (this->impl->spellCardBonus.displayArg != GUI_DISPLAY_HIDDEN)
     {
         if (this->impl->spellCardBonus.timer >= 280)
         {
-            this->impl->spellCardBonus.isShown = 0;
+            this->impl->spellCardBonus.displayArg = GUI_DISPLAY_HIDDEN;
         }
         ++this->impl->spellCardBonus.timer;
     }
@@ -1853,6 +1853,9 @@ void Gui::DrawStageElements()
         healthBarRect.top = 19.0f;
         healthBarRect.right = healthBarRect.left + 3.0f;
         healthBarRect.bottom = healthBarRect.top + 4.0f;
+
+        // secondsRemaining used as bossLifeMarkers here. its reused for its
+        // actual name later on
         secondsRemaining = this->bossLifeMarkers;
         markerGap = (this->bossLifeMarkers <= 5) + 1;
         for (j = 0; j < secondsRemaining; j++)

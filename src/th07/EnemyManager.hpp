@@ -24,9 +24,9 @@ struct EnemyEclContext
     EclExInstr func;
     EclRawInstr *eclExInstr;
     EclContextArgs eclContextArgs;
-    ZunTimer timer2;
+    ZunTimer waitTimer;
     EclInterp interps[8];
-    i32 compareRegister;
+    i32 laserNotInUse;
     i32 isPeriodicSub;
     i16 subId;
     // pad 2

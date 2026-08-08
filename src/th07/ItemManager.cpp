@@ -271,7 +271,7 @@ void ItemManager::OnUpdate()
                         {
                             g_BulletManager.RemoveAllBullets(1);
                         }
-                        g_Gui.ShowFullPowerMode(0, 1);
+                        g_Gui.ShowStatusPopup(0, 1);
                         this->DespawnAllItems(i);
                     }
                     g_GameManager.AddScore(10);
@@ -389,7 +389,7 @@ void ItemManager::OnUpdate()
                         {
                             g_BulletManager.RemoveAllBullets(1);
                         }
-                        g_Gui.ShowFullPowerMode(0, 1);
+                        g_Gui.ShowStatusPopup(0, 1);
                         this->DespawnAllItems(i);
                     }
                     g_Gui.showPower = 2;
@@ -424,7 +424,7 @@ void ItemManager::OnUpdate()
                 if ((i32)g_GameManager.globals->currentPower < 128)
                 {
                     g_BulletManager.RemoveAllBullets(1);
-                    g_Gui.ShowFullPowerMode(0, 1);
+                    g_Gui.ShowStatusPopup(0, 1);
                     g_SoundPlayer.PlaySoundByIdx(SOUND_POWERUP, 0);
                     g_AsciiManager.CreatePopup1(&item->currentPosition, -1, 0xffffc0a0);
                     this->DespawnAllItems(i);

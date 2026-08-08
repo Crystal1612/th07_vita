@@ -1140,7 +1140,7 @@ if (arg->timersMax[camIdx] != 0)
         t = 1.0f;
         arg->timersMax[camIdx] = 0;
     }
-    switch (arg->interpModes[camIdx])
+    switch (arg->easeModes[camIdx])
     {
     case 1:
         t = 1.0f - t;

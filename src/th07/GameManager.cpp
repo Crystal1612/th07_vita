@@ -980,7 +980,7 @@ void GameManager::AddCherryPlus(i32 amount)
     }
     if (this->cherry >= this->cherryMax && oldCherry != this->cherry)
     {
-        g_Gui.ShowFullPowerMode(this->cherry - this->globals->cherryStart, 3);
+        g_Gui.ShowStatusPopup(this->cherry - this->globals->cherryStart, 3);
     }
 }
 
@@ -995,7 +995,7 @@ void GameManager::AddCherry(i32 amount)
     }
     if (this->cherry >= this->cherryMax && oldCherry != this->cherry)
     {
-        g_Gui.ShowFullPowerMode(this->cherry - this->globals->cherryStart, 3);
+        g_Gui.ShowStatusPopup(this->cherry - this->globals->cherryStart, 3);
     }
 }
 

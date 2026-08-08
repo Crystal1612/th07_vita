@@ -12,6 +12,20 @@
 extern const D3DFORMAT g_TextureFormatD3D8Mapping[6];
 extern const i32 g_TextureBytesPerPixel[7];
 
+typedef enum AnmVarId
+{
+    ANM_VAR_INT1_1 = 10000,
+    ANM_VAR_INT1_2 = 10001,
+    ANM_VAR_INT1_3 = 10002,
+    ANM_VAR_INT1_4 = 10003,
+    ANM_VAR_FLOAT_1 = 10004,
+    ANM_VAR_FLOAT_2 = 10005,
+    ANM_VAR_FLOAT_3 = 10006,
+    ANM_VAR_FLOAT_4 = 10007,
+    ANM_VAR_INT2_1 = 10008,
+    ANM_VAR_INT2_2 = 10009,
+} AnmVarId;
+
 typedef enum AnmOpcode
 {
     ANM_EXIT_HIDE = -1,
@@ -80,7 +94,7 @@ typedef enum AnmOpcode
     ANM_TAN = 63,
     ANM_ACOS = 64,
     ANM_ATAN = 65,
-    ANM_ADD_NORMALIZE_ANGLE = 66,
+    ANM_NORMALIZE_ANGLE = 66,
     ANM_JUMP_IF_EQ = 67,
     ANM_JUMP_IF_EQ_FLOAT = 68,
     ANM_JUMP_IF_NEQ = 69,
@@ -97,6 +111,16 @@ typedef enum AnmOpcode
     ANM_SET_SCROLLVEL_X = 80,
     ANM_SET_SCROLLVEL_Y = 81
 } AnmOpcode;
+
+typedef enum AnmEaseMode
+{
+    ANM_EASE_IN_QUAD = 1,
+    ANM_EASE_IN_CUBIC = 2,
+    ANM_EASE_IN_QUART = 3,
+    ANM_EASE_OUT_QUAD = 4,
+    ANM_EASE_OUT_CUBIC = 5,
+    ANM_EASE_OUT_QUART = 6,
+} AnmEaseMode;
 
 struct AnmLoadedSprite
 {
@@ -176,7 +200,7 @@ struct AnmVm : AnmVmBase
     i32 GetVarValue(i32 arg);
     void Initialize();
 
-    u8 interpModes[5];
+    u8 easeModes[5];
     // pad 3
     i32 intVars1[4];
     f32 floatVars[4];

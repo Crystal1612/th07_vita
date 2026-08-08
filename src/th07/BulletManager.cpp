@@ -149,8 +149,8 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
     }
     switch (bulletProps->aimMode)
     {
-    case 0:
-    case 1:
+    case BULLET_AIM_SPREAD_AIMED:
+    case BULLET_AIM_SPREAD_ABSOLUTE:
         if ((bulletProps->count1 & 1U) != 0)
         {
             bulletAngle += bulletProps->angle2 * (f32)((x + 1) / 2);
@@ -163,36 +163,36 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
         {
             bulletAngle *= -1.0f;
         }
-        if (bulletProps->aimMode == 0)
+        if (bulletProps->aimMode == BULLET_AIM_SPREAD_AIMED)
         {
             bulletAngle += angle;
         }
         bulletAngle += bulletProps->angle1;
         break;
-    case 2:
+    case BULLET_AIM_RING_AIMED:
         bulletAngle += angle;
-    case 3:
+    case BULLET_AIM_RING_ABSOLUTE:
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)y * bulletProps->angle2 + bulletProps->angle1;
         break;
-    case 4:
+    case BULLET_AIM_RING_SHIFTED_AIMED:
         bulletAngle += angle;
-    case 5:
+    case BULLET_AIM_RING_SHIFTED_ABSOLUTE:
         bulletAngle += ZUN_PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += bulletProps->angle1;
         break;
-    case 6:
+    case BULLET_AIM_ANGLE_RANDOM:
         bulletAngle =
             g_Rng.GetRandomFloatInRange(bulletProps->angle1 - bulletProps->angle2) +
             bulletProps->angle2;
         break;
-    case 7:
+    case BULLET_AIM_RING_SPEED_RANDOM:
         bulletSpeed = g_Rng.GetRandomFloatInRange(bulletProps->speed1 - bulletProps->speed2) + bulletProps->speed2;
         bulletAngle += (f32)x * ZUN_2PI / (f32)(i32)bulletProps->count1;
         bulletAngle += (f32)y * bulletProps->angle2 + bulletProps->angle1;
         break;
-    case 8:
+    case BULLET_AIM_RANDOM:
         bulletAngle =
             g_Rng.GetRandomFloatInRange(bulletProps->angle1 - bulletProps->angle2) +
             bulletProps->angle2;

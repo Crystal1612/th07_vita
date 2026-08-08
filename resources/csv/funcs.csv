@@ -231,7 +231,7 @@ address|name|type
 00427ba2|Gui::ClearActiveSprites|function
 00427be2|Gui::IsDialogueSkippable|function
 00427bf8|Gui::ShowBonusScore|function
-00427c81|Gui::ShowFullPowerMode|function
+00427c81|Gui::ShowStatusPopup|function
 00427d09|Gui::ShowSpellcardBonus|function
 00427d92|Gui::CopyTemplateSpriteToSprite|function
 00427e7c|Gui::OnUpdate|function

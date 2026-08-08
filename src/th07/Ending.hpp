@@ -3,6 +3,15 @@
 #include "AnmVm.hpp"
 #include "Chain.hpp"
 
+typedef enum EndingFadeType
+{
+    ENDING_FADE_NONE = 0,
+    ENDING_FADE_OUT_BLACK = 1,
+    ENDING_FADE_IN_BLACK = 2,
+    ENDING_FADE_OUT_WHITE = 3,
+    ENDING_FADE_IN_WHITE = 4,
+} EndingFadeType;
+
 struct Ending
 {
     Ending()
