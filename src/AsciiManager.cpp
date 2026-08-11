@@ -965,11 +965,11 @@ i32 RetryMenu::OnUpdate()
             g_GameManager.globals->extendsFromPointItems = 0;
             g_GameManager.globals->nextNeededPointItemsForExtend = 50;
             g_GameManager.cherry = g_GameManager.globals->cherryStart;
-            g_Gui.showLives = 2;
-            g_Gui.showBombs = 2;
-            g_Gui.showGraze = 2;
-            g_Gui.showPoint = 2;
-            g_Gui.showPower = 2;
+            g_Gui.lifeDisplayUpdateFrames = 2;
+            g_Gui.bombDisplayUpdateFrames = 2;
+            g_Gui.grazeDisplayUpdateFrames = 2;
+            g_Gui.pointDisplayUpdateFrames = 2;
+            g_Gui.powerDisplayUpdateFrames = 2;
             IncrementCapped(
                 &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty].playCount,
                 999999);
