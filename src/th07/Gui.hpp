@@ -133,7 +133,7 @@ struct GuiImpl
     AnmVm enemySpellcardName;
     AnmVm bombSpellcardNameBg;
     AnmVm enemySpellcardNameBg;
-    AnmVm stageClearTextVm;
+    AnmVm stageClearBg;
     AnmVm stageClearBonusTextVm;
     AnmVm stageTransitionSnapshotVm;
     AnmVm captureBonusVm;

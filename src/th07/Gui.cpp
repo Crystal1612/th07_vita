@@ -40,8 +40,8 @@ ChainElem g_GuiDrawChain;
 // FUNCTION: TH07 0x00427ae0
 i32 Gui::IsStageFinished()
 {
-    return this->impl->stageClearTextVm.activeSpriteIdx >= 0 &&
-           this->impl->stageClearTextVm.isStopped;
+    return this->impl->stageClearBg.activeSpriteIdx >= 0 &&
+           this->impl->stageClearBg.isStopped;
 }
 
 // FUNCTION: TH07 0x00427b21
@@ -62,7 +62,7 @@ void Gui::EndEnemySpellcard()
 // FUNCTION: TH07 0x00427ba2
 void Gui::ClearActiveSprites()
 {
-    this->impl->stageClearTextVm.activeSpriteIdx = -1;
+    this->impl->stageClearBg.activeSpriteIdx = -1;
     this->impl->stageClearBonusTextVm.activeSpriteIdx = -1;
     this->impl->stageTransitionSnapshotVm.activeSpriteIdx = -1;
     this->impl->activeTransitionQuads = 0;
@@ -979,7 +979,7 @@ ZunResult GuiImpl::RunMsg()
             this->finishedStage = 1;
             if (g_GameManager.currentStage < 6)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearTextVm, 1566);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearBg, 1566);
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTransitionSnapshotVm, 1829);
                 g_AnmManager->CreateScreenshotTexture(
                     this->stageTransitionSnapshotVm.sprite->startPixelInclusive.x,
@@ -1283,11 +1283,11 @@ void Gui::UpdateGui()
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardNameBg);
     g_AnmManager->ExecuteScript(&this->impl->enemySpellcardNameBg);
     g_AnmManager->ExecuteScript(&this->impl->spellcardBonusIndicator);
-    if (this->impl->stageClearTextVm.activeSpriteIdx >= 0)
+    if (this->impl->stageClearBg.activeSpriteIdx >= 0)
     {
-        if (g_AnmManager->ExecuteScript(&this->impl->stageClearTextVm))
+        if (g_AnmManager->ExecuteScript(&this->impl->stageClearBg))
         {
-            this->impl->stageClearTextVm.activeSpriteIdx = -1;
+            this->impl->stageClearBg.activeSpriteIdx = -1;
         }
         if (g_AnmManager->ExecuteScript(&this->impl->stageTransitionSnapshotVm) !=
             0)
@@ -1794,9 +1794,9 @@ void Gui::DrawStageElements()
             g_AnmManager->GetSprite(digit % 10 + 132);
         g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
     }
-    if (this->impl->stageClearTextVm.activeSpriteIdx >= 0)
+    if (this->impl->stageClearBg.activeSpriteIdx >= 0)
     {
-        g_AnmManager->DrawNoRotation(&this->impl->stageClearTextVm);
+        g_AnmManager->DrawNoRotation(&this->impl->stageClearBg);
         g_AnmManager->DrawNoRotation(&this->impl->stageTransitionSnapshotVm);
         if (this->impl->stageClearBonusTextVm.activeSpriteIdx >= 0)
         {
