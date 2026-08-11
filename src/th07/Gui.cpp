@@ -686,11 +686,11 @@ ZunResult Gui::ActualAddedCallback()
     this->impl->bonusScore.displayArg = GUI_DISPLAY_HIDDEN;
     this->impl->statusPopup.displayArg = GUI_DISPLAY_HIDDEN;
     this->impl->spellCardBonus.displayArg = GUI_DISPLAY_HIDDEN;
-    this->showLives = 2;
-    this->showBombs = 2;
-    this->showGraze = 2;
-    this->showPoint = 2;
-    this->showPower = 2;
+    this->lifeDisplayUpdateFrames = 2;
+    this->bombDisplayUpdateFrames = 2;
+    this->grazeDisplayUpdateFrames = 2;
+    this->pointDisplayUpdateFrames = 2;
+    this->powerDisplayUpdateFrames = 2;
     g_Supervisor.renderSkipFrames = 16;
     return ZUN_SUCCESS;
 }
@@ -711,10 +711,10 @@ ZunResult Gui::LoadMsg(const char *param_1)
 
     this->impl->msg.currentMsgIdx = -1;
     this->impl->msg.curInstr = NULL;
-    for (i = 0; i < this->impl->msg.msgFile->numEntries; i++)
+    for (i = 0; i < this->impl->msg.msgFile->numInstrs; i++)
     {
-        (&this->impl->msg.msgFile->entries)[i] =
-            (MsgRawInstr *)((i32)(&this->impl->msg.msgFile->entries)[i] + (i32) & this->impl->msg.msgFile->numEntries);
+        (&this->impl->msg.msgFile->instrs)[i] =
+            (MsgRawInstr *)((i32)(&this->impl->msg.msgFile->instrs)[i] + (i32) & this->impl->msg.msgFile->numInstrs);
     }
     return ZUN_SUCCESS;
 }
@@ -736,7 +736,7 @@ void GuiImpl::MsgRead(i32 msgIdx)
 {
     MsgRawHeader *tmpMsgFile;
 
-    if (this->msg.msgFile->numEntries <= msgIdx)
+    if (this->msg.msgFile->numInstrs <= msgIdx)
     {
         return;
     }
@@ -745,7 +745,7 @@ void GuiImpl::MsgRead(i32 msgIdx)
     memset(&this->msg, 0, sizeof(GuiMsgVm));
     this->msg.currentMsgIdx = msgIdx;
     this->msg.msgFile = tmpMsgFile;
-    this->msg.curInstr = (&this->msg.msgFile->entries)[msgIdx];
+    this->msg.curInstr = (&this->msg.msgFile->instrs)[msgIdx];
     this->msg.dialogueLines[0].anmFileIdx = -1;
     this->msg.dialogueLines[1].anmFileIdx = -1;
     this->msg.fontSize = 15;
@@ -1471,11 +1471,11 @@ void Gui::DrawGameScene()
         g_AnmManager->DrawNoRotation(this->impl->vms0 + 6);
         g_AnmManager->DrawNoRotation(this->impl->vms0 + 7);
         g_AnmManager->DrawNoRotation(this->impl->vms0 + 8);
-        this->showLives = 2;
-        this->showBombs = 2;
-        this->showGraze = 2;
-        this->showPoint = 2;
-        this->showPower = 2;
+        this->lifeDisplayUpdateFrames = 2;
+        this->bombDisplayUpdateFrames = 2;
+        this->grazeDisplayUpdateFrames = 2;
+        this->pointDisplayUpdateFrames = 2;
+        this->powerDisplayUpdateFrames = 2;
     }
     if (!g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
@@ -1485,27 +1485,27 @@ void Gui::DrawGameScene()
         g_AnmManager->DrawNoRotation(vm);
         vm->pos = Float3(x, 64.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
-        if (this->showLives)
+        if (this->lifeDisplayUpdateFrames)
         {
             vm->pos = Float3(x, 96.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        if (this->showBombs)
+        if (this->bombDisplayUpdateFrames)
         {
             vm->pos = Float3(x, 112.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        if (this->showPower)
+        if (this->powerDisplayUpdateFrames)
         {
             vm->pos = Float3(x, 144.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        if (this->showGraze)
+        if (this->grazeDisplayUpdateFrames)
         {
             vm->pos = Float3(x, 160.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        if (this->showPoint)
+        if (this->pointDisplayUpdateFrames)
         {
             vm->pos = Float3(x, 176.0f, 0.48f);
             g_AnmManager->DrawNoRotation(vm);
@@ -1513,7 +1513,7 @@ void Gui::DrawGameScene()
         vm->pos = Float3(512.0f, 464.0f, 0.48f);
         g_AnmManager->DrawNoRotation(vm);
     }
-    if (this->showLives)
+    if (this->lifeDisplayUpdateFrames)
     {
         vm = &this->impl->vms0[9];
         for (i = 0, x = 496.0f;
@@ -1524,7 +1524,7 @@ void Gui::DrawGameScene()
             g_AnmManager->DrawNoRotation(vm);
         }
     }
-    if (this->showBombs)
+    if (this->bombDisplayUpdateFrames)
     {
         vm = &this->impl->vms0[10];
         for (i = 0, x = 496.0f;
@@ -1587,14 +1587,14 @@ void Gui::DrawGameScene()
         g_AsciiManager.scale.x = 1.0f;
         g_AsciiManager.scale.y = 1.0f;
     }
-    if (this->showGraze ||
+    if (this->grazeDisplayUpdateFrames ||
         g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = Float3(496.0f, 160.0f, 0.0f);
         AsciiManager::AddFormatText(&g_AsciiManager, &textDrawPos, "%d",
                                     g_GameManager.globals->grazeInTotal);
     }
-    if (this->showPoint ||
+    if (this->pointDisplayUpdateFrames ||
         g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         textDrawPos = Float3(496.0f, 176.0f, 0.0f);
@@ -1604,7 +1604,7 @@ void Gui::DrawGameScene()
             g_GameManager.globals->nextNeededPointItemsForExtend);
     }
     g_AnmManager->Flush();
-    if (this->showPower ||
+    if (this->powerDisplayUpdateFrames ||
         g_Supervisor.cfg.disableItemDrawAroundPlayfield)
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
@@ -1659,21 +1659,21 @@ void Gui::DrawGameScene()
                                         &Float3(496.0f, 144.0f, 0.0f), "MAX");
         }
     }
-    if (this->showLives)
+    if (this->lifeDisplayUpdateFrames)
     {
-        this->showLives--;
+        this->lifeDisplayUpdateFrames--;
     }
-    if (this->showPower)
+    if (this->powerDisplayUpdateFrames)
     {
-        this->showPower--;
+        this->powerDisplayUpdateFrames--;
     }
-    if (this->showBombs)
+    if (this->bombDisplayUpdateFrames)
     {
-        this->showBombs--;
+        this->bombDisplayUpdateFrames--;
     }
-    if (this->showGraze)
+    if (this->grazeDisplayUpdateFrames)
     {
-        this->showGraze--;
+        this->grazeDisplayUpdateFrames--;
     }
 }
 

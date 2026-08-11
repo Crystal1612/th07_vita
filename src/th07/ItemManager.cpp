@@ -275,7 +275,7 @@ void ItemManager::OnUpdate()
                         this->DespawnAllItems(i);
                     }
                     g_GameManager.AddScore(10);
-                    g_Gui.showPower = 2;
+                    g_Gui.powerDisplayUpdateFrames = 2;
                     while ((i32)g_GameManager.globals->currentPower >= g_PowerLevels[j])
                     {
                         j++;
@@ -316,7 +316,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.AddScore(itemScore);
                 g_GameManager.globals->pointItemsCollectedThisStage++;
                 g_GameManager.globals->pointItemsCollectedForExtend++;
-                g_Gui.showPoint = 2;
+                g_Gui.pointDisplayUpdateFrames = 2;
                 if (item->currentPosition.y < 128.0f)
                 {
                     g_GameManager.IncreaseSubrank(10);
@@ -392,7 +392,7 @@ void ItemManager::OnUpdate()
                         g_Gui.ShowStatusPopup(0, 1);
                         this->DespawnAllItems(i);
                     }
-                    g_Gui.showPower = 2;
+                    g_Gui.powerDisplayUpdateFrames = 2;
                     g_GameManager.AddScore(10);
                     while ((i32)g_GameManager.globals->currentPower >= g_PowerLevels[k])
                     {
@@ -413,7 +413,7 @@ void ItemManager::OnUpdate()
                 if ((i32)g_GameManager.globals->bombsRemaining < 8)
                 {
                     g_GameManager.AddBombsRemaining(1);
-                    g_Gui.showBombs = 2;
+                    g_Gui.bombDisplayUpdateFrames = 2;
                 }
                 g_GameManager.IncreaseSubrank(5);
                 break;
@@ -433,7 +433,7 @@ void ItemManager::OnUpdate()
                 g_GameManager.RegenerateGameIntegrityCsum();
                 g_GameManager.AddScore(1000);
                 g_AsciiManager.CreatePopup1(&item->currentPosition, 1000, 0xffffffff);
-                g_Gui.showPower = 2;
+                g_Gui.powerDisplayUpdateFrames = 2;
                 break;
             case ITEM_POINT_BULLET:
                 if (!g_Player.isBombing)

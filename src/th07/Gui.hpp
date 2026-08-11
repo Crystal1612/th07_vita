@@ -80,11 +80,11 @@ struct MsgRawInstr
 
 struct MsgRawHeader
 {
-    i32 numEntries;
-    MsgRawInstr *entries;
+    i32 numInstrs;
+    MsgRawInstr *instrs;
 };
 
-struct GuiImplChildB
+struct GuiFormattedText
 {
     Float3 pos;
     i32 fmtArg;
@@ -145,9 +145,9 @@ struct GuiImpl
     i32 finishedStage;
     i32 stageClearBonus;
     i32 transitionToScoreScreen;
-    GuiImplChildB bonusScore;
-    GuiImplChildB statusPopup;
-    GuiImplChildB spellCardBonus;
+    GuiFormattedText bonusScore;
+    GuiFormattedText statusPopup;
+    GuiFormattedText spellCardBonus;
     i32 clearPower;
     i32 clearPointItems;
     i32 clearCherryMax;
@@ -213,14 +213,14 @@ struct Gui
         u32 flags;
         struct
         {
-            u32 showLives : 2;
-            u32 showBombs : 2;
-            u32 showPower : 2;
-            u32 showGraze : 2;
-            u32 showPoint : 2;
+            u32 lifeDisplayUpdateFrames : 2;
+            u32 bombDisplayUpdateFrames : 2;
+            u32 powerDisplayUpdateFrames : 2;
+            u32 grazeDisplayUpdateFrames : 2;
+            u32 pointDisplayUpdateFrames : 2;
         };
     };
-    struct GuiImpl *impl;
+    GuiImpl *impl;
     f32 bombNameBarLength;
     f32 spellcardBarLength;
     u32 bossHealthBarAlpha;

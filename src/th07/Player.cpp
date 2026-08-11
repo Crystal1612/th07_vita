@@ -1206,7 +1206,7 @@ void Player::ScoreGraze(Float3 *param_1)
         g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
     }
     g_GameManager.IncreaseSubrank(6);
-    g_Gui.showGraze = 2;
+    g_Gui.grazeDisplayUpdateFrames = 2;
     g_SoundPlayer.PlaySoundByIdx(SOUND_GRAZE, 0);
     g_EnemyManager.spellcardInfo.grazeBonusScore =
         g_EnemyManager.spellcardInfo.grazeBonusScore + 2500 +
@@ -1705,7 +1705,7 @@ void Player::UpdateBorderAndBombState()
             if (this->bombInfo.bombTimer.HasTicked())
             {
                 PlayerBombInfo::SubtractCherryDrain(this->bombInfo.cherryDrain);
-                g_Gui.showPoint = 2;
+                g_Gui.pointDisplayUpdateFrames = 2;
             }
             if (!this->bombInfo.isFocus)
             {
@@ -1728,7 +1728,7 @@ void Player::UpdateBorderAndBombState()
                 g_ReplayManager->replayEventFlags |= 1;
                 g_GameManager.AddBombsUsed(1);
                 g_GameManager.AddBombsRemaining(-1);
-                g_Gui.showBombs = 2;
+                g_Gui.bombDisplayUpdateFrames = 2;
                 this->bombInfo.isFocus = (i32)this->isFocus;
                 this->bombInfo.isInUse = 1;
                 this->isBombing = 1;
@@ -1799,7 +1799,7 @@ i32 Player::UpdateDeath()
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_Gui.showPower = 2;
+                g_Gui.powerDisplayUpdateFrames = 2;
                 cherryPenalty =
                     (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
                     g_Player.shooterData->cherryPenaltyMultiplier;
@@ -1816,7 +1816,7 @@ i32 Player::UpdateDeath()
                 }
                 cherryPenalty -= cherryPenalty % 10;
                 g_GameManager.cherry -= cherryPenalty;
-                g_Gui.showPoint = 2;
+                g_Gui.pointDisplayUpdateFrames = 2;
                 g_ItemManager.ActivateAllItems();
             }
             else
@@ -1828,7 +1828,7 @@ i32 Player::UpdateDeath()
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
                 g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_Gui.showPower = 2;
+                g_Gui.powerDisplayUpdateFrames = 2;
             }
             g_GameManager.DecreaseSubrank(1600);
         }
@@ -1866,10 +1866,10 @@ i32 Player::UpdateDeath()
             else
             {
                 g_GameManager.AddLivesRemaining(-1);
-                g_Gui.showLives = 2;
+                g_Gui.lifeDisplayUpdateFrames = 2;
                 g_GameManager.SetBombsRemainingAndComputeCsum(
                     g_Player.shooterData->initialBombs);
-                g_Gui.showBombs = 2;
+                g_Gui.bombDisplayUpdateFrames = 2;
                 return 1;
             }
         }
