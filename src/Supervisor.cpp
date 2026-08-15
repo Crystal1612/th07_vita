@@ -97,11 +97,11 @@ void Supervisor::CheckTiming()
 
     if (this->maxTimingError >= 40 || this->timingBadCount >= 16)
     {
-        this->flags |= 8;
+        this->timingBad = 1;
     }
     else
     {
-        this->flags &= 0xfffffff7;
+        this->timingBad = 0;
     }
 }
 
@@ -761,7 +761,7 @@ LAB_00439350:
 
 void ZunTimer::Increment(i32 value)
 {
-    if ((g_Supervisor.flags >> 5 & 1) != 0)
+    if (g_Supervisor.forceIntegerTimer)
     {
         this->current++;
         this->subFrame = 0.0f;
@@ -793,7 +793,7 @@ void ZunTimer::Increment(i32 value)
 
 void ZunTimer::Decrement(i32 value)
 {
-    if ((g_Supervisor.flags >> 5 & 1) != 0)
+    if (g_Supervisor.forceIntegerTimer)
     {
         this->current--;
         this->subFrame = 0.0f;

@@ -133,7 +133,7 @@ start:
         {
             break;
         }
-        g_Supervisor.flags = g_Supervisor.flags & 0xffffffef;
+        g_Supervisor.deviceNotReset = 0;
     }
 
 cleanup:
