@@ -404,7 +404,7 @@ i32 GameWindow::InitD3dRendering()
     presentParams.EnableAutoDepthStencil = 1;
     presentParams.AutoDepthStencilFormat = D3DFMT_D16;
     presentParams.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-    g_Supervisor.flags |= 2;
+    g_Supervisor.hasLockableBackbuffer = 1;
     g_Supervisor.lockableBackBuffer = 1;
     retryWithoutRefreshRate = 0;
     for (;;)
@@ -470,7 +470,7 @@ i32 GameWindow::InitD3dRendering()
                 {
                     // STRING: TH07 0x004979c8
                     g_GameErrorContext.Log("REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
-                    g_Supervisor.flags &= 0xfffffffe;
+                    g_Supervisor.usingTnLHal = 0;
                     usingD3dHal = false;
                 }
             }
@@ -478,14 +478,14 @@ i32 GameWindow::InitD3dRendering()
             {
                 // STRING: TH07 0x004979b4
                 g_GameErrorContext.Log("HAL で動作します\r\n");
-                g_Supervisor.flags &= 0xfffffffe;
+                g_Supervisor.usingTnLHal = 0;
             }
         }
         else
         {
             // STRING: TH07 0x00497998
             g_GameErrorContext.Log("T&L HAL で動作しま～す\r\n");
-            g_Supervisor.flags |= 1;
+            g_Supervisor.usingTnLHal = 1;
         }
         break;
     }
@@ -535,11 +535,11 @@ i32 GameWindow::InitD3dRendering()
                 0, D3DDEVTYPE_HAL, presentParams.BackBufferFormat, 0,
                 D3DRTYPE_TEXTURE, D3DFMT_A8R8G8B8) == 0)
         {
-            g_Supervisor.flags |= 4;
+            g_Supervisor.supports32BitTex = 1;
         }
         else
         {
-            g_Supervisor.flags &= 0xfffffffb;
+            g_Supervisor.supports32BitTex = 0;
             g_Supervisor.cfg.use16BitTextures = 1;
             // STRING: TH07 0x004978b0
             g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");

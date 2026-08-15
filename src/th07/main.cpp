@@ -119,7 +119,7 @@ start:
                 {
                     break;
                 }
-                g_Supervisor.flags = g_Supervisor.flags & 0xffffffef;
+                g_Supervisor.deviceNotReset = 0;
             }
             else if (d3dDeviceStatus == D3DERR_DEVICENOTRESET)
             {
@@ -131,7 +131,7 @@ start:
                 }
                 GameWindow::ResetRenderState();
                 g_Supervisor.renderSkipFrames = 3;
-                g_Supervisor.flags = g_Supervisor.flags | 16;
+                g_Supervisor.deviceNotReset = 1;
             }
         }
     }

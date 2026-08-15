@@ -46,7 +46,7 @@ u32 ReplayManager::OnUpdate(ReplayManager *arg)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
-    if ((g_Supervisor.flags >> 3 & 1) != 0)
+    if (g_Supervisor.timingBad)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
@@ -282,7 +282,7 @@ ReplayManager::ValidateReplayData(ReplayFile *data, i32 size)
         goto bad;
     }
     dataDecompressed = (ReplayFile *)ZunMemory::Alloc(curData->head.sizeWithoutHeader +
-                                                               sizeof(ReplayHeader));
+                                                      sizeof(ReplayHeader));
     memcpy(dataDecompressed, data, sizeof(ReplayHeader));
     Lzss::Decompress(&curData->data.rngValue3, curData->head.compressedSize,
                      &dataDecompressed->data.rngValue3, curData->head.sizeWithoutHeader);

@@ -433,8 +433,8 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
                                 utils::AddNormalizeAngle(laser->angle, -1.5707964f);
                         }
                         bullet->velocity.FromAngleMagnitude(bullet->angle,
-                                                        g_Supervisor.effectiveFramerateMultiplier *
-                                                            bullet->speed);
+                                                            g_Supervisor.effectiveFramerateMultiplier *
+                                                                bullet->speed);
                         bullet->state2 = 10;
                         bullet->sprites = g_BulletManager.bulletTypeTemplates[5];
                         g_AnmManager->SetActiveSprite(
@@ -609,7 +609,7 @@ void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
     g_Supervisor.effectiveFramerateMultiplier = 1.0f / (f32)instr->args[1].i;
     if (g_Supervisor.effectiveFramerateMultiplier < 1.0f)
     {
-        g_Supervisor.flags |= 0x20;
+        g_Supervisor.forceIntegerTimer = 1;
     }
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
     g_Stage.spellcardVms[0].pendingInterrupt = 1;
