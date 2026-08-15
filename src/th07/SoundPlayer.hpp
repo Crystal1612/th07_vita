@@ -62,7 +62,14 @@ C_ASSERT(sizeof(SoundPlayerCommand) == 0x10c);
 
 struct SoundPlayer
 {
-    SoundPlayer();
+    SoundPlayer()
+    {
+        memset(this, 0, sizeof(SoundPlayer));
+        for (i32 i = 0; i < 128; i++)
+        {
+            this->unusedSoundVolRelated[i] = -1;
+        }
+    }
 
     static DWORD __stdcall BackgroundMusicPlayerThread(LPVOID lpThreadParameter);
     i32 GetFmtIndexByName(const char *param_1);

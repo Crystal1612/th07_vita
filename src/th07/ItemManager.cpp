@@ -29,49 +29,6 @@ u8 g_ItemDropTable[32] = {0, 0, 1, 0, 1, 0, 0, 7, 1, 1, 0, 0, 7, 1, 1, 0, 1, 0,
 // GLOBAL: TH07 0x00575c70
 ItemManager g_ItemManager;
 
-// FUNCTION: TH07 0x004325c0
-void Float3::FromAngleMagnitude(f32 angle, f32 magnitude)
-{
-    /* this->x = cosf(angle) * magnitude;
-     * this->y = sinf(angle) * magnitude;
-     */
-    __asm {
-        mov eax, this
-        fld [angle]
-        fsincos
-        fmul [magnitude]
-        fstp float ptr [eax]
-        fmul [magnitude]
-        fstp float ptr [eax + 4]
-    }
-}
-
-// FUNCTION: TH07 0x004325e0
-void GameManager::AddCurrentPower(i32 amount)
-{
-    if (CheckGameIntegrity())
-    {
-        NUKE_SUPERVISOR();
-    }
-    this->globals->currentPower += (f32)amount;
-    RegenerateGameIntegrityCsum();
-}
-
-// FUNCTION: TH07 0x00432630
-ItemManager::ItemManager()
-{
-    i32 idk;
-
-    UselessStack::FourBytes();
-    UselessStack::FourBytes();
-    UselessStack::FourBytes();
-}
-
-// FUNCTION: TH07 0x00432690
-Item::Item()
-{
-}
-
 #pragma var_order(i, item)
 // FUNCTION: TH07 0x004326f0
 Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)

@@ -62,19 +62,6 @@ BulletManager g_BulletManager;
 // GLOBAL: TH07 0x009a9abc
 ChainElem g_BulletManagerCalcChain;
 
-void BulletManager::Initialize()
-{
-    memset(this, 0, sizeof(BulletManager));
-    this->bulletsStart = this->bullets;
-    this->bullets[1024].state = BULLET_END_ARRAY;
-    this->itemType = ITEM_POINT_BULLET;
-}
-
-BulletManager::BulletManager()
-{
-    Initialize();
-}
-
 // FUNCTION: TH07 0x00423660
 void BulletManager::SetActiveSpriteByResolution(AnmVm *sprite,
                                                 AnmVm *bulletTypeTemplate,
@@ -650,7 +637,6 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         }
 
         g_AnmManager->SetAnmIdxAndExecuteScript(&laser->vm0, laserShooter->sprite + 522);
-        UselessStack::FourBytes();
         g_AnmManager->SetActiveSprite(&laser->vm0,
                                       (i32)laser->vm0.activeSpriteIdx +
                                           (i32)laserShooter->spriteOffset);

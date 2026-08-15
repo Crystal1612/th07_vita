@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AnmVm.hpp"
 #include "Player.hpp"
 
 extern u8 g_ItemDropTable[32];
@@ -22,8 +21,6 @@ typedef enum ItemType
 
 struct Item
 {
-    Item();
-
     i32 IsBelowPoc()
     {
         return this->currentPosition.y < g_Player.shooterData->pocY;
@@ -57,8 +54,6 @@ C_ASSERT(sizeof(Item) == 0x288);
 
 struct ItemManager
 {
-    ItemManager();
-
     void ActivateAllItems();
     void DespawnAllItems(i32 param_1);
     void OnUpdate();

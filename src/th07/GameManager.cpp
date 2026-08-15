@@ -39,53 +39,6 @@ ChainElem g_GameManagerCalcChain;
 // GLOBAL: TH07 0x0062f8d4
 ChainElem g_GameManagerDrawChain;
 
-// FUNCTION: TH07 0x0042d560
-GameManager::GameManager()
-{
-    memset(this, 0, sizeof(GameManager));
-    this->arcadeRegionTopLeftPos.x = 32.0f;
-    this->arcadeRegionTopLeftPos.y = 16.0f;
-    this->arcadeRegionSize.x = 384.0f;
-    this->arcadeRegionSize.y = 448.0f;
-    this->demoIdx = 2;
-    this->phantasmUnlocked = 1;
-}
-
-// FUNCTION: TH07 0x0042d5cd
-void GameManager::AddLivesRemaining(i32 amount)
-{
-    if (CheckGameIntegrity())
-    {
-        NUKE_SUPERVISOR();
-    }
-    this->globals->livesRemaining += (f32)amount;
-    RegenerateGameIntegrityCsum();
-}
-
-// FUNCTION: TH07 0x0042d612
-void GameManager::AddBombsRemaining(i32 amount)
-{
-    if (CheckGameIntegrity())
-    {
-        NUKE_SUPERVISOR();
-    }
-    this->globals->bombsRemaining += (f32)amount;
-    RegenerateGameIntegrityCsum();
-}
-
-// FUNCTION: TH07 0x0042d657
-void GameManager::ResetRegionsPos()
-{
-    this->arcadeRegionTopLeftPos.x = 32.0f;
-    this->arcadeRegionTopLeftPos.y = 16.0f;
-    this->arcadeRegionSize.x = 384.0f;
-    this->arcadeRegionSize.y = 448.0f;
-    this->playerMovementAreaTopLeftPos.x = 8.0f;
-    this->playerMovementAreaTopLeftPos.y = 16.0f;
-    this->playerMovementAreaSize.x = 368.0f;
-    this->playerMovementAreaSize.y = 416.0f;
-}
-
 // FUNCTION: TH07 0x0042d6d8
 i32 GameManager::IsInBounds(f32 x, f32 y, f32 widthPx, f32 heightPx)
 {

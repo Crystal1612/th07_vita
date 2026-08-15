@@ -2569,12 +2569,10 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             vm->offset = Float3(0.0f, 0.0f, 0.0f);
             g_AnmManager->SetAnmIdxAndExecuteScript(vm, i + 2304);
         }
-        UselessStack::FourBytes();
         g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 2320);
         vm = arg->spellcardListVms;
         for (i = 0; i < 15; i++, vm++)
         {
-            UselessStack::FourBytes();
             g_AnmManager->InitializeAndSetActiveSprite(vm, i + 1813);
             vm->pos = Float3(0.0f, 0.0f, 0.0f);
             vm->anchor = 3;

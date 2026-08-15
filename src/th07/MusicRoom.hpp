@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "AnmVm.hpp"
+#include "AnmManager.hpp"
 #include "Chain.hpp"
 
 struct TrackDescriptor

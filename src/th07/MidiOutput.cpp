@@ -109,7 +109,7 @@ MidiTimer::MidiTimer()
     this->timerId = 0;
 }
 
-// FUNCTION: TH07 0x004362d0 FOLDED
+// FUNCTION: TH07 0x004362d0
 MidiTimer::~MidiTimer()
 {
     StopTimer();
@@ -736,6 +736,7 @@ void Supervisor::StopMidiTimer(MidiTimer *timer)
     timer->StopTimer();
 }
 
+// FUNCTION: TH07 0x0044d620 FOLDED
 void MidiTimer::OnTimerElapsed()
 {
 }

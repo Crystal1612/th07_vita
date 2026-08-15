@@ -26,30 +26,6 @@ ChainElem g_AsciiManagerCalcChain;
 // GLOBAL: TH07 0x0135dfcc
 ChainElem g_AsciiManagerOnDrawPopupsChain;
 
-// FUNCTION: TH07 0x00401400
-void AsciiManager::UpdateScripts()
-{
-    g_AnmManager->ExecuteScript(&this->cherryGauge);
-    g_AnmManager->ExecuteScript(&this->cherryDigit);
-    g_AnmManager->ExecuteScript(&this->bossMarkers[0]);
-    g_AnmManager->ExecuteScript(&this->bossMarkers[1]);
-    g_AnmManager->ExecuteScript(&this->bossMarkers[2]);
-    g_AnmManager->ExecuteScript(&this->bossMarkers[3]);
-    g_AnmManager->ExecuteScript(&this->cherryBorderActive);
-}
-
-AsciiManager::AsciiManager()
-{
-}
-
-PauseMenu::PauseMenu()
-{
-}
-
-RetryMenu::RetryMenu()
-{
-}
-
 // FUNCTION: TH07 0x004017b0
 void IncrementCapped(u32 *param, u32 cap)
 {
@@ -77,7 +53,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
             }
 
             curPopup->pos.y -= 0.5f * g_Supervisor.effectiveFramerateMultiplier;
-            curPopup->timer++;
+            curPopup->timer.NextTick();
             if (curPopup->timer > 60)
             {
                 curPopup->inUse = 0;
@@ -148,9 +124,7 @@ void AsciiManager::InitializeVms()
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
     this->vm1.anchor = 3;
-    UselessStack::FourBytes();
     g_AnmManager->InitializeAndSetActiveSprite(&this->vm1, 0);
-    UselessStack::FourBytes();
     g_AnmManager->InitializeAndSetActiveSprite(&this->vm0, 32);
     this->vm1.pos.z = 0.1f;
     this->isSelected = 0;
@@ -252,7 +226,7 @@ void AsciiManager::AddString(Float3 *pos, const char *text)
     // the only reason this doesn't cause a problem is because nothing more
     // than 64 chars is passed through this function
     strcpy(curString->text, text);
-    curString->pos = *(PodFloat3 *)pos;
+    curString->pos = *pos;
     curString->color = this->color;
     curString->scale.x = this->scale.x;
     curString->scale.y = this->scale.y;

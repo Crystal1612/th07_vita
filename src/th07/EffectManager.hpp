@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AnmVm.hpp"
+#include "AnmManager.hpp"
 #include "ZunResult.hpp"
 
 typedef i32 (*EffectCallback)(struct Effect *);

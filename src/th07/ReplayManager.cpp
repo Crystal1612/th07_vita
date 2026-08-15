@@ -479,8 +479,12 @@ ZunResult ReplayManager::RegisterChain(i32 isDemo, const char *replayFilename)
             mgr->calcChain = g_Chain.CreateElem((ChainCallback)OnUpdate);
             mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
             mgr->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
+            // ReplayManager::OnDraw is almost certainly folded with
+            // EffectManager::UpdateNoOp, but I couldn't get it to fold
+            // from the (admittedly very little) attempts I put on it, so just
+            // do this
             mgr->drawChain = g_Chain.CreateElem(
-                (ChainCallback)EffectManager::UpdateNoOp); // idk either bro
+                (ChainCallback)EffectManager::UpdateNoOp);
             mgr->calcChain->arg = mgr;
             if (g_Chain.AddToCalcChain(mgr->calcChain, 16))
             {

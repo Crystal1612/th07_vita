@@ -420,9 +420,5 @@ ZunResult MusicRoom::RegisterChain()
     musicRoom->drawChain->arg = musicRoom;
     g_Chain.AddToDrawChain(musicRoom->drawChain, 0);
 
-    UselessStack::EightBytes();
-    UselessStack::EightBytes();
-    UselessStack::EightBytes();
-
     return ZUN_SUCCESS;
 }

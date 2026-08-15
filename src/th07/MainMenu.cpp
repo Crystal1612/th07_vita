@@ -170,27 +170,6 @@ const char *g_MainMenuStrings[8] = {
     "‚¢‚ë‚¢‚ë‚ÆI—¹‚µ‚Ü‚·",
 };
 
-// FUNCTION: TH07 0x004553fa
-void InitializeTimingVars(Supervisor *arg)
-{
-    arg->timingErrorCount = 0;
-    arg->maxTimingError = 0;
-    arg->checkTiming = 0;
-    arg->timingSpikeAccumulator = 0;
-    arg->timingBadCount = 0;
-}
-
-// FUNCTION: TH07 0x00455435
-void MainMenu::SetGameState(GameState gameState)
-{
-    this->prevGameState = this->gameState;
-    this->gameState = gameState;
-    this->inputDelayTimer = 0;
-    this->stateTimer = 0;
-    this->menuSubState = 0;
-    this->idleFrames = 0;
-}
-
 // FUNCTION: TH07 0x004554d6
 u32 MainMenu::OnUpdate(MainMenu *arg)
 {

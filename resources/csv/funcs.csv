@@ -1,7 +1,7 @@
 address|name|type
 00401000|D3DXMatrixIdentity|function
 004010b0|ZunTimer::NextTick|function
-004010f0|AnmVm::Initialize|function
+004010f0|AnmVmBase::Initialize|function
 00401170|AnmVm::AnmVm|function
 004011b0|AnmVmBase::AnmVmBase|function
 004012b0|GameManager::RegenerateGameIntegrityCsum|function

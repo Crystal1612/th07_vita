@@ -77,16 +77,6 @@ const char *g_SFXList[30] = {
 // GLOBAL: TH07 0x004ba0d8
 SoundPlayer g_SoundPlayer;
 
-// FUNCTION: TH07 0x0044b510
-SoundPlayer::SoundPlayer()
-{
-    memset(this, 0, sizeof(SoundPlayer));
-    for (i32 i = 0; i < 128; i++)
-    {
-        this->unusedSoundVolRelated[i] = -1;
-    }
-}
-
 #pragma var_order(bufdesc, audioBuffer2Start, audioBuffer2Len, audioBuffer1Len, audioBuffer1Start, wavFormat)
 // FUNCTION: TH07 0x0044b560
 ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)

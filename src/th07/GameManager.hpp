@@ -69,7 +69,16 @@ struct Rank
 
 struct GameManager
 {
-    GameManager();
+    GameManager()
+    {
+        memset(this, 0, sizeof(GameManager));
+        this->arcadeRegionTopLeftPos.x = 32.0f;
+        this->arcadeRegionTopLeftPos.y = 16.0f;
+        this->arcadeRegionSize.x = 384.0f;
+        this->arcadeRegionSize.y = 448.0f;
+        this->demoIdx = 2;
+        this->phantasmUnlocked = 1;
+    }
 
 #pragma var_order(local_10, local_c)
     // FUNCTION: TH07 0x004012b0
@@ -111,8 +120,6 @@ struct GameManager
 #endif
     }
 
-    void AddCurrentPower(i32 amount);
-
     // FUNCTION: TH07 0x0043b5c0
     void RerollRng()
     {
@@ -137,6 +144,16 @@ struct GameManager
         RegenerateGameIntegrityCsum();
     }
 
+    void AddCurrentPower(i32 amount)
+    {
+        if (CheckGameIntegrity())
+        {
+            NUKE_SUPERVISOR();
+        }
+        this->globals->currentPower += (f32)amount;
+        RegenerateGameIntegrityCsum();
+    }
+
     // FUNCTION: TH07 0x0043b7a0
     void AddBombsUsed(i32 amount)
     {
@@ -145,6 +162,28 @@ struct GameManager
             NUKE_SUPERVISOR();
         }
         this->globals->bombsUsed += (f32)amount;
+        RegenerateGameIntegrityCsum();
+    }
+
+    // FUNCTION: TH07 0x0042d5cd
+    void AddLivesRemaining(i32 amount)
+    {
+        if (CheckGameIntegrity())
+        {
+            NUKE_SUPERVISOR();
+        }
+        this->globals->livesRemaining += (f32)amount;
+        RegenerateGameIntegrityCsum();
+    }
+
+    // FUNCTION: TH07 0x0042d612
+    void AddBombsRemaining(i32 amount)
+    {
+        if (CheckGameIntegrity())
+        {
+            NUKE_SUPERVISOR();
+        }
+        this->globals->bombsRemaining += (f32)amount;
         RegenerateGameIntegrityCsum();
     }
 
@@ -173,6 +212,19 @@ struct GameManager
         this->globals->livesRemaining = (f32)amount;
     }
 
+    // FUNCTION: TH07 0x0042d657
+    void ResetRegionsPos()
+    {
+        this->arcadeRegionTopLeftPos.x = 32.0f;
+        this->arcadeRegionTopLeftPos.y = 16.0f;
+        this->arcadeRegionSize.x = 384.0f;
+        this->arcadeRegionSize.y = 448.0f;
+        this->playerMovementAreaTopLeftPos.x = 8.0f;
+        this->playerMovementAreaTopLeftPos.y = 16.0f;
+        this->playerMovementAreaSize.x = 368.0f;
+        this->playerMovementAreaSize.y = 416.0f;
+    }
+
     static ZunResult RegisterChain();
     static void CutChain();
 
@@ -189,10 +241,8 @@ struct GameManager
     i32 HasUnlockedPhantom(i32 shotType);
     i32 HasUnlockedPhantomAndMaxClears();
 
-    void AddBombsRemaining(i32 amount);
     void AddCherryPlus(i32 amount);
     void AddCherry(i32 amount);
-    void AddLivesRemaining(i32 amount);
     void ExtendFromPoints();
 
     void DecreaseSubrank(i32 amount);
@@ -202,7 +252,6 @@ struct GameManager
     void InitializeRank();
     static void InitializeRngAndCsum();
     i32 IsInBounds(f32 x, f32 y, f32 widthPx, f32 heightPx);
-    void ResetRegionsPos();
 
     static void DrawLoadingSprite();
 

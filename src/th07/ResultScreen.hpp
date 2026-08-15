@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-#include "AnmVm.hpp"
+#include "AnmManager.hpp"
 #include "Chain.hpp"
 #include "ReplayManager.hpp"
 #include "ZunMemory.hpp"
@@ -115,8 +115,6 @@ struct ScoreListNode
 {
     ScoreListNode()
     {
-        i32 unused[4];
-
         prev = NULL;
         next = NULL;
         data = NULL;

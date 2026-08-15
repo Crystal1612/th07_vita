@@ -48,115 +48,6 @@ ChainElem g_EnemyManagerCalcChain;
 // GLOBAL: TH07 0x012fe230
 ChainElem g_EnemyManagerDrawChain2;
 
-// FUNCTION: TH07 0x0041e920
-void Enemy::Move()
-{
-    this->deltaPos = this->pos - this->prevPos;
-    this->prevPos = this->pos;
-    if (!this->mirror)
-    {
-        this->pos.x +=
-            g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
-    }
-    else
-    {
-        this->pos.x -=
-            g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
-    }
-    this->pos.y +=
-        g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.y;
-    this->pos.z +=
-        g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
-}
-
-#pragma var_order(i, enemy)
-// FUNCTION: TH07 0x0041ea60
-void EnemyManager::Initialize()
-{
-    Enemy *enemy;
-    i32 i;
-
-    enemy = &this->enemies[0];
-    memset(this, 0, sizeof(EnemyManager));
-    enemy = &this->enemyTemplate;
-    memset(enemy, 0, sizeof(Enemy));
-    for (i = 0; i < 2; i++)
-    {
-        enemy->vms[i].anmFileIdx = -1;
-    }
-    for (i = 0; i < 96; i++)
-    {
-        enemy->enemyHistory[i].pos.x = -999.0f;
-    }
-    enemy->active = 1;
-    enemy->timer = 0;
-    enemy->isInBounds = 0;
-    enemy->hitboxSize = Float3(12.0f, 12.0f, 12.0f);
-    enemy->axisSpeed = Float3(0.0f, 0.0f, 0.0f);
-    enemy->angularVelocity = 0.0f;
-    enemy->angle = 0.0f;
-    enemy->moveAcceleration = 0.0f;
-    enemy->moveSpeed = 0.0f;
-    enemy->moveMode = 0;
-    enemy->disableBullets = 0;
-    enemy->mirror = 0;
-    enemy->isBoss = 0;
-    enemy->stackDepth = 0;
-    enemy->life = 1;
-    enemy->score = 100;
-    enemy->deathAnm1 = 0;
-    enemy->deathAnm2 = 0;
-    enemy->deathAnm3 = 0;
-    enemy->shootInterval = 0;
-    enemy->shootIntervalTimer = 0;
-    enemy->shootOffset = Float3(0.0f, 0.0f, 0.0f);
-    enemy->anmExLeft = -1;
-    enemy->anmExRight = -1;
-    enemy->anmExDefaults = -1;
-    enemy->canDie = 1;
-    enemy->hasContactHitbox = 1;
-    enemy->canBeDamaged = 1;
-    enemy->hasNoCollision = 0;
-    enemy->isHittable = 1;
-    enemy->isProjectile = 0;
-    enemy->deathType = 0;
-    enemy->deathCallbackSub = -1;
-    enemy->hasMovementBounds = 0;
-    enemy->effectsNum = 0;
-    enemy->runInterrupt = -1;
-    for (i = 0; i < 4; i++)
-    {
-        enemy->lifeCallbackThreshold[i] = -1;
-    }
-    enemy->timerCallbackThreshold = -1;
-    enemy->periodicCallbackSub = -1;
-    enemy->laserIdx = 0;
-    enemy->damageTintTimer = 0;
-    enemy->primaryVmAutoRotate = 0;
-    enemy->bulletRankSpeedLow = -0.15f;
-    enemy->bulletRankSpeedHigh = 0.15f;
-    enemy->bulletProps.soundIdx = SOUND_BOMB_MARISA_A_FOCUS;
-    enemy->bulletProps.soundOverride = SOUND_25;
-}
-
-// FUNCTION: TH07 0x0041ee70
-EnemyManager::EnemyManager()
-{
-    i32 idk[8];
-
-    Initialize();
-}
-
-// FUNCTION: TH07 0x0041ef70
-Enemy::Enemy()
-{
-}
-
-// FUNCTION: TH07 0x0041f220
-EnemyEclContext::EnemyEclContext()
-{
-}
-
 #pragma var_order(i, enemy)
 // FUNCTION: TH07 0x0041f2e0
 Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, Float3 *pos, i32 life,
@@ -785,7 +676,6 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
-                UselessStack::ThirtyTwoBytes();
                 enemy->specialEffect->pos1 = enemy->specialEffect->pos1 + (enemy->pos - enemy->specialEffect->pos1) / 16.0f;
             }
         }

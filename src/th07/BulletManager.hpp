@@ -254,7 +254,18 @@ C_ASSERT(sizeof(Bullet) == 0xd68);
 
 struct BulletManager
 {
-    BulletManager();
+    BulletManager()
+    {
+        Initialize();
+    }
+
+    __declspec(noinline) void Initialize()
+    {
+        memset(this, 0, sizeof(BulletManager));
+        this->bulletsStart = this->bullets;
+        this->bullets[1024].state = BULLET_END_ARRAY;
+        this->itemType = ITEM_POINT_BULLET;
+    }
 
     static ZunResult RegisterChain(const char *etamaAnmPath);
     static void CutChain();
@@ -263,8 +274,6 @@ struct BulletManager
     static ZunResult DeletedCallback(BulletManager *arg);
     static u32 OnUpdate(BulletManager *arg);
     static u32 OnDraw(BulletManager *arg);
-
-    void Initialize();
 
     i32 DespawnBullets(i32 param_1, i32 turnIntoItem);
     void RemoveAllBullets(i32 param_1);

@@ -1020,7 +1020,6 @@ ZunResult GuiImpl::RunMsg()
                     goto SKIP_TIME_INCREMENT;
                 }
 
-                UselessStack::FourBytes();
                 g_AnmManager->InitializeAndSetActiveSprite(&this->stageClearBonusTextVm, 268);
                 this->transitionToScoreScreen = 1;
                 this->msg.currentMsgIdx = -2;

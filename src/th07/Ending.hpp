@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AnmVm.hpp"
+#include "AnmManager.hpp"
 #include "Chain.hpp"
 
 typedef enum EndingFadeType

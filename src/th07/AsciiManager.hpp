@@ -2,15 +2,13 @@
 
 #include <d3d8.h>
 
-#include "AnmVm.hpp"
+#include "AnmManager.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
 
 struct PauseMenu
 {
-    PauseMenu();
-
     void OnDraw();
     i32 OnUpdate();
 
@@ -23,8 +21,6 @@ C_ASSERT(sizeof(PauseMenu) == 0x194c);
 
 struct RetryMenu
 {
-    RetryMenu();
-
     i32 OnUpdate();
     void OnDraw();
 
@@ -50,13 +46,7 @@ C_ASSERT(sizeof(AsciiManagerPopup) == 0x28);
 struct AsciiManagerString
 {
     char text[64];
-
-    // This should seriously just be a normal Float3, but for some reason if
-    // a Float3 is used here instead the AsciiManager constructor opts to
-    // construct popups with a vector constructor iterator rather than just
-    // doing it in a loop, which ruins the matching percentage even more than
-    // it already is.
-    PodFloat3 pos;
+    Float3 pos;
     D3DCOLOR color;
     Float2 scale;
     i32 isSelected;
@@ -65,8 +55,6 @@ struct AsciiManagerString
 
 struct AsciiManager
 {
-    AsciiManager();
-
     static ZunResult RegisterChain();
     static void CutChain();
 
@@ -85,7 +73,17 @@ struct AsciiManager
     void DrawStrings();
     void InitializeVms();
     void InitializeOtherVms();
-    void UpdateScripts();
+
+    void UpdateScripts()
+    {
+        g_AnmManager->ExecuteScript(&this->cherryGauge);
+        g_AnmManager->ExecuteScript(&this->cherryDigit);
+        g_AnmManager->ExecuteScript(&this->bossMarkers[0]);
+        g_AnmManager->ExecuteScript(&this->bossMarkers[1]);
+        g_AnmManager->ExecuteScript(&this->bossMarkers[2]);
+        g_AnmManager->ExecuteScript(&this->bossMarkers[3]);
+        g_AnmManager->ExecuteScript(&this->cherryBorderActive);
+    }
 
     void SetColor(D3DCOLOR color)
     {

@@ -1,11 +1,9 @@
 #pragma once
 
 #include "AnmManager.hpp"
-#include "AnmVm.hpp"
 #include "ScreenEffect.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
-#include "d3dx8.h"
 #include "utils.hpp"
 
 typedef enum StageEaseMode

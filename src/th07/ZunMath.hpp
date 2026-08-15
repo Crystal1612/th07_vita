@@ -51,7 +51,21 @@ struct Float3
         this->z = z;
     }
 
-    void FromAngleMagnitude(f32 angle, f32 magnitude);
+    void FromAngleMagnitude(f32 angle, f32 magnitude)
+    {
+        /* this->x = cosf(angle) * magnitude;
+         * this->y = sinf(angle) * magnitude;
+         */
+        __asm {
+            mov eax, this
+            fld [angle]
+            fsincos
+            fmul [magnitude]
+            fstp float ptr [eax]
+            fmul [magnitude]
+            fstp float ptr [eax + 4]
+        }
+    }
 
     operator f32 *()
     {

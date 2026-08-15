@@ -28,7 +28,6 @@ LINK_PATH = VC_PATH / "bin" / "link.exe"
 RC_PATH = VC_PATH / "bin" / "rc.exe"
 
 TH07_SOURCES = [
-    "AnmVm.cpp",
     "AsciiManager.cpp",
     "Stage.cpp",
     "BombData.cpp",
@@ -255,7 +254,7 @@ with open("build.ninja", "w") as f:
     f.write("  description = rc $out\n\n")
 
     f.write("rule link\n")
-    f.write("  command = $link $in $in_lflags $in_libs $order_arg /OUT:$out\n")
+    f.write("  command = $link $in $in_lflags $in_libs /OUT:$out\n")
     f.write("  description = link $out\n\n")
 
     th07_objects = []
@@ -291,7 +290,6 @@ with open("build.ninja", "w") as f:
     f.write(f"build th07.exe: link {' '.join(th07_objects)}\n")
     f.write(f"  in_lflags = $lflags_th07\n")
     f.write(f"  in_libs = $libs_th07\n")
-    f.write(f"  order_arg = /order:@{conv_path(RESOURCE_DIR / 'order.txt')}\n\n")
 
     if args.with_custom:
         custom_objects = []
@@ -319,7 +317,6 @@ with open("build.ninja", "w") as f:
         f.write(f"build custom.exe: link {' '.join(custom_objects)}\n")
         f.write(f"  in_lflags = $lflags_custom\n")
         f.write(f"  in_libs = $libs_custom\n")
-        f.write(f"  order_arg =\n")
 
 subprocess.check_call(["ninja"])
 

@@ -1,6 +1,6 @@
 # th07
 
-<img src="resources/progress.svg" alt="th07.exe: Implemented: 100%. Accuracy: 99.41%" width="50%">
+<img src="resources/progress.svg" alt="th07.exe: Implemented: 100%. Accuracy: 99.78%" width="50%">
 <img src="resources/custom/progress.svg" alt="custom.exe: Implemented: 100%. Accuracy: 100%" width="50%">
 
 A work-in-progress reimplementation/decompilation of 東方妖々夢　～ Perfect Cherry Blossom 1.00b (md5: 0126afce1e805370d36c3482445e98da) by Team Shanghai Alice.
