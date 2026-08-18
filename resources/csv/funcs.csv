@@ -233,7 +233,7 @@ address|name|type
 00427bf8|Gui::ShowBonusScore|function
 00427c81|Gui::ShowStatusPopup|function
 00427d09|Gui::ShowSpellcardBonus|function
-00427d92|Gui::CopyTemplateSpriteToSprite|function
+00427d92|Gui::CopyEnemyNameTexture|function
 00427e7c|Gui::OnUpdate|function
 00427f22|Gui::OnDraw|function
 0042868d|Gui::ShowBombNamePortrait|function

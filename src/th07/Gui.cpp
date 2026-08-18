@@ -105,20 +105,20 @@ void Gui::ShowSpellcardBonus(i32 fmtArg)
 }
 
 // FUNCTION: TH07 0x00427d92
-void Gui::CopyTemplateSpriteToSprite(i32 spriteIdx)
+void Gui::CopyEnemyNameTexture(i32 spriteIdx)
 {
     RECT srcRect;
-    RECT dstRect;
+    RECT enemyNameRect;
 
     srcRect.left = g_AnmManager->GetSprite(0x609)->startPixelInclusive.x;
     srcRect.top = g_AnmManager->GetSprite(0x609)->startPixelInclusive.y;
     srcRect.right = g_AnmManager->GetSprite(0x609)->endPixelInclusive.x;
     srcRect.bottom = g_AnmManager->GetSprite(0x609)->endPixelInclusive.y;
-    dstRect.left = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
-    dstRect.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
-    dstRect.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;
-    dstRect.bottom = g_AnmManager->sprites[spriteIdx].endPixelInclusive.y;
-    g_AnmManager->CopyTexture(21, 22, &srcRect, &dstRect);
+    enemyNameRect.left = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
+    enemyNameRect.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
+    enemyNameRect.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;
+    enemyNameRect.bottom = g_AnmManager->sprites[spriteIdx].endPixelInclusive.y;
+    g_AnmManager->CopyTexture(21, 22, &srcRect, &enemyNameRect);
 }
 
 // FUNCTION: TH07 0x00427e7c
@@ -494,7 +494,7 @@ ZunResult Gui::ActualAddedCallback()
     switch (g_GameManager.currentStage)
     {
     case 1:
-        CopyTemplateSpriteToSprite(1550);
+        CopyEnemyNameTexture(1550);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_01_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -511,7 +511,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 2:
-        CopyTemplateSpriteToSprite(1552);
+        CopyEnemyNameTexture(1552);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_02_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -528,7 +528,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 3:
-        CopyTemplateSpriteToSprite(1554);
+        CopyEnemyNameTexture(1554);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_03_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -545,7 +545,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 4:
-        CopyTemplateSpriteToSprite(1556);
+        CopyEnemyNameTexture(1556);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_04_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -562,7 +562,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 5:
-        CopyTemplateSpriteToSprite(1558);
+        CopyEnemyNameTexture(1558);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_05_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -579,7 +579,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 6:
-        CopyTemplateSpriteToSprite(1560);
+        CopyEnemyNameTexture(1560);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_06_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -596,7 +596,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 7:
-        CopyTemplateSpriteToSprite(1562);
+        CopyEnemyNameTexture(1562);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_07_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -613,7 +613,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 8:
-        CopyTemplateSpriteToSprite(1564);
+        CopyEnemyNameTexture(1564);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_08_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -762,33 +762,33 @@ void GuiImpl::MsgRead(i32 msgIdx)
         switch (g_GameManager.currentStage)
         {
         case 1:
-            Gui::CopyTemplateSpriteToSprite(1551);
+            Gui::CopyEnemyNameTexture(1551);
             break;
         case 2:
-            Gui::CopyTemplateSpriteToSprite(1553);
+            Gui::CopyEnemyNameTexture(1553);
             break;
         case 3:
-            Gui::CopyTemplateSpriteToSprite(1555);
+            Gui::CopyEnemyNameTexture(1555);
             break;
         case 4:
-            Gui::CopyTemplateSpriteToSprite(1557);
+            Gui::CopyEnemyNameTexture(1557);
             break;
         case 5:
-            Gui::CopyTemplateSpriteToSprite(1559);
+            Gui::CopyEnemyNameTexture(1559);
             break;
         case 6:
-            Gui::CopyTemplateSpriteToSprite(1561);
+            Gui::CopyEnemyNameTexture(1561);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 7:
-            Gui::CopyTemplateSpriteToSprite(1563);
+            Gui::CopyEnemyNameTexture(1563);
             g_Stage.spellcardVmsIdx = 1;
             g_Stage.numSpellcardVms = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 8:
-            Gui::CopyTemplateSpriteToSprite(1565);
+            Gui::CopyEnemyNameTexture(1565);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
         }
