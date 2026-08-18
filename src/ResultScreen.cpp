@@ -94,6 +94,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     Supervisor::DebugPrint("info : score load\r\n");
     rawData = (ScoreDatRaw *)FileSystem::OpenFile(path, 1);
     scoreData = new ScoreDat;
+    scoreData->decodedData = NULL;
 
     if (!rawData)
     {
@@ -102,6 +103,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
         SAFE_FREE(rawData);
         SAFE_DELETE(scoreData);
         scoreData = new ScoreDat;
+        scoreData->decodedData = NULL;
         scoreData->raw.dataOffset = sizeof(ScoreDatRaw);
         scoreData->raw.fileLength = sizeof(ScoreDatRaw);
         goto INIT_SCORES;
