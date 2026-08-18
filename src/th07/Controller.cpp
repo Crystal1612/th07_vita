@@ -18,7 +18,7 @@ static u16 g_AutoFocusTimer;
 #define JOYSTICK_MIDPOINT(min, max) ((min + max) / 2)
 
 // FUNCTION: TH07 0x00430290
-u16 Controller::GetJoystickCaps()
+u32 Controller::GetJoystickCaps()
 {
     joyinfoex_tag joyinfo;
 
@@ -27,7 +27,7 @@ u16 Controller::GetJoystickCaps()
     if (joyGetPosEx(0, &joyinfo))
     {
         // STRING: TH07 0x00497d9c
-        g_GameErrorContext.Log("égÇ¶ÇÈÉpÉbÉhÇ™ë∂ç›ÇµÇ»Ç¢ÇÊÇ§Ç≈Ç∑ÅAécîO\r\n");
+        g_GameErrorContext.Log("ÔøΩgÔøΩÔøΩÔøΩÔøΩpÔøΩbÔøΩhÔøΩÔøΩÔøΩÔøΩÔøΩ›ÇÔøΩÔøΩ»ÇÔøΩÔøΩÊÇ§ÔøΩ≈ÇÔøΩÔøΩAÔøΩcÔøΩO\r\n");
         return 1;
     }
     joyGetDevCapsA(0, &g_JoystickCaps, 0x194);
@@ -35,7 +35,7 @@ u16 Controller::GetJoystickCaps()
 }
 
 // FUNCTION: TH07 0x004302f0
-u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons,
+u32 Controller::SetButtonFromDirectInputJoystate(u32 *outButtons,
                                                  i16 controllerButtonToTest,
                                                  u32 touhouButton,
                                                  u8 *inputButtons)
@@ -45,15 +45,15 @@ u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons,
         return 0;
     }
     *outButtons |= (inputButtons[controllerButtonToTest] & 0x80) != 0
-                       ? (u16)touhouButton
+                       ? (u32)touhouButton
                        : 0;
 
-    return (inputButtons[controllerButtonToTest] & 0x80) != 0 ? (u16)touhouButton
+    return (inputButtons[controllerButtonToTest] & 0x80) != 0 ? (u32)touhouButton
                                                               : 0;
 }
 
 // FUNCTION: TH07 0x00430370
-u32 Controller::SetButtonFromControllerInputs(u16 *outButtons,
+u32 Controller::SetButtonFromControllerInputs(u32 *outButtons,
                                               i16 controllerButtonToTest,
                                               u32 touhouButton,
                                               u32 inputButtons)
@@ -66,13 +66,13 @@ u32 Controller::SetButtonFromControllerInputs(u16 *outButtons,
     }
 
     mask = 1 << (i32)controllerButtonToTest;
-    *outButtons |= (inputButtons & mask) != 0 ? (u16)touhouButton : 0;
-    return (inputButtons & mask) != 0 ? (u16)touhouButton : 0;
+    *outButtons |= (inputButtons & mask) != 0 ? (u32)touhouButton : 0;
+    return (inputButtons & mask) != 0 ? (u32)touhouButton : 0;
 }
 
 #pragma var_order(pji, distance, DVar1, DVar2, hr, js, retryCount)
 // FUNCTION: TH07 0x004303f0
-u16 Controller::GetControllerInput(u16 buttons)
+u32 Controller::GetControllerInput(u32 buttons)
 {
     i32 retryCount;
     DIJOYSTATE2 js;
@@ -334,11 +334,11 @@ u8 *Controller::GetControllerState()
 }
 
 // FUNCTION: TH07 0x00430b50
-u16 Controller::GetInput()
+u32 Controller::GetInput()
 {
     u8 keyboardState[256];
 
-    u16 buttons = 0;
+    u32 buttons = 0;
 
     if (!g_Supervisor.keyboard)
     {
@@ -367,6 +367,24 @@ u16 Controller::GetInput()
         buttons |= KEY_PRESSED('S', TH_BUTTON_S);
         buttons |= KEY_PRESSED('R', TH_BUTTON_RESET);
         buttons |= KEY_PRESSED(VK_RETURN, TH_BUTTON_ENTER);
+
+        //Player 2
+        buttons |= KEY_PRESSED('W', TH_BUTTON_SHOOT2);
+        buttons |= KEY_PRESSED('E', TH_BUTTON_BOMB2);
+        buttons |= KEY_PRESSED('Q', TH_BUTTON_FOCUS2);
+        buttons |= KEY_PRESSED('T', TH_BUTTON_UP2);
+        buttons |= KEY_PRESSED('G', TH_BUTTON_DOWN2);
+        buttons |= KEY_PRESSED('F', TH_BUTTON_LEFT2);
+        buttons |= KEY_PRESSED('H', TH_BUTTON_RIGHT2);
+
+        //Player 3
+        buttons |= KEY_PRESSED('V', TH_BUTTON_SHOOT3);
+        buttons |= KEY_PRESSED('B', TH_BUTTON_BOMB3);
+        buttons |= KEY_PRESSED('C', TH_BUTTON_FOCUS3);
+        buttons |= KEY_PRESSED('I', TH_BUTTON_UP3);
+        buttons |= KEY_PRESSED('K', TH_BUTTON_DOWN3);
+        buttons |= KEY_PRESSED('J', TH_BUTTON_LEFT3);
+        buttons |= KEY_PRESSED('L', TH_BUTTON_RIGHT3);
     }
     else
     {
@@ -403,8 +421,29 @@ u16 Controller::GetInput()
         buttons |= KEY_PRESSED(DIK_S, TH_BUTTON_S);
         buttons |= KEY_PRESSED(DIK_RETURN, TH_BUTTON_ENTER);
         buttons |= KEY_PRESSED(DIK_R, TH_BUTTON_RESET);
+
+        //Player 2
+        buttons |= KEY_PRESSED(DIK_W, TH_BUTTON_SHOOT2);
+        buttons |= KEY_PRESSED(DIK_E, TH_BUTTON_BOMB2);
+        buttons |= KEY_PRESSED(DIK_Q, TH_BUTTON_FOCUS2);
+        buttons |= KEY_PRESSED(DIK_T, TH_BUTTON_UP2);
+        buttons |= KEY_PRESSED(DIK_G, TH_BUTTON_DOWN2);
+        buttons |= KEY_PRESSED(DIK_F, TH_BUTTON_LEFT2);
+        buttons |= KEY_PRESSED(DIK_H, TH_BUTTON_RIGHT2);
+
+        //Player 3
+        buttons |= KEY_PRESSED(DIK_V, TH_BUTTON_SHOOT3);
+        buttons |= KEY_PRESSED(DIK_B, TH_BUTTON_BOMB3);
+        buttons |= KEY_PRESSED(DIK_C, TH_BUTTON_FOCUS3);
+        buttons |= KEY_PRESSED(DIK_I, TH_BUTTON_UP3);
+        buttons |= KEY_PRESSED(DIK_K, TH_BUTTON_DOWN3);
+        buttons |= KEY_PRESSED(DIK_J, TH_BUTTON_LEFT3);
+        buttons |= KEY_PRESSED(DIK_L, TH_BUTTON_RIGHT3);
+
     }
-    return GetControllerInput(buttons);
+    
+    return buttons;
+    // return GetControllerInput(buttons);
 }
 
 // FUNCTION: TH07 0x004312c0

@@ -169,6 +169,7 @@ struct PlayerBulletTimer
 
 struct Player
 {
+    static ZunResult RegisteringChain(Player *mgr, u32 param_1);
     static ZunResult RegisterChain(u32 param_1);
     static void CutChain();
 
@@ -307,9 +308,27 @@ struct Player
     Effect *borderEffect;
     struct ShtData *shooterData;
     struct ShtData *shooterDataFocus;
+
+    // multiplayer
+    // button
+    u32 buttonShoot;
+    u32 buttonBomb;
+    u32 buttonFocus;
+    u32 buttonUp;
+    u32 buttonDown;
+    u32 buttonLeft;
+    u32 buttonRight;
+    //do i need this?
+    // u32 buttonUpLeft;
+    // u32 buttonUpRight;
+    // u32 buttonDownLeft;
+    // u32 buttonDownRight;
+    // u32 buttonDirection;
 };
-C_ASSERT(sizeof(Player) == 0xb7e78);
+// C_ASSERT(sizeof(Player) == 0xb7e78);
 extern Player g_Player;
+extern Player g_Player2;
+extern Player g_Player3;
 
 typedef i32 (*ShtFunc1)(Player *, PlayerBullet *, i32, struct ShtEntry *);
 extern ShtFunc1 g_ShtFireFuncs[6];

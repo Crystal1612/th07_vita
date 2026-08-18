@@ -32,7 +32,8 @@ u32 ReplayManager::OnUpdateRng(ReplayManager *arg)
 // FUNCTION: TH07 0x00442cd0
 u32 ReplayManager::OnUpdate(ReplayManager *arg)
 {
-    u16 curInput;
+    // this need to be u32 instead of u16 for player 3
+    u32 curInput;
     i32 stage;
 
     if (!g_GameManager.notInMenu)

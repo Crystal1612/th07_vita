@@ -26,22 +26,22 @@
 ControllerMapping g_ControllerMapping = {0, 1, 2, 4, -1, -1, -1, -1, 3};
 
 // GLOBAL: TH07 0x004b9e4c
-u16 g_CurFrameRawInput;
+u32 g_CurFrameRawInput;
 
 // GLOBAL: TH07 0x004b9e50
-u16 g_CurFrameGameInput;
+u32 g_CurFrameGameInput;
 
 // GLOBAL: TH07 0x004b9e54
-u16 g_LastFrameRawInput;
+u32 g_LastFrameRawInput;
 
 // GLOBAL: TH07 0x004b9e58
-u16 g_LastFrameGameInput;
+u32 g_LastFrameGameInput;
 
 // GLOBAL: TH07 0x004b9e5c
-u16 g_IsEighthFrameOfHeldInput;
+u32 g_IsEighthFrameOfHeldInput;
 
 // GLOBAL: TH07 0x004b9e60
-u16 g_NumOfFramesInputsWereHeld;
+u32 g_NumOfFramesInputsWereHeld;
 
 // GLOBAL: TH07 0x00575950
 Supervisor g_Supervisor;
@@ -125,7 +125,7 @@ void Supervisor::CheckTiming()
                 this->timingSpikeAccumulator = 0;
             }
             // STRING: TH07 0x00497244
-            Supervisor::DebugPrint2("alq ƒ`ƒFƒbƒN %f / %f = %f\r\n", timeDiff, perfDiff,
+            Supervisor::DebugPrint2("alq ï¿½`ï¿½Fï¿½bï¿½N %f / %f = %f\r\n", timeDiff, perfDiff,
                                     timeDiff / perfDiff);
         }
         else if (this->timingErrorCount != 0)
@@ -466,7 +466,7 @@ ZunResult Supervisor::SetupDInput()
     {
         this->directInput = NULL;
         // STRING: TH07 0x00497208
-        g_GameErrorContext.Log("DirectInput ‚ªŽg—p‚Å‚«‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Log("DirectInput ï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
     else
@@ -475,7 +475,7 @@ ZunResult Supervisor::SetupDInput()
                                                    &this->keyboard, NULL)))
         {
             SAFE_RELEASE(this->directInput);
-            g_GameErrorContext.Log("DirectInput ‚ªŽg—p‚Å‚«‚Ü‚¹‚ñ\r\n");
+            g_GameErrorContext.Log("DirectInput ï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
             return ZUN_ERROR;
         }
         else
@@ -485,7 +485,7 @@ ZunResult Supervisor::SetupDInput()
                 SAFE_RELEASE(this->keyboard);
                 SAFE_RELEASE(this->directInput);
                 // STRING: TH07 0x004971d8
-                g_GameErrorContext.Log("DirectInput SetDataFormat ‚ªŽg—p‚Å‚«‚Ü‚¹‚ñ\r\n");
+                g_GameErrorContext.Log("DirectInput SetDataFormat ï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
                 return ZUN_ERROR;
             }
             else
@@ -497,14 +497,14 @@ ZunResult Supervisor::SetupDInput()
                     SAFE_RELEASE(this->keyboard);
                     SAFE_RELEASE(this->directInput);
                     // STRING: TH07 0x004971a4
-                    g_GameErrorContext.Log("DirectInput SetCooperativeLevel ‚ªŽg—p‚Å‚«‚Ü‚¹‚ñ\r\n");
+                    g_GameErrorContext.Log("DirectInput SetCooperativeLevel ï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
                     return ZUN_ERROR;
                 }
                 else
                 {
                     this->keyboard->Acquire();
                     // STRING: TH07 0x0049717c
-                    g_GameErrorContext.Log("DirectInput ‚Í³í‚É‰Šú‰»‚³‚ê‚Ü‚µ‚½\r\n");
+                    g_GameErrorContext.Log("DirectInput ï¿½Íï¿½ï¿½ï¿½Éï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
                     this->directInput->EnumDevices(4, EnumGameControllersCb, NULL, 1);
                     if (this->controller)
                     {
@@ -514,7 +514,7 @@ ZunResult Supervisor::SetupDInput()
                         this->controller->GetCapabilities(&g_Supervisor.controllerCaps);
                         this->controller->EnumObjects(ControllerCallback, NULL, 0);
                         // STRING: TH07 0x0049715c
-                        g_GameErrorContext.Log("—LŒø‚Èƒpƒbƒh‚ð”­Œ©‚µ‚Ü‚µ‚½\r\n");
+                        g_GameErrorContext.Log("ï¿½Lï¿½ï¿½ï¿½Èƒpï¿½bï¿½hï¿½ð”­Œï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
                     }
                     return ZUN_SUCCESS;
                 }
@@ -538,14 +538,14 @@ ZunResult Supervisor::LoadGameData()
         if (!g_Supervisor.version)
         {
             // STRING: TH07 0x00497118
-            g_GameErrorContext.Fatal("error : ƒf[ƒ^‚Ìƒo[ƒWƒ‡ƒ“‚ªˆá‚¢‚Ü‚·\r\n");
+            g_GameErrorContext.Fatal("error : ï¿½fï¿½[ï¿½^ï¿½Ìƒoï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á‚¢ï¿½Ü‚ï¿½\r\n");
             return ZUN_ERROR;
         }
     }
     else
     {
         // STRING: TH07 0x004970f0
-        g_GameErrorContext.Fatal("error : ƒf[ƒ^ƒtƒ@ƒCƒ‹‚ª‘¶Ý‚µ‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Fatal("error : ï¿½fï¿½[ï¿½^ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
     return ZUN_SUCCESS;
@@ -630,14 +630,14 @@ i32 Supervisor::CheckVSync()
 
         if (fpsSum > 160.0f)
         {
-            g_GameErrorContext.Log("‚’¼“¯Šú‚ªŽæ‚ê‚Ä‚È‚¢‚©AƒŠƒtƒŒƒbƒVƒ…ƒŒ[ƒg‚ª‚‚·‚¬‚Ü‚·\r\n");
-            g_GameErrorContext.Log("‹­§‚U‚OƒtƒŒ[ƒ€ƒ‚[ƒh‚Å“®ì‚µ‚Ü‚·\r\n");
+            g_GameErrorContext.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚È‚ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½tï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
+            g_GameErrorContext.Log("ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½Oï¿½tï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½hï¿½Å“ï¿½ï¿½ì‚µï¿½Ü‚ï¿½\r\n");
             g_Supervisor.vsyncEnabled = 1;
         }
         else if (fpsSum >= 65.0f)
         {
-            g_GameErrorContext.Log("‚’¼“¯Šú‚ªŽæ‚ê‚Ä‚È‚¢‚©AƒŠƒtƒŒƒbƒVƒ…ƒŒ[ƒg‚ª‚‚·‚¬‚Ü‚·B\r\n");
-            g_GameErrorContext.Log("‹­§‚U‚OƒtƒŒ[ƒ€ƒ‚[ƒh‚Å“®ì‚µ‚Ü‚·\r\n");
+            g_GameErrorContext.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚È‚ï¿½ï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½tï¿½ï¿½ï¿½bï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B\r\n");
+            g_GameErrorContext.Log("ï¿½ï¿½ï¿½ï¿½ï¿½Uï¿½Oï¿½tï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½hï¿½Å“ï¿½ï¿½ì‚µï¿½Ü‚ï¿½\r\n");
             g_Supervisor.vsyncEnabled = 1;
             return -2;
         }
@@ -722,7 +722,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     if (AsciiManager::RegisterChain() != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00496ff0
-        g_GameErrorContext.Log("error : •¶Žš‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉŽï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
@@ -732,7 +732,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt"))
     {
         // STRING: TH07 0x00496fb8
-        g_GameErrorContext.Log("error : BGM ‚Ì‰Šú‰»‚ÉŽ¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : BGM ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉŽï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
@@ -1087,14 +1087,14 @@ i32 Supervisor::SnapshotScreen(const char *filename)
     {
     case D3DFMT_R5G6B5:
         // STRING: TH07 0x00496f80
-        g_GameErrorContext.Log("16bit ‚ÍŽæ‚èž‚ß‚È‚¢\r\n");
+        g_GameErrorContext.Log("16bit ï¿½ÍŽï¿½èžï¿½ß‚È‚ï¿½\r\n");
         break;
     case D3DFMT_X8R8G8B8:
         bitmapInfo = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
         if (!bitmapInfo)
         {
             // STRING: TH07 0x00496f60
-            g_GameErrorContext.Log("snapShotScreen : Šm•Û‚µ‚­‚è\r\n");
+            g_GameErrorContext.Log("snapShotScreen : ï¿½mï¿½Û‚ï¿½ï¿½ï¿½ï¿½ï¿½\r\n");
             break;
         }
 
@@ -1103,7 +1103,7 @@ i32 Supervisor::SnapshotScreen(const char *filename)
         bitmapData = malloc(stride * 480);
         if (!bitmapData)
         {
-            g_GameErrorContext.Log("snapShotScreen : Šm•Û‚µ‚­‚è\r\n");
+            g_GameErrorContext.Log("snapShotScreen : ï¿½mï¿½Û‚ï¿½ï¿½ï¿½ï¿½ï¿½\r\n");
             break;
         }
 
@@ -1173,7 +1173,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     if (!configFile)
     {
         // STRING: TH07 0x00496f14
-        g_GameErrorContext.Log("ƒRƒ“ƒtƒBƒOƒf[ƒ^‚ªŒ©‚Â‚©‚ç‚È‚¢‚Ì‚Å‰Šú‰»‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("ï¿½Rï¿½ï¿½ï¿½tï¿½Bï¿½Oï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½È‚ï¿½ï¿½Ì‚Åï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
     init:
         g_Supervisor.cfg.lifeCount = 2;
         g_Supervisor.cfg.bombCount = 3;
@@ -1190,7 +1190,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
                 bgm2Data[2] != 0x700)
             {
                 // STRING: TH07 0x00496ee4
-                g_GameErrorContext.Fatal("BGM ƒf[ƒ^‚Ìƒo[ƒWƒ‡ƒ“‚ªˆá‚¢‚Ü‚·\r\n");
+                g_GameErrorContext.Fatal("BGM ï¿½fï¿½[ï¿½^ï¿½Ìƒoï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á‚¢ï¿½Ü‚ï¿½\r\n");
                 return ZUN_ERROR;
             }
             g_Supervisor.cfg.musicMode = MUSIC_WAV;
@@ -1199,7 +1199,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         {
             g_Supervisor.cfg.musicMode = MUSIC_MIDI;
             // STRING: TH07 0x00496ebc
-            Supervisor::DebugPrint2("wave ƒf[ƒ^‚ª–³‚¢‚Ì‚ÅAmidi ‚É‚µ‚Ü‚·\r\n");
+            Supervisor::DebugPrint2("wave ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚ÅAmidi ï¿½É‚ï¿½ï¿½Ü‚ï¿½\r\n");
         }
         g_Supervisor.cfg.playSounds = 1;
         g_Supervisor.cfg.defaultDifficulty = (u8)DIFF_NORMAL;
@@ -1223,7 +1223,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
                 bgmData[2] != 0x700)
             {
-                g_GameErrorContext.Fatal("BGM ƒf[ƒ^‚Ìƒo[ƒWƒ‡ƒ“‚ªˆá‚¢‚Ü‚·\r\n");
+                g_GameErrorContext.Fatal("BGM ï¿½fï¿½[ï¿½^ï¿½Ìƒoï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á‚¢ï¿½Ü‚ï¿½\r\n");
                 return ZUN_ERROR;
             }
         }
@@ -1242,7 +1242,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
               g_LastFileSize == sizeof(GameConfiguration)))
         {
             // STRING: TH07 0x00496e88
-            g_GameErrorContext.Log("ƒRƒ“ƒtƒBƒOƒf[ƒ^‚ªˆÙí‚Å‚µ‚½‚Ì‚ÅÄ‰Šú‰»‚µ‚Ü‚µ‚½\r\n");
+            g_GameErrorContext.Log("ï¿½Rï¿½ï¿½ï¿½tï¿½Bï¿½Oï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½Ùï¿½Å‚ï¿½ï¿½ï¿½ï¿½Ì‚ÅÄï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
             goto init;
         }
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
@@ -1251,83 +1251,83 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     if (this->cfg.noVertexBuffers)
     {
         // STRING: TH07 0x00496e64
-        g_GameErrorContext.Log("’¸“_ƒoƒbƒtƒ@‚ÌŽg—p‚ð—}§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½ï¿½ï¿½_ï¿½oï¿½bï¿½tï¿½@ï¿½ÌŽgï¿½pï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.disableFog)
     {
         // STRING: TH07 0x00496e48
-        g_GameErrorContext.Log("ƒtƒHƒO‚ÌŽg—p‚ð—}§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½tï¿½Hï¿½Oï¿½ÌŽgï¿½pï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.use16BitTextures)
     {
         // STRING: TH07 0x00496e20
-        g_GameErrorContext.Log("16Bit ‚ÌƒeƒNƒXƒ`ƒƒ‚ÌŽg—p‚ð‹­§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("16Bit ï¿½Ìƒeï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ÌŽgï¿½pï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->IsClearingBackbuffer())
     {
         // STRING: TH07 0x00496dfc
-        g_GameErrorContext.Log("ƒoƒbƒNƒoƒbƒtƒ@‚ÌÁ‹Ž‚ð‹­§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½oï¿½bï¿½Nï¿½oï¿½bï¿½tï¿½@ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.disableItemDrawAroundPlayfield)
     {
         // STRING: TH07 0x00496dd0
-        g_GameErrorContext.Log("ƒQ[ƒ€Žü‚è‚ÌƒAƒCƒeƒ€‚Ì•`‰æ‚ð—}§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½Qï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÌƒAï¿½Cï¿½eï¿½ï¿½ï¿½Ì•`ï¿½ï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.disableGouraud)
     {
         // STRING: TH07 0x00496da8
-        g_GameErrorContext.Log("ƒO[ƒ[ƒVƒF[ƒfƒBƒ“ƒO‚ð—}§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½Oï¿½[ï¿½ï¿½ï¿½[ï¿½Vï¿½Fï¿½[ï¿½fï¿½Bï¿½ï¿½ï¿½Oï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.disableZBuffer)
     {
         // STRING: TH07 0x00496d8c
-        g_GameErrorContext.Log("ƒfƒvƒXƒeƒXƒg‚ð—}§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½fï¿½vï¿½Xï¿½eï¿½Xï¿½gï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     this->vsyncEnabled = 0;
     this->cfg.unused = 0;
     if (this->cfg.disableTextureBlend)
     {
         // STRING: TH07 0x00496d6c
-        g_GameErrorContext.Log("ƒeƒNƒXƒ`ƒƒ‚ÌF‡¬‚ð—}§‚µ‚Ü‚·n");
+        g_GameErrorContext.Log("ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ÌFï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½n");
     }
     if (this->cfg.windowed)
     {
         // STRING: TH07 0x00496d4c
-        g_GameErrorContext.Log("ƒEƒBƒ“ƒhƒEƒ‚[ƒh‚Å‹N“®‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½Eï¿½Bï¿½ï¿½ï¿½hï¿½Eï¿½ï¿½ï¿½[ï¿½hï¿½Å‹Nï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.forceReferenceRender)
     {
         // STRING: TH07 0x00496d24
-        g_GameErrorContext.Log("ƒŠƒtƒ@ƒŒƒ“ƒXƒ‰ƒXƒ^ƒ‰ƒCƒU‚ð‹­§‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½ï¿½ï¿½tï¿½@ï¿½ï¿½ï¿½ï¿½ï¿½Xï¿½ï¿½ï¿½Xï¿½^ï¿½ï¿½ï¿½Cï¿½Uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.disableDinput)
     {
         // STRING: TH07 0x00496cec
-        g_GameErrorContext.Log("ƒpƒbƒhAƒL[ƒ{[ƒh‚Ì“ü—Í‚É DirectInput ‚ðŽg—p‚µ‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Log("ï¿½pï¿½bï¿½hï¿½Aï¿½Lï¿½[ï¿½{ï¿½[ï¿½hï¿½Ì“ï¿½ï¿½Í‚ï¿½ DirectInput ï¿½ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
     }
     if (this->cfg.redrawEveryFrame)
     {
         // STRING: TH07 0x00496cd0
-        g_GameErrorContext.Log("‰æ–ÊŽü‚è‚ð–ˆ‰ñ•`‰æ‚µ‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½ï¿½ÊŽï¿½ï¿½ï¿½ð–ˆ‰ï¿½`ï¿½æ‚µï¿½Ü‚ï¿½\r\n");
     }
     if (this->cfg.preloadBgm)
     {
         // STRING: TH07 0x00496cb0
-        g_GameErrorContext.Log("‚a‚f‚l‚ðƒƒ‚ƒŠ‚É“Ç‚Ýž‚Ý‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½aï¿½fï¿½lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É“Ç‚Ýï¿½ï¿½Ý‚Ü‚ï¿½\r\n");
     }
     if (this->cfg.enableVsync)
     {
         // STRING: TH07 0x00496c98
-        g_GameErrorContext.Log("‚’¼“¯Šú‚ðŽæ‚è‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         g_Supervisor.vsyncEnabled = 1;
     }
     if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg,
                                     sizeof(GameConfiguration)))
     {
         // STRING: TH07 0x00496c78
-        g_GameErrorContext.Fatal("ƒtƒ@ƒCƒ‹‚ª‘‚«o‚¹‚Ü‚¹‚ñ %s\r\n", configFilename);
+        g_GameErrorContext.Fatal("ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½ %s\r\n", configFilename);
         // STRING: TH07 0x00496c20
-        g_GameErrorContext.Fatal("ƒtƒHƒ‹ƒ_‚ª‘ž‚Ý‹ÖŽ~‘®«‚É‚È‚Á‚Ä‚¢‚é‚©AƒfƒBƒXƒN‚ª‚¢‚Á‚Ï‚¢‚¢‚Á‚Ï‚¢‚É‚È‚Á‚Ä‚Ü‚¹‚ñ‚©H\r\n");
+        g_GameErrorContext.Fatal("ï¿½tï¿½Hï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý‹ÖŽ~ï¿½ï¿½ï¿½ï¿½ï¿½É‚È‚ï¿½ï¿½Ä‚ï¿½ï¿½é‚©ï¿½Aï¿½fï¿½Bï¿½Xï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï‚ï¿½ï¿½É‚È‚ï¿½ï¿½Ä‚Ü‚ï¿½ï¿½ñ‚©H\r\n");
         return ZUN_ERROR;
     }
 

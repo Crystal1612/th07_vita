@@ -777,12 +777,17 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->lastDamage = 0;
             if (enemy->canDie && enemy->isHittable)
             {
-                damage = g_Player.CalcDamageToEnemy(
-                    &enemy->pos, &enemy->hitboxSize, &collisionOut);
+                // 3 players
+                damage = 
+                g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->hitboxSize, &collisionOut)+
+                g_Player2.CalcDamageToEnemy(&enemy->pos, &enemy->hitboxSize, &collisionOut)+
+                g_Player3.CalcDamageToEnemy(&enemy->pos, &enemy->hitboxSize, &collisionOut);
                 if (enemy->grazeSize.x > 0.0f)
                 {
-                    grazeDamage = g_Player.CalcDamageToEnemy(
-                        &enemy->pos, &enemy->grazeSize, &collisionOut);
+                    grazeDamage = 
+                        g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->grazeSize, &collisionOut)+
+                        g_Player2.CalcDamageToEnemy(&enemy->pos, &enemy->grazeSize, &collisionOut)+
+                        g_Player3.CalcDamageToEnemy(&enemy->pos, &enemy->grazeSize, &collisionOut);
                     if (collisionOut == 0)
                     {
                         damage = (i32)((f32)damage + (f32)grazeDamage / 2.5f);

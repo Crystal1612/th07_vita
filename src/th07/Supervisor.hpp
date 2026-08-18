@@ -8,12 +8,13 @@
 #include "MidiOutput.hpp"
 #include "inttypes.hpp"
 
-extern u16 g_CurFrameRawInput;
-extern u16 g_CurFrameGameInput;
-extern u16 g_LastFrameRawInput;
-extern u16 g_LastFrameGameInput;
-extern u16 g_IsEighthFrameOfHeldInput;
-extern u16 g_NumOfFramesInputsWereHeld;
+// change it u32 for player 3 moment
+extern u32 g_CurFrameRawInput;
+extern u32 g_CurFrameGameInput;
+extern u32 g_LastFrameRawInput;
+extern u32 g_LastFrameGameInput;
+extern u32 g_IsEighthFrameOfHeldInput;
+extern u32 g_NumOfFramesInputsWereHeld;
 
 struct ControllerMapping
 {
