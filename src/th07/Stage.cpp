@@ -228,7 +228,7 @@ loop_begin:
             if (arg->cameraTeleported)
             {
                 Float3 diff = *curInstr->args.AsVec() - arg->camEnd.pos;
-                EffectManager::DoSomethingWithEffects(&diff);
+                EffectManager::ShiftEffectsAfterCameraTeleport(&diff);
                 arg->cameraTeleported = 0;
             }
             arg->camStart.pos = arg->camEnd.pos;
@@ -625,12 +625,12 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(fog, alpha, local_1c, i)
+#pragma var_order(fog, alpha, rect, i)
 // FUNCTION: TH07 0x00406de0
 u32 Stage::OnDrawLowPrio(Stage *arg)
 {
     i32 i;
-    ZunRect local_1c;
+    ZunRect rect;
     i32 alpha;
     f32 fog;
 
@@ -647,10 +647,10 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
             g_EffectManager.UpdateSpecialEffect();
             if (arg->spellCardState == 1)
             {
-                local_1c.left = 32.0f;
-                local_1c.top = 16.0f;
-                local_1c.right = 416.0f;
-                local_1c.bottom = 464.0f;
+                rect.left = 32.0f;
+                rect.top = 16.0f;
+                rect.right = 416.0f;
+                rect.bottom = 464.0f;
                 alpha = arg->ticksSinceSpellcardStarted * 255 / 60;
                 g_AnmManager->Flush();
                 g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
@@ -658,7 +658,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
                 {
                     g_Supervisor.SetRenderState(D3DRS_FOGENABLE, 0);
                 }
-                ScreenEffect::DrawSquare(&local_1c, alpha << 24);
+                ScreenEffect::DrawSquare(&rect, alpha << 24);
             }
         }
     }
@@ -895,7 +895,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, vmCount, i, vm, object, quad)
+#pragma var_order(unused, vmCount, i, vm, object, quad)
 // FUNCTION: TH07 0x004077f0
 ZunResult Stage::UpdateObjects()
 {
@@ -904,7 +904,7 @@ ZunResult Stage::UpdateObjects()
     AnmVm *vm;
     i32 i;
     i32 vmCount;
-    StdRawQuadBasic *local_8;
+    StdRawQuadBasic *unused;
 
     for (i = 0; i < this->objectsCount; i++)
     {
@@ -922,7 +922,7 @@ ZunResult Stage::UpdateObjects()
                     g_AnmManager->ExecuteScript(vm);
                     break;
                 case 1:
-                    local_8 = quad;
+                    unused = quad;
                     g_AnmManager->ExecuteScript(vm);
                     break;
                 }

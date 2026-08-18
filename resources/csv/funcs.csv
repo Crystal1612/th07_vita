@@ -131,7 +131,7 @@ address|name|type
 0041abe0|EffectManager::UpdateAttachToPlayer|function
 0041ac30|EffectManager::UpdateGather240Frames|function
 0041ad10|EffectManager::UpdateBurst30Frames|function
-0041adf0|EffectManager::DoSomethingWithEffects|function
+0041adf0|EffectManager::ShiftEffectsAfterCameraTeleport|function
 0041ae90|EffectManager::ModifyEffect1eAcceleration|function
 0041aef0|EffectManager::UpdateWeatherPhysics|function
 0041b0b0|EffectManager::InitWeatherForward|function

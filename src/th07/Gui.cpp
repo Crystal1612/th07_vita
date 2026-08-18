@@ -63,7 +63,7 @@ void Gui::EndEnemySpellcard()
 void Gui::ClearActiveSprites()
 {
     this->impl->stageClearBg.activeSpriteIdx = -1;
-    this->impl->stageClearBonusTextVm.activeSpriteIdx = -1;
+    this->impl->loadingSprite.activeSpriteIdx = -1;
     this->impl->stageTransitionSnapshotVm.activeSpriteIdx = -1;
     this->impl->activeTransitionQuads = 0;
 }
@@ -696,16 +696,16 @@ ZunResult Gui::ActualAddedCallback()
 }
 
 // FUNCTION: TH07 0x00429935
-ZunResult Gui::LoadMsg(const char *param_1)
+ZunResult Gui::LoadMsg(const char *filename)
 {
     i32 i;
 
     FreeMsgFile();
-    this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(param_1, 0);
+    this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(filename, 0);
     if (!this->impl->msg.msgFile)
     {
         // STRING: TH07 0x00498108
-        g_GameErrorContext.Log("error : メッセージファイル %s が読み込めませんでした\r\n", param_1);
+        g_GameErrorContext.Log("error : メッセージファイル %s が読み込めませんでした\r\n", filename);
         return ZUN_ERROR;
     }
 
@@ -726,9 +726,9 @@ void Gui::FreeMsgFile()
 }
 
 // FUNCTION: TH07 0x00429a36
-void Gui::MsgRead(i32 param_1)
+void Gui::MsgRead(i32 msgIdx)
 {
-    this->impl->MsgRead(param_1);
+    this->impl->MsgRead(msgIdx);
 }
 
 // FUNCTION: TH07 0x00429a4f
@@ -1020,7 +1020,7 @@ ZunResult GuiImpl::RunMsg()
                     goto SKIP_TIME_INCREMENT;
                 }
 
-                g_AnmManager->InitializeAndSetActiveSprite(&this->stageClearBonusTextVm, 268);
+                g_AnmManager->InitializeAndSetActiveSprite(&this->loadingSprite, 268);
                 this->transitionToScoreScreen = 1;
                 this->msg.currentMsgIdx = -2;
             }
@@ -1797,10 +1797,10 @@ void Gui::DrawStageElements()
     {
         g_AnmManager->DrawNoRotation(&this->impl->stageClearBg);
         g_AnmManager->DrawNoRotation(&this->impl->stageTransitionSnapshotVm);
-        if (this->impl->stageClearBonusTextVm.activeSpriteIdx >= 0)
+        if (this->impl->loadingSprite.activeSpriteIdx >= 0)
         {
-            this->impl->stageClearBonusTextVm.pos = Float3(304.0f, 448.0f, 0.0f);
-            g_AnmManager->DrawNoRotation(&this->impl->stageClearBonusTextVm);
+            this->impl->loadingSprite.pos = Float3(304.0f, 448.0f, 0.0f);
+            g_AnmManager->DrawNoRotation(&this->impl->loadingSprite);
         }
     }
     if (this->impl->activeTransitionQuads != 0)

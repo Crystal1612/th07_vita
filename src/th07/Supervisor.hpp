@@ -123,7 +123,7 @@ struct Supervisor
     ZunResult PlayLoadedAudio(i32 idx);
     void SetRenderState(D3DRENDERSTATETYPE stateType, DWORD param_2);
     ZunResult SetupDInput();
-    i32 SnapshotScreen(const char *param_1);
+    i32 SnapshotScreen(const char *filename);
     ZunResult StopAudio();
     void TickTimer(i32 *frames, f32 *subFrames);
     void UpdateStartupTime();

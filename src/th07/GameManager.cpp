@@ -416,30 +416,30 @@ void GameManager::InitializeRngAndCsum()
                               (f32)g_GameManager.globals->rng2[3];
 }
 
-#pragma var_order(local_8, local_c, scoreDat, local_14)
+#pragma var_order(catk, i, scoreDat, j)
 // FUNCTION: TH07 0x0042e634
 ZunResult ResultScreen::ParseScores()
 {
+    i32 j;
     ScoreDat *scoreDat;
-    i32 local_14;
-    i32 local_c;
-    Catk *local_8;
+    i32 i;
+    Catk *catk;
 
-    local_8 = g_GameManager.catk;
+    catk = g_GameManager.catk;
     RegisterChain(2);
     memset(g_GameManager.catk, 0, sizeof(g_GameManager.catk));
-    for (local_c = 0; local_c < 141; local_c++, local_8++)
+    for (i = 0; i < 141; i++, catk++)
     {
-        local_8->magic = 0x4b544143;
-        local_8->th7kLen2 = sizeof(Catk);
-        local_8->th7kLen = sizeof(Catk);
-        local_8->version = 1;
-        local_8->idx = (i16)local_c;
-        for (local_14 = 0; local_14 < 7; local_14++)
+        catk->magic = 0x4b544143;
+        catk->th7kLen2 = sizeof(Catk);
+        catk->th7kLen = sizeof(Catk);
+        catk->version = 1;
+        catk->idx = (i16)i;
+        for (j = 0; j < 7; j++)
         {
-            local_8->numAttemptsPerShot[local_14] = 0;
-            local_8->numSuccessesPerShot[local_14] = 0;
-            local_8->highScorePerShot[local_14] = 0;
+            catk->numAttemptsPerShot[j] = 0;
+            catk->numSuccessesPerShot[j] = 0;
+            catk->highScorePerShot[j] = 0;
         }
     }
     scoreDat = OpenScore("score.dat");
@@ -987,15 +987,15 @@ i32 GameManager::HasReachedMaxClears(i32 shotType)
 // FUNCTION: TH07 0x0042f853
 i32 GameManager::HasUnlockedPhantom(i32 shotType)
 {
-    i32 local_8 = 0;
+    i32 numSuccesses = 0;
     for (i32 i = 0; i < 141; i++)
     {
         if (this->catk[i].numSuccessesPerShot[6] > 0)
         {
-            local_8++;
+            numSuccesses++;
         }
     }
-    if (local_8 >= 60 &&
+    if (numSuccesses >= 60 &&
         this->clrd[shotType].difficultyClearedWithRetries[4] == 99)
     {
         this->clrd[shotType].difficultyClearedWithRetries[5] = 99;

@@ -427,23 +427,23 @@ i32 __stdcall Supervisor::EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
     return 0;
 }
 
-#pragma var_order(local_1c, idk)
+#pragma var_order(dipr, idk)
 // FUNCTION: TH07 0x0043836e
-i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE param_1,
-                                             void *param_2)
+i32 __stdcall Supervisor::ControllerCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi,
+                                             LPVOID pvRef)
 {
-    DIPROPRANGE local_1c;
-    void *idk = param_2;
+    DIPROPRANGE dipr;
+    void *idk = pvRef;
 
-    if (param_1->dwType & DIDFT_AXIS)
+    if (lpddoi->dwType & DIDFT_AXIS)
     {
-        local_1c.diph.dwSize = sizeof(DIPROPRANGE);
-        local_1c.diph.dwHeaderSize = 16;
-        local_1c.diph.dwHow = 2;
-        local_1c.diph.dwObj = param_1->dwType;
-        local_1c.lMin = -1000;
-        local_1c.lMax = 1000;
-        if (g_Supervisor.controller->SetProperty(DIPROP_RANGE, &local_1c.diph) <
+        dipr.diph.dwSize = sizeof(DIPROPRANGE);
+        dipr.diph.dwHeaderSize = 16;
+        dipr.diph.dwHow = 2;
+        dipr.diph.dwObj = lpddoi->dwType;
+        dipr.lMin = -1000;
+        dipr.lMax = 1000;
+        if (g_Supervisor.controller->SetProperty(DIPROP_RANGE, &dipr.diph) <
             0)
         {
             return 0;
@@ -837,13 +837,14 @@ ZunResult Supervisor::RegisterChain()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(fps, elapsedTimeInSecs, curTime, targetFps, local_1c, local_28, local_34)
+#pragma var_order(fps, elapsedTimeInSecs, curTime, targetFps, curPerfCounter, \
+                  fpsCounterPos, replayFpsCounterPos)
 // FUNCTION: TH07 0x004390a5
 void Supervisor::DrawFpsCounter(i32 param_1)
 {
-    Float3 local_30;
-    Float3 local_24;
-    LARGE_INTEGER local_18;
+    Float3 replayFpsCounterPos;
+    Float3 fpsCounterPos;
+    LARGE_INTEGER curPerfCounter;
     f32 targetFps;
     DWORD curTime;
     f32 elapsedTimeInSecs;
@@ -917,21 +918,21 @@ void Supervisor::DrawFpsCounter(i32 param_1)
         {
             QueryPerformanceCounter(&g_PerformanceCounter);
         }
-        QueryPerformanceCounter(&local_18);
-        if (local_18.LowPart < g_PerformanceCounter.LowPart)
+        QueryPerformanceCounter(&curPerfCounter);
+        if (curPerfCounter.LowPart < g_PerformanceCounter.LowPart)
         {
-            g_PerformanceCounter.LowPart = local_18.LowPart;
-            g_PerformanceCounter.HighPart = local_18.HighPart;
+            g_PerformanceCounter.LowPart = curPerfCounter.LowPart;
+            g_PerformanceCounter.HighPart = curPerfCounter.HighPart;
             g_NumFramesSinceLastTime = 0;
         }
-        if (local_18.LowPart >= g_PerformanceCounter.LowPart +
-                                    (g_Supervisor.perfFrequency.LowPart >> 1))
+        if (curPerfCounter.LowPart >= g_PerformanceCounter.LowPart +
+                                          (g_Supervisor.perfFrequency.LowPart >> 1))
         {
             elapsedTimeInSecs =
-                (f32)(local_18.LowPart - g_PerformanceCounter.LowPart) /
+                (f32)(curPerfCounter.LowPart - g_PerformanceCounter.LowPart) /
                 (f32)g_Supervisor.perfFrequency.LowPart;
-            g_PerformanceCounter.LowPart = local_18.LowPart;
-            g_PerformanceCounter.HighPart = local_18.HighPart;
+            g_PerformanceCounter.LowPart = curPerfCounter.LowPart;
+            g_PerformanceCounter.HighPart = curPerfCounter.HighPart;
             g_FpsUpdateCounter++;
             if (g_FpsUpdateCounter % 8 == 0)
             {
@@ -944,16 +945,16 @@ void Supervisor::DrawFpsCounter(i32 param_1)
 LAB_00439350:
     if (!g_Supervisor.isInEnding && param_1 != 0)
     {
-        local_24.x = 512.0f;
-        local_24.y = 464.0f;
-        local_24.z = 0.0f;
-        g_AsciiManager.AddString(&local_24, g_FpsCounterBuffer);
+        fpsCounterPos.x = 512.0f;
+        fpsCounterPos.y = 464.0f;
+        fpsCounterPos.z = 0.0f;
+        g_AsciiManager.AddString(&fpsCounterPos, g_FpsCounterBuffer);
         if (g_GameManager.replay &&
             g_GameManager.notInMenu)
         {
-            local_30.x = 384.0f;
-            local_30.y = 448.0f;
-            local_30.z = 0.0f;
+            replayFpsCounterPos.x = 384.0f;
+            replayFpsCounterPos.y = 448.0f;
+            replayFpsCounterPos.z = 0.0f;
             if (g_Supervisor.isFpsBad)
             {
                 g_AsciiManager.color = 0xffff4040;
@@ -962,7 +963,7 @@ LAB_00439350:
             {
                 g_AsciiManager.color = 0xffffffd0;
             }
-            g_AsciiManager.AddString(&local_30, g_ReplayFpsBuffer);
+            g_AsciiManager.AddString(&replayFpsCounterPos, g_ReplayFpsBuffer);
             g_AsciiManager.color = 0xffffffff;
         }
     }
@@ -1053,35 +1054,35 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
 }
 
 // ZUN name: snapShotScreen
-#pragma var_order(local_14, local_18, local_1c, backBuffer, local_24,        \
-                  local_28, local_2c, y, x, bytesPerRow, local_40, local_44, \
-                  hFile)
+#pragma var_order(bmfh, local_18, local_1c, backBuffer, stride,                    \
+                  srcPixel, dstPixel, y, x, bytesPerRow, lockedRect, bytesWritten, \
+                  bitmapFile)
 // FUNCTION: TH07 0x004395fb
-i32 Supervisor::SnapshotScreen(const char *param_1)
+i32 Supervisor::SnapshotScreen(const char *filename)
 {
-    HANDLE hFile;
-    DWORD local_44;
-    D3DLOCKED_RECT local_40;
+    HANDLE bitmapFile;
+    DWORD bytesWritten;
+    D3DLOCKED_RECT lockedRect;
     i32 bytesPerRow;
     i32 x;
     i32 y;
-    u8 *local_2c;
-    u8 *local_28;
-    i32 local_24;
+    u8 *dstPixel;
+    u8 *srcPixel;
+    i32 stride;
     IDirect3DSurface8 *backBuffer;
-    BITMAPINFO *local_1c;
-    void *local_18;
-    BITMAPFILEHEADER local_14;
+    BITMAPINFO *bitmapInfo;
+    void *bitmapData;
+    BITMAPFILEHEADER bmfh;
 
-    local_1c = NULL;
-    local_18 = NULL;
+    bitmapInfo = NULL;
+    bitmapData = NULL;
     backBuffer = NULL;
     this->d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
-    memset(&local_14, 0, sizeof(BITMAPFILEHEADER));
+    memset(&bmfh, 0, sizeof(BITMAPFILEHEADER));
 
     // STRING: TH07 0x00496f98
-    local_14.bfType = *(WORD *)&"BM";
-    local_14.bfSize = local_14.bfOffBits = 54;
+    bmfh.bfType = *(WORD *)&"BM";
+    bmfh.bfSize = bmfh.bfOffBits = 54;
     switch (this->presentParameters.BackBufferFormat)
     {
     case D3DFMT_R5G6B5:
@@ -1089,60 +1090,60 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         g_GameErrorContext.Log("16bit ‚ÍŽæ‚èž‚ß‚È‚¢\r\n");
         break;
     case D3DFMT_X8R8G8B8:
-        local_1c = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
-        if (!local_1c)
+        bitmapInfo = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
+        if (!bitmapInfo)
         {
             // STRING: TH07 0x00496f60
             g_GameErrorContext.Log("snapShotScreen : Šm•Û‚µ‚­‚è\r\n");
             break;
         }
 
-        memset(local_1c, 0, sizeof(BITMAPINFO));
-        local_24 = 1920;
-        local_18 = malloc(local_24 * 480);
-        if (!local_18)
+        memset(bitmapInfo, 0, sizeof(BITMAPINFO));
+        stride = 1920;
+        bitmapData = malloc(stride * 480);
+        if (!bitmapData)
         {
             g_GameErrorContext.Log("snapShotScreen : Šm•Û‚µ‚­‚è\r\n");
             break;
         }
 
-        local_14.bfSize += local_24 * 480;
-        local_1c->bmiHeader.biBitCount = 24;
-        local_1c->bmiHeader.biSize = 40;
-        local_1c->bmiHeader.biWidth = 640;
-        local_1c->bmiHeader.biHeight = 480;
-        local_1c->bmiHeader.biPlanes = 1;
-        local_1c->bmiHeader.biCompression = 0;
-        backBuffer->LockRect(&local_40, NULL, 0);
+        bmfh.bfSize += stride * 480;
+        bitmapInfo->bmiHeader.biBitCount = 24;
+        bitmapInfo->bmiHeader.biSize = 40;
+        bitmapInfo->bmiHeader.biWidth = 640;
+        bitmapInfo->bmiHeader.biHeight = 480;
+        bitmapInfo->bmiHeader.biPlanes = 1;
+        bitmapInfo->bmiHeader.biCompression = 0;
+        backBuffer->LockRect(&lockedRect, NULL, 0);
         bytesPerRow = 0;
         for (y = 479; -1 < y; y--, bytesPerRow++)
         {
-            local_2c = (u8 *)((u8 *)local_18 + local_24 * bytesPerRow);
-            local_28 = (u8 *)((u8 *)local_40.pBits + local_40.Pitch * y);
+            dstPixel = (u8 *)((u8 *)bitmapData + stride * bytesPerRow);
+            srcPixel = (u8 *)((u8 *)lockedRect.pBits + lockedRect.Pitch * y);
             for (x = 0; x < 640; x++)
             {
-                *local_2c = *local_28;
-                local_28++;
-                local_2c++;
-                *local_2c = *local_28;
-                local_28++;
-                local_2c++;
-                *local_2c = *local_28;
-                local_28 += 2;
-                local_2c++;
+                *dstPixel = *srcPixel;
+                srcPixel++;
+                dstPixel++;
+                *dstPixel = *srcPixel;
+                srcPixel++;
+                dstPixel++;
+                *dstPixel = *srcPixel;
+                srcPixel += 2;
+                dstPixel++;
             }
         }
         backBuffer->UnlockRect();
-        hFile = CreateFileA(param_1, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
-        if (hFile == INVALID_HANDLE_VALUE)
+        bitmapFile = CreateFileA(filename, GENERIC_WRITE, 0, NULL, 2, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (bitmapFile == INVALID_HANDLE_VALUE)
         {
             break;
         }
 
-        WriteFile(hFile, &local_14, 14, &local_44, NULL);
-        WriteFile(hFile, local_1c, 40, &local_44, NULL);
-        WriteFile(hFile, local_18, local_24 * 480, &local_44, NULL);
-        CloseHandle(hFile);
+        WriteFile(bitmapFile, &bmfh, 14, &bytesWritten, NULL);
+        WriteFile(bitmapFile, bitmapInfo, 40, &bytesWritten, NULL);
+        WriteFile(bitmapFile, bitmapData, stride * 480, &bytesWritten, NULL);
+        CloseHandle(bitmapFile);
         break;
     default:
         // STRING: TH07 0x00496f48
@@ -1150,8 +1151,8 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
         return 1;
     }
     SAFE_RELEASE(backBuffer);
-    free(local_1c);
-    free(local_18);
+    free(bitmapInfo);
+    free(bitmapData);
     return 0;
 }
 
@@ -1387,12 +1388,12 @@ ZunResult Supervisor::PlayLoadedAudio(i32 idx)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(local_8, local_10c)
+#pragma var_order(pathExt, pathBuf)
 // FUNCTION: TH07 0x00439f4d
 ZunResult Supervisor::PlayAudio(const char *path)
 {
-    char local_10c[256];
-    char *local_8;
+    char pathBuf[256];
+    char *pathExt;
 
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
@@ -1406,12 +1407,12 @@ ZunResult Supervisor::PlayAudio(const char *path)
         if (g_Supervisor.cfg.musicMode == MUSIC_WAV)
         {
             // ZUN landmine: the result of strrchr is not checked for NULL.
-            strcpy(local_10c, path);
-            local_8 = strrchr(local_10c, '.');
-            local_8[1] = 'w';
-            local_8[2] = 'a';
-            local_8[3] = 'v';
-            g_SoundPlayer.PushCommand(AUDIO_START, -1, local_10c);
+            strcpy(pathBuf, path);
+            pathExt = strrchr(pathBuf, '.');
+            pathExt[1] = 'w';
+            pathExt[2] = 'a';
+            pathExt[3] = 'v';
+            g_SoundPlayer.PushCommand(AUDIO_START, -1, pathBuf);
         }
         else
         {
@@ -1455,7 +1456,7 @@ ZunResult Supervisor::StopAudio()
 // FUNCTION: TH07 0x0043a0d6
 i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
 {
-    f32 local_8;
+    f32 effectiveFadeFrames;
 
     if (g_Supervisor.cfg.musicMode == MUSIC_MIDI)
     {
@@ -1470,18 +1471,18 @@ i32 Supervisor::FadeOutMusic(f32 musicFadeFrames)
         {
             if (this->effectiveFramerateMultiplier == 0.0f)
             {
-                local_8 = musicFadeFrames;
+                effectiveFadeFrames = musicFadeFrames;
             }
             else if (this->effectiveFramerateMultiplier > 1.0f)
             {
-                local_8 = musicFadeFrames;
+                effectiveFadeFrames = musicFadeFrames;
             }
             else
             {
-                local_8 = musicFadeFrames / this->effectiveFramerateMultiplier;
+                effectiveFadeFrames = musicFadeFrames / this->effectiveFramerateMultiplier;
             }
             // STRING: TH07 0x00496c1e
-            g_SoundPlayer.PushCommand(AUDIO_FADEOUT, local_8, "");
+            g_SoundPlayer.PushCommand(AUDIO_FADEOUT, effectiveFadeFrames, "");
         }
         else
         {

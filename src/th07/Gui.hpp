@@ -134,7 +134,7 @@ struct GuiImpl
     AnmVm bombSpellcardNameBg;
     AnmVm enemySpellcardNameBg;
     AnmVm stageClearBg;
-    AnmVm stageClearBonusTextVm;
+    AnmVm loadingSprite;
     AnmVm stageTransitionSnapshotVm;
     AnmVm captureBonusVm;
     AnmVm spellcardBonusIndicator;
@@ -174,8 +174,8 @@ struct Gui
     i32 HasCurrentMsgIdx();
     i32 IsDialogueSkippable();
     i32 IsStageFinished();
-    ZunResult LoadMsg(const char *param_1);
-    void MsgRead(i32 param_1);
+    ZunResult LoadMsg(const char *filename);
+    void MsgRead(i32 msgIdx);
     i32 MsgWait();
 
     void EndEnemySpellcard();

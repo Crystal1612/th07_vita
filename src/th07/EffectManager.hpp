@@ -72,7 +72,7 @@ struct EffectManager
     static i32 InitWeatherSlow(Effect *effect);
     static i32 InitWeatherFalling(Effect *effect);
 
-    static void DoSomethingWithEffects(Float3 *param_1);
+    static void ShiftEffectsAfterCameraTeleport(Float3 *shift);
     static void ModifyEffect1eAcceleration();
     static i32 UpdateNoOp(Effect *effect);
 

@@ -164,7 +164,7 @@ void Ending::FadingEffect()
     }
 }
 
-#pragma var_order(lineDisplayed, local_54, local_58, i, anmScriptIdx, vmIdx,   \
+#pragma var_order(lineDisplayed, buf, local_58, i, anmScriptIdx, vmIdx,   \
                   anmSpriteIdx, scrollBGDistance, scrollBGDuration, execOuter, \
                   execInner, j, musicFadeFrames)
 // FUNCTION: TH07 0x0041d700
@@ -181,12 +181,12 @@ ZunResult Ending::ParseEndFile()
     i32 anmScriptIdx;
     i32 i;
     i32 local_58;
-    char local_54[68];
+    char buf[68];
     i32 lineDisplayed;
 
     lineDisplayed = 0;
     local_58 = 0;
-    memset(local_54, 0, sizeof(local_54));
+    memset(buf, 0, sizeof(buf));
     if (this->timer3 > 0)
     {
         this->timer3--;
@@ -388,7 +388,7 @@ ZunResult Ending::ParseEndFile()
             {
                 AnmManager::DrawVmTextFmt(g_AnmManager,
                                           &this->sprites[this->timesFileParsed],
-                                          this->textColor.color, 0xffffffff, local_54);
+                                          this->textColor.color, 0xffffffff, buf);
                 this->sprites[this->timesFileParsed].SetInterrupt(1);
             }
             while (*this->endFileDataPtr == '\n' || *this->endFileDataPtr == '\0' ||
@@ -409,8 +409,8 @@ ZunResult Ending::ParseEndFile()
             this->timesFileParsed++;
             goto stop;
         default:
-            local_54[local_58] = *this->endFileDataPtr;
-            local_54[local_58 + 1] = this->endFileDataPtr[1];
+            buf[local_58] = *this->endFileDataPtr;
+            buf[local_58 + 1] = this->endFileDataPtr[1];
             local_58 += 2;
             this->endFileDataPtr = this->endFileDataPtr + 2;
             break;
