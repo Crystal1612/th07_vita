@@ -12,23 +12,22 @@
 #include "ZunResult.hpp"
 #include "utils.hpp"
 
-u32 g_SpellcardScore[141] = {
-    0x1E8480, 0x1E8480, 0x2191C0, 0x2191C0, 0x249F00, 0x249F00, 0x249F00, 0x249F00, 0x249F00,
-    0x249F00, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40,
-    0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x27AC40, 0x2DC6C0,
-    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0,
-    0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0,
-    0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3567E0, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
-    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900,
-    0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x3D0900, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40,
-    0x4C4B40, 0x4C4B40, 0x4C4B40, 0x4C4B40, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x2DC6C0, 0x5B8D80,
-    0x5B8D80, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0,
-    0x3D0900, 0x6ACFC0, 0x6ACFC0, 0x6ACFC0, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200, 0x7A1200,
-    0x7A1200, 0x7A1200, 0x7A1200, 0x3D0900, 0x7A1200, 0x3D0900};
+u32 g_SpellcardScore[SPELLCARD_COUNT] = {
+    2000000, 2000000, 2200000, 2200000, 2400000, 2400000, 2400000, 2400000, 2400000, 2400000,
+    2600000, 2600000, 2600000, 2600000, 2600000, 2600000, 2600000, 2600000, 2600000, 2600000,
+    2600000, 2600000, 2600000, 2600000, 2600000, 2600000, 3000000, 3000000, 3000000, 3000000,
+    3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000,
+    3000000, 3000000, 3000000, 3000000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000,
+    3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000,
+    3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 4000000, 4000000,
+    4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000,
+    4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 4000000, 5000000, 5000000,
+    5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000,
+    5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000,
+    5000000, 5000000, 3000000, 3000000, 3000000, 3000000, 6000000, 6000000, 7000000, 7000000,
+    7000000, 7000000, 7000000, 7000000, 7000000, 7000000, 4000000, 7000000, 7000000, 7000000,
+    8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 4000000, 8000000,
+    4000000};
 
 ChainElem g_EnemyManagerDrawChain1;
 
@@ -142,7 +141,7 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i32 life, i32 itemDr
     i32 i;
 
     enemy = this->enemies;
-    for (i = 0; i < 480; i++, enemy++)
+    for (i = 0; i < MAX_ENEMIES; i++, enemy++)
     {
         if (enemy->active)
         {
@@ -183,7 +182,7 @@ Enemy *EnemyManager::SpawnEnemyEx(i32 eclSubId, ZunVec3 *pos, i32 life, i32 item
     i32 i;
 
     enemy = this->enemies;
-    for (i = 0; i < 480; i++, enemy++)
+    for (i = 0; i < MAX_ENEMIES; i++, enemy++)
     {
         if (enemy->active)
         {
@@ -447,7 +446,7 @@ i32 Enemy::HandleLifeCallback()
     Enemy *enemy;
 
     enemy = g_EnemyManager.enemies;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(enemy->lifeCallbackThreshold); i++)
     {
         if (this->lifeCallbackThreshold[i] < 0)
         {
@@ -470,7 +469,7 @@ i32 Enemy::HandleLifeCallback()
             this->stackDepth = 0;
             this->bulletProps = g_EnemyManager.enemyTemplate.bulletProps;
             this->shootInterval = 0;
-            for (j = 0; j < 480; j++, enemy++)
+            for (j = 0; j < MAX_ENEMIES; j++, enemy++)
             {
                 if (!enemy->active)
                 {
@@ -512,7 +511,7 @@ i32 Enemy::HandleTimerCallback()
     if (this->timer >= this->timerCallbackThreshold)
     {
         max = 0;
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->lifeCallbackThreshold); i++)
         {
             if (this->lifeCallbackThreshold[i] < 0)
             {
@@ -548,7 +547,7 @@ i32 Enemy::HandleTimerCallback()
             g_GameManager.cherry -= cherryPenalty;
         }
         enemy = g_EnemyManager.enemies;
-        for (j = 0; j < 480; j++, enemy++)
+        for (j = 0; j < MAX_ENEMIES; j++, enemy++)
         {
             if (!enemy->active)
             {
@@ -684,7 +683,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         g_GameManager.playTimeAll++;
     }
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->enemyHead); i++)
     {
         arg->enemyHead[i] = NULL;
     }
@@ -699,7 +698,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
 
     enemy = arg->enemies;
     arg->enemyCountReal = 0;
-    for (i = 0; i < 480; i++, enemy++)
+    for (i = 0; i < MAX_ENEMIES; i++, enemy++)
     {
         if (!enemy->active)
         {
@@ -726,8 +725,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
-                enemy->specialEffect->pos1 = enemy->specialEffect->pos1 +
-                                             (enemy->pos - enemy->specialEffect->pos1) / 16.0f;
+                enemy->specialEffect->pos1 =
+                    enemy->specialEffect->pos1 + (enemy->pos - enemy->specialEffect->pos1) / 16.0f;
             }
         }
         if (enemy->trailFlags != 0)
@@ -747,8 +746,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->hasNoCollision = 1;
         }
         if (!enemy->hasNoCollision && !enemy->isInBounds &&
-            g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y,
-                                     enemy->primaryVm.sprite->widthPx,
+            g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y, enemy->primaryVm.sprite->widthPx,
                                      enemy->primaryVm.sprite->heightPx) != 0)
         {
             enemy->isInBounds = 1;
@@ -815,12 +813,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->lastDamage = 0;
             if (enemy->canDie && enemy->isHittable)
             {
-                damage =
-                    g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->hitboxSize, &collisionOut);
+                damage = g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->hitboxSize, &collisionOut);
                 if (enemy->grazeSize.x > 0.0f)
                 {
-                    grazeDamage = g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->grazeSize,
-                                                             &collisionOut);
+                    grazeDamage =
+                        g_Player.CalcDamageToEnemy(&enemy->pos, &enemy->grazeSize, &collisionOut);
                     if (collisionOut == 0)
                     {
                         damage = (i32)((f32)damage + (f32)grazeDamage / 2.5f);
@@ -976,7 +973,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (enemy->life <= 0 && enemy->canDie)
         {
-            for (k = 0; k < 4; k++)
+            for (k = 0; k < ARRAY_SIZE_SIGNED(enemy->lifeCallbackThreshold); k++)
             {
                 enemy->lifeCallbackThreshold[k] = -1;
             }
@@ -993,12 +990,9 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 g_ReplayManager->replayEventFlags |= 0x20;
                 if (enemy->deathAnm1 >= 0)
                 {
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->pos, 1,
-                                                   0xffffffff);
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->pos, 1,
-                                                   0xffffffff);
-                    g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->pos, 1,
-                                                   0xffffffff);
+                    g_EffectManager.SpawnEffect(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
+                    g_EffectManager.SpawnEffect(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
+                    g_EffectManager.SpawnEffect(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
                 }
                 break;
             case 1:
@@ -1018,19 +1012,17 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             case 2:
                 if (enemy->itemDrop >= 0)
                 {
-                    g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->pos, 3,
-                                                   0xffffffff);
+                    g_EffectManager.SpawnEffect(enemy->deathAnm2 + 4, &enemy->pos, 3, 0xffffffff);
                     g_ItemManager.SpawnItem(&enemy->pos, enemy->itemDrop, collisionOut);
                 }
                 else if (enemy->itemDrop == -1)
                 {
                     if ((i32)arg->randomItemSpawnIdx % 3 == 0)
                     {
-                        g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->pos, 6,
-                                                       0xffffffff);
-                        g_ItemManager.SpawnItem(&enemy->pos,
-                                                g_ItemDropTable[arg->randomItemTableIdx],
-                                                collisionOut);
+                        g_EffectManager.SpawnEffect(enemy->deathAnm2 + 4, &enemy->pos, 6,
+                                                    0xffffffff);
+                        g_ItemManager.SpawnItem(
+                            &enemy->pos, g_ItemDropTable[arg->randomItemTableIdx], collisionOut);
                         arg->randomItemTableIdx++;
                         if (arg->randomItemTableIdx >= 32)
                         {
@@ -1057,9 +1049,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             g_SoundPlayer.PlaySoundByIdx(i % 2 + 2, 0);
             if (enemy->deathAnm1 >= 0)
             {
-                g_EffectManager.SpawnParticles(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
-                g_EffectManager.SpawnParticles(enemy->deathAnm2 + 4, &enemy->pos, 4,
-                                               0xffffffff);
+                g_EffectManager.SpawnEffect(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(enemy->deathAnm2 + 4, &enemy->pos, 4, 0xffffffff);
             }
             if (enemy->deathCallbackSub >= 0)
             {
@@ -1070,7 +1061,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 enemy->bulletRankAmount2Low = 0;
                 enemy->bulletRankAmount2High = 0;
                 enemy->stackDepth = 0;
-                for (l = 0; l < 4; l++)
+                for (l = 0; l < ARRAY_SIZE_SIGNED(enemy->lifeCallbackThreshold); l++)
                 {
                     enemy->lifeCallbackThreshold[l] = -1;
                 }
@@ -1279,8 +1270,7 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                             enemy->primaryVm.color.bytes.a =
                                 baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
                         }
-                        enemy->primaryVm.pos =
-                            enemy->enemyHistory[j].pos + enemy->primaryVm.offset;
+                        enemy->primaryVm.pos = enemy->enemyHistory[j].pos + enemy->primaryVm.offset;
                         enemy->primaryVm.pos.z = 0.3f;
                         enemy->primaryVm.pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
                         enemy->primaryVm.pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
@@ -1500,7 +1490,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
     enemy = this->enemies;
     totalScore = scoreMin;
     popupScore = 2000;
-    for (i = 0; i < 480; i++, enemy++)
+    for (i = 0; i < MAX_ENEMIES; i++, enemy++)
     {
         if (!enemy->active)
         {
@@ -1551,7 +1541,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
 
 i32 EnemyManager::HasActiveBoss()
 {
-    for (i32 i = 0; i < 8; i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->bosses); i++)
     {
         if (this->bosses[i])
         {

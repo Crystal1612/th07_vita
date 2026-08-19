@@ -12,6 +12,8 @@ typedef enum EndingFadeType
     ENDING_FADE_IN_WHITE = 4,
 } EndingFadeType;
 
+#define MAX_ENDING_SPRITES 15
+
 struct Ending
 {
     Ending()
@@ -41,7 +43,7 @@ struct Ending
     ChainElem *drawChain;
     Float2 backgroundPos;
     f32 backgroundScrollSpeed;
-    AnmVm sprites[16];
+    AnmVm sprites[MAX_ENDING_SPRITES + 1];
     char *endFileData;
     i32 hasSeenEnding;
     ZunTimer timer1;

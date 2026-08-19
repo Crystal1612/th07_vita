@@ -99,6 +99,8 @@ struct ThBgmDataSource
     u32 segmentBytesRemaining;
 };
 
+#define MAX_SOUND_COMMANDS 31
+
 struct SoundPlayer
 {
     SoundPlayer();
@@ -143,7 +145,7 @@ struct SoundPlayer
     u32 bgmPreloadAllocSizes[16];
     i32 curBgmIdx;
     ThBgmFormat *bgmFmtData;
-    SoundPlayerCommand commandQueue[32];
+    SoundPlayerCommand commandQueue[MAX_SOUND_COMMANDS + 1];
     char bgmFileNames[16][256];
     char bgmArchivePath[256];
     ThBgmDataSource *bgmDataSource;

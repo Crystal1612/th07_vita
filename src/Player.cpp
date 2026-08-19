@@ -515,7 +515,7 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet, ZunVec3 *pos)
     }
     if (bullet->timer.GetCurrent() % 6 == 0)
     {
-        g_EffectManager.SpawnParticles(5, pos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(5, pos, 1, 0xffffffff);
     }
     return 0;
 }
@@ -529,7 +529,7 @@ i32 ShtData::SpawnHitParticles(Player *player, PlayerBullet *bullet, ZunVec3 *po
     {
         particlePos = *pos;
         particlePos.x = bullet->pos.x;
-        g_EffectManager.SpawnParticles(5, &particlePos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(5, &particlePos, 1, 0xffffffff);
     }
     return 0;
 }
@@ -824,7 +824,7 @@ i32 Player::CalcDamageToEnemy(ZunVec3 *center, ZunVec3 *size, i32 *param_3)
             if (bullet->bulletState == 1)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&bullet->vm, bullet->vm.anmFileIdx + 32);
-                g_EffectManager.SpawnParticles(5, &bullet->pos, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(5, &bullet->pos, 1, 0xffffffff);
                 bullet->pos.z = 0.1f;
             }
             bullet->bulletState = 2;
@@ -858,11 +858,11 @@ i32 Player::CalcDamageToEnemy(ZunVec3 *center, ZunVec3 *size, i32 *param_3)
         {
             if (i < 96)
             {
-                g_EffectManager.SpawnParticles(3, center, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(3, center, 1, 0xffffffff);
             }
             else
             {
-                g_EffectManager.SpawnParticles(5, center, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(5, center, 1, 0xffffffff);
             }
         }
         if (this->bombInfo.isInUse && param_3)
@@ -1101,16 +1101,16 @@ void Player::ScoreGraze(ZunVec3 *param_1)
     {
         if (this->isFocus)
         {
-            g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
+            g_EffectManager.SpawnEffect(8, &grazePos, 1, 0xffffffff);
         }
         else
         {
-            g_EffectManager.SpawnParticles(8, &grazePos, 3, 0xffff8080);
+            g_EffectManager.SpawnEffect(8, &grazePos, 3, 0xffff8080);
         }
     }
     else
     {
-        g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(8, &grazePos, 1, 0xffffffff);
     }
     g_GameManager.IncreaseSubrank(6);
     g_Gui.grazeDisplayUpdateFrames = 2;
@@ -1137,8 +1137,8 @@ void Player::ScoreGraze(ZunVec3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
-    g_EffectManager.SpawnParticles(6, &this->positionCenter, 16, 0xffffffff);
+    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
+    g_EffectManager.SpawnEffect(6, &this->positionCenter, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN, 0);
@@ -1343,7 +1343,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect =
-                    g_EffectManager.SpawnEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
             }
             else
             {
@@ -1402,7 +1402,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect =
-                    g_EffectManager.SpawnEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
         }
@@ -1426,7 +1426,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect =
-                    g_EffectManager.SpawnEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->optionsPosition[0].x -= optionOffsetX;
@@ -1494,7 +1494,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect =
-                    g_EffectManager.SpawnEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->focusMovementTimer++;
@@ -2000,7 +2000,8 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
+        spawnedEffect =
+            g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
         spawnedEffect->vm.easeModes[4] = 0;
@@ -2030,7 +2031,7 @@ void Player::BreakBorder()
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
+    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
     effect->vm.easeModes[4] = 0;
@@ -2056,7 +2057,7 @@ void Player::BreakBorder()
     angle = -ZUN_PI;
     for (i = 0; i < 32; i++, angle += 0.19634955f)
     {
-        effect = g_EffectManager.SpawnParticles(29, &this->positionCenter, 1, 0xffffffff);
+        effect = g_EffectManager.SpawnEffect(29, &this->positionCenter, 1, 0xffffffff);
         effect->direction.x = cosf(angle);
         effect->direction.y = sinf(angle);
     }
@@ -2402,10 +2403,10 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
     ShtData *parsed = new ShtData;
     memcpy(parsed, rawData, offsetof(ShtRawData, levels));
 
-    parsed->levels = new ShtLevel[parsed->entryCount];
+    parsed->levels = new ShtLevel[parsed->numLevels];
 
     i32 totalEntries = 0;
-    for (i32 i = 0; i < parsed->entryCount; i++)
+    for (i32 i = 0; i < parsed->numLevels; i++)
     {
         ShtRawEntry *re = (ShtRawEntry *)(rawFile + rawData->levels[i].entryOffset);
         while (re->fireInterval >= 0)
@@ -2419,7 +2420,7 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
     parsed->entries = new ShtEntry[totalEntries];
 
     i32 entryIdx = 0;
-    for (i32 i = 0; i < parsed->entryCount; i++)
+    for (i32 i = 0; i < parsed->numLevels; i++)
     {
         parsed->levels[i].requiredPower = rawData->levels[i].requiredPower;
         parsed->levels[i].entry = &parsed->entries[entryIdx];

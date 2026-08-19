@@ -417,7 +417,7 @@ ZunResult ResultScreen::ParseScores()
     catk = g_GameManager.catk;
     RegisterChain(2);
     memset(g_GameManager.catk, 0, sizeof(g_GameManager.catk));
-    for (i = 0; i < 141; i++, catk++)
+    for (i = 0; i < SPELLCARD_COUNT; i++, catk++)
     {
         catk->base.magic = 0x4b544143;
         catk->base.th7kLen2 = sizeof(Catk);
@@ -940,7 +940,7 @@ i32 GameManager::HasReachedMaxClears(i32 shotType)
 i32 GameManager::HasUnlockedPhantom(i32 shotType)
 {
     i32 numSuccesses = 0;
-    for (i32 i = 0; i < 141; i++)
+    for (i32 i = 0; i < SPELLCARD_COUNT; i++)
     {
         if (this->catk[i].numSuccessesPerShot[6] > 0)
         {
@@ -970,7 +970,7 @@ i32 GameManager::HasUnlockedPhantomAndMaxClears()
     i32 spellCardsCaptured;
 
     spellCardsCaptured = 0;
-    for (i = 0; i < 141; i++)
+    for (i = 0; i < SPELLCARD_COUNT; i++)
     {
         if (this->catk[i].numSuccessesPerShot[6] > 0)
         {

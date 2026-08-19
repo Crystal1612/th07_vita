@@ -580,7 +580,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
             {
                 g_Supervisor.DisableFog();
             }
-            g_EffectManager.UpdateSpecialEffect();
+            g_EffectManager.DrawLayer1Effects();
             if (arg->spellCardState == 1)
             {
                 rect.left = 32.0f;
@@ -730,7 +730,7 @@ ZunResult Stage::AddedCallback(Stage *arg)
     arg->cam.fov = ZUN_PI / 6.0f;
     arg->camEnd = arg->cam;
     arg->camStart = arg->cam;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->timers); i++)
     {
         arg->timersMax[i] = 0;
         arg->timers[i] = 0;

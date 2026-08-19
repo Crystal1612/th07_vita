@@ -267,7 +267,7 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
     {
         if (parsedCatk->base.magic == CATK_MAGIC && parsedCatk->base.version == 1)
         {
-            if (parsedCatk->idx >= 141)
+            if (parsedCatk->idx >= SPELLCARD_COUNT)
             {
                 break;
             }
@@ -361,7 +361,7 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outPscr)
     }
 
     pscr = outPscr;
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < SHOT_COUNT; i++)
     {
         for (j = 0; j < 6; j++)
         {
@@ -465,9 +465,9 @@ void ResultScreen::WriteScore()
     memcpy(fileBuffer + sizeOfFile, &this->th7kHeader, sizeof(Th7k));
     sizeOfFile += sizeof(Th7k);
 
-    for (difficulty = 0; difficulty < 6; difficulty++)
+    for (difficulty = 0; difficulty < DIFF_COUNT; difficulty++)
     {
-        for (character = 0; character < 6; character++)
+        for (character = 0; character < SHOT_COUNT; character++)
         {
             currentCharacter = this->scoreLists[difficulty][character].next;
             characterSlot = 0;
@@ -519,7 +519,7 @@ void ResultScreen::WriteScore()
     }
 
     catk = g_GameManager.catk;
-    for (difficulty = 0; difficulty < 141; difficulty++, catk++)
+    for (difficulty = 0; difficulty < SPELLCARD_COUNT; difficulty++, catk++)
     {
         if (catk->base.magic == CATK_MAGIC)
         {
@@ -534,7 +534,7 @@ void ResultScreen::WriteScore()
     }
 
     pscr = &g_GameManager.pscr[0][0][0];
-    for (difficulty = 0; difficulty < 6; difficulty++)
+    for (difficulty = 0; difficulty < DIFF_COUNT; difficulty++)
     {
         for (j = 0; j < 6; j++)
         {
@@ -972,7 +972,7 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             for (vmIdx = arg->lastSpellcardSelected * 10;
                  vmIdx < arg->lastSpellcardSelected * 10 + 10; vmIdx++)
             {
-                if (vmIdx >= 141)
+                if (vmIdx >= SPELLCARD_COUNT)
                 {
                     break;
                 }
@@ -990,8 +990,8 @@ u32 ResultScreen::OnUpdate(ResultScreen *arg)
             }
             AnmManager::DrawVmTextFmt(g_AnmManager, arg->spellcardListVms + 10, 0xffffff, 0,
                                       "%s %3d枚中%3d枚取得（キャラ切り替え↓↑）",
-                                      g_CharacterList[arg->prevSpellcardListPage], 141,
-                                      arg->totalPlayCountPerCharacter[arg->spellcardListPage]);
+                                      g_CharacterList[arg->prevSpellcardListPage], SPELLCARD_COUNT,
+                                      arg->totalPlayCountPerShot[arg->spellcardListPage]);
             arg->spellcardListVms[10].color.bytes.a = 255;
         }
         if (arg->frameTimer < 30)
@@ -2152,7 +2152,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
             for (i = 0; i < 10; i++)
             {
                 spellcardIdx = arg->lastSpellcardSelected * 10 + i;
-                if (spellcardIdx >= 141)
+                if (spellcardIdx >= SPELLCARD_COUNT)
                 {
                     break;
                 }
@@ -2371,9 +2371,9 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     i32 i;
 
     g_GameManager.HasUnlockedPhantomAndMaxClears();
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < DIFF_COUNT; i++)
     {
-        for (j = 0; j < 6; j++)
+        for (j = 0; j < SHOT_COUNT; j++)
         {
             for (k = 0; k < 10; k++)
             {
@@ -2404,7 +2404,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             return ZUN_ERROR;
         }
         vm = arg->vms;
-        for (i = 0; i < 41; i++, vm++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(arg->vms); i++, vm++)
         {
             vm->pos = ZunVec3(0.0f, 0.0f, 0.0f);
             vm->offset = ZunVec3(0.0f, 0.0f, 0.0f);
@@ -2412,7 +2412,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         }
         g_AnmManager->InitializeAndSetActiveSprite(&arg->rightArrowVm, 2320);
         vm = arg->spellcardListVms;
-        for (i = 0; i < 15; i++, vm++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(arg->spellcardListVms); i++, vm++)
         {
             g_AnmManager->InitializeAndSetActiveSprite(vm, i + 1813);
             vm->pos = ZunVec3(0.0f, 0.0f, 0.0f);
@@ -2423,9 +2423,9 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
     }
     arg->prevCursor = 0;
     arg->scoreDat = OpenScore("score.dat");
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < DIFF_COUNT; i++)
     {
-        for (j = 0; j < 6; j++)
+        for (j = 0; j < SHOT_COUNT; j++)
         {
             GetHighScore(arg->scoreDat, arg->scoreLists[i] + j, j, i, NULL);
         }
@@ -2458,11 +2458,11 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
         arg->resultScreenState = 11;
         strcpy(arg->replayName, arg->lsnmHeader.name);
     }
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < SHOT_COUNT + 1; i++)
     {
         catk = g_GameManager.catk;
-        arg->totalPlayCountPerCharacter[i] = 0;
-        for (catkIdx = 0; catkIdx < 141; catkIdx++, catk++)
+        arg->totalPlayCountPerShot[i] = 0;
+        for (catkIdx = 0; catkIdx < SPELLCARD_COUNT; catkIdx++, catk++)
         {
             if (catk->base.magic != CATK_MAGIC || catk->base.version != 1)
             {
@@ -2470,7 +2470,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *arg)
             }
             if (catk->numSuccessesPerShot[i] != 0)
             {
-                arg->totalPlayCountPerCharacter[i]++;
+                arg->totalPlayCountPerShot[i]++;
             }
         }
     }
