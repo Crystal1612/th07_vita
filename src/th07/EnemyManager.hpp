@@ -283,6 +283,9 @@ struct EnemyManager
     Enemy *SpawnEnemyEx(i32 eclSubId, Float3 *pos, i32 life, i32 itemDrop,
                         i32 score, EclContextArgs *args);
 
+    // multiplayer
+    i32 CalculateDamageAndGetCherry(Enemy *enemy, Player * player, i32 collisionOut, i32 stageFactor);
+    
     void Initialize()
     {
         Enemy *enemy;

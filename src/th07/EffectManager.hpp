@@ -80,6 +80,10 @@ struct EffectManager
                            D3DCOLOR color);
     Effect *SpawnEffect(i32 effectId, Float3 *pos, i32 param_3, i32 param_4,
                         D3DCOLOR color);
+    // multiplayer
+    static i32 UpdateAttachToPlayer2(Effect *effect);
+    static i32 UpdateAttachToPlayer3(Effect *effect);
+    //////
     Effect *SpawnMovingParticles(i32 effectId, Float3 *pos,
                                  Float3 *velocity, i32 numParticles,
                                  D3DCOLOR color);

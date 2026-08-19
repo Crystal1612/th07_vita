@@ -116,8 +116,15 @@ void ItemManager::OnUpdate()
     i32 i;
 
     item = this->items;
+
+    Player *playerItemCollector;
     Float3 local_20(g_Player.shooterData->itemCollectRadius,
                     g_Player.shooterData->itemCollectRadius, 16.0f);
+    Float3 local_202(g_Player2.shooterData->itemCollectRadius,
+                    g_Player2.shooterData->itemCollectRadius, 16.0f);
+    Float3 local_203(g_Player3.shooterData->itemCollectRadius,
+                    g_Player3.shooterData->itemCollectRadius, 16.0f);
+
     itemAcquired = 0;
     this->activeItemCount = 0;
     this->listTail = &this->listHead;
@@ -149,20 +156,12 @@ void ItemManager::OnUpdate()
         }
         else
         {
-            if (item->state == 1 || ((128.0 <= (f64)(i32)g_GameManager.globals->currentPower || g_GameManager.difficulty >= 4) && g_Player.positionCenter.y < g_Player.shooterData->pocY) || g_Player.hasBorder == 1)
+            if (item->state == 1)
             {
-                if (g_Player.playerState != 1)
-                {
-                    playerAngle = g_Player.AngleToPlayer(&item->currentPosition);
-                    item->startPosition.FromAngleMagnitude(playerAngle, g_Player.shooterData->itemCollectSpeed);
-                    item->state = 1;
-                    if (g_Player.hasBorder == 1)
-                    {
-                        item->autoCollect = 1;
-                    }
-                }
-                else
-                {
+                if(this->CollectItemPerPlayer(&g_Player,item,g_GameManager.globals->currentPower)){
+                }else if(this->CollectItemPerPlayer(&g_Player2,item,g_GameManager.globals->currentPower)){
+                }else if(this->CollectItemPerPlayer(&g_Player3,item,g_GameManager.globals->currentPower)){
+                }else{
                     item->startPosition.y = -0.5f;
                     item->state = 0;
                 }
@@ -193,7 +192,19 @@ void ItemManager::OnUpdate()
             item->startPosition.y = 3.0f;
         }
     check_collision:
-        if (g_Player.CalcItemBoxCollision(&item->currentPosition, &local_20))
+        //check 3 player;
+        playerItemCollector;
+        if (g_Player.CalcItemBoxCollision(&item->currentPosition, &local_20)==1){
+            playerItemCollector = &g_Player;
+        }else if (g_Player2.CalcItemBoxCollision(&item->currentPosition, &local_202)==1){
+            playerItemCollector = &g_Player2;
+        }else if (g_Player3.CalcItemBoxCollision(&item->currentPosition, &local_203)==1){
+            playerItemCollector = &g_Player3;
+        }else{
+            playerItemCollector = NULL;
+        }
+        
+        if (playerItemCollector>0)
         {
             g_ReplayManager->replayEventFlags |= 0x40;
             switch (item->itemType)
@@ -269,7 +280,7 @@ void ItemManager::OnUpdate()
                     itemScore += (g_GameManager.cherry - g_GameManager.globals->cherryStart - 50000) / 5;
                 }
                 itemScore -= itemScore % 10;
-                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect == 1 ? 0xffffff00 : 0xffffffff);
+                g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < playerItemCollector->shooterData->pocY || item->autoCollect == 1 ? 0xffffff00 : 0xffffffff);
                 g_GameManager.AddScore(itemScore);
                 g_GameManager.globals->pointItemsCollectedThisStage++;
                 g_GameManager.globals->pointItemsCollectedForExtend++;
@@ -393,7 +404,7 @@ void ItemManager::OnUpdate()
                 g_Gui.powerDisplayUpdateFrames = 2;
                 break;
             case ITEM_POINT_BULLET:
-                if (!g_Player.isBombing)
+                if (!playerItemCollector->isBombing)
                 {
                     itemScore = g_GameManager.globals->grazeInTotal / 40 * 10 + 300;
                     if (itemScore <= 0)
@@ -407,7 +418,7 @@ void ItemManager::OnUpdate()
                 }
                 g_AsciiManager.CreatePopup2(&item->currentPosition, itemScore, -1);
                 g_GameManager.AddScore(itemScore);
-                if (!g_Player.bombInfo.isInUse)
+                if (!playerItemCollector->bombInfo.isInUse)
                 {
                     g_GameManager.AddCherryPlus(20);
                 }
@@ -431,7 +442,7 @@ void ItemManager::OnUpdate()
                                     ? 50000
                                     : 50000 - item->OffsetFromPoc() * 100;
                     itemScore -= itemScore % 10;
-                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < g_Player.shooterData->pocY || item->autoCollect ? 0xffffff00 : 0xffffffff);
+                    g_AsciiManager.CreatePopup1(&item->currentPosition, itemScore, item->currentPosition.y < playerItemCollector->shooterData->pocY || item->autoCollect ? 0xffffff00 : 0xffffffff);
                     g_GameManager.AddScore(itemScore);
                 }
                 itemScore = 1000;
@@ -603,4 +614,24 @@ void ItemManager::OnDraw()
         g_AnmManager->Draw(&item->sprite);
         item = item->next;
     }
+}
+
+// multiplayer
+bool ItemManager::CollectItemPerPlayer(Player *player, Item *item, i32 currentPower){
+    if(
+        ((128.0 <= currentPower || g_GameManager.difficulty >= 4)
+        && player->positionCenter.y < player->shooterData->pocY) || player->hasBorder == 1)
+    {
+        if (player->playerState != 1)
+        {
+            item->startPosition.FromAngleMagnitude(player->AngleToPlayer(&item->currentPosition), player->shooterData->itemCollectSpeed);
+            item->state = 1;
+            if (player->hasBorder == 1)
+            {
+                item->autoCollect = 1;
+            }
+            return true;
+        }
+    }
+    return false;
 }

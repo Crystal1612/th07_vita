@@ -795,8 +795,9 @@ i32 Player::UpdateFireBulletTimer()
     {
         return 0;
     }
+    // gplayer to this
     if (this->fireBulletTimer.HasTicked() &&
-        (!g_Player.bombInfo.isInUse ||
+        (!this->bombInfo.isInUse ||
          g_GameManager.character != CHAR_MARISA ||
          g_GameManager.shotType != 1))
     {
@@ -1028,7 +1029,8 @@ i32 Player::CalcKillboxCollision(Float3 *center, Float3 *size)
     g_ReplayManager->replayEventFlags = g_ReplayManager->replayEventFlags | 2;
     if (this->playerState == PLAYER_STATE_BORDER)
     {
-        g_Player.BreakBorder(0);
+        // i change this gPlayer to "this"... probably will break
+        this->BreakBorder(0);
         return 1;
     }
     if (this->playerState != PLAYER_STATE_ALIVE)
@@ -1162,7 +1164,8 @@ LASER_COLLISION:
     if (this->playerState == PLAYER_STATE_BORDER)
     {
         // this is already a member function of Player though
-        g_Player.BreakBorder(0);
+        // cardana : ok, then i'll change gPlayer to this
+        this->BreakBorder(0);
         return 1;
     }
     if (this->playerState != PLAYER_STATE_ALIVE)
@@ -1180,7 +1183,7 @@ void Player::ScoreGraze(Float3 *param_1)
 {
     Float3 grazePos;
 
-    if (!g_Player.bombInfo.isInUse)
+    if (!this->bombInfo.isInUse)
     {
         if (g_GameManager.globals->grazeInStage < 9999)
         {
@@ -1438,7 +1441,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    24, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+(this->playerType-1), 1, 0xffffffff);
             }
             else
             {
@@ -1497,7 +1500,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    24, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
         }
@@ -1521,7 +1524,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    24, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->optionsPosition[0].x -= optionOffsetX;
@@ -1589,7 +1592,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnEffect(
-                    24, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->focusMovementTimer++;
@@ -1750,9 +1753,9 @@ void Player::UpdateBorderAndBombState()
                 g_EnemyManager.spellcardInfo.usedBomb =
                     g_EnemyManager.spellcardInfo.isActive;
                 this->respawnTimer += 6;
-                if (this->respawnTimer > g_Player.shooterData->initialRespawnTimer)
+                if (this->respawnTimer > this->shooterData->initialRespawnTimer)
                 {
-                    this->respawnTimer = g_Player.shooterData->initialRespawnTimer;
+                    this->respawnTimer = this->shooterData->initialRespawnTimer;
                 }
             }
             else
@@ -1804,7 +1807,7 @@ i32 Player::UpdateDeath()
                 g_Gui.powerDisplayUpdateFrames = 2;
                 cherryPenalty =
                     (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
-                    g_Player.shooterData->cherryPenaltyMultiplier;
+                    this->shooterData->cherryPenaltyMultiplier;
                 if (g_GameManager.character != CHAR_SAKUYA)
                 {
                     if (cherryPenalty > 100000)
@@ -1870,7 +1873,7 @@ i32 Player::UpdateDeath()
                 g_GameManager.AddLivesRemaining(-1);
                 g_Gui.lifeDisplayUpdateFrames = 2;
                 g_GameManager.SetBombsRemainingAndComputeCsum(
-                    g_Player.shooterData->initialBombs);
+                    this->shooterData->initialBombs);
                 g_Gui.bombDisplayUpdateFrames = 2;
                 return 1;
             }
@@ -1901,7 +1904,7 @@ void Player::Respawn()
         this->playerSprite.color.color = 0xffffffff;
         this->playerSprite.blendMode = 0;
         this->invulnerabilityTimer = 240;
-        this->respawnTimer = g_Player.shooterData->initialRespawnTimer;
+        this->respawnTimer = this->shooterData->initialRespawnTimer;
     }
 }
 
@@ -1975,18 +1978,18 @@ void Player::UpdateState()
                 this->playerSprite.color.color = 0xffffffff;
             }
             color.bytes.a = 128;
-            if (g_Player.invulnerabilityTimer >= 510)
+            if (this->invulnerabilityTimer >= 510)
             {
                 color.bytes.r = color.bytes.g = color.bytes.b =
                     128 -
-                    (540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80 /
+                    (540 - this->invulnerabilityTimer.GetCurrent()) * 80 /
                         30;
             }
-            else if (g_Player.invulnerabilityTimer < 30)
+            else if (this->invulnerabilityTimer < 30)
             {
                 color.bytes.r = color.bytes.g = color.bytes.b =
                     128 -
-                    g_Player.invulnerabilityTimer.GetCurrent() * 80 /
+                    this->invulnerabilityTimer.GetCurrent() * 80 /
                         30;
             }
             else
@@ -2022,7 +2025,7 @@ void Player::BreakBorderNaturally()
         this->playerSprite.color.color = 0xffffffff;
         this->playerSprite.blendMode = 0;
         this->invulnerabilityTimer = 240;
-        this->respawnTimer = g_Player.shooterData->initialRespawnTimer;
+        this->respawnTimer = this->shooterData->initialRespawnTimer;
     }
     this->playerState = PLAYER_STATE_INVULNERABLE;
     this->invulnerabilityTimer = 40;
@@ -2311,10 +2314,12 @@ u32 Player::OnDrawHighPrio(Player *arg)
             g_AnmManager->Draw(&arg->optionsSprite[1]);
         }
     }
+    // for performance, maybe
+    i32 localTimer = arg->invulnerabilityTimer.GetCurrent();
     if (arg->playerState == PLAYER_STATE_BORDER &&
-        arg->invulnerabilityTimer.GetCurrent() > 0)
+        localTimer > 0)
     {
-        if (arg->invulnerabilityTimer.GetCurrent() % 4 < 2)
+        if (localTimer % 4 < 2)
         {
             arg->playerSprite.color.color = 0xffff0000;
         }
@@ -2323,18 +2328,18 @@ u32 Player::OnDrawHighPrio(Player *arg)
             arg->playerSprite.color.color = 0xffffffff;
         }
         color.bytes.a = 128;
-        if (g_Player.invulnerabilityTimer >= 510)
+        if (localTimer >= 510)
         {
             color.bytes.r = color.bytes.g = color.bytes.b =
                 128 -
-                (540 - g_Player.invulnerabilityTimer.GetCurrent()) * 80 /
+                (540 - localTimer) * 80 /
                     30;
         }
-        else if (g_Player.invulnerabilityTimer < 30)
+        else if (localTimer < 30)
         {
             color.bytes.r = color.bytes.g = color.bytes.b =
                 128 -
-                g_Player.invulnerabilityTimer.GetCurrent() * 80 /
+                localTimer * 80 /
                     30;
         }
         else
@@ -2437,10 +2442,10 @@ ZunResult Player::AddedCallback(Player *arg)
     {
         arg->bombDamageBoxes[i].size.x = 0.0f;
     }
-    arg->hitboxSize.y = g_Player.shooterData->hitboxRadius / 2.0f;
+    arg->hitboxSize.y = arg->shooterData->hitboxRadius / 2.0f;
     arg->hitboxSize.x = arg->hitboxSize.y;
     arg->hitboxSize.z = 5.0f;
-    arg->grazeSize.y = g_Player.shooterData->grabItemRadius / 2.0f;
+    arg->grazeSize.y = arg->shooterData->grabItemRadius / 2.0f;
     arg->grazeSize.x = arg->grazeSize.y;
     arg->grazeSize.z = 5.0f;
     arg->grabItemSize.x = 12.0f;
@@ -2469,7 +2474,7 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->optionAngle = -1.5707964f;
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
-    arg->respawnTimer = g_Player.shooterData->initialRespawnTimer;
+    arg->respawnTimer = arg->shooterData->initialRespawnTimer;
     if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
               g_Supervisor.curState != 12))
     {
@@ -2482,7 +2487,7 @@ ZunResult Player::AddedCallback(Player *arg)
     if (g_GameManager.cherryPlus >= g_GameManager.globals->cherryStart + 50000)
     {
         g_GameManager.cherryPlus = g_GameManager.globals->cherryStart + 50000;
-        g_Player.ActivateBorder();
+        arg->ActivateBorder();
     }
     return ZUN_SUCCESS;
 }
@@ -2500,8 +2505,8 @@ ZunResult Player::DeletedCallback(Player *arg)
         g_AsciiManager.GetBossMarker(1)->pendingInterrupt = 99;
         g_AsciiManager.GetBossMarker(2)->pendingInterrupt = 99;
     }
-    SAFE_FREE(g_Player.shooterData);
-    SAFE_FREE(g_Player.shooterDataFocus);
+    SAFE_FREE(arg->shooterData);
+    SAFE_FREE(arg->shooterDataFocus);
     return ZUN_SUCCESS;
 }
 
@@ -2534,6 +2539,8 @@ ZunResult Player::RegisterChain(u32 param_1)
         return ZUN_ERROR;
     }
     // apply it's controller. compatslop
+    g_Player.playerType = 1;
+    g_Player.playerEffectAttach = 24;
     g_Player.buttonShoot = TH_BUTTON_SHOOT;
     g_Player.buttonBomb = TH_BUTTON_BOMB;
     g_Player.buttonFocus = TH_BUTTON_FOCUS;
@@ -2545,6 +2552,8 @@ ZunResult Player::RegisterChain(u32 param_1)
     if(RegisteringChain(&g_Player2,param_1)==ZUN_ERROR){
         return ZUN_ERROR;
     }
+    g_Player2.playerType = 2;
+    g_Player2.playerEffectAttach = 34;
     g_Player2.buttonShoot = TH_BUTTON_SHOOT2;
     g_Player2.buttonBomb = TH_BUTTON_BOMB2;
     g_Player2.buttonFocus = TH_BUTTON_FOCUS2;
@@ -2556,6 +2565,8 @@ ZunResult Player::RegisterChain(u32 param_1)
     if(RegisteringChain(&g_Player3,param_1)==ZUN_ERROR){
         return ZUN_ERROR;
     }
+    g_Player3.playerType = 3;
+    g_Player3.playerEffectAttach = 35;
     g_Player3.buttonShoot = TH_BUTTON_SHOOT3;
     g_Player3.buttonBomb = TH_BUTTON_BOMB3;
     g_Player3.buttonFocus = TH_BUTTON_FOCUS3;

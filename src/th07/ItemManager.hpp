@@ -61,6 +61,9 @@ struct ItemManager
     void RemoveAllItems();
     Item *SpawnItem(Float3 *heading, i32 itemType, i32 state);
 
+    //multiplayer
+    bool CollectItemPerPlayer(Player *player, Item *item, i32 currentPower);
+
     struct Item items[1101];
     i32 nextIndex;
     i32 activeItemCount;

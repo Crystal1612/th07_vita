@@ -74,7 +74,7 @@ ZunResult EclManager::Load(const char *path)
     if (!this->eclFile)
     {
         // STRING: TH07 0x00498700
-        g_GameErrorContext.Log("“Gƒf[ƒ^‚Ì“Ç‚Ýž‚Ý‚ÉŽ¸”s‚µ‚Ü‚µ‚½Aƒf[ƒ^‚ª‰ó‚ê‚Ä‚é‚©Ž¸‚í‚ê‚Ä‚¢‚Ü‚·\r\n");
+        g_GameErrorContext.Log("ï¿½Gï¿½fï¿½[ï¿½^ï¿½Ì“Ç‚Ýï¿½ï¿½Ý‚ÉŽï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½ï¿½Aï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
         return ZUN_ERROR;
     }
 

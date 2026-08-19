@@ -10,56 +10,60 @@
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049efc0
-EffectTypeInfo g_EffectMapping[34] = {
-    {0x2ab, NULL, NULL},
-    {0x2ac, NULL, NULL},
-    {0x2ad, NULL, NULL},
-    {0x2ae, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurst},
-    {0x2b3, EffectManager::UpdatePhysics,
+EffectTypeInfo g_EffectMapping[36] = {
+    {0x2ab, NULL, NULL}, //0
+    {0x2ac, NULL, NULL}, //1
+    {0x2ad, NULL, NULL}, //2
+    {0x2ae, EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurst}, //3
+    {0x2b3, EffectManager::UpdatePhysics, //4
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b4, EffectManager::UpdatePhysics,
+    {0x2b4, EffectManager::UpdatePhysics, //5
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b5, EffectManager::UpdatePhysics,
+    {0x2b5, EffectManager::UpdatePhysics, //6
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b6, EffectManager::UpdatePhysics,
+    {0x2b6, EffectManager::UpdatePhysics, //7
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b7, EffectManager::UpdatePhysics,
+    {0x2b7, EffectManager::UpdatePhysics, //8
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b8, EffectManager::UpdatePhysics,
+    {0x2b8, EffectManager::UpdatePhysics, //9
      EffectManager::InitDeceleratingBurstFast},
-    {0x2b9, EffectManager::UpdatePhysics,
+    {0x2b9, EffectManager::UpdatePhysics, //10
      EffectManager::InitDeceleratingBurstFast},
-    {0x2ba, EffectManager::UpdatePhysics,
+    {0x2ba, EffectManager::UpdatePhysics, //11
      EffectManager::InitDeceleratingBurstFast},
-    {0x2bb, NULL, NULL},
-    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
-    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
-    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
-    {0x2dc, NULL, NULL},
-    {0x2af, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir},
-    {0x2b0, EffectManager::UpdateGather240Frames, EffectManager::InitRandomDir},
-    {0x2bd, EffectManager::UpdateNoOp, NULL},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
+    {0x2bb, NULL, NULL}, //12
+    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect}, //13
+    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect}, //14
+    {0x2bc, EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect}, //15
+    {0x2dc, NULL, NULL}, //16
+    {0x2af, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir}, //17
+    {0x2b0, EffectManager::UpdateGather240Frames, EffectManager::InitRandomDir}, //18
+    {0x2bd, EffectManager::UpdateNoOp, NULL}, //19
+    {0x2bf, EffectManager::UpdateWeatherPhysics, //20
      EffectManager::InitWeatherForward},
-    {0x2c3, NULL, NULL},
-    {0x2c0, EffectManager::UpdateBurstEaseOut30Frames,
-     EffectManager::InitRandomDirWithSpeed},
-    {0x304, EffectManager::UpdateAttachToCamera, NULL},
-    {0x2c2, EffectManager::UpdateAttachToPlayer, NULL},
-    {0x2da, EffectManager::UpdateNoOp, NULL},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
+    {0x2c3, NULL, NULL}, //21
+    {0x2c0, EffectManager::UpdateBurstEaseOut30Frames, //22
+     EffectManager::InitRandomDirWithSpeed}, 
+    {0x304, EffectManager::UpdateAttachToCamera, NULL}, //23
+    {0x2c2, EffectManager::UpdateAttachToPlayer, NULL}, //24
+    {0x2da, EffectManager::UpdateNoOp, NULL}, //25
+    {0x2bf, EffectManager::UpdateWeatherPhysics, //26
      EffectManager::InitWeatherVortex},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
+    {0x2bf, EffectManager::UpdateWeatherPhysics, //27
      EffectManager::InitWeatherBackward},
-    {0x2db, EffectManager::UpdateNoOp, NULL},
-    {0x2b2, EffectManager::UpdateBurst30Frames, EffectManager::InitRandomDir},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
+    {0x2db, EffectManager::UpdateNoOp, NULL}, //28
+    {0x2b2, EffectManager::UpdateBurst30Frames, EffectManager::InitRandomDir}, //29
+    {0x2bf, EffectManager::UpdateWeatherPhysics, //30
      EffectManager::InitWeatherSlow},
-    {0x2bf, EffectManager::UpdateWeatherPhysics,
+    {0x2bf, EffectManager::UpdateWeatherPhysics, //31
      EffectManager::InitWeatherFalling},
-    {0x2c1, EffectManager::UpdateBurstEaseOut30Frames,
+    {0x2c1, EffectManager::UpdateBurstEaseOut30Frames, //32
      EffectManager::InitRandomDirWithSpeed},
-    {0x2b1, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir},
+    {0x2b1, EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir}, //33
+
+    // multiplayer, anm index borrowed from unused 1 and 2
+    {0x2c2, EffectManager::UpdateAttachToPlayer2, NULL}, //34
+    {0x2c2, EffectManager::UpdateAttachToPlayer3, NULL}, //35
 };
 
 // GLOBAL: TH07 0x012fe250
@@ -220,6 +224,28 @@ i32 EffectManager::UpdateAttachToPlayer(Effect *effect)
     return true;
 }
 
+// multiplayer
+i32 EffectManager::UpdateAttachToPlayer2(Effect *effect)
+{
+    if ((i32)!effect->vm.currentInstruction)
+    {
+        return false;
+    }
+
+    effect->pos1 = g_Player2.positionCenter;
+    return true;
+}
+
+i32 EffectManager::UpdateAttachToPlayer3(Effect *effect)
+{
+    if ((i32)!effect->vm.currentInstruction)
+    {
+        return false;
+    }
+
+    effect->pos1 = g_Player3.positionCenter;
+    return true;
+}
 // FUNCTION: TH07 0x0041ac30
 i32 EffectManager::UpdateGather240Frames(Effect *effect)
 {

@@ -310,6 +310,8 @@ struct Player
     struct ShtData *shooterDataFocus;
 
     // multiplayer
+    u8 playerType;
+    u8 playerEffectAttach;
     // button
     u32 buttonShoot;
     u32 buttonBomb;
