@@ -373,8 +373,8 @@ struct ShtData
     static i32 SpawnHitParticles(Player *player, PlayerBullet *bullet,
                                  Float3 *pos);
 
-    i16 numLevels;
-    u16 entryCount;
+    i16 unused;
+    u16 numLevels;
     f32 initialBombs;
     i32 initialRespawnTimer;
     f32 hitboxRadius;
@@ -387,6 +387,6 @@ struct ShtData
     f32 speedFocus;
     f32 speedDiagonal;
     f32 speedDiagonalFocus;
-    ShtLevel levels;
+    ShtLevel levels[1];
 };
 C_ASSERT(sizeof(ShtData) == 0x3c);

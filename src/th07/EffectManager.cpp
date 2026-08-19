@@ -244,7 +244,7 @@ void EffectManager::ShiftEffectsAfterCameraTeleport(Float3 *shift)
     Effect *effect;
 
     effect = g_EffectManager.effects;
-    for (i = 0; i < 400; i++, effect++)
+    for (i = 0; i < MAX_NORMAL_EFFECTS; i++, effect++)
     {
         if (effect->effectId == 20 || effect->effectId == 31)
         {
@@ -261,7 +261,7 @@ void EffectManager::ModifyEffect1eAcceleration()
     Effect *effect;
 
     effect = g_EffectManager.effects;
-    for (i = 0; i < 400; i++, effect++)
+    for (i = 0; i < MAX_NORMAL_EFFECTS; i++, effect++)
     {
         if (effect->effectId == 30)
         {
@@ -503,17 +503,17 @@ i32 EffectManager::UpdateNoOp(Effect *effect)
 
 #pragma var_order(effect, i)
 // FUNCTION: TH07 0x0041c1c0
-Effect *EffectManager::SpawnParticles(i32 effectId, Float3 *pos,
-                                      i32 numParticles, D3DCOLOR color)
+Effect *EffectManager::SpawnEffect(i32 effectId, Float3 *pos,
+                                   i32 numParticles, D3DCOLOR color)
 {
     i32 i;
     Effect *effect;
 
     effect = &this->effects[this->nextIndex];
-    for (i = 0; i < 400; i++)
+    for (i = 0; i < MAX_NORMAL_EFFECTS; i++)
     {
         this->nextIndex++;
-        if (this->nextIndex >= 400)
+        if (this->nextIndex >= MAX_NORMAL_EFFECTS)
         {
             this->nextIndex = 0;
         }
@@ -562,7 +562,7 @@ Effect *EffectManager::SpawnParticles(i32 effectId, Float3 *pos,
         }
     }
 
-    return i >= 400 ? &this->effects[408] : effect;
+    return i >= MAX_NORMAL_EFFECTS ? &this->effects[MAX_EFFECTS] : effect;
 }
 
 #pragma var_order(effect, i)
@@ -576,10 +576,10 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, Float3 *pos,
 
     effect = &this->effects[this->nextIndex];
 
-    for (i = 0; i < 400; i++)
+    for (i = 0; i < MAX_NORMAL_EFFECTS; i++)
     {
         this->nextIndex++;
-        if (this->nextIndex >= 400)
+        if (this->nextIndex >= MAX_NORMAL_EFFECTS)
         {
             this->nextIndex = 0;
         }
@@ -627,16 +627,16 @@ Effect *EffectManager::SpawnMovingParticles(i32 effectId, Float3 *pos,
         }
     }
 
-    return i >= 400 ? &this->effects[408] : effect;
+    return i >= MAX_NORMAL_EFFECTS ? &this->effects[MAX_EFFECTS] : effect;
 }
 
 // FUNCTION: TH07 0x0041c610
-Effect *EffectManager::SpawnEffect(i32 effectId, Float3 *pos, i32 param_3,
-                                   i32 param_4, D3DCOLOR color)
+Effect *EffectManager::SpawnSpecialEffect(i32 effectId, Float3 *pos, i32 effectIdx,
+                                          i32 param_4, D3DCOLOR color)
 {
     Effect *effect;
 
-    effect = &this->effects[param_3 + 400];
+    effect = &this->effects[effectIdx + MAX_NORMAL_EFFECTS];
     effect->is2D = 0;
     effect->inUseFlag = 1;
     effect->effectId = effectId;
@@ -667,7 +667,7 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
     Effect *effect;
 
     effect = arg->effects;
-    arg->activeEffectsCount = 0;
+    arg->activeEffects = 0;
     arg->layerPtrs[0] = &arg->layer0;
     arg->layerPtrs[1] = &arg->layer1;
     arg->layerPtrs[2] = &arg->layer2;
@@ -676,14 +676,14 @@ u32 EffectManager::OnUpdate(EffectManager *arg)
     arg->layer1.next = NULL;
     arg->layer2.next = NULL;
     arg->layer3.next = NULL;
-    for (i = 0; i < 408; i++, effect++)
+    for (i = 0; i < MAX_EFFECTS; i++, effect++)
     {
         if (!effect->inUseFlag)
         {
             continue;
         }
 
-        arg->activeEffectsCount++;
+        arg->activeEffects++;
         if (effect->callback && effect->callback(effect) != 1)
         {
             effect->inUseFlag = 0;
@@ -769,7 +769,7 @@ u32 EffectManager::OnDraw(EffectManager *arg)
 
 #pragma var_order(effect, a, counter, b, g, r, temp)
 // FUNCTION: TH07 0x0041cb80
-i32 EffectManager::UpdateSpecialEffect()
+i32 EffectManager::DrawLayer1Effects()
 {
     int temp;
     f32 r;

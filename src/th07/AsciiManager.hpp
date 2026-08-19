@@ -19,6 +19,8 @@ struct PauseMenu
 };
 C_ASSERT(sizeof(PauseMenu) == 0x194c);
 
+#define RETRY_MENU_SPRITES 5
+
 struct RetryMenu
 {
     i32 OnUpdate();
@@ -26,7 +28,7 @@ struct RetryMenu
 
     i32 curState;
     i32 numFrames;
-    AnmVm menuSprites[6];
+    AnmVm menuSprites[RETRY_MENU_SPRITES + 1];
     AnmVm menuBackground;
 };
 C_ASSERT(sizeof(RetryMenu) == 0x101c);

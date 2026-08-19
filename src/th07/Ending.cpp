@@ -49,7 +49,7 @@ u32 Ending::OnUpdate(Ending *arg)
         {
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
-        for (i = 0; i < 15; i++)
+        for (i = 0; i < MAX_ENDING_SPRITES; i++)
         {
             g_AnmManager->ExecuteScript(&arg->sprites[i]);
         }
@@ -71,7 +71,7 @@ u32 Ending::OnDraw(Ending *arg)
 {
     g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x,
                                  (i32)arg->backgroundPos.y, 640, 480);
-    for (i32 i = 0; i < 15; i++)
+    for (i32 i = 0; i < MAX_ENDING_SPRITES; i++)
     {
         g_AnmManager->Draw(&arg->sprites[i]);
     }
@@ -205,7 +205,7 @@ ZunResult Ending::ParseEndFile()
         }
         if (this->timer3 <= 0)
         {
-            for (i = 0; i < 15; i++)
+            for (i = 0; i < MAX_ENDING_SPRITES; i++)
             {
                 this->sprites[i].pendingInterrupt = 2;
             }
@@ -275,7 +275,7 @@ ZunResult Ending::ParseEndFile()
                 }
                 local_58 = 0;
                 lineDisplayed = 0;
-                for (execOuter = 0; execOuter < 6; execOuter++)
+                for (execOuter = 0; execOuter < ARRAY_SIZE_SIGNED(g_GameManager.clrd); execOuter++)
                 {
                     for (execInner = 0; execInner < 4; execInner++)
                     {
@@ -290,7 +290,7 @@ ZunResult Ending::ParseEndFile()
                     }
                 }
             case 'R':
-                for (j = 0; j < 16; j++)
+                for (j = 0; j < ARRAY_SIZE_SIGNED(this->sprites); j++)
                 {
                     this->sprites[j].anmFileIdx = 0;
                 }
@@ -490,7 +490,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
     }
     g_GameManager.clrd[shotType]
         .difficultyClearedWithoutRetries[g_GameManager.difficulty] = 99;
-    for (i = 0; i < 15; i++)
+    for (i = 0; i < MAX_ENDING_SPRITES; i++)
     {
         g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 1807);
         arg->sprites[i].pos =

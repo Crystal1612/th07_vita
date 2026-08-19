@@ -6,6 +6,7 @@
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
 #include "inttypes.hpp"
+#include "utils.hpp"
 
 // GLOBAL: TH07 0x0049fc88
 static JOYCAPSA g_JoystickCaps;
@@ -413,7 +414,7 @@ void Controller::ResetKeyboard()
     u8 key_states[256];
 
     GetKeyboardState(key_states);
-    for (i32 i = 0; i < 256; i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(key_states); i++)
     {
         key_states[i] = key_states[i] & 0x7f;
     }

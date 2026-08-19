@@ -78,7 +78,7 @@ ZunResult EclManager::Load(const char *path)
         return ZUN_ERROR;
     }
 
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->eclFile->timelinePtr); i++)
     {
         this->eclFile->timelinePtr[i] =
             (EclTimelineInstr *)((i32)this->eclFile->timelinePtr[i] + (i32)this->eclFile);
@@ -665,7 +665,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     i32 i;
 
     memcpy(spellcardName, &instr->args[1], sizeof(spellcardName));
-    for (i = 0; (u32)i < 48; i++)
+    for (i = 0; i < ARRAY_SIZE(spellcardName); i++)
     {
         spellcardName[i] = (u8)spellcardName[i] ^ 0xaa;
     }
@@ -696,7 +696,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
     enemy->bulletRankAmount2Low = 0;
     enemy->bulletRankAmount2High = 0;
     enemy->specialEffect =
-        g_EffectManager.SpawnEffect(25, &enemy->pos, 1, 1, 0xffffffff);
+        g_EffectManager.SpawnSpecialEffect(25, &enemy->pos, 1, 1, 0xffffffff);
     enemy->specialEffect->vm.interpStartTimes[4] = 0;
     enemy->specialEffect->vm.interpEndTimes[4] = enemy->timerCallbackThreshold;
     enemy->specialEffect->vm.easeModes[4] = 0;
@@ -717,7 +717,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
             nameCsum += catk->name[j];
         }
         newCsum = nameCsum;
-        for (j = 0; j < 7; j++)
+        for (j = 0; j < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); j++)
         {
             nameCsum += catk->numSuccessesPerShot[j];
             nameCsum += catk->numAttemptsPerShot[j];
@@ -725,7 +725,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
         }
         if (catk->nameCsum != (u8)nameCsum)
         {
-            for (j = 0; j < 7; j++)
+            for (j = 0; j < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); j++)
             {
                 catk->numSuccessesPerShot[j] = 0;
                 catk->numAttemptsPerShot[j] = 0;
@@ -736,11 +736,11 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
         {
             catk->numAttemptsPerShot[g_GameManager.shotTypeAndCharacter]++;
         }
-        if (catk->numAttemptsPerShot[6] < 9999)
+        if (catk->numAttemptsPerShot[SHOT_COUNT] < 9999)
         {
-            catk->numAttemptsPerShot[6]++;
+            catk->numAttemptsPerShot[SHOT_COUNT]++;
         }
-        for (j = 0; j < 7; j++)
+        for (j = 0; j < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); j++)
         {
             newCsum += catk->numSuccessesPerShot[j];
             newCsum += catk->numAttemptsPerShot[j];
@@ -791,7 +791,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
                         nameCsum += catk->name[i];
                     }
                     newCsum = nameCsum;
-                    for (i = 0; i < 7; i++)
+                    for (i = 0; i < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); i++)
                     {
                         nameCsum += catk->numSuccessesPerShot[i];
                         nameCsum += catk->numAttemptsPerShot[i];
@@ -799,7 +799,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
                     }
                     if (catk->nameCsum != (u8)nameCsum)
                     {
-                        for (i = 0; i < 7; i++)
+                        for (i = 0; i < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); i++)
                         {
                             catk->numSuccessesPerShot[i] = 0;
                             catk->numAttemptsPerShot[i] = 0;
@@ -823,7 +823,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
                     {
                         catk->numSuccessesPerShot[6]++;
                     }
-                    for (i = 0; i < 7; i++)
+                    for (i = 0; i < ARRAY_SIZE_SIGNED(catk->numSuccessesPerShot); i++)
                     {
                         newCsum += catk->numSuccessesPerShot[i];
                         newCsum += catk->numAttemptsPerShot[i];
@@ -835,7 +835,7 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
             }
         }
         g_EnemyManager.spellcardInfo.isActive = 0;
-        for (j = 0; j < 8; j++)
+        for (j = 0; j < ARRAY_SIZE_SIGNED(g_EnemyManager.bosses); j++)
         {
             if (g_EnemyManager.bosses[j] &&
                 g_EnemyManager.bosses[j]->specialEffect != NULL)
@@ -849,10 +849,10 @@ void EclManager::EndSpellcard(Enemy *enemy, EclRawInstr *instr)
     g_Stage.spellCardState = 0;
 }
 
-#pragma var_order(arg, instr, lerpDelta, interpIdx, interp, bulletInstrArgs,                              \
-                  bulletProps, bulletCommand, laserProps, laserInstrArgs, laserIdx, effectInstrArgs,          \
-                  exitAngle, healthIdx, bossIdx, particleVel, numDrops, itemDropIdx,                          \
-                  itemDropPos, numPointItems, pointItemIdx, pointItemPos, unusedEnemyAbs, absSpawnInstrArgs,  \
+#pragma var_order(arg, instr, lerpDelta, interpIdx, interp, bulletInstrArgs,                                 \
+                  bulletProps, bulletCommand, laserProps, laserInstrArgs, laserIdx, effectInstrArgs,         \
+                  exitAngle, healthIdx, bossIdx, particleVel, numDrops, itemDropIdx,                         \
+                  itemDropPos, numPointItems, pointItemIdx, pointItemPos, unusedEnemyAbs, absSpawnInstrArgs, \
                   absEnemySpawnPos, unusedEnemyRel, relSpawnInstrArgs, relEnemySpawnPos, moveVec, unused_e4, \
                   t1, anmDirection, interpIdx2, t2, posModified, interp2)
 // FUNCTION: TH07 0x00410520
@@ -912,7 +912,7 @@ restart:
             enemy->currentContext.eclContextArgs = enemy->savedEclContextArgs;
             g_EclManager.CallEclSub(&enemy->currentContext,
                                     (i16)enemy->periodicCallbackSub);
-            if (enemy->stackDepth < 15)
+            if (enemy->stackDepth < ENEMY_STACK_SIZE)
             {
                 enemy->stackDepth++;
             }
@@ -1173,7 +1173,7 @@ restart:
                 }
                 g_EclManager.CallEclSub(&enemy->currentContext, (i16)arg);
                 enemy->currentContext.eclContextArgs.globalVars = g_GlobalEclVars;
-                if (!enemy->noStackRet && enemy->stackDepth < 15)
+                if (!enemy->noStackRet && enemy->stackDepth < ENEMY_STACK_SIZE)
                 {
                     enemy->stackDepth++;
                 }
@@ -1527,7 +1527,7 @@ restart:
                 break;
             case ECL_SPAWN_EFFECT:
                 effectInstrArgs = instr->args;
-                enemy->effects[enemy->effectsNum] = g_EffectManager.SpawnParticles(
+                enemy->effects[enemy->effectsNum] = g_EffectManager.SpawnEffect(
                     13, &enemy->pos, 1, g_BulletColor[effectInstrArgs->i]);
                 enemy->effects[enemy->effectsNum]->direction = *(Float3 *)&effectInstrArgs[1];
                 enemy->effectDistance = effectInstrArgs[4].f;
@@ -1682,7 +1682,7 @@ restart:
                 }
                 g_EclManager.CallEclSub(&enemy->currentContext,
                                         enemy->interrupts[enemy->runInterrupt]);
-                if (enemy->stackDepth < 15)
+                if (enemy->stackDepth < ENEMY_STACK_SIZE)
                 {
                     enemy->stackDepth = enemy->stackDepth + 1;
                 }
@@ -1746,7 +1746,7 @@ restart:
                 enemy->canDie = instr->args[0].b[0];
                 break;
             case ECL_SPAWN_PARTICLES:
-                g_EffectManager.SpawnParticles(
+                g_EffectManager.SpawnEffect(
                     GET_INT_VALUE(enemy, 0),
                     &enemy->pos,
                     GET_INT_VALUE(enemy, 1),
@@ -2172,7 +2172,7 @@ restart:
                 interp2 = enemy->currentContext.interps;
 
                 Float3 oldPos = enemy->pos;
-                for (interpIdx2 = 0; interpIdx2 < 8; interpIdx2++, interp2++)
+                for (interpIdx2 = 0; interpIdx2 < ARRAY_SIZE_SIGNED(enemy->currentContext.interps); interpIdx2++, interp2++)
                 {
                     if (interp2->fn)
                     {
@@ -2261,7 +2261,7 @@ restart:
             {
                 if (g_Player.bombInfo.isInUse &&
                     g_EnemyManager.spellcardInfo.isActive &&
-                    g_EnemyManager.spellcardInfo.spellcardIdx >= 118)
+                    g_EnemyManager.spellcardInfo.spellcardIdx >= SPELLCARD_EX_BOSS_1)
                 {
                     enemy->invisibleOnBomb = 1;
                     enemy->spellcardDelayTimer = 1;

@@ -252,6 +252,8 @@ struct Bullet
 };
 C_ASSERT(sizeof(Bullet) == 0xd68);
 
+#define MAX_BULLETS 1024
+
 struct BulletManager
 {
     BulletManager()
@@ -288,7 +290,7 @@ struct BulletManager
     void StopBulletMovement();
 
     BulletTypeSprites bulletTypeTemplates[16];
-    Bullet bullets[1025];
+    Bullet bullets[MAX_BULLETS + 1];
     Laser lasers[64];
     i32 bulletCount;
     i32 screenClearTime;

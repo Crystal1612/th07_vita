@@ -106,7 +106,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
 
     // ZUN bloat: i is assigned twice here for some reason
     i = 0;
-    for (bullet = this->bulletsStart, i = 0; i < 1024; i++)
+    for (bullet = this->bulletsStart, i = 0; i < MAX_BULLETS; i++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -118,7 +118,7 @@ i32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 x,
             bullet = this->bullets;
         }
     }
-    if (i >= 1024)
+    if (i >= MAX_BULLETS)
     {
         return 1;
     }
@@ -414,7 +414,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
     Float3 local_10;
 
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 1024; i++, bullet++)
+    for (i = 0; i < MAX_BULLETS; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE || bullet->state == BULLET_DESPAWN)
         {
@@ -438,7 +438,7 @@ void BulletManager::RemoveAllBullets(i32 param_1)
         }
     }
     laser = this->lasers;
-    for (i = 0; i < 64; i++, laser++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->lasers); i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -500,7 +500,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
     local_8 = 2000;
     unused_10 = 0;
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 1024; i++, bullet++)
+    for (i = 0; i < MAX_BULLETS; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -522,7 +522,7 @@ i32 BulletManager::DespawnBullets(i32 param_1, i32 turnIntoItem)
         bullet->state = BULLET_DESPAWN;
     }
     laser = this->lasers;
-    for (i = 0; i < 64; i++, laser++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->lasers); i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -564,7 +564,7 @@ void BulletManager::RemoveBulletsInRadius(Float3 *centerPos, f32 radius)
 
     bullet = g_BulletManager.bullets;
     radius *= radius;
-    for (i = 0; i < 1024; i++, bullet++)
+    for (i = 0; i < MAX_BULLETS; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE || bullet->state == BULLET_DESPAWN)
         {
@@ -591,7 +591,7 @@ i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
     i32 x;
     i32 y;
 
-    if (g_BulletManager.bulletCount >= 1024)
+    if (g_BulletManager.bulletCount >= MAX_BULLETS)
     {
         return 0;
     }
@@ -629,7 +629,7 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         return laser;
     }
 
-    for (i = 0; i < 64; i++, laser++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->lasers); i++, laser++)
     {
         if (laser->inUse)
         {
@@ -894,7 +894,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
     arg->bulletsPtrs[1] = NULL;
     arg->bulletsPtrs[0] = NULL;
 
-    for (i = 0; i < 1024; i++)
+    for (i = 0; i < MAX_BULLETS; i++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {
@@ -1069,14 +1069,14 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         blockIdx--;
         if (blockIdx < 0)
         {
-            blockIdx = 1023;
-            bullet += 1024;
+            blockIdx = MAX_BULLETS - 1;
+            bullet += MAX_BULLETS;
         }
         bullet--;
     }
 
     laser = arg->lasers;
-    for (i = 0; i < 64; i++, laser++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->lasers); i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -1259,7 +1259,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
     i32 i;
 
     laser = arg->lasers;
-    for (i = 0; i < 64; i++, laser++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->lasers); i++, laser++)
     {
         if (!laser->inUse)
         {
@@ -1299,7 +1299,7 @@ u32 BulletManager::OnDraw(BulletManager *arg)
         }
     }
     g_ItemManager.OnDraw();
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->bulletsPtrs); i++)
     {
         bullet = arg->bulletsPtrs[i];
         while (bullet)
@@ -1479,7 +1479,7 @@ void BulletManager::StopBulletMovement()
     i32 i;
 
     bullet = g_BulletManager.bullets;
-    for (i = 0; i < 1024; i++, bullet++)
+    for (i = 0; i < MAX_BULLETS; i++, bullet++)
     {
         if (bullet->state == BULLET_INACTIVE)
         {

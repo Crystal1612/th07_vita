@@ -469,23 +469,23 @@ ZunResult Gui::ActualAddedCallback()
                 .y,
             this->impl->stageTransitionSnapshotVm.sprite->widthPx,
             this->impl->stageTransitionSnapshotVm.sprite->heightPx);
-        for (i = 0; i < 14; i++)
+        for (i = 0; i < TRANSITION_QUAD_ROWS; i++)
         {
-            for (j = 0; j < 12; j++)
+            for (j = 0; j < TRANSITION_QUAD_COLS; j++)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(
-                    &this->impl->transitionQuads[i * 12 + j],
+                    &this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j],
                     (i + j & 1) + 1830);
-                this->impl->transitionQuads[i * 12 + j].intVars2[0] =
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].intVars2[0] =
                     i + j * 2;
-                this->impl->transitionQuads[i * 12 + j].pos.x =
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].pos.x =
                     (f32)j * 32.0f - 0.5f + 16.0f;
-                this->impl->transitionQuads[i * 12 + j].pos.y =
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].pos.y =
                     (f32)i * 32.0f - 0.5f + 16.0f;
-                this->impl->transitionQuads[i * 12 + j].pos.z = 0.0f;
-                this->impl->transitionQuads[i * 12 + j].uvScrollPos.x =
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].pos.z = 0.0f;
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].uvScrollPos.x =
                     (f32)j * 32.0f / 512.0f;
-                this->impl->transitionQuads[i * 12 + j].uvScrollPos.y =
+                this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].uvScrollPos.y =
                     (f32)i * 32.0f / 512.0f;
             }
         }
@@ -634,7 +634,7 @@ ZunResult Gui::ActualAddedCallback()
     }
     if (g_Supervisor.curState == 3 || g_Supervisor.curState == 11 || g_Supervisor.curState == 12 ? 0 : 1)
     {
-        for (k = 0; k < 33; k++)
+        for (k = 0; k < ARRAY_SIZE_SIGNED(this->impl->vms0); k++)
         {
             g_AnmManager->SetAnmIdxAndExecuteScript(
                 &this->impl->vms0[k], k + 1536);
@@ -713,8 +713,8 @@ ZunResult Gui::LoadMsg(const char *filename)
     this->impl->msg.curInstr = NULL;
     for (i = 0; i < this->impl->msg.msgFile->numInstrs; i++)
     {
-        (&this->impl->msg.msgFile->instrs)[i] =
-            (MsgRawInstr *)((i32)(&this->impl->msg.msgFile->instrs)[i] + (i32) & this->impl->msg.msgFile->numInstrs);
+        this->impl->msg.msgFile->instrs[i] =
+            (MsgRawInstr *)((i32)this->impl->msg.msgFile->instrs[i] + (i32)this->impl->msg.msgFile);
     }
     return ZUN_SUCCESS;
 }
@@ -745,7 +745,7 @@ void GuiImpl::MsgRead(i32 msgIdx)
     memset(&this->msg, 0, sizeof(GuiMsgVm));
     this->msg.currentMsgIdx = msgIdx;
     this->msg.msgFile = tmpMsgFile;
-    this->msg.curInstr = (&this->msg.msgFile->instrs)[msgIdx];
+    this->msg.curInstr = this->msg.msgFile->instrs[msgIdx];
     this->msg.dialogueLines[0].anmFileIdx = -1;
     this->msg.dialogueLines[1].anmFileIdx = -1;
     this->msg.fontSize = 15;

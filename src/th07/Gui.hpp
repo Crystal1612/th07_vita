@@ -3,6 +3,9 @@
 #include "AnmManager.hpp"
 #include "ZunResult.hpp"
 
+#define TRANSITION_QUAD_ROWS 14
+#define TRANSITION_QUAD_COLS 12
+
 typedef enum GuiDisplayArg
 {
     GUI_DISPLAY_HIDDEN = 0,
@@ -81,7 +84,7 @@ struct MsgRawInstr
 struct MsgRawHeader
 {
     i32 numInstrs;
-    MsgRawInstr *instrs;
+    MsgRawInstr *instrs[1];
 };
 
 struct GuiFormattedText
@@ -138,7 +141,7 @@ struct GuiImpl
     AnmVm stageTransitionSnapshotVm;
     AnmVm captureBonusVm;
     AnmVm spellcardBonusIndicator;
-    AnmVm transitionQuads[168];
+    AnmVm transitionQuads[TRANSITION_QUAD_ROWS * TRANSITION_QUAD_COLS];
     i32 activeTransitionQuads;
     GuiMsgVm msg;
     // pad 3

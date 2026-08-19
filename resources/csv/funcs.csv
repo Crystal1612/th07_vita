@@ -143,12 +143,12 @@ address|name|type
 0041bfd0|EffectManager::UpdateBurstEaseOut30Frames|function
 0041c100|EffectManager::UpdateAttachToCamera|function
 0041c1b0|EffectManager::UpdateNoOp|function
-0041c1c0|EffectManager::SpawnParticles|function
+0041c1c0|EffectManager::SpawnEffect|function
 0041c400|EffectManager::SpawnMovingParticles|function
-0041c610|EffectManager::SpawnEffect|function
+0041c610|EffectManager::SpawnSpecialEffect|function
 0041c790|EffectManager::OnUpdate|function
 0041ca10|EffectManager::OnDraw|function
-0041cb80|EffectManager::UpdateSpecialEffect|function
+0041cb80|EffectManager::DrawLayer1Effects|function
 0041cde0|EffectManager::AddedCallback|function
 0041d050|EffectManager::DeletedCallback|function
 0041d0a0|EffectManager::RegisterChain|function
