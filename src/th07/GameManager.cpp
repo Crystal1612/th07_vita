@@ -446,7 +446,7 @@ ZunResult ResultScreen::ParseScores()
     if (!scoreDat)
     {
         // STRING: TH07 0x00498090
-        g_GameErrorContext.Log("error : ƒXƒRƒAƒtƒ@ƒCƒ‹‚Ì“Ç‚İæ‚è‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½Xï¿½Rï¿½Aï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ì“Ç‚İï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
@@ -523,7 +523,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         }
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : ƒvƒŒƒCƒ„[‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+            g_GameErrorContext.Log("error : ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
             return ZUN_ERROR;
         }
         if (!g_GameManager.replay)
@@ -682,7 +682,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
             // STRING: TH07 0x00498064
-            g_GameErrorContext.Log("error : ƒvƒŒƒCƒ„[‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+            g_GameErrorContext.Log("error : ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
             return ZUN_ERROR;
         }
     }
@@ -736,14 +736,14 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     if (Stage::RegisterChain(arg->currentStage) != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00498038
-        g_GameErrorContext.Log("error : ”wŒiƒf[ƒ^‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½wï¿½iï¿½fï¿½[ï¿½^ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
     if (BulletManager::RegisterChain("data/etama.anm") != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00498010
-        g_GameErrorContext.Log("error : “G’e‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½Gï¿½eï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
@@ -752,28 +752,28 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             g_EnemyAnmStageFiles[arg->currentStage].anmPath2) != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00497f4c
-        g_GameErrorContext.Log("error : “G‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½Gï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
     if (g_EclManager.Load(g_EclPaths[arg->currentStage]) != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00497e84
-        g_GameErrorContext.Log("error : “G“ª”]‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½Gï¿½ï¿½ï¿½]ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
     if (EffectManager::RegisterChain() != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00497e58
-        g_GameErrorContext.Log("error : ƒGƒtƒFƒNƒg‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : ï¿½Gï¿½tï¿½Fï¿½Nï¿½gï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 
     if (Gui::RegisterChain() != ZUN_SUCCESS)
     {
         // STRING: TH07 0x00497e30
-        g_GameErrorContext.Log("error : 2D•\¦‚Ì‰Šú‰»‚É¸”s‚µ‚Ü‚µ‚½\r\n");
+        g_GameErrorContext.Log("error : 2Dï¿½\ï¿½ï¿½ï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
 

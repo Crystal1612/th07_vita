@@ -12,6 +12,10 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
+//i'll macro it fror multiplayer
+// #define THE_2_5_6_0_SPRITE_LIMIT 2560
+#define THE_2_5_6_0_SPRITE_LIMIT 5120
+
 typedef enum AnmVarId
 {
     ANM_VAR_INT1_1 = 10000,
@@ -616,15 +620,18 @@ struct AnmManager
     u32 flushesThisFrame;
     Float2 offset;
     D3DXMATRIX matrix;
-    struct AnmLoadedSprite sprites[2560];
+    struct AnmLoadedSprite sprites[THE_2_5_6_0_SPRITE_LIMIT];
     struct AnmVm vm;
     struct IDirect3DTexture8 *textures[264];
     void *imageDataArray[256];
     char *textureNames[264];
     i32 loadedSpriteCount;
-    struct AnmRawInstr *scripts[2560];
-    i32 spriteIndices[2560];
-    struct AnmEntry anmFiles[50];
+    struct AnmRawInstr *scripts[THE_2_5_6_0_SPRITE_LIMIT];
+    i32 spriteIndices[THE_2_5_6_0_SPRITE_LIMIT];
+
+    //multiplayer, from 50 into 150
+    struct AnmEntry anmFiles[150];
+
     struct IDirect3DSurface8 *surfaces[32];
     struct IDirect3DSurface8 *surfacesBis[32];
     struct ZunImageInfo surfaceSourceInfo[32];
@@ -653,5 +660,5 @@ struct AnmManager
     i32 screenshotDstWidth;
     i32 screenshotDstHeight;
 };
-C_ASSERT(sizeof(AnmManager) == 0x17e560);
+// C_ASSERT(sizeof(AnmManager) == 0x17e560);
 extern AnmManager *g_AnmManager;

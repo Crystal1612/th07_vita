@@ -169,7 +169,7 @@ struct PlayerBulletTimer
 
 struct Player
 {
-    static ZunResult RegisteringChain(Player *mgr, u32 param_1);
+    static ZunResult RegisteringChain(Player *mgr, u32 param_1, u8 playerType);
     static ZunResult RegisterChain(u32 param_1);
     static void CutChain();
 
@@ -312,6 +312,12 @@ struct Player
     // multiplayer
     u8 playerType;
     u8 playerEffectAttach;
+    u8 character;
+    u8 shotType;
+    u8 shotTypeAndCharacter;
+    // sprite
+    i32 anmFilePlayer;
+    i32 anmOffsetPlayer;
     // button
     u32 buttonShoot;
     u32 buttonBomb;

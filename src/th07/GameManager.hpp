@@ -273,6 +273,14 @@ struct GameManager
     u8 character;
     u8 shotType;
     u8 shotTypeAndCharacter;
+
+    u8 character2;
+    u8 shotType2;
+    u8 shotTypeAndCharacter2;
+
+    u8 character3;
+    u8 shotType3;
+    u8 shotTypeAndCharacter3;
     union {
         u32 flags;
         struct
@@ -310,5 +318,5 @@ struct GameManager
     Rank rank;
     i32 subrank;
 };
-C_ASSERT(sizeof(GameManager) == 0x9644);
+// C_ASSERT(sizeof(GameManager) == 0x9644);
 extern GameManager g_GameManager;

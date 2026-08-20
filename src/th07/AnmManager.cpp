@@ -48,7 +48,7 @@ AnmManager::AnmManager()
 {
     memset(this, 0, sizeof(AnmManager));
 
-    for (i32 i = 0; i < 2560; i++)
+    for (i32 i = 0; i < THE_2_5_6_0_SPRITE_LIMIT; i++)
     {
         this->sprites[i].sourceFileIndex = -1;
     }
@@ -309,7 +309,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
         surfaceDesc.Format != D3DFMT_A1R5G5B5)
     {
         // STRING: TH07 0x00495cb8
-        g_GameErrorContext.Fatal("error : ƒCƒ[ƒW‚ªƒ¿‚ğ‚Á‚Ä‚¢‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Fatal("error : ï¿½Cï¿½ï¿½ï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         goto err;
     }
 
@@ -408,7 +408,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     if (!entry)
     {
         // STRING: TH07 0x00495c7c
-        g_GameErrorContext.Fatal("ƒAƒjƒ‚ª“Ç‚İ‚ß‚Ü‚¹‚ñBƒf[ƒ^‚ª¸‚í‚ê‚Ä‚é‚©‰ó‚ê‚Ä‚¢‚Ü‚·\r\n");
+        g_GameErrorContext.Fatal("ï¿½Aï¿½jï¿½ï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚Ü‚ï¿½ï¿½ï¿½Bï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
         return ZUN_ERROR;
     }
     while (true)
@@ -449,13 +449,14 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     id = 0;
     if (!rawEntry)
     {
-        g_GameErrorContext.Fatal("ƒAƒjƒ‚ª“Ç‚İ‚ß‚Ü‚¹‚ñBƒf[ƒ^‚ª¸‚í‚ê‚Ä‚é‚©‰ó‚ê‚Ä‚¢‚Ü‚·\r\n");
+        g_GameErrorContext.Fatal("ï¿½Aï¿½jï¿½ï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚Ü‚ï¿½ï¿½ï¿½Bï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
         return ZUN_ERROR;
     }
-    if (textureIdx >= 50)
+    // multiplayer 50 into 150
+    if (textureIdx >= 150)
     {
         // STRING: TH07 0x00495c5c
-        g_GameErrorContext.Fatal("ƒeƒNƒXƒ`ƒƒŠi”[æ‚ª‘«‚è‚Ü‚¹‚ñ\r\n");
+        g_GameErrorContext.Fatal("ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½iï¿½[ï¿½æ‚ªï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\r\n");
         return ZUN_ERROR;
     }
     ReleaseAnm(textureIdx);
@@ -463,7 +464,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     if (data->version != 2)
     {
         // STRING: TH07 0x00495c3c
-        g_GameErrorContext.Fatal("ƒAƒjƒ‚Ìƒo[ƒWƒ‡ƒ“‚ªˆá‚¢‚Ü‚·\r\n");
+        g_GameErrorContext.Fatal("ï¿½Aï¿½jï¿½ï¿½ï¿½Ìƒoï¿½[ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á‚¢ï¿½Ü‚ï¿½\r\n");
         return ZUN_ERROR;
     }
     data->textureIdx = textureIdx;
@@ -482,7 +483,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                 ZUN_SUCCESS)
             {
                 // STRING: TH07 0x00495bf8
-                g_GameErrorContext.Fatal("ƒeƒNƒXƒ`ƒƒ %s ‚ª“Ç‚İ‚ß‚Ü‚¹‚ñBƒf[ƒ^‚ª¸‚í‚ê‚Ä‚é‚©‰ó‚ê‚Ä‚¢‚Ü‚·\r\n", name);
+                g_GameErrorContext.Fatal("ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ %s ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚Ü‚ï¿½ï¿½ï¿½Bï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -492,7 +493,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
             if (LoadTextureAlphaChannel(data->textureIdx, name, data->format,
                                         data->color_key) != ZUN_SUCCESS)
             {
-                g_GameErrorContext.Fatal("ƒeƒNƒXƒ`ƒƒ %s ‚ª“Ç‚İ‚ß‚Ü‚¹‚ñBƒf[ƒ^‚ª¸‚í‚ê‚Ä‚é‚©‰ó‚ê‚Ä‚¢‚Ü‚·\r\n", name);
+                g_GameErrorContext.Fatal("ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ %s ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚Ü‚ï¿½ï¿½ï¿½Bï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n", name);
                 return ZUN_ERROR;
             }
         }
@@ -505,7 +506,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                 data->format) != ZUN_SUCCESS)
         {
             // STRING: TH07 0x00495bb8
-            g_GameErrorContext.Fatal("ƒeƒNƒXƒ`ƒƒ‚ª“Ç‚İ‚ß‚Ü‚¹‚ñBƒf[ƒ^‚ª¸‚í‚ê‚Ä‚é‚©‰ó‚ê‚Ä‚¢‚Ü‚·\r\n");
+            g_GameErrorContext.Fatal("ï¿½eï¿½Nï¿½Xï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚Ü‚ï¿½ï¿½ï¿½Bï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚é‚©ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
             return ZUN_ERROR;
         }
     }
@@ -535,20 +536,20 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             id = rawSprite->id;
         }
-        if (rawSprite->id + spriteIdxOffset >= 2560)
+        if (rawSprite->id + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
         {
             // STRING: TH07 0x00495b80
-            g_GameErrorContext.Fatal("ƒXƒvƒ‰ƒCƒg‚ªŠi”[‚Å‚«‚Ü‚¹‚ñBƒe[ƒuƒ‹‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·\r\n");
+            g_GameErrorContext.Fatal("ï¿½Xï¿½vï¿½ï¿½ï¿½Cï¿½gï¿½ï¿½ï¿½iï¿½[ï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½Bï¿½eï¿½[ï¿½uï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
             return ZUN_ERROR;
         }
         LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
     }
     for (i = 0; i < data->numScripts; i++, curSprite += 2)
     {
-        if (*curSprite + spriteIdxOffset >= 2560)
+        if (*curSprite + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
         {
             // STRING: TH07 0x00495b4c
-            g_GameErrorContext.Fatal("ƒAƒjƒ‚ªŠi”[‚Å‚«‚Ü‚¹‚ñBƒe[ƒuƒ‹‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·\r\n");
+            g_GameErrorContext.Fatal("ï¿½Aï¿½jï¿½ï¿½ï¿½ï¿½ï¿½iï¿½[ï¿½Å‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½Bï¿½eï¿½[ï¿½uï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½\r\n");
             return ZUN_ERROR;
         }
         if (id < *curSprite)
@@ -575,7 +576,8 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     i32 spriteIdxOffset;
     i32 *spriteIdx;
 
-    if (anmIdx < 0 || (u32)anmIdx >= 50)
+    // multiplayer 50 into 150
+    if (anmIdx < 0 || (u32)anmIdx >= 150)
     {
         return;
     }
@@ -2414,7 +2416,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
     if (!data)
     {
         // STRING: TH07 0x00495b30
-        g_GameErrorContext.Fatal("%s‚ª“Ç‚İ‚ß‚È‚¢‚Å‚·B\r\n", path);
+        g_GameErrorContext.Fatal("%sï¿½ï¿½ï¿½Ç‚İï¿½ï¿½ß‚È‚ï¿½ï¿½Å‚ï¿½ï¿½B\r\n", path);
         return ZUN_ERROR;
     }
     if (g_Supervisor.d3dDevice->CreateImageSurface(

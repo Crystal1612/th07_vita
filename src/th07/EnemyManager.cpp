@@ -1432,7 +1432,7 @@ i32 EnemyManager::CalculateDamageAndGetCherry(Enemy *enemy, Player * player, i32
             }
 
             // ABSOLUTELY no reason for this to be a switch statement
-            switch (g_GameManager.shotTypeAndCharacter)
+            switch (player->shotTypeAndCharacter)
             {
             default:
                 break;
@@ -1520,7 +1520,7 @@ i32 EnemyManager::CalculateDamageAndGetCherry(Enemy *enemy, Player * player, i32
             player->positionOfLastEnemyHit = enemy->pos;
         }
 
-        if (g_GameManager.character == CHAR_SAKUYA)
+        if (player->character == CHAR_SAKUYA)
         {
             diffToPlayer = player->sakuyaTargetPosition - player->positionCenter;
             angle = atan2f(enemy->pos.y - player->positionCenter.y,
@@ -1544,7 +1544,7 @@ i32 EnemyManager::CalculateDamageAndGetCherry(Enemy *enemy, Player * player, i32
         {
             player->positionOfLastEnemyHit = enemy->pos;
         }
-        if (g_GameManager.character == CHAR_SAKUYA &&
+        if (player->character == CHAR_SAKUYA &&
             player->sakuyaTargetPosition.y < -900.0f)
         {
             angle = atan2f(enemy->pos.y - player->positionCenter.y,
