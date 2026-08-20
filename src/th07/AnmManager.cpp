@@ -619,7 +619,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 // FUNCTION: TH07 0x0044e6f0
 void AnmManager::ReleaseTexture(i32 textureIdx)
 {
-    if (textureIdx < 0 || (u32)textureIdx >= 264)
+    if (textureIdx < 0 || textureIdx >= ARRAY_SIZE(this->textures))
     {
         return;
     }
@@ -714,11 +714,11 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         this->currentBlendMode = vm->blendMode;
         if (!this->currentBlendMode)
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         }
         else
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 2);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
@@ -762,11 +762,11 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         this->currentZWriteDisable = vm->zWriteDisable;
         if (!this->currentZWriteDisable)
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 1);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
         }
         else
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
         }
     }
     if ((u32)this->currentCameraMode != vm->cameraMode)
@@ -795,11 +795,11 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         this->currentBlendMode = vm->blendMode;
         if (!this->currentBlendMode)
         {
-            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 6);
+            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         }
         else
         {
-            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 2);
+            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
         }
     }
     if (!g_Supervisor.cfg.disableZBuffer &&
@@ -808,11 +808,11 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         this->currentZWriteDisable = vm->zWriteDisable;
         if (!this->currentZWriteDisable)
         {
-            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 1);
+            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
         }
         else
         {
-            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
         }
     }
     this->renderStateChangesThisFrame++;
@@ -964,8 +964,8 @@ void AnmManager::Flush()
         return;
     }
 
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 0);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
                                             D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(
@@ -1476,7 +1476,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     SetRenderStateForVm(vm);
     world.m[3][2] = vm->pos.z;
 
-    g_Supervisor.d3dDevice->SetTransform((D3DTRANSFORMSTATETYPE)256, &world);
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_WORLD, &world);
 
     if (this->currentSprite != vm->sprite)
     {
@@ -1507,8 +1507,8 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
                                                     D3DFVF_DIFFUSE |
                                                     D3DFVF_XYZ);
         }
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
         this->currentVertexShader = 2;
     }
 
@@ -2799,7 +2799,8 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
 
     if (this->currentVertexShader != 3)
     {
-        g_Supervisor.d3dDevice->SetVertexShader(0x144);
+        g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
+                                                D3DFVF_XYZRHW);
         this->currentVertexShader = 3;
     }
 

@@ -491,7 +491,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
         .difficultyClearedWithoutRetries[g_GameManager.difficulty] = 99;
     for (i = 0; i < MAX_ENDING_SPRITES; i++)
     {
-        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 1807);
+        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + ANM_SCRIPT_TEXT_ENDING);
         arg->sprites[i].pos =
             Float3(64.0f, (f32)i * 16.0f + 392.0f, 0.0f);
     }
@@ -515,7 +515,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
 // FUNCTION: TH07 0x0041e790
 ZunResult Ending::DeletedCallback(Ending *arg)
 {
-    g_AnmManager->ReleaseAnm(49);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAFF);
     g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
     g_AnmManager->ReleaseSurface(0);
     ZunMemory::Free(arg->endFileData);

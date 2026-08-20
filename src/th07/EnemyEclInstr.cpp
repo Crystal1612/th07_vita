@@ -439,8 +439,8 @@ void EnemyEclInstr::ExInsReflectBulletsFromLasers(Enemy *enemy,
                         bullet->sprites = g_BulletManager.bulletTypeTemplates[5];
                         g_AnmManager->SetActiveSprite(
                             &bullet->sprites.spriteBullet,
-                            (i32)bullet->sprites.spriteBullet.activeSpriteIdx +
-                                (i32)bullet->spriteOffset);
+                            bullet->sprites.spriteBullet.activeSpriteIdx +
+                                bullet->spriteOffset);
                     }
                 }
             }
@@ -572,10 +572,10 @@ void EnemyEclInstr::ExInsYoumuSetGameSpeed(Enemy *enemy, EclRawInstr *instr)
         bullet->velocity *= g_Supervisor.effectiveFramerateMultiplier;
         bullet->sprites.spriteBullet.baseSpriteIdx =
             bullet->sprites.spriteBullet.activeSpriteIdx;
-        if (bullet->sprites.spriteBullet.activeSpriteIdx >= 608 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx <= 623)
+        if (bullet->sprites.spriteBullet.activeSpriteIdx >= ANM_SPRITE_BULLETS_ARROWHEAD &&
+            bullet->sprites.spriteBullet.activeSpriteIdx <= ANM_SPRITE_BULLETS_ARROWHEAD_WHITE)
         {
-            g_AnmManager->SetActiveSprite(&bullet->sprites.spriteBullet, 623);
+            g_AnmManager->SetActiveSprite(&bullet->sprites.spriteBullet, ANM_SPRITE_BULLETS_ARROWHEAD_WHITE);
         }
     }
 }
@@ -598,8 +598,8 @@ void EnemyEclInstr::ExInsYoumuRestoreGameSpeed(Enemy *enemy, EclRawInstr *instr)
         }
 
         bullet->velocity *= fps;
-        if (bullet->sprites.spriteBullet.activeSpriteIdx >= 608 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx <= 623)
+        if (bullet->sprites.spriteBullet.activeSpriteIdx >= ANM_SPRITE_BULLETS_ARROWHEAD &&
+            bullet->sprites.spriteBullet.activeSpriteIdx <= ANM_SPRITE_BULLETS_ARROWHEAD_WHITE)
         {
             g_AnmManager->SetActiveSprite(
                 &bullet->sprites.spriteBullet,
@@ -768,8 +768,8 @@ void EnemyEclInstr::ExInsYuyukoTransformButterflyBullets(Enemy *enemy,
             continue;
         }
         if (bullet->state2 == 0 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx >= 632 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx <= 639)
+            bullet->sprites.spriteBullet.activeSpriteIdx >= ANM_SPRITE_BULLETS_BUTTERFLY &&
+            bullet->sprites.spriteBullet.activeSpriteIdx <= ANM_SPRITE_BULLETS_BUTTERFLY_WHITE)
         {
             bulletProps.pos = bullet->pos;
             bulletProps.sprite = 0;
@@ -808,7 +808,7 @@ void EnemyEclInstr::ExInsYuyukoButterflySpawnEnemy(Enemy *enemy,
         }
 
         if (bullet->state2 == 0 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx == 636)
+            bullet->sprites.spriteBullet.activeSpriteIdx == ANM_SPRITE_BULLETS_BUTTERFLY_LBLUE)
         {
             args.floatVars1[0] = bullet->angle;
             args.floatVars1[7] = angleOffset;
@@ -817,8 +817,8 @@ void EnemyEclInstr::ExInsYuyukoButterflySpawnEnemy(Enemy *enemy,
                                         &bullet->pos, 1, -2, 10, &args);
             bullet->Initialize();
         }
-        else if (bullet->sprites.spriteBullet.activeSpriteIdx >= 632 &&
-                 bullet->sprites.spriteBullet.activeSpriteIdx <= 639)
+        else if (bullet->sprites.spriteBullet.activeSpriteIdx >= ANM_SPRITE_BULLETS_BUTTERFLY &&
+                 bullet->sprites.spriteBullet.activeSpriteIdx <= ANM_SPRITE_BULLETS_BUTTERFLY_WHITE)
         {
             bullet->Initialize();
         }
@@ -841,7 +841,7 @@ void EnemyEclInstr::ExInsYuyukoCountButterflyBullets(Enemy *enemy,
             continue;
         }
         if (bullet->state2 == 0 &&
-            bullet->sprites.spriteBullet.activeSpriteIdx == 636)
+            bullet->sprites.spriteBullet.activeSpriteIdx == ANM_SPRITE_BULLETS_BUTTERFLY_LBLUE)
         {
             enemy->currentContext.eclContextArgs.intVars1[0]++;
         }

@@ -73,7 +73,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     {
         if (arg->vm.anmFileIdx == 0)
         {
-            g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm, 7);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm, ANM_SCRIPT_ASCII_DEMO_MARKER);
         }
         g_AnmManager->ExecuteScript(&arg->vm);
     }
@@ -108,8 +108,8 @@ u32 AsciiManager::OnDrawPopups(AsciiManager *arg)
 // FUNCTION: TH07 0x00401a00
 void AsciiManager::InitializeVms()
 {
-    memset(&this->vm1, 0, sizeof(AnmVm));
-    memset(&this->vm0, 0, sizeof(AnmVm));
+    memset(&this->largeTextVm, 0, sizeof(AnmVm));
+    memset(&this->smallScorePopupVm, 0, sizeof(AnmVm));
     memset(&this->strings, 0, sizeof(this->strings));
     memset(&this->pauseMenu, 0, sizeof(PauseMenu));
     memset(&this->retryMenu, 0, sizeof(RetryMenu));
@@ -123,10 +123,10 @@ void AsciiManager::InitializeVms()
     this->color = 0xffffffff;
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
-    this->vm1.anchor = 3;
-    g_AnmManager->InitializeAndSetActiveSprite(&this->vm1, 0);
-    g_AnmManager->InitializeAndSetActiveSprite(&this->vm0, 32);
-    this->vm1.pos.z = 0.1f;
+    this->largeTextVm.anchor = 3;
+    g_AnmManager->InitializeAndSetActiveSprite(&this->largeTextVm, ANM_SPRITE_ASCII_LARGE_FONT);
+    g_AnmManager->InitializeAndSetActiveSprite(&this->smallScorePopupVm, ANM_SPRITE_ASCII_SMALL_SCORE);
+    this->largeTextVm.pos.z = 0.1f;
     this->isSelected = 0;
     this->fontSpacing = 14;
     this->SetFadeState(this->uiFadeState);
@@ -135,13 +135,13 @@ void AsciiManager::InitializeVms()
 // FUNCTION: TH07 0x00401ba0
 void AsciiManager::InitializeOtherVms()
 {
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryGauge, ANM_OFFSET_CHERRY_GAUGE);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryDigit, ANM_OFFSET_CHERRY_DIGIT);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryBorderActive, ANM_OFFSET_CHERRY_BORDER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[0], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[1], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[2], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[3], ANM_OFFSET_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryGauge, ANM_SCRIPT_ASCII_CHERRY_GAUGE);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryDigit, ANM_SCRIPT_ASCII_DIGIT);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryBorderActive, ANM_SCRIPT_ASCII_CHERRY_BORDER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[0], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[1], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[2], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[3], ANM_SCRIPT_ASCII_BOSS_MARKER);
 }
 
 // FUNCTION: TH07 0x00401d70
@@ -166,10 +166,10 @@ ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
 // FUNCTION: TH07 0x00401de0
 ZunResult AsciiManager::DeletedCallback(AsciiManager *arg)
 {
-    g_AnmManager->ReleaseAnm(1);
-    g_AnmManager->ReleaseAnm(2);
-    g_AnmManager->ReleaseAnm(4);
-    g_AnmManager->ReleaseAnm(3);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_0);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_1);
+    g_AnmManager->ReleaseAnm(ANM_FILE_CAPTURE);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_2);
     return ZUN_SUCCESS;
 }
 
@@ -269,14 +269,14 @@ void AsciiManager::DrawStrings()
 
     guiString = 1;
     string = this->strings;
-    this->vm0.visible = 1;
-    this->vm0.anchor = 3;
+    this->smallScorePopupVm.visible = 1;
+    this->smallScorePopupVm.anchor = 3;
     for (i = 0; i < this->numStrings; i++, string++)
     {
-        this->vm0.pos = *(Float3 *)&string->pos;
+        this->smallScorePopupVm.pos = *(Float3 *)&string->pos;
         text = string->text;
-        this->vm0.scale.x = string->scale.x;
-        this->vm0.scale.y = string->scale.y;
+        this->smallScorePopupVm.scale.x = string->scale.x;
+        this->smallScorePopupVm.scale.y = string->scale.y;
         charWidth = (f32)this->fontSpacing * string->scale.x;
         if (guiString != string->isGui)
         {
@@ -303,27 +303,27 @@ void AsciiManager::DrawStrings()
         {
             if (*(u8 *)text == '\n')
             {
-                this->vm0.pos.y += 16.0f * string->scale.y;
-                this->vm0.pos.x = string->pos.x;
+                this->smallScorePopupVm.pos.y += 16.0f * string->scale.y;
+                this->smallScorePopupVm.pos.x = string->pos.x;
             }
             else if (*(u8 *)text == ' ')
             {
-                this->vm0.pos.x += charWidth;
+                this->smallScorePopupVm.pos.x += charWidth;
             }
             else
             {
                 if (!string->isSelected)
                 {
-                    this->vm0.sprite = &g_AnmManager->sprites[(u8)*text - 1];
-                    this->vm0.color.color = string->color;
+                    this->smallScorePopupVm.sprite = &g_AnmManager->sprites[(u8)*text - 1];
+                    this->smallScorePopupVm.color.color = string->color;
                 }
                 else
                 {
-                    this->vm0.sprite = &g_AnmManager->sprites[(u8)*text + 124];
-                    this->vm0.color.color = 0xffffffff;
+                    this->smallScorePopupVm.sprite = &g_AnmManager->sprites[(u8)*text + 124];
+                    this->smallScorePopupVm.color.color = 0xffffffff;
                 }
-                g_AnmManager->DrawNoRotation(&this->vm0);
-                this->vm0.pos.x += charWidth;
+                g_AnmManager->DrawNoRotation(&this->smallScorePopupVm);
+                this->smallScorePopupVm.pos.x += charWidth;
             }
             text++;
         }
@@ -493,14 +493,15 @@ i32 PauseMenu::OnUpdate()
     case PAUSE_MENU_STATE_INIT:
         for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
         {
-            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + ANM_OFFSET_RETRY_MENU);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + ANM_SCRIPT_ASCII_PAUSE_MENU);
         }
         for (i = 0; i < 4; i++)
         {
             this->menuSprites[i].pendingInterrupt = 1;
         }
-        g_AnmManager->SetActiveSprite(this->menuSprites + 7,
-                                      g_GameManager.difficulty + 269);
+        g_AnmManager->SetActiveSprite(&this->menuSprites[7],
+                                      g_GameManager.difficulty +
+                                          ANM_SPRITE_ASCII_PAUSE_MENU_DIFFICULTY);
         if (!g_GameManager.practice)
         {
             this->menuSprites[8].SetInvisible();
@@ -850,16 +851,22 @@ i32 RetryMenu::OnUpdate()
         if (this->numFrames == 0)
         {
             g_SoundPlayer.PushCommand(AUDIO_PAUSE, 0, "Pause");
-            for (i = 0; i < 4; i++)
+            for (i = 0; i < RETRY_MENU_SPRITES - 1; i++)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + 264);
+                g_AnmManager->SetAnmIdxAndExecuteScript(
+                    &this->menuSprites[i],
+                    i + ANM_SCRIPT_ASCII_RETRY_MENU);
                 this->menuSprites[i].pendingInterrupt = 1;
             }
-            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[4], 268);
-            g_AnmManager->SetActiveSprite(&this->menuSprites[4],
-                                          g_GameManager.maxRetries + 262 -
-                                              (u32)g_GameManager.globals->numRetries);
-            this->menuSprites[4].pendingInterrupt = 1;
+            g_AnmManager->SetAnmIdxAndExecuteScript(
+                &this->menuSprites[RETRY_MENU_SPRITES - 1],
+                ANM_SCRIPT_ASCII_RETRY_MENU_LIVES);
+            g_AnmManager->SetActiveSprite(
+                &this->menuSprites[RETRY_MENU_SPRITES - 1],
+                g_GameManager.maxRetries +
+                    ANM_SPRITE_ASCII_RETRY_MENU_LIVES -
+                    (u32)g_GameManager.globals->numRetries);
+            this->menuSprites[RETRY_MENU_SPRITES - 1].pendingInterrupt = 1;
             if (g_Supervisor.hasLockableBackbuffer)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, ANM_OFFSET_MENU_BG);
@@ -1071,7 +1078,7 @@ void AsciiManager::DrawPopups()
     {
         g_Supervisor.DisableFog();
     }
-    g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
+    g_Supervisor.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
     for (i = 0; i < ARRAY_SIZE_SIGNED(this->popups); i++, popup++)
     {
@@ -1080,9 +1087,9 @@ void AsciiManager::DrawPopups()
             continue;
         }
 
-        this->vm1.pos.x = popup->pos.x - (f32)(popup->characterCount << 2);
-        this->vm1.pos.y = popup->pos.y;
-        this->vm1.color.color = popup->color;
+        this->largeTextVm.pos.x = popup->pos.x - (f32)(popup->characterCount << 2);
+        this->largeTextVm.pos.y = popup->pos.y;
+        this->largeTextVm.color.color = popup->color;
 
         dx = g_Player.positionCenter.x - popup->pos.x;
         dy = g_Player.positionCenter.y - popup->pos.y;
@@ -1110,22 +1117,22 @@ void AsciiManager::DrawPopups()
         {
             if (popup->timer < 52 || *digits == 10)
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits];
+                this->largeTextVm.color.bytes.a = alpha;
             }
             else if (popup->timer < 56)
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits + 11];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits + 11];
+                this->largeTextVm.color.bytes.a = alpha;
             }
             else
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits + 21];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits + 21];
+                this->largeTextVm.color.bytes.a = alpha;
             }
 
-            g_AnmManager->DrawNoRotation(&this->vm1);
-            this->vm1.pos.x += 8.0f;
+            g_AnmManager->DrawNoRotation(&this->largeTextVm);
+            this->largeTextVm.pos.x += 8.0f;
             digits--;
         }
     }
@@ -1180,7 +1187,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1215,7 +1223,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1265,7 +1274,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += (f32)xInc;

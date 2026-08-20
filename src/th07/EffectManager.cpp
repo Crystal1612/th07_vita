@@ -928,10 +928,10 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
 // FUNCTION: TH07 0x0041d050
 ZunResult EffectManager::DeletedCallback(EffectManager *arg)
 {
-    g_AnmManager->ReleaseAnm(17);
-    g_AnmManager->ReleaseAnm(18);
-    g_AnmManager->ReleaseAnm(19);
-    g_AnmManager->ReleaseAnm(20);
+    g_AnmManager->ReleaseAnm(ANM_FILE_EFFECTS);
+    g_AnmManager->ReleaseAnm(ANM_FILE_EFFECTS2);
+    g_AnmManager->ReleaseAnm(ANM_FILE_EFFECTS3_0);
+    g_AnmManager->ReleaseAnm(ANM_FILE_EFFECTS3_1);
     return ZUN_SUCCESS;
 }
 

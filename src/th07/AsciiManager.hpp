@@ -147,8 +147,8 @@ struct AsciiManager
         this->bossMarkers[idx].pendingInterrupt = interrupt;
     }
 
-    AnmVm vm0;
-    AnmVm vm1;
+    AnmVm smallScorePopupVm;
+    AnmVm largeTextVm;
     AnmVm cherryGauge;
     AnmVm cherryDigit;
     AnmVm cherryBorderActive;

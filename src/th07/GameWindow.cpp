@@ -712,41 +712,41 @@ void GameWindow::ResetRenderState()
 {
     if (!g_Supervisor.cfg.disableZBuffer)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZENABLE, 1);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZENABLE, 0);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_LIGHTING, 0);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_CULLMODE, 1);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, 1);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
     if (!g_Supervisor.cfg.disableGouraud)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, 2);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, 1);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_SRCBLEND, 5);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZFUNC, 8);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, 1);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHAREF, 4);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHAFUNC, 7);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
     if (!g_Supervisor.cfg.disableFog)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, 1);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, 0);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     }
     f32 fogDensity = 1.0f;
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)&fogDensity);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGTABLEMODE, 0);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGVERTEXMODE, 3);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_NONE);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGCOLOR, 0xffa0a0a0);
 
     f32 fog = 1000.0f;
@@ -760,46 +760,46 @@ void GameWindow::ResetRenderState()
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, 0);
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
     if (!g_Supervisor.cfg.noVertexBuffers)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
     }
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
     if (!g_Supervisor.cfg.noVertexBuffers)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
     }
     else
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 0);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_NONE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS,
-                                                 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, 3);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, 1);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, 1);
+                                                 D3DTTFF_COUNT2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_CLAMP);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
     if (g_AnmManager)
     {
         g_AnmManager->SetBlendMode(255);

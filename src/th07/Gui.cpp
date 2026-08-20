@@ -342,13 +342,19 @@ u32 Gui::OnDraw(Gui *arg)
 // FUNCTION: TH07 0x0042868d
 void Gui::ShowBombNamePortrait(i32 sprite, const char *name)
 {
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait, 1185);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait,
+                                            ANM_SCRIPT_FACE_SPELLCARD_PORTRAIT);
     g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardPortrait, sprite);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorLeft, 1188);
-    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorLeft, 1196);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorRight, 1190);
-    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorRight, 1196);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName, 1796);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorLeft,
+                                            ANM_SCRIPT_FACE_SPELLCARD_DECOR_LEFT);
+    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorLeft,
+                                  ANM_SPRITE_FACE_SPELLCARD_DECOR);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardDecorRight,
+                                            ANM_SCRIPT_FACE_SPELLCARD_DECOR_RIGHT);
+    g_AnmManager->SetActiveSprite(&this->impl->bombSpellcardDecorRight,
+                                  ANM_SPRITE_FACE_SPELLCARD_DECOR);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName,
+                                            ANM_SCRIPT_TEXT_SPELLCARD_NAME);
     AnmManager::DrawVmTextFmt(g_AnmManager, &this->impl->bombSpellcardName,
                               0xf0f0ff, 0, name);
     this->bombNameBarLength = (f32)(u32)(strlen(name) * 15) / 2.0f + 16.0f;
@@ -362,10 +368,13 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
 {
     if (spellcardSprite >= 0)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardPortrait,
-                                                1187);
-        g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardPortrait,
-                                      spellcardSprite + 1197);
+        g_AnmManager->SetAnmIdxAndExecuteScript(
+            &this->impl->enemySpellcardPortrait,
+            ANM_SCRIPT_FACE_ENEMY_SPELLCARD_PORTRAIT);
+        g_AnmManager->SetActiveSprite(
+            &this->impl->enemySpellcardPortrait,
+            spellcardSprite +
+                ANM_SPRITE_FACE_STAGE_ENEMY_SPELLCARD_PORTRAIT_ARRAY);
         if (this->impl->enemySpellcardPortrait.sprite->widthPx > 256.0f)
         {
             this->impl->enemySpellcardPortrait.offset.x = -288.0f;
@@ -382,11 +391,19 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
             }
         }
     }
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated1, 1189);
-    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated1, 1196);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardRelated2, 1191);
-    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardRelated2, 1196);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName, 1797);
+    g_AnmManager->SetAnmIdxAndExecuteScript(
+        &this->impl->enemySpellcardDecorHorizontalUp,
+        ANM_SCRIPT_FACE_SPELLCARD_DECOR_UP);
+    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardDecorHorizontalUp,
+                                  ANM_SPRITE_FACE_SPELLCARD_DECOR);
+    g_AnmManager->SetAnmIdxAndExecuteScript(
+        &this->impl->enemySpellcardDecorHorizontalDown,
+        ANM_SCRIPT_FACE_SPELLCARD_DECOR_DOWN);
+    g_AnmManager->SetActiveSprite(&this->impl->enemySpellcardDecorHorizontalDown,
+                                  ANM_SPRITE_FACE_SPELLCARD_DECOR);
+    g_AnmManager->SetAnmIdxAndExecuteScript(
+        &this->impl->enemySpellcardName,
+        ANM_SCRIPT_TEXT_ENEMY_SPELLCARD_NAME);
     g_AnmManager->DrawStringFormat(&this->impl->enemySpellcardName, 0xfff0f0, 0,
                                    spellcardName);
     this->spellcardBarLength =
@@ -460,7 +477,7 @@ ZunResult Gui::ActualAddedCallback()
         ClearActiveSprites();
         g_AnmManager->SetAnmIdxAndExecuteScript(
             &this->impl->stageTransitionSnapshotVm,
-            1829);
+            ANM_SCRIPT_CAPTURE_TRANSITION_SNAPSHOT);
         this->impl->stageTransitionSnapshotVm.pendingInterrupt = 1;
         g_AnmManager->CreateScreenshotTexture(
             this->impl->stageTransitionSnapshotVm.sprite->startPixelInclusive
@@ -475,7 +492,7 @@ ZunResult Gui::ActualAddedCallback()
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(
                     &this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j],
-                    (i + j & 1) + 1830);
+                    (i + j & 1) + ANM_SCRIPT_CAPTURE_TRANSITION_QUAD_ARRAY);
                 this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].intVars2[0] =
                     i + j * 2;
                 this->impl->transitionQuads[i * TRANSITION_QUAD_COLS + j].pos.x =
@@ -637,7 +654,7 @@ ZunResult Gui::ActualAddedCallback()
         for (k = 0; k < ARRAY_SIZE_SIGNED(this->impl->vms0); k++)
         {
             g_AnmManager->SetAnmIdxAndExecuteScript(
-                &this->impl->vms0[k], k + 1536);
+                &this->impl->vms0[k], k + ANM_SCRIPT_FRONT_UI_ELEMENTS_ARRAY);
         }
     }
     this->bossPresent = 0;
@@ -645,37 +662,37 @@ ZunResult Gui::ActualAddedCallback()
     this->bossHealthBar = 0.0f;
     this->bossHealthBarEased = 0.0f;
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardPortrait,
-                                            1185);
+                                            ANM_SCRIPT_FACE_SPELLCARD_PORTRAIT);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardPortrait,
-                                            1187);
+                                            ANM_SCRIPT_FACE_ENEMY_SPELLCARD_PORTRAIT);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardName,
-                                            1796);
+                                            ANM_SCRIPT_TEXT_SPELLCARD_NAME);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName,
-                                            1797);
-    g_AnmManager->ExecuteVmsAnms(this->impl->vms1, 2048, 5);
+                                            ANM_SCRIPT_TEXT_ENEMY_SPELLCARD_NAME);
+    g_AnmManager->ExecuteVmsAnms(this->impl->stageTextVm, ANM_SCRIPT_STAGE_TEXT, 5);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardNameBg,
-                                            1);
+                                            ANM_SCRIPT_ASCII_SPELLCARD_NAME_BG);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardNameBg,
-                                            0);
+                                            ANM_SCRIPT_ASCII_ENEMY_SPELLCARD_NAME_BG);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->spellcardBonusIndicator,
-                                            2);
+                                            ANM_SCRIPT_ASCII_SPELLCARD_BONUS);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->captureBonusVm,
-                                            3);
+                                            ANM_SCRIPT_ASCII_DIGIT);
     this->impl->bombSpellcardPortrait.currentInstruction = NULL;
     this->impl->bombSpellcardDecorLeft.currentInstruction = NULL;
     this->impl->bombSpellcardDecorRight.currentInstruction = NULL;
     this->impl->bombSpellcardName.currentInstruction = NULL;
     this->impl->enemySpellcardPortrait.currentInstruction = NULL;
-    this->impl->enemySpellcardRelated1.currentInstruction = NULL;
-    this->impl->enemySpellcardRelated2.currentInstruction = NULL;
+    this->impl->enemySpellcardDecorHorizontalUp.currentInstruction = NULL;
+    this->impl->enemySpellcardDecorHorizontalDown.currentInstruction = NULL;
     this->impl->enemySpellcardName.currentInstruction = NULL;
     this->impl->bombSpellcardPortrait.visible = 0;
     this->impl->bombSpellcardDecorLeft.visible = 0;
     this->impl->bombSpellcardDecorRight.visible = 0;
     this->impl->bombSpellcardName.visible = 0;
     this->impl->enemySpellcardPortrait.visible = 0;
-    this->impl->enemySpellcardRelated1.visible = 0;
-    this->impl->enemySpellcardRelated2.visible = 0;
+    this->impl->enemySpellcardDecorHorizontalUp.visible = 0;
+    this->impl->enemySpellcardDecorHorizontalDown.visible = 0;
     this->impl->enemySpellcardName.visible = 0;
     this->impl->bombSpellcardName.fontWidth = 15;
     this->impl->bombSpellcardName.fontHeight = 15;
@@ -834,8 +851,8 @@ ZunResult GuiImpl::RunMsg()
                 args->portrait.anmScriptIdx +
                     (args->portrait.portraitIdx !=
                              0
-                         ? 1184 + 2
-                         : 1184));
+                         ? ANM_SCRIPT_FACE_PORTRAIT_SHOW_RIGHT
+                         : ANM_SCRIPT_FACE_PORTRAIT_SHOW_LEFT));
             if (this->msg.portraits[args->portrait.portraitIdx]
                     .sprite
                     ->widthPx > 128.0f)
@@ -853,7 +870,10 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.curInstr->args;
             g_AnmManager->SetActiveSprite(
                 &this->msg.portraits[args->portrait.portraitIdx],
-                args->portrait.anmScriptIdx + (args->portrait.portraitIdx == 0 ? 1184 : 1197));
+                args->portrait.anmScriptIdx +
+                    (args->portrait.portraitIdx == 0
+                         ? ANM_SPRITE_FACE_PORTRAIT
+                         : ANM_SPRITE_FACE_STAGE_ENEMY_PORTRAIT));
             if (this->msg.portraits[args->portrait.portraitIdx]
                     .sprite
                     ->widthPx > 256.0f)
@@ -889,7 +909,7 @@ ZunResult GuiImpl::RunMsg()
             }
             g_AnmManager->SetAnmIdxAndExecuteScript(
                 &this->msg.dialogueLines[args->dialogue.textLine],
-                args->dialogue.textLine + 1792);
+                args->dialogue.textLine + ANM_SCRIPT_TEXT_DIALOGUE);
             this->msg.dialogueLines[args->dialogue.textLine]
                 .fontHeight = (u8)this->msg.fontSize;
             this->msg.dialogueLines[args->dialogue.textLine]
@@ -914,8 +934,7 @@ ZunResult GuiImpl::RunMsg()
                     {
                         break;
                     }
-                    this->msg.framesElapsedDuringPause =
-                        this->msg.framesElapsedDuringPause + 1;
+                    this->msg.framesElapsedDuringPause++;
                     goto SKIP_TIME_INCREMENT;
                 }
             }
@@ -939,16 +958,18 @@ ZunResult GuiImpl::RunMsg()
         case MSG_MUSIC:
             if (g_GameManager.currentStage != 6)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms1[0],
-                                                        2052);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTextVm[0],
+                                                        ANM_SCRIPT_STAGE_TEXT_MUSIC);
             }
             else
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms1[0],
-                                                        2053);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTextVm[0],
+                                                        ANM_SCRIPT_STAGE_TEXT_MUSIC_ST6);
             }
             g_AnmManager->SetActiveSprite(
-                this->vms1, this->msg.curInstr->args.music.musicIdx + 2051);
+                this->stageTextVm,
+                this->msg.curInstr->args.music.musicIdx +
+                    ANM_SPRITE_STAGE_TEXT_MUSIC);
             if (g_Supervisor.PlayLoadedAudio(
                     this->msg.curInstr->args.music.musicIdx) != ZUN_SUCCESS)
             {
@@ -961,7 +982,7 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.curInstr->args;
             g_AnmManager->SetAnmIdxAndExecuteScript(
                 &this->msg.introLines[args->dialogue.textLine],
-                args->dialogue.textLine + 1794);
+                args->dialogue.textLine + ANM_SCRIPT_TEXT_INTRO);
             g_AnmManager->DrawStringFormat(
                 this->msg.introLines + args->dialogue.textLine,
                 this->msg.textColorsA[args->dialogue.textColor],
@@ -979,8 +1000,10 @@ ZunResult GuiImpl::RunMsg()
             this->finishedStage = 1;
             if (g_GameManager.currentStage < 6)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearBg, 1566);
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTransitionSnapshotVm, 1829);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearBg,
+                                                        ANM_SCRIPT_LOADING_STAGE_CLEAR_BG);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTransitionSnapshotVm,
+                                                        ANM_SCRIPT_CAPTURE_TRANSITION_SNAPSHOT);
                 g_AnmManager->CreateScreenshotTexture(
                     this->stageTransitionSnapshotVm.sprite->startPixelInclusive.x,
                     this->stageTransitionSnapshotVm.sprite->startPixelInclusive.y,
@@ -1020,7 +1043,7 @@ ZunResult GuiImpl::RunMsg()
                     goto SKIP_TIME_INCREMENT;
                 }
 
-                g_AnmManager->InitializeAndSetActiveSprite(&this->loadingSprite, 268);
+                g_AnmManager->InitializeAndSetActiveSprite(&this->loadingSprite, ANM_SPRITE_ASCII_LOADING);
                 this->transitionToScoreScreen = 1;
                 this->msg.currentMsgIdx = -2;
             }
@@ -1134,14 +1157,14 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->Flush();
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
     if (!g_Supervisor.cfg.disableZBuffer)
     {
-        g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+        g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
     }
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, dialogueBg,
@@ -1152,11 +1175,11 @@ ZunResult GuiImpl::DrawDialogue()
     g_AnmManager->SetZWriteDisable(255);
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[0]);
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[1]);
     g_AnmManager->DrawNoRotation(&this->msg.introLines[0]);
@@ -1269,15 +1292,15 @@ void Gui::UpdateGui()
             }
         }
     }
-    g_AnmManager->ExecuteScripts(this->impl->vms0, 33);
-    g_AnmManager->ExecuteScripts(this->impl->vms1, 5);
+    g_AnmManager->ExecuteScripts(this->impl->vms0, ARRAY_SIZE_SIGNED(this->impl->vms0));
+    g_AnmManager->ExecuteScripts(this->impl->stageTextVm, ARRAY_SIZE_SIGNED(this->impl->stageTextVm));
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardPortrait);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardDecorLeft);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardDecorRight);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardName);
     g_AnmManager->ExecuteScript(&this->impl->enemySpellcardPortrait);
-    g_AnmManager->ExecuteScript(&this->impl->enemySpellcardRelated1);
-    g_AnmManager->ExecuteScript(&this->impl->enemySpellcardRelated2);
+    g_AnmManager->ExecuteScript(&this->impl->enemySpellcardDecorHorizontalUp);
+    g_AnmManager->ExecuteScript(&this->impl->enemySpellcardDecorHorizontalDown);
     g_AnmManager->ExecuteScript(&this->impl->enemySpellcardName);
     g_AnmManager->ExecuteScript(&this->impl->bombSpellcardNameBg);
     g_AnmManager->ExecuteScript(&this->impl->enemySpellcardNameBg);
@@ -1296,8 +1319,8 @@ void Gui::UpdateGui()
     }
     if (this->impl->activeTransitionQuads != 0)
     {
-        activeTransitionQuads = 168;
-        for (i = 0; i < 168; i++)
+        activeTransitionQuads = ARRAY_SIZE_SIGNED(this->impl->transitionQuads);
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->impl->transitionQuads); i++)
         {
             if (g_AnmManager->ExecuteScript(this->impl->transitionQuads + i))
             {
@@ -1621,14 +1644,14 @@ void Gui::DrawGameScene()
             powerBarVerts[0].w = powerBarVerts[1].w = powerBarVerts[2].w = powerBarVerts[3].w = 1.0f;
             if (!g_Supervisor.cfg.disableTextureBlend)
             {
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
+                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
             }
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
             if (!g_Supervisor.cfg.disableZBuffer)
             {
-                g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+                g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
             }
             g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
             g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &powerBarVerts,
@@ -1639,11 +1662,11 @@ void Gui::DrawGameScene()
             g_AnmManager->SetZWriteDisable(255);
             if (!g_Supervisor.cfg.disableTextureBlend)
             {
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
+                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+                g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
             }
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+            g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
         }
         if ((i32)g_GameManager.globals->currentPower < 128)
         {
@@ -1701,7 +1724,7 @@ void Gui::DrawStageElements()
 
     for (i = 0; i < 5; i++)
     {
-        g_AnmManager->Draw(&this->impl->vms1[i]);
+        g_AnmManager->Draw(&this->impl->stageTextVm[i]);
     }
     if (this->impl->bombSpellcardPortrait.visible)
     {
@@ -1716,8 +1739,8 @@ void Gui::DrawStageElements()
             this->impl->enemySpellcardPortrait.offset;
         g_AnmManager->DrawNoRotation(&this->impl->enemySpellcardPortrait);
         this->impl->enemySpellcardPortrait.pos = oldPos;
-        g_AnmManager->DrawNoRotation(&this->impl->enemySpellcardRelated1);
-        g_AnmManager->Draw(&this->impl->enemySpellcardRelated2);
+        g_AnmManager->DrawNoRotation(&this->impl->enemySpellcardDecorHorizontalUp);
+        g_AnmManager->Draw(&this->impl->enemySpellcardDecorHorizontalDown);
     }
     if (this->impl->bombSpellcardName.visible)
     {
@@ -1905,22 +1928,22 @@ ZunResult Gui::AddedCallback(Gui *arg)
 // FUNCTION: TH07 0x0042d04b
 ZunResult Gui::DeletedCallback(Gui *arg)
 {
-    g_AnmManager->ReleaseAnm(24);
-    g_AnmManager->ReleaseAnm(28);
-    g_AnmManager->ReleaseAnm(29);
-    g_AnmManager->ReleaseAnm(30);
-    g_AnmManager->ReleaseAnm(31);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_TEXT);
+    g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE);
+    g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE_1);
+    g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE_2);
+    g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE_3);
     arg->FreeMsgFile();
     if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
               g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
               g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
-        g_AnmManager->ReleaseAnm(21);
-        g_AnmManager->ReleaseAnm(23);
-        g_AnmManager->ReleaseAnm(25);
-        g_AnmManager->ReleaseAnm(26);
-        g_AnmManager->ReleaseAnm(27);
-        g_AnmManager->ReleaseAnm(22);
+        g_AnmManager->ReleaseAnm(ANM_FILE_FRONT_0);
+        g_AnmManager->ReleaseAnm(ANM_FILE_LOADING);
+        g_AnmManager->ReleaseAnm(ANM_FILE_FACE_0);
+        g_AnmManager->ReleaseAnm(ANM_FILE_FACE_1);
+        g_AnmManager->ReleaseAnm(ANM_FILE_FACE_2);
+        g_AnmManager->ReleaseAnm(ANM_FILE_FRONT_1);
         delete arg->impl;
         arg->impl = NULL;
     }

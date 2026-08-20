@@ -52,6 +52,8 @@ struct Item
 };
 C_ASSERT(sizeof(Item) == 0x288);
 
+#define MAX_ITEMS 1100
+
 struct ItemManager
 {
     void ActivateAllItems();
@@ -61,10 +63,10 @@ struct ItemManager
     void RemoveAllItems();
     Item *SpawnItem(Float3 *heading, i32 itemType, i32 state);
 
-    struct Item items[1101];
+    Item items[MAX_ITEMS + 1];
     i32 nextIndex;
     i32 activeItemCount;
-    struct Item listHead;
-    struct Item *listTail;
+    Item listHead;
+    Item *listTail;
 };
 extern ItemManager g_ItemManager;

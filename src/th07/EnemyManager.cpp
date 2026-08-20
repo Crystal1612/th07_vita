@@ -1396,8 +1396,8 @@ ZunResult EnemyManager::AddedCallback(EnemyManager *arg)
 // FUNCTION: TH07 0x00422e70
 ZunResult EnemyManager::DeletedCallback(EnemyManager *arg)
 {
-    g_AnmManager->ReleaseAnm(16);
-    g_AnmManager->ReleaseAnm(15);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ENEMY2);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ENEMY);
     Float3 vec = Float3(-999.0f, -999.0f, -999.0f);
     g_AsciiManager.GetBossMarker(0)->pos = vec;
     g_AsciiManager.GetBossMarker(1)->pos = vec;

@@ -2694,9 +2694,11 @@ ZunResult MainMenu::ActualAddedCallback()
             BombEffects::RegisterChain(0, 70, 0xffffff, 0, 0);
         }
     }
-    for (i = 0; i < 14; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->vms); i++)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->vms[i], 1798);
+        g_AnmManager->SetAnmIdxAndExecuteScript(
+            &this->vms[i],
+            ANM_SCRIPT_TEXT_MAINMENU_OPTION_DESC);
         g_AnmManager->SetActiveSprite(&this->vms[i],
                                       this->vms[i].activeSpriteIdx + i);
     }
@@ -2729,7 +2731,7 @@ ZunResult MainMenu::Release()
 ZunResult MainMenu::DeletedCallback(MainMenu *arg)
 {
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
-    for (i32 i = 32; i <= 41; i++)
+    for (i32 i = ANM_FILE_TITLE_0; i <= ANM_FILE_TITLE_9; i++)
     {
         g_AnmManager->ReleaseAnm(i);
     }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <assert.h>
-#include <windef.h>
 #include <windows.h>
 
 #include "AnmIdx.hpp"

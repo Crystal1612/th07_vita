@@ -780,7 +780,7 @@ ZunResult Supervisor::DeletedCallback(Supervisor *arg)
 {
     SAFE_FREE(g_Supervisor.version);
     g_AnmManager->ReleaseVertexBuffer();
-    g_AnmManager->ReleaseAnm(0);
+    g_AnmManager->ReleaseAnm(ANM_FILE_TEXT);
     AsciiManager::CutChain();
     // STRING: TH07 0x004980d0
     g_SoundPlayer.PushCommand(AUDIO_SHUTDOWN, 0, "dummy");
@@ -1510,7 +1510,7 @@ HRESULT Supervisor::EnableFog()
     if (this->fogEnabled != 1)
     {
         this->fogEnabled = 1;
-        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, 1);
+        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, TRUE);
     }
 
     return 0;
@@ -1523,7 +1523,7 @@ HRESULT Supervisor::DisableFog()
     if (this->fogEnabled)
     {
         this->fogEnabled = 0;
-        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, 0);
+        return this->d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     }
 
     return 0;

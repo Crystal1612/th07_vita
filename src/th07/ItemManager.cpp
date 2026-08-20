@@ -43,13 +43,13 @@ Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)
             itemType = ITEM_CHERRY;
         }
     }
-    for (i = 0; i < 1100; i++)
+    for (i = 0; i < MAX_ITEMS; i++)
     {
         this->nextIndex++;
 
         if (item->isInUse)
         {
-            if (this->nextIndex >= 1100)
+            if (this->nextIndex >= MAX_ITEMS)
             {
                 this->nextIndex = 0;
                 item = this->items;
@@ -60,7 +60,7 @@ Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)
             }
             continue;
         }
-        if (this->nextIndex >= 1100)
+        if (this->nextIndex >= MAX_ITEMS)
         {
             this->nextIndex = 0;
         }
@@ -87,7 +87,8 @@ Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)
         {
             item->state = 0;
         }
-        g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, itemType + 708);
+        g_AnmManager->SetAnmIdxAndExecuteScript(
+            &item->sprite, itemType + ANM_SCRIPT_BULLETS_ITEM_SPAWN_ARRAY);
         item->sprite.color.color = 0xffffffff;
         item->sprite.zWriteDisable = 1;
         item->autoCollect = 0;
@@ -95,7 +96,7 @@ Item *ItemManager::SpawnItem(Float3 *heading, i32 itemType, i32 state)
         break;
     }
 
-    return i < 1100 ? item : &this->items[1100];
+    return i < MAX_ITEMS ? item : &this->items[MAX_ITEMS];
 }
 
 #pragma var_order(i, itemTimerSecs, itemScore, playerAngle, local_20, itemAcquired, \
@@ -122,7 +123,7 @@ void ItemManager::OnUpdate()
     this->listTail = &this->listHead;
     this->listHead.next = NULL;
 
-    for (i = 0; i < 1100; i++, item++)
+    for (i = 0; i < MAX_ITEMS; i++, item++)
     {
         if (!item->isInUse)
         {
@@ -490,7 +491,7 @@ void ItemManager::RemoveAllItems()
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 1100; i++, item++)
+    for (i = 0; i < MAX_ITEMS; i++, item++)
     {
         if (!item->isInUse)
         {
@@ -510,7 +511,7 @@ void ItemManager::DespawnAllItems(i32 param_1)
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 1100; i++, item++)
+    for (i = 0; i < MAX_ITEMS; i++, item++)
     {
         if (item->isInUse == 0 || i == param_1)
         {
@@ -527,7 +528,8 @@ void ItemManager::DespawnAllItems(i32 param_1)
             }
             g_EffectManager.SpawnEffect(0, &item->currentPosition, 1, 0xffffffff);
             item->itemType = 7;
-            g_AnmManager->SetAnmIdxAndExecuteScript(&item->sprite, 715);
+            g_AnmManager->SetAnmIdxAndExecuteScript(
+                &item->sprite, ANM_SCRIPT_BULLETS_ITEM_DESPAWN);
         }
     }
 }
@@ -540,7 +542,7 @@ void ItemManager::ActivateAllItems()
     i32 i;
 
     item = this->items;
-    for (i = 0; i < 1100; i++, item++)
+    for (i = 0; i < MAX_ITEMS; i++, item++)
     {
         if (item->isInUse != 1)
         {
@@ -577,7 +579,9 @@ void ItemManager::OnDraw()
             item->sprite.pos.y = 8.0f + g_GameManager.arcadeRegionTopLeftPos.y;
             if (item->isOnscreen)
             {
-                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 694);
+                g_AnmManager->SetActiveSprite(
+                    &item->sprite,
+                    item->itemType + ANM_SPRITE_BULLETS_ITEMS_ARRAY);
                 item->isOnscreen = 0;
                 item->sprite.zWriteDisable = 1;
             }
@@ -593,7 +597,9 @@ void ItemManager::OnDraw()
         {
             if (!item->isOnscreen)
             {
-                g_AnmManager->SetActiveSprite(&item->sprite, item->itemType + 684);
+                g_AnmManager->SetActiveSprite(
+                    &item->sprite,
+                    item->itemType + ANM_SPRITE_BULLETS_ITEMS_OFFSCREEN_ARRAY);
                 item->isOnscreen = 1;
                 item->sprite.color.color = 0xffffffff;
                 item->sprite.zWriteDisable = 1;
