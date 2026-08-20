@@ -367,7 +367,7 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
         return ZUN_ERROR;
     }
 
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < SHOT_COUNT; i++)
     {
         memset(outClrd + i, 0, sizeof(Clrd));
         outClrd[i].magic = CLRD_MAGIC;
@@ -486,7 +486,7 @@ void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
     free(scoreDat);
 }
 
-#pragma var_order(difficulty, characterSlot, fileBuffer, sizeOfFile,         \
+#pragma var_order(i, characterSlot, fileBuffer, sizeOfFile,         \
                   currentCharacter, character, clrd, catk, pscr, j, k, vrsm, \
                   compressedBuffer, scoreDat, originalByte, remainingSize,   \
                   xorValue, bytes, sd)
@@ -511,7 +511,7 @@ void ResultScreen::WriteScore()
     size_t sizeOfFile;
     u8 *fileBuffer;
     i32 characterSlot;
-    i32 difficulty;
+    i32 i;
 
     sizeOfFile = 0;
 
@@ -528,11 +528,11 @@ void ResultScreen::WriteScore()
     memcpy(fileBuffer + sizeOfFile, &this->th7kHeader, sizeof(Th7k));
     sizeOfFile += sizeof(Th7k);
 
-    for (difficulty = 0; difficulty < DIFF_COUNT; difficulty++)
+    for (i = 0; i < DIFF_COUNT; i++)
     {
         for (character = 0; character < SHOT_COUNT; character++)
         {
-            currentCharacter = this->scoreLists[difficulty][character].next;
+            currentCharacter = this->scoreLists[i][character].next;
             characterSlot = 0;
 
             for (;;)
@@ -542,7 +542,7 @@ void ResultScreen::WriteScore()
                     if (currentCharacter->data->magic == HSCR_MAGIC)
                     {
                         currentCharacter->data->character = character;
-                        currentCharacter->data->difficulty = difficulty;
+                        currentCharacter->data->difficulty = i;
                         currentCharacter->data->th7kLen2 = sizeof(Hscr);
                         currentCharacter->data->th7kLen = sizeof(Hscr);
                         currentCharacter->data->version = 1;
@@ -570,7 +570,7 @@ void ResultScreen::WriteScore()
     }
 
     clrd = g_GameManager.clrd;
-    for (difficulty = 0; difficulty < 6; difficulty++, clrd++)
+    for (i = 0; i < SHOT_COUNT; i++, clrd++)
     {
         clrd->magic = CLRD_MAGIC;
         clrd->th7kLen2 = sizeof(Clrd);
@@ -582,11 +582,11 @@ void ResultScreen::WriteScore()
     }
 
     catk = g_GameManager.catk;
-    for (difficulty = 0; difficulty < SPELLCARD_COUNT; difficulty++, catk++)
+    for (i = 0; i < SPELLCARD_COUNT; i++, catk++)
     {
         if (catk->magic == CATK_MAGIC)
         {
-            catk->idx = difficulty;
+            catk->idx = i;
             catk->th7kLen2 = sizeof(Catk);
             catk->th7kLen = sizeof(Catk);
             catk->version = 1;
@@ -597,7 +597,7 @@ void ResultScreen::WriteScore()
     }
 
     pscr = &g_GameManager.pscr[0][0][0];
-    for (difficulty = 0; difficulty < DIFF_COUNT; difficulty++)
+    for (i = 0; i < SHOT_COUNT; i++)
     {
         for (j = 0; j < 6; j++)
         {
@@ -1969,7 +1969,7 @@ i32 ResultScreen::DrawStats()
         if (this->frameTimer < 40)
         {
             vm = this->spellcardListVms;
-            for (i32 i = 0; i < 14; i++, vm++)
+            for (i32 i = 0; i < MAX_SPELLCARD_LIST_ENTRIES; i++, vm++)
             {
                 vm->color.bytes.a = this->frameTimer * 255 / 40;
             }
@@ -2004,7 +2004,7 @@ i32 ResultScreen::DrawStats()
         if (this->frameTimer < 20)
         {
             vm = this->spellcardListVms;
-            for (i32 i = 0; i < 14; i++, vm++)
+            for (i32 i = 0; i < MAX_SPELLCARD_LIST_ENTRIES; i++, vm++)
             {
                 vm->color.bytes.a = 255 - this->frameTimer * 255 / 20;
             }
@@ -2449,7 +2449,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
         AsciiManager::AddFormatText(&g_AsciiManager, &pos,
                                     // STRING: TH07 0x0049641c
                                     "No.   Name     Date   Player Score");
-        for (i = 0; i < 15; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(arg->replays); i++)
         {
             pos = vm->pos;
             vm++;
@@ -2664,9 +2664,9 @@ ZunResult ResultScreen::DeletedCallback(ResultScreen *arg)
         ReleaseScoreDat(arg->scoreDat);
     }
     arg->scoreDat = NULL;
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < DIFF_COUNT; i++)
     {
-        for (j = 0; j < 6; j++)
+        for (j = 0; j < SHOT_COUNT; j++)
         {
             arg->FreeScore(i, j);
         }

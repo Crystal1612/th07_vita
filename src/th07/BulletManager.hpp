@@ -265,7 +265,7 @@ struct BulletManager
     {
         memset(this, 0, sizeof(BulletManager));
         this->bulletsStart = this->bullets;
-        this->bullets[1024].state = BULLET_END_ARRAY;
+        this->bullets[MAX_BULLETS].state = BULLET_END_ARRAY;
         this->itemType = ITEM_POINT_BULLET;
     }
 

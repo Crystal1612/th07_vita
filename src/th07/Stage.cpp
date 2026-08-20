@@ -913,7 +913,7 @@ ZunResult Stage::UpdateObjects()
         {
             vmCount = 0;
             quad = &object->firstQuad;
-            while (0 <= quad->type)
+            while (quad->type >= 0)
             {
                 vm = &this->quadVms[quad->vmIndex];
                 switch (quad->type)

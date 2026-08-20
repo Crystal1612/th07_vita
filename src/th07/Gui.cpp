@@ -110,10 +110,10 @@ void Gui::CopyEnemyNameTexture(i32 spriteIdx)
     RECT srcRect;
     RECT enemyNameRect;
 
-    srcRect.left = g_AnmManager->GetSprite(0x609)->startPixelInclusive.x;
-    srcRect.top = g_AnmManager->GetSprite(0x609)->startPixelInclusive.y;
-    srcRect.right = g_AnmManager->GetSprite(0x609)->endPixelInclusive.x;
-    srcRect.bottom = g_AnmManager->GetSprite(0x609)->endPixelInclusive.y;
+    srcRect.left = g_AnmManager->GetSprite(ANM_SPRITE_FRONT_ENEMY_NAME_FRAME)->startPixelInclusive.x;
+    srcRect.top = g_AnmManager->GetSprite(ANM_SPRITE_FRONT_ENEMY_NAME_FRAME)->startPixelInclusive.y;
+    srcRect.right = g_AnmManager->GetSprite(ANM_SPRITE_FRONT_ENEMY_NAME_FRAME)->endPixelInclusive.x;
+    srcRect.bottom = g_AnmManager->GetSprite(ANM_SPRITE_FRONT_ENEMY_NAME_FRAME)->endPixelInclusive.y;
     enemyNameRect.left = g_AnmManager->sprites[spriteIdx].startPixelInclusive.x;
     enemyNameRect.top = g_AnmManager->sprites[spriteIdx].startPixelInclusive.y;
     enemyNameRect.right = g_AnmManager->sprites[spriteIdx].endPixelInclusive.x;
@@ -506,12 +506,12 @@ ZunResult Gui::ActualAddedCallback()
                     (f32)i * 32.0f / 512.0f;
             }
         }
-        this->impl->activeTransitionQuads = 168;
+        this->impl->activeTransitionQuads = ARRAY_SIZE_SIGNED(this->impl->transitionQuads);
     }
     switch (g_GameManager.currentStage)
     {
     case 1:
-        CopyEnemyNameTexture(1550);
+        CopyEnemyNameTexture(ENEMY_NAME_CIRNO_MBOSS_ST1);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_01_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -528,7 +528,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 2:
-        CopyEnemyNameTexture(1552);
+        CopyEnemyNameTexture(ENEMY_NAME_CHEN_MBOSS_ST2);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_02_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -545,7 +545,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 3:
-        CopyEnemyNameTexture(1554);
+        CopyEnemyNameTexture(ENEMY_NAME_ALICE_MBOSS_ST3);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_03_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -562,7 +562,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 4:
-        CopyEnemyNameTexture(1556);
+        CopyEnemyNameTexture(ENEMY_NAME_LILY_MBOSS_ST4);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_04_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -579,7 +579,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 5:
-        CopyEnemyNameTexture(1558);
+        CopyEnemyNameTexture(ENEMY_NAME_YOUMU_MBOSS_ST5);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_05_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -596,7 +596,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 6:
-        CopyEnemyNameTexture(1560);
+        CopyEnemyNameTexture(ENEMY_NAME_YOUMU_MBOSS_ST6);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_06_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -613,7 +613,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 7:
-        CopyEnemyNameTexture(1562);
+        CopyEnemyNameTexture(ENEMY_NAME_CHEN_MBOSS_EX);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_07_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -630,7 +630,7 @@ ZunResult Gui::ActualAddedCallback()
         }
         break;
     case 8:
-        CopyEnemyNameTexture(1564);
+        CopyEnemyNameTexture(ENEMY_NAME_RAN_MBOSS_PH);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_08_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
         {
@@ -669,7 +669,8 @@ ZunResult Gui::ActualAddedCallback()
                                             ANM_SCRIPT_TEXT_SPELLCARD_NAME);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardName,
                                             ANM_SCRIPT_TEXT_ENEMY_SPELLCARD_NAME);
-    g_AnmManager->ExecuteVmsAnms(this->impl->stageTextVm, ANM_SCRIPT_STAGE_TEXT, 5);
+    g_AnmManager->ExecuteVmsAnms(this->impl->stageTextVm, ANM_SCRIPT_STAGE_TEXT,
+                                 ARRAY_SIZE_SIGNED(this->impl->stageTextVm));
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->bombSpellcardNameBg,
                                             ANM_SCRIPT_ASCII_SPELLCARD_NAME_BG);
     g_AnmManager->SetAnmIdxAndExecuteScript(&this->impl->enemySpellcardNameBg,
@@ -779,33 +780,33 @@ void GuiImpl::MsgRead(i32 msgIdx)
         switch (g_GameManager.currentStage)
         {
         case 1:
-            Gui::CopyEnemyNameTexture(1551);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_LETTY_BOSS_ST1);
             break;
         case 2:
-            Gui::CopyEnemyNameTexture(1553);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_CHEN_BOSS_ST2);
             break;
         case 3:
-            Gui::CopyEnemyNameTexture(1555);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_ALICE_BOSS_ST3);
             break;
         case 4:
-            Gui::CopyEnemyNameTexture(1557);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_PRISMRIVER_BOSS_ST4);
             break;
         case 5:
-            Gui::CopyEnemyNameTexture(1559);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_YOUMU_BOSS_ST5);
             break;
         case 6:
-            Gui::CopyEnemyNameTexture(1561);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_YUYUKO_BOSS_ST6);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 7:
-            Gui::CopyEnemyNameTexture(1563);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_RAN_BOSS_EX);
             g_Stage.spellcardVmsIdx = 1;
             g_Stage.numSpellcardVms = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
         case 8:
-            Gui::CopyEnemyNameTexture(1565);
+            Gui::CopyEnemyNameTexture(ENEMY_NAME_YUKARI_BOSS_PH);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
         }
@@ -872,8 +873,8 @@ ZunResult GuiImpl::RunMsg()
                 &this->msg.portraits[args->portrait.portraitIdx],
                 args->portrait.anmScriptIdx +
                     (args->portrait.portraitIdx == 0
-                         ? ANM_SPRITE_FACE_PORTRAIT
-                         : ANM_SPRITE_FACE_STAGE_ENEMY_PORTRAIT));
+                         ? ANM_SPRITE_FACE_PORTRAIT_ARRAY
+                         : ANM_SPRITE_FACE_STAGE_ENEMY_PORTRAIT_ARRAY));
             if (this->msg.portraits[args->portrait.portraitIdx]
                     .sprite
                     ->widthPx > 256.0f)
@@ -1631,7 +1632,7 @@ void Gui::DrawGameScene()
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
 
-        if (0 < (i32)g_GameManager.globals->currentPower)
+        if ((i32)g_GameManager.globals->currentPower > 0)
         {
             powerBarVerts[0].pos = Float3(496.0f, 144.0f, 0.1f);
             powerBarVerts[1].pos =
@@ -1722,7 +1723,7 @@ void Gui::DrawStageElements()
     Float3 oldPos;
     i32 i;
 
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->impl->stageTextVm); i++)
     {
         g_AnmManager->Draw(&this->impl->stageTextVm[i]);
     }
@@ -1775,7 +1776,7 @@ void Gui::DrawStageElements()
             if (leadingZeroSkipped != 0 || digitDivisor == 1)
             {
                 this->impl->captureBonusVm.sprite =
-                    g_AnmManager->GetSprite(digit + 132);
+                    g_AnmManager->GetSprite(digit + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
             }
             this->impl->captureBonusVm.pos.x += 7.0f;
@@ -1791,12 +1792,12 @@ void Gui::DrawStageElements()
         if (digit / 10 != 0)
         {
             this->impl->captureBonusVm.sprite =
-                g_AnmManager->GetSprite(digit / 10 + 132);
+                g_AnmManager->GetSprite(digit / 10 + ANM_SPRITE_ASCII_DIGITS);
             g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
         }
         this->impl->captureBonusVm.pos.x += 7.0f;
         this->impl->captureBonusVm.sprite =
-            g_AnmManager->GetSprite(digit % 10 + 132);
+            g_AnmManager->GetSprite(digit % 10 + ANM_SPRITE_ASCII_DIGITS);
         g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
 
         digit = catk->numAttemptsPerShot[g_GameManager.shotTypeAndCharacter];
@@ -1808,12 +1809,12 @@ void Gui::DrawStageElements()
         if (digit / 10 != 0)
         {
             this->impl->captureBonusVm.sprite =
-                g_AnmManager->GetSprite(digit / 10 + 132);
+                g_AnmManager->GetSprite(digit / 10 + ANM_SPRITE_ASCII_DIGITS);
             g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
         }
         this->impl->captureBonusVm.pos.x += 7.0f;
         this->impl->captureBonusVm.sprite =
-            g_AnmManager->GetSprite(digit % 10 + 132);
+            g_AnmManager->GetSprite(digit % 10 + ANM_SPRITE_ASCII_DIGITS);
         g_AnmManager->DrawNoRotation(&this->impl->captureBonusVm);
     }
     if (this->impl->stageClearBg.activeSpriteIdx >= 0)
@@ -1828,7 +1829,7 @@ void Gui::DrawStageElements()
     }
     if (this->impl->activeTransitionQuads != 0)
     {
-        for (i = 0; i < 168; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->impl->transitionQuads); i++)
         {
             g_AnmManager->DrawProjected(&this->impl->transitionQuads[i]);
             g_AnmManager->SetSprite(NULL);
@@ -1847,7 +1848,7 @@ void Gui::DrawStageElements()
         timerPos.y = 16.0f;
         timerPos.z = 0.0f;
         ScreenEffect::DrawColoredQuad(&healthBarRect, color1, color1, color2, color2);
-        for (j = 0; j < 8; j++)
+        for (j = 0; j < ARRAY_SIZE_SIGNED(this->bossHealth); j++)
         {
             if (this->bossHealth[j] == 0.0f)
             {

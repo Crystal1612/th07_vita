@@ -353,7 +353,7 @@ void Bullet::RunCommands()
 
     for (;;)
     {
-        if (this->curCmdIdx >= 5)
+        if (this->curCmdIdx >= ARRAY_SIZE_SIGNED(this->commands))
         {
             return;
         }
@@ -1410,18 +1410,18 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
             {
                 switch (g_BulletTypeInfos[i].anmFileIdx)
                 {
-                case 514:
+                case ANM_SCRIPT_BULLETS_RICE:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
                     break;
-                case 516:
-                case 518:
+                case ANM_SCRIPT_BULLETS_KUNAI:
+                case ANM_SCRIPT_BULLETS_ARROWHEAD:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
                     break;
-                case 517:
+                case ANM_SCRIPT_BULLETS_SHARD:
                     arg->bulletTypeTemplates[i].grazeSize.x = 4.0f;
                     arg->bulletTypeTemplates[i].grazeSize.y = 4.0f;
                     arg->bulletTypeTemplates[i].collisionType = 4;
@@ -1439,12 +1439,12 @@ ZunResult BulletManager::AddedCallback(BulletManager *arg)
                 {
                     switch (g_BulletTypeInfos[i].anmFileIdx)
                     {
-                    case 520:
+                    case ANM_SCRIPT_BULLETS_BUTTERFLY:
                         arg->bulletTypeTemplates[i].grazeSize.x = 5.0f;
                         arg->bulletTypeTemplates[i].grazeSize.y = 5.0f;
                         arg->bulletTypeTemplates[i].collisionType = 1;
                         break;
-                    case 521:
+                    case ANM_SCRIPT_BULLETS_KNIFE:
                         arg->bulletTypeTemplates[i].grazeSize.x = 8.0f;
                         arg->bulletTypeTemplates[i].grazeSize.y = 8.0f;
                         arg->bulletTypeTemplates[i].collisionType = 2;

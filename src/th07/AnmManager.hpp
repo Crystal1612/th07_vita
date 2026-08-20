@@ -268,6 +268,21 @@ struct AnmVmBase
         this->currentTimeInScript.Initialize();
     }
 
+    void SetInvisible()
+    {
+        this->visible = 0;
+    }
+
+    void SetInterrupt(i16 interrupt)
+    {
+        this->pendingInterrupt = interrupt;
+    }
+
+    void SetRotationZ(f32 z)
+    {
+        this->rotation.z = z;
+    }
+
     Float3 rotation;
     Float3 angleVel;
     Float2 scale;
@@ -321,21 +336,6 @@ struct AnmVm : AnmVmBase
     {
         memset(this, 0, sizeof(AnmVm));
         this->activeSpriteIdx = -1;
-    }
-
-    void SetInvisible()
-    {
-        this->visible = 0;
-    }
-
-    void SetInterrupt(i16 interrupt)
-    {
-        this->pendingInterrupt = interrupt;
-    }
-
-    void SetRotationZ(f32 z)
-    {
-        this->rotation.z = z;
     }
 
     static void AssignVm(AnmVm *out, AnmVm *vm)
@@ -459,7 +459,7 @@ struct AnmManager
     // FUNCTION: TH07 0x00433f20
     void ReleaseSurfaces()
     {
-        for (i32 i = 0; i < 32; i++)
+        for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->surfaces); i++)
         {
             SAFE_RELEASE(this->surfaces[i]);
         }

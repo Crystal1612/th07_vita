@@ -21,9 +21,9 @@ static u16 g_AutoFocusTimer;
 // FUNCTION: TH07 0x00430290
 u16 Controller::GetJoystickCaps()
 {
-    joyinfoex_tag joyinfo;
+    JOYINFOEX joyinfo;
 
-    joyinfo.dwSize = 52;
+    joyinfo.dwSize = sizeof(JOYINFOEX);
     joyinfo.dwFlags = 255;
     if (joyGetPosEx(0, &joyinfo))
     {
@@ -86,7 +86,7 @@ u16 Controller::GetControllerInput(u16 buttons)
     if (!g_Supervisor.controller)
     {
         memset(&pji, 0, sizeof(JOYINFOEX));
-        pji.dwSize = 52;
+        pji.dwSize = sizeof(JOYINFOEX);
         pji.dwFlags = 255;
         if (joyGetPosEx(0, &pji))
         {
@@ -281,7 +281,7 @@ u8 *Controller::GetControllerState()
     if (!g_Supervisor.controller)
     {
         memset(&joyinfoex, 0, sizeof(JOYINFOEX));
-        joyinfoex.dwSize = 52;
+        joyinfoex.dwSize = sizeof(JOYINFOEX);
         joyinfoex.dwFlags = 255;
         if (joyGetPosEx(0, &joyinfoex))
         {

@@ -242,10 +242,10 @@ u32 MainMenu::OnUpdatePreInput()
         {
             this->vmCount = 164;
             this->vmHead = new AnmVm[this->vmCount];
-            g_AnmManager->ExecuteVmsAnms(this->vmHead, 2304, this->vmCount);
+            g_AnmManager->ExecuteVmsAnms(this->vmHead, ANM_OFFSET_TITLE, this->vmCount);
         }
         g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 2);
-        for (i = 0; i < 8; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(g_MainMenuStrings); i++)
         {
             g_AnmManager->SetActiveSprite(&this->vmHead[i + 1],
                                           this->vmHead[i + 1].baseSpriteIdx + 1);
@@ -289,7 +289,7 @@ u32 MainMenu::OnUpdatePreInput()
                                             g_MainMenuStrings[i]);
         }
     case MENU_SUBSTATE_PREINPUT_INPUT: {
-        i = MoveCursorVertical(8);
+        i = MoveCursorVertical(ARRAY_SIZE_SIGNED(g_MainMenuStrings));
         if (i != 0)
         {
             while (g_GameManager.HasReachedMaxClearsAllShotTypes() == 0 &&
@@ -297,7 +297,7 @@ u32 MainMenu::OnUpdatePreInput()
             {
                 this->cursor += i;
             }
-            for (i = 0; i < 8; i++)
+            for (i = 0; i < ARRAY_SIZE_SIGNED(g_MainMenuStrings); i++)
             {
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 1],
                                               this->vmHead[i + 1].baseSpriteIdx + 1);
@@ -512,7 +512,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
         if (this->stateTimer == 0)
         {
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 3);
-            for (i = 0; i < 9; i++)
+            for (i = 0; i < ARRAY_SIZE_SIGNED(g_OptionsStrings); i++)
             {
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 9],
                                               this->vmHead[i + 9].baseSpriteIdx + 1);
@@ -534,9 +534,9 @@ u32 MainMenu::OnUpdateOptionsMenu()
         break;
     }
 
-    if (MoveCursorVertical(9))
+    if (MoveCursorVertical(ARRAY_SIZE_SIGNED(g_OptionsStrings)))
     {
-        for (i = 0; i < 9; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(g_OptionsStrings); i++)
         {
             g_AnmManager->SetActiveSprite(&this->vmHead[i + 9],
                                           this->vmHead[i + 9].baseSpriteIdx + 1);
@@ -902,7 +902,7 @@ u32 MainMenu::OnUpdateKeyConfig()
         if (this->stateTimer == 0)
         {
             g_AnmManager->SetInterruptActiveVms(this->vmHead, this->vmCount, 4);
-            for (i = 0; i < 12; i++)
+            for (i = 0; i < ARRAY_SIZE_SIGNED(g_KeyConfigStrings); i++)
             {
                 g_AnmManager->SetActiveSprite(
                     &this->vmHead[i + 35],
@@ -945,9 +945,9 @@ u32 MainMenu::OnUpdateKeyConfig()
                                             g_KeyConfigStrings[i]);
         }
     case MENU_SUBSTATE_SELECT_INPUT:
-        if (MoveCursorVertical(12))
+        if (MoveCursorVertical(ARRAY_SIZE_SIGNED(g_KeyConfigStrings)))
         {
-            for (i = 0; i < 12; i++)
+            for (i = 0; i < ARRAY_SIZE_SIGNED(g_KeyConfigStrings); i++)
             {
                 g_AnmManager->SetActiveSprite(&this->vmHead[i + 35],
                                               this->vmHead[i + 35].baseSpriteIdx +
@@ -1731,7 +1731,7 @@ u32 MainMenu::OnUpdateSelectShotType()
         }
         break;
     case MENU_SUBSTATE_SELECT_INPUT:
-        if (MoveCursorVertical(2))
+        if (MoveCursorVertical(MENU_CURSOR_SELECTSHOTTYPE_COUNT))
         {
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
@@ -2072,7 +2072,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         break;
     case 1:
         MoveCursorVertical(this->replayFilesNum);
-        if (15 < this->replayFilesNum)
+        if (this->replayFilesNum > 15)
         {
             if (WAS_PRESSED_RAW_AND_IS_EIGHTH(TH_BUTTON_LEFT))
             {
@@ -2306,7 +2306,7 @@ i32 MainMenu::DrawReplayMenu()
                                     // STRING: TH07 0x00495540
                                     "Stage    LastScore");
         replayAmount = this->chosenReplay - this->chosenReplay % 15;
-        for (i = 0; i < 7; i++, replayAmount++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(g_StageReplayStrings); i++, replayAmount++)
         {
             vm++;
             if (this->menuSubState != 3)
@@ -2397,7 +2397,7 @@ i32 MainMenu::DrawPracticeMenu()
     {
         local_10 = 1;
     }
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(g_StagePracticeStrings); i++)
     {
         g_AsciiManager.isSelected = IsSelected(i);
         if (i == this->cursor)
