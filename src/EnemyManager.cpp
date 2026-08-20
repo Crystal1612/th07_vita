@@ -201,7 +201,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
     EclTimelineInstrArgs *args1;
     Enemy *enemy;
 
-    while (0 <= timeline->timelineInstr->time)
+    while (timeline->timelineInstr->time >= 0)
     {
         if (timeline->timelineTime == timeline->timelineInstr->time)
         {
@@ -713,7 +713,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         enemy->primaryVm.color.color = enemy->color.color;
         g_AnmManager->ExecuteScript(&enemy->primaryVm);
         enemy->color.color = enemy->primaryVm.color.color;
-        for (j = 0; j < 2; j++)
+        for (j = 0; j < ARRAY_SIZE_SIGNED(enemy->vms); j++)
         {
             if (enemy->vms[j].anmFileIdx >= 0 && g_AnmManager->ExecuteScript(enemy->vms + j))
             {
@@ -956,7 +956,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                         g_ItemManager.SpawnItem(
                             &enemy->pos, g_ItemDropTable[arg->randomItemTableIdx], collisionOut);
                         arg->randomItemTableIdx++;
-                        if (arg->randomItemTableIdx >= 32)
+                        if (arg->randomItemTableIdx >= ARRAY_SIZE_SIGNED(g_ItemDropTable))
                         {
                             arg->randomItemTableIdx = 0;
                         }

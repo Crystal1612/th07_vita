@@ -371,7 +371,7 @@ void AsciiManager::CreatePopup1(ZunVec3 *pos, i32 value, u32 color)
     i32 characterCount;
     AsciiManagerPopup *popup;
 
-    if (this->nextPopupIndex1 >= 720)
+    if (this->nextPopupIndex1 >= MAX_POPUP1)
     {
         this->nextPopupIndex1 = 0;
     }
@@ -408,11 +408,11 @@ void AsciiManager::CreatePopup2(ZunVec3 *pos, i32 value, u32 color)
     i32 characterCount;
     AsciiManagerPopup *popup;
 
-    if (this->nextPopupIndex2 >= 3)
+    if (this->nextPopupIndex2 >= MAX_POPUP2)
     {
         this->nextPopupIndex2 = 0;
     }
-    popup = &this->popups[this->nextPopupIndex2 + 720];
+    popup = &this->popups[this->nextPopupIndex2 + MAX_POPUP1];
     popup->inUse = 1;
     characterCount = 0;
     if (value >= 0)
@@ -1171,8 +1171,7 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit,
-                                              j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
+                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1207,8 +1206,7 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit,
-                                              j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
+                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1256,8 +1254,7 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit,
-                                              j + ANM_SPRITE_ASCII_CHERRY_DIGITS);
+                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += (f32)xInc;

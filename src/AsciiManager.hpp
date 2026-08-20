@@ -78,6 +78,9 @@ struct AsciiManagerString
     i32 isGui;
 };
 
+#define MAX_POPUP1 720
+#define MAX_POPUP2 3
+
 struct AsciiManager
 {
     AsciiManager();
@@ -158,7 +161,7 @@ struct AsciiManager
     PauseMenu pauseMenu;
     RetryMenu retryMenu;
     AnmVm vm;
-    AsciiManagerPopup popups[723];
+    AsciiManagerPopup popups[MAX_POPUP1 + MAX_POPUP2];
 };
 
 extern AsciiManager g_AsciiManager;
