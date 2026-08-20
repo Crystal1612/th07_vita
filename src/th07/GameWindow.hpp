@@ -5,13 +5,13 @@
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
-typedef enum RenderResult
+enum RenderResult
 {
     RENDER_RESULT_EXIT_SUCCESS_2 = -1,
     RENDER_RESULT_KEEP_RUNNING = 0,
     RENDER_RESULT_EXIT_SUCCESS = 1,
     RENDER_RESULT_EXIT_ERROR = 2
-} RenderResult;
+};
 
 #pragma pack(4)
 struct GameWindow

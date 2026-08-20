@@ -9,7 +9,6 @@
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
 #include "ZunResult.hpp"
-#include "d3dx8.h"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f1b8
@@ -524,7 +523,7 @@ i32 Enemy::HandleTimerCallback()
 // FUNCTION: TH07 0x004202d0
 void Enemy::Despawn()
 {
-    if (this->deathType == 0)
+    if (this->deathType == ENEMY_DEATH_DESPAWN)
     {
         this->active = 0;
     }
@@ -951,10 +950,10 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
 
             switch (enemy->deathType)
             {
-            case 3:
+            case ENEMY_DEATH_BOSS:
                 enemy->life = 1;
                 enemy->canBeDamaged = 0;
-                enemy->deathType = 0;
+                enemy->deathType = ENEMY_DEATH_DESPAWN;
                 g_Gui.bossPresent = 0;
                 g_ReplayManager->replayEventFlags |= 0x20;
                 if (enemy->deathAnm1 >= 0)
@@ -964,11 +963,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     g_EffectManager.SpawnEffect(enemy->deathAnm1, &enemy->pos, 1, 0xffffffff);
                 }
                 break;
-            case 1:
+            case ENEMY_DEATH_SCORE_ONLY:
                 g_GameManager.AddScore(enemy->score);
                 enemy->canDie = 0;
                 goto END_BOSS;
-            case 0:
+            case ENEMY_DEATH_DESPAWN:
                 g_GameManager.AddScore(enemy->score);
                 enemy->active = 0;
                 goto END_BOSS;
@@ -978,7 +977,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     g_Gui.bossPresent = 0;
                     enemy->ResetEffectArray();
                 }
-            case 2:
+            case ENEMY_DEATH_DROP_ITEMS:
                 if (enemy->itemDrop >= 0)
                 {
                     g_EffectManager.SpawnEffect(enemy->deathAnm2 + 4, &enemy->pos, 3, 0xffffffff);

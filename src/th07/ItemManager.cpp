@@ -10,7 +10,6 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
-#include "d3dx8.h"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ecf8

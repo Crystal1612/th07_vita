@@ -167,7 +167,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
     {
         if (WAS_PRESSED_RAW(TH_BUTTON_ANY))
         {
-            g_Supervisor.curState = 1;
+            g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
         }
         arg->demoFrames = arg->demoFrames + 1;
         if ((arg->demoIdx == 0 && arg->demoFrames == 8100) ||
@@ -181,7 +181,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             (arg->demoIdx == 1 && arg->demoFrames >= 7140) ||
             (arg->demoIdx == 2 && arg->demoFrames >= 4740))
         {
-            g_Supervisor.curState = 1;
+            g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
             return CHAIN_CALLBACK_RESULT_BREAK;
         }
     }
@@ -322,11 +322,10 @@ u32 GameManager::OnDraw(GameManager *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(rect, spriteVm, spritePos, unused)
+#pragma var_order(rect, spriteVm, spritePos)
 // FUNCTION: TH07 0x0042e1f8
 void GameManager::DrawLoadingSprite()
 {
-    i32 unused[3];
     Float3 spritePos;
     AnmVm spriteVm;
     ZunRect rect;
@@ -497,7 +496,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->shotTypeAndCharacter = arg->character * 2 + arg->shotType;
     g_Supervisor.currentTime = timeGetTime();
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
-    if (g_Supervisor.curState != 3)
+    if (g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE)
     {
         DrawLoadingSprite();
         SAFE_DELETE(arg->defaultCfg);
@@ -648,7 +647,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     g_GameManager.plst.playDataByDifficulty[6].playCountPerShotType +
                         arg->shotTypeAndCharacter,
                     999999);
-                if (g_Supervisor.curState == 10)
+                if (g_Supervisor.curState == SUPERVISOR_STATE_RESTART_FROM_BEGINNING)
                 {
                     IncrementCappedAgain(
                         &((Plst *)(g_GameManager.pscr + 6))
@@ -797,7 +796,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         ;
     arg->isInRetryMenu = 0;
     arg->notInMenu = 1;
-    if (g_Supervisor.curState != 3)
+    if (g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE)
     {
         g_Supervisor.framerateMultiplier = 0.0f;
         g_Supervisor.fpsAccumulator = 0.0f;

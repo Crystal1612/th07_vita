@@ -14,7 +14,6 @@
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "ZunMath.hpp"
-#include "d3dx8.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
 
@@ -2391,8 +2390,9 @@ ZunResult Player::AddedCallback(Player *arg)
         return ZUN_ERROR;
     }
 
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         switch (g_GameManager.character)
         {
@@ -2468,8 +2468,9 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->respawnTimer = g_Player.shooterData->initialRespawnTimer;
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         g_AsciiManager.cherryGauge.pendingInterrupt = 1;
         g_AsciiManager.uiFadeState = 1;
@@ -2488,8 +2489,9 @@ ZunResult Player::AddedCallback(Player *arg)
 // FUNCTION: TH07 0x004428e0
 ZunResult Player::DeletedCallback(Player *arg)
 {
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         g_AnmManager->ReleaseAnm(10);
         g_AsciiManager.cherryGauge.pendingInterrupt = 99;

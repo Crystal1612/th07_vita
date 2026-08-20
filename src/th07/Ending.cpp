@@ -8,7 +8,6 @@
 #include "GameManager.hpp"
 #include "ScreenEffect.hpp"
 #include "Supervisor.hpp"
-#include "d3dx8.h"
 
 // GLOBAL: TH07 0x0049f628
 const char *g_BadEndingPaths[3] = {
@@ -164,7 +163,7 @@ void Ending::FadingEffect()
     }
 }
 
-#pragma var_order(lineDisplayed, buf, local_58, i, anmScriptIdx, vmIdx,   \
+#pragma var_order(lineDisplayed, buf, local_58, i, anmScriptIdx, vmIdx,        \
                   anmSpriteIdx, scrollBGDistance, scrollBGDuration, execOuter, \
                   execInner, j, musicFadeFrames)
 // FUNCTION: TH07 0x0041d700
@@ -517,7 +516,7 @@ ZunResult Ending::AddedCallback(Ending *arg)
 ZunResult Ending::DeletedCallback(Ending *arg)
 {
     g_AnmManager->ReleaseAnm(49);
-    g_Supervisor.curState = 6;
+    g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
     g_AnmManager->ReleaseSurface(0);
     ZunMemory::Free(arg->endFileData);
     g_Chain.Cut(arg->drawChain);

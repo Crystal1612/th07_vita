@@ -600,7 +600,7 @@ address|name|type
 00455170|AnmManager::UpdateTrail|function
 004552d0|AnmManager::DrawTriangleStrip|function
 004553fa|MainMenu::InitializeTimingVars|function
-00455435|MainMenu::SetGameState|function
+00455435|MainMenu::SetMenuState|function
 0045547d|MainMenu::MainMenu|function
 004554d6|MainMenu::OnUpdate|function
 004555dd|MainMenu::OnUpdatePreInput|function

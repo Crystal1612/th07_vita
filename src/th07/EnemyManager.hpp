@@ -9,6 +9,22 @@
 
 extern u32 g_SpellcardScore[SPELLCARD_COUNT];
 
+enum EnemyMoveMode
+{
+    ENEMY_MOVE_AXIS,
+    ENEMY_MOVE_POLAR,
+    ENEMY_MOVE_INTERP,
+    ENEMY_MOVE_ORBIT,
+};
+
+enum EnemyDeathType
+{
+    ENEMY_DEATH_DESPAWN,
+    ENEMY_DEATH_SCORE_ONLY,
+    ENEMY_DEATH_DROP_ITEMS,
+    ENEMY_DEATH_BOSS,
+};
+
 struct EnemyHistory
 {
     Float3 pos;
@@ -313,7 +329,7 @@ struct EnemyManager
         enemy->angle = 0.0f;
         enemy->moveAcceleration = 0.0f;
         enemy->moveSpeed = 0.0f;
-        enemy->moveMode = 0;
+        enemy->moveMode = ENEMY_MOVE_AXIS;
         enemy->disableBullets = 0;
         enemy->mirror = 0;
         enemy->isBoss = 0;
@@ -335,7 +351,7 @@ struct EnemyManager
         enemy->hasNoCollision = 0;
         enemy->isHittable = 1;
         enemy->isProjectile = 0;
-        enemy->deathType = 0;
+        enemy->deathType = ENEMY_DEATH_DESPAWN;
         enemy->deathCallbackSub = -1;
         enemy->hasMovementBounds = 0;
         enemy->effectsNum = 0;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <windows.h>
 #include <assert.h>
 #include <windef.h>
+#include <windows.h>
 
 #include "AnmIdx.hpp"
 #include "ZunColor.hpp"
@@ -12,7 +12,7 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-typedef enum AnmVarId
+enum AnmVarId
 {
     ANM_VAR_INT1_1 = 10000,
     ANM_VAR_INT1_2 = 10001,
@@ -24,9 +24,9 @@ typedef enum AnmVarId
     ANM_VAR_FLOAT_4 = 10007,
     ANM_VAR_INT2_1 = 10008,
     ANM_VAR_INT2_2 = 10009,
-} AnmVarId;
+};
 
-typedef enum AnmOpcode
+enum AnmOpcode
 {
     ANM_EXIT_HIDE = -1,
     ANM_EXIT_HIDE2 = 1,
@@ -110,9 +110,9 @@ typedef enum AnmOpcode
     ANM_WAIT = 79,
     ANM_SET_SCROLLVEL_X = 80,
     ANM_SET_SCROLLVEL_Y = 81
-} AnmOpcode;
+};
 
-typedef enum AnmEaseMode
+enum AnmEaseMode
 {
     ANM_EASE_IN_QUAD = 1,
     ANM_EASE_IN_CUBIC = 2,
@@ -120,7 +120,7 @@ typedef enum AnmEaseMode
     ANM_EASE_OUT_QUAD = 4,
     ANM_EASE_OUT_CUBIC = 5,
     ANM_EASE_OUT_QUART = 6,
-} AnmEaseMode;
+};
 
 struct VertexDiffuseXyzrhw
 {

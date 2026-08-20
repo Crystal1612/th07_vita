@@ -14,7 +14,6 @@
 #include "Supervisor.hpp"
 #include "TextHelper.hpp"
 #include "ZunMath.hpp"
-#include "d3dx8.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
 
