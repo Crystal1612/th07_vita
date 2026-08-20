@@ -8,7 +8,6 @@
 #include "GameManager.hpp"
 #include "ScreenEffect.hpp"
 #include "Supervisor.hpp"
-#include "d3dx8.h"
 
 // GLOBAL: TH07 0x0049f628
 const char *g_BadEndingPaths[3] = {
@@ -49,7 +48,7 @@ u32 Ending::OnUpdate(Ending *arg)
         {
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
         }
-        for (i = 0; i < 15; i++)
+        for (i = 0; i < MAX_ENDING_SPRITES; i++)
         {
             g_AnmManager->ExecuteScript(&arg->sprites[i]);
         }
@@ -71,7 +70,7 @@ u32 Ending::OnDraw(Ending *arg)
 {
     g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x,
                                  (i32)arg->backgroundPos.y, 640, 480);
-    for (i32 i = 0; i < 15; i++)
+    for (i32 i = 0; i < MAX_ENDING_SPRITES; i++)
     {
         g_AnmManager->Draw(&arg->sprites[i]);
     }
@@ -164,7 +163,7 @@ void Ending::FadingEffect()
     }
 }
 
-#pragma var_order(lineDisplayed, buf, local_58, i, anmScriptIdx, vmIdx,   \
+#pragma var_order(lineDisplayed, buf, local_58, i, anmScriptIdx, vmIdx,        \
                   anmSpriteIdx, scrollBGDistance, scrollBGDuration, execOuter, \
                   execInner, j, musicFadeFrames)
 // FUNCTION: TH07 0x0041d700
@@ -205,7 +204,7 @@ ZunResult Ending::ParseEndFile()
         }
         if (this->timer3 <= 0)
         {
-            for (i = 0; i < 15; i++)
+            for (i = 0; i < MAX_ENDING_SPRITES; i++)
             {
                 this->sprites[i].pendingInterrupt = 2;
             }
@@ -275,7 +274,7 @@ ZunResult Ending::ParseEndFile()
                 }
                 local_58 = 0;
                 lineDisplayed = 0;
-                for (execOuter = 0; execOuter < 6; execOuter++)
+                for (execOuter = 0; execOuter < ARRAY_SIZE_SIGNED(g_GameManager.clrd); execOuter++)
                 {
                     for (execInner = 0; execInner < 4; execInner++)
                     {
@@ -290,7 +289,7 @@ ZunResult Ending::ParseEndFile()
                     }
                 }
             case 'R':
-                for (j = 0; j < 16; j++)
+                for (j = 0; j < ARRAY_SIZE_SIGNED(this->sprites); j++)
                 {
                     this->sprites[j].anmFileIdx = 0;
                 }
@@ -490,9 +489,9 @@ ZunResult Ending::AddedCallback(Ending *arg)
     }
     g_GameManager.clrd[shotType]
         .difficultyClearedWithoutRetries[g_GameManager.difficulty] = 99;
-    for (i = 0; i < 15; i++)
+    for (i = 0; i < MAX_ENDING_SPRITES; i++)
     {
-        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + 1807);
+        g_AnmManager->ExecuteAnmIdx(&arg->sprites[i], i + ANM_SCRIPT_TEXT_ENDING);
         arg->sprites[i].pos =
             Float3(64.0f, (f32)i * 16.0f + 392.0f, 0.0f);
     }
@@ -516,8 +515,8 @@ ZunResult Ending::AddedCallback(Ending *arg)
 // FUNCTION: TH07 0x0041e790
 ZunResult Ending::DeletedCallback(Ending *arg)
 {
-    g_AnmManager->ReleaseAnm(49);
-    g_Supervisor.curState = 6;
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAFF);
+    g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
     g_AnmManager->ReleaseSurface(0);
     ZunMemory::Free(arg->endFileData);
     g_Chain.Cut(arg->drawChain);

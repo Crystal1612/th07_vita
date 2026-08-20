@@ -3,7 +3,10 @@
 #include "AnmManager.hpp"
 #include "ZunResult.hpp"
 
-typedef enum GuiDisplayArg
+#define TRANSITION_QUAD_ROWS 14
+#define TRANSITION_QUAD_COLS 12
+
+enum GuiDisplayArg
 {
     GUI_DISPLAY_HIDDEN = 0,
     GUI_DISPLAY_SHOWN = 1,
@@ -11,27 +14,47 @@ typedef enum GuiDisplayArg
     GUI_DISPLAY_BORDER = 2,
     GUI_DISPLAY_CHERRY_MAX = 3,
     GUI_DISPLAY_BORDER_BONUS = 4,
-} GuiDisplayArg;
+};
 
 // values from https://pytouhou.linkmauve.fr/doc/06/msg.xml
-typedef enum MsgOpcode
+enum MsgOpcode
 {
-    MSG_DELETE = 0,
-    MSG_SHOW_PORTRAIT = 1,
-    MSG_CHANGE_FACE = 2,
-    MSG_DIALOGUE = 3,
-    MSG_PAUSE = 4,
-    MSG_SWITCH = 5,
-    MSG_APPEAR_ENEMY = 6,
-    MSG_MUSIC = 7,
-    MSG_TEXT_INTRODUCE = 8,
-    MSG_STAGERESULTS = 9,
-    MSG_FREEZE = 10,
-    MSG_NEXT_LEVEL = 11,
-    MSG_FADEOUT_MUSIC = 12,
-    MSG_ALLOW_SKIP = 13,
-    MSG_FADE_IN_EFFECT = 14
-} MsgOpcode;
+    MSG_DELETE,
+    MSG_SHOW_PORTRAIT,
+    MSG_CHANGE_FACE,
+    MSG_DIALOGUE,
+    MSG_PAUSE,
+    MSG_SWITCH,
+    MSG_APPEAR_ENEMY,
+    MSG_MUSIC,
+    MSG_TEXT_INTRODUCE,
+    MSG_STAGERESULTS,
+    MSG_FREEZE,
+    MSG_NEXT_LEVEL,
+    MSG_FADEOUT_MUSIC,
+    MSG_ALLOW_SKIP,
+    MSG_FADE_IN_EFFECT,
+};
+
+enum
+{
+    ENEMY_NAME_CIRNO_MBOSS_ST1 = ANM_SPRITE_FRONT_ENEMY_NAME,
+    ENEMY_NAME_LETTY_BOSS_ST1,
+    ENEMY_NAME_CHEN_MBOSS_ST2,
+    ENEMY_NAME_CHEN_BOSS_ST2,
+    ENEMY_NAME_ALICE_MBOSS_ST3,
+    ENEMY_NAME_ALICE_BOSS_ST3,
+    ENEMY_NAME_LILY_MBOSS_ST4,
+    ENEMY_NAME_PRISMRIVER_BOSS_ST4,
+    ENEMY_NAME_YOUMU_MBOSS_ST5,
+    ENEMY_NAME_YOUMU_BOSS_ST5,
+    ENEMY_NAME_YOUMU_MBOSS_ST6,
+    ENEMY_NAME_YUYUKO_BOSS_ST6,
+    ENEMY_NAME_CHEN_MBOSS_EX,
+    ENEMY_NAME_RAN_BOSS_EX,
+    ENEMY_NAME_RAN_MBOSS_PH,
+    ENEMY_NAME_YUKARI_BOSS_PH,
+};
 
 struct MsgRawInstrArgPortrait
 {
@@ -81,7 +104,7 @@ struct MsgRawInstr
 struct MsgRawHeader
 {
     i32 numInstrs;
-    MsgRawInstr *instrs;
+    MsgRawInstr *instrs[1];
 };
 
 struct GuiFormattedText
@@ -122,13 +145,13 @@ struct GuiImpl
     AnmVm vms0[33];
     u8 bossHealthBarState;
     // pad 3
-    AnmVm vms1[5];
+    AnmVm stageTextVm[5];
     AnmVm bombSpellcardPortrait;
     AnmVm enemySpellcardPortrait;
     AnmVm bombSpellcardDecorLeft;
-    AnmVm enemySpellcardRelated1;
+    AnmVm enemySpellcardDecorHorizontalUp;
     AnmVm bombSpellcardDecorRight;
-    AnmVm enemySpellcardRelated2;
+    AnmVm enemySpellcardDecorHorizontalDown;
     AnmVm bombSpellcardName;
     AnmVm enemySpellcardName;
     AnmVm bombSpellcardNameBg;
@@ -138,7 +161,7 @@ struct GuiImpl
     AnmVm stageTransitionSnapshotVm;
     AnmVm captureBonusVm;
     AnmVm spellcardBonusIndicator;
-    AnmVm transitionQuads[168];
+    AnmVm transitionQuads[TRANSITION_QUAD_ROWS * TRANSITION_QUAD_COLS];
     i32 activeTransitionQuads;
     GuiMsgVm msg;
     // pad 3

@@ -16,7 +16,7 @@ ZunResult MusicRoom::CheckInputEnable()
 
     if (this->waitFramesCounter == 0)
     {
-        for (i = 0; i < 31; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->titleSprites); i++)
         {
             if (this->cursor == i)
             {
@@ -27,7 +27,7 @@ ZunResult MusicRoom::CheckInputEnable()
                 this->titleSprites[i].pendingInterrupt = 2;
             }
         }
-        for (i = 0; i < 8; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->descriptionSprites); i++)
         {
             this->descriptionSprites[i].pendingInterrupt = 1;
         }
@@ -64,7 +64,7 @@ i32 MusicRoom::ProcessInput()
         {
             this->listingOffset = this->cursor;
         }
-        for (i = 0; i < 31; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->titleSprites); i++)
         {
             if (this->cursor == i)
             {
@@ -91,7 +91,7 @@ i32 MusicRoom::ProcessInput()
                 this->listingOffset = this->cursor - 9;
             }
         }
-        for (i = 0; i < 31; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->titleSprites); i++)
         {
             if (this->cursor == i)
             {
@@ -111,7 +111,7 @@ i32 MusicRoom::ProcessInput()
             g_SoundPlayer.StartBGM("thbgm.dat");
         }
         g_Supervisor.PlayAudio(this->trackDescriptors[this->selectedIdx].path);
-        for (i = 0; i < 8; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->descriptionSprites); i++)
         {
             memset(local_54, 0, sizeof(local_54));
             memcpy(local_54,
@@ -133,7 +133,7 @@ i32 MusicRoom::ProcessInput()
     }
     if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
     {
-        g_Supervisor.curState = 1;
+        g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
         return 1;
     }
 
@@ -173,11 +173,11 @@ recheck:
         arg->waitFramesCounter++;
     }
     g_AnmManager->ExecuteScript(&arg->vm[0]);
-    for (i = 0; i < 31; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->titleSprites); i++)
     {
         g_AnmManager->ExecuteScript(&arg->titleSprites[i]);
     }
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->descriptionSprites); i++)
     {
         g_AnmManager->ExecuteScript(&arg->descriptionSprites[i]);
     }
@@ -220,7 +220,7 @@ u32 MusicRoom::OnDraw(MusicRoom *arg)
         AsciiManager::AddFormatText(&g_AsciiManager, &local_18, "%2d.", i + 1);
     }
     i++;
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->descriptionSprites); i++)
     {
         g_AnmManager->DrawNoRotation(&arg->descriptionSprites[i]);
     }
@@ -251,7 +251,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
         return ZUN_ERROR;
     }
 
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], 2304);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], ANM_SCRIPT_MUSIC);
     arg->waitFramesCounter = 0;
     // STRING: TH07 0x00496bc4
     curChar = (char *)FileSystem::OpenFile("data/musiccmt.txt", 0);
@@ -261,7 +261,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
         return ZUN_ERROR;
     }
 
-    arg->trackDescriptors = new TrackDescriptor[32];
+    arg->trackDescriptors = new TrackDescriptor[MAX_TRACK_DESCRIPTORS];
     offset = -1;
     while ((u32)((i32)curChar - (i32)firstChar) < g_LastFileSize)
     {
@@ -307,7 +307,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
                     goto LAB_0043b195;
                 }
             }
-            for (lineIdx = 0; lineIdx < 8; lineIdx++)
+            for (lineIdx = 0; lineIdx < ARRAY_SIZE_SIGNED(arg->descriptionSprites); lineIdx++)
             {
                 if (*curChar == '@')
                 {
@@ -347,7 +347,8 @@ LAB_0043b195:
     arg->numDescriptors = offset + 1;
     for (offset = 0; offset < arg->numDescriptors; offset++)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&arg->titleSprites[offset], offset + 2305);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&arg->titleSprites[offset],
+                                                offset + ANM_SCRIPT_MUSIC_TITLE);
         AnmManager::DrawVmTextFmt(g_AnmManager, arg->titleSprites + offset,
                                   0xc0e0ff, 0x302080,
                                   arg->trackDescriptors[offset].title);
@@ -357,11 +358,11 @@ LAB_0043b195:
         arg->titleSprites[offset].pos.z = 0.0f;
         arg->titleSprites[offset].anchor = 3;
     }
-    for (offset = 0; offset < 8; offset++)
+    for (offset = 0; offset < ARRAY_SIZE_SIGNED(arg->descriptionSprites); offset++)
     {
         g_AnmManager->SetAnmIdxAndExecuteScript(
             &arg->descriptionSprites[offset],
-            offset + 1799);
+            offset + ANM_SCRIPT_TEXT_MUSIC_DESC);
         memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
         memcpy(lineCharBuffer,
                arg->trackDescriptors[arg->selectedIdx].description[offset],
@@ -388,8 +389,8 @@ ZunResult MusicRoom::DeletedCallback(MusicRoom *arg)
     delete arg->trackDescriptors;
     arg->trackDescriptors = NULL;
     g_AnmManager->ReleaseSurface(0);
-    g_AnmManager->ReleaseAnm(46);
-    g_AnmManager->ReleaseAnm(47);
+    g_AnmManager->ReleaseAnm(ANM_FILE_MUSIC_0);
+    g_AnmManager->ReleaseAnm(ANM_FILE_MUSIC_1);
     g_Chain.Cut(arg->drawChain);
     arg->drawChain = NULL;
     return ZUN_SUCCESS;

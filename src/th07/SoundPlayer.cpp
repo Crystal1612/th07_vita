@@ -5,6 +5,7 @@
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
 #include "dxutil.hpp"
+#include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ea88
 SoundBufferIdxVolume SOUND_BUFFER_IDX_VOL[38] = {
@@ -89,7 +90,7 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     DSBUFFERDESC bufdesc;
 
     memset(this, 0, sizeof(SoundPlayer));
-    for (i32 i = 0; i < 128; i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->unusedSoundVolRelated); i++)
     {
         this->unusedSoundVolRelated[i] = -1;
     }
@@ -151,7 +152,7 @@ ZunResult SoundPlayer::Release()
         return ZUN_SUCCESS;
     }
 
-    for (i = 0; i < 128; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->duplicateSoundBuffers); i++)
     {
         SAFE_RELEASE(this->duplicateSoundBuffers[i]);
         SAFE_RELEASE(this->soundBuffers[i]);
@@ -163,7 +164,7 @@ ZunResult SoundPlayer::Release()
     SAFE_RELEASE(this->initSoundBuffer);
     SAFE_DELETE(this->backgroundMusic);
     SAFE_DELETE(this->manager);
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bgmPreloadData); i++)
     {
         SAFE_FREE(this->bgmPreloadData[i]);
     }
@@ -566,11 +567,11 @@ ZunResult SoundPlayer::InitSoundBuffers()
         return ZUN_SUCCESS;
     }
 
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundQueue); i++)
     {
         this->soundQueue[i] = -1;
     }
-    for (i = 0; i < 30; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(g_SFXList); i++)
     {
         if (LoadSound(i, g_SFXList[i]) != ZUN_SUCCESS)
         {
@@ -581,7 +582,7 @@ ZunResult SoundPlayer::InitSoundBuffers()
             return ZUN_ERROR;
         }
     }
-    for (i = 0; (u32)i < 38; i++)
+    for (i = 0; i < ARRAY_SIZE(SOUND_BUFFER_IDX_VOL); i++)
     {
         this->directSoundHdl->DuplicateSoundBuffer(
             this->soundBuffers[SOUND_BUFFER_IDX_VOL[i].bufferIdx],
@@ -600,7 +601,7 @@ void SoundPlayer::PlaySoundByIdx(i32 idx, u32 param_2)
     i32 i;
 
     iVar1 = SOUND_BUFFER_IDX_VOL[idx].field2_0x6;
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundQueue); i++)
     {
         if (this->soundQueue[i] < 0)
         {
@@ -612,7 +613,7 @@ void SoundPlayer::PlaySoundByIdx(i32 idx, u32 param_2)
             return;
         }
     }
-    if (i >= 5)
+    if (i >= ARRAY_SIZE_SIGNED(this->soundQueue))
     {
         return;
     }
@@ -874,7 +875,7 @@ loop:
     default:
         goto loop_breakout;
     }
-    for (i = 0; i < 31; i++, commandCursor++)
+    for (i = 0; i < MAX_SOUND_COMMANDS; i++, commandCursor++)
     {
         if (commandCursor->opcode == 0)
         {
@@ -895,7 +896,7 @@ loop_breakout:
     }
     else
     {
-        for (i = 0; i < 5; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundQueue); i++)
         {
             if (this->soundQueue[i] < 0)
             {
@@ -972,7 +973,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
 // FUNCTION: TH07 0x0044d2f0
 void SoundPlayer::PushCommand(AudioOpcode opcode, i32 arg1, const char *arg2)
 {
-    for (i32 i = 0; i < 31; i++)
+    for (i32 i = 0; i < MAX_SOUND_COMMANDS; i++)
     {
         if (this->commandQueue[i].opcode != 0)
         {

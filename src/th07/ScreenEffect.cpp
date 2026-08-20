@@ -77,16 +77,16 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
                 vertices[3].diffuse.color = color;
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
     if (!g_Supervisor.cfg.disableZBuffer)
     {
-        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+        g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
                                             sizeof(VertexDiffuseXyzrhw));
@@ -98,11 +98,11 @@ void ScreenEffect::DrawSquare(ZunRect *rect, D3DCOLOR color)
     g_AnmManager->SetZWriteDisable(255);
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 }
 
 // FUNCTION: TH07 0x0044aa20
@@ -125,16 +125,16 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
     vertices[3].diffuse.color = param_5;
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 2);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 2);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 0);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_DIFFUSE);
     if (!g_Supervisor.cfg.disableZBuffer)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
     }
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices,
                                             sizeof(VertexDiffuseXyzrhw));
@@ -146,11 +146,11 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2,
     g_AnmManager->SetZWriteDisable(255);
     if (!g_Supervisor.cfg.disableTextureBlend)
     {
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, 4);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, 4);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     }
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, 2);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, 2);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 }
 
 // FUNCTION: TH07 0x0044adf0

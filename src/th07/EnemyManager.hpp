@@ -7,7 +7,23 @@
 #include "SoundPlayer.hpp"
 #include "inttypes.hpp"
 
-extern u32 g_SpellcardScore[141];
+extern u32 g_SpellcardScore[SPELLCARD_COUNT];
+
+enum EnemyMoveMode
+{
+    ENEMY_MOVE_AXIS,
+    ENEMY_MOVE_POLAR,
+    ENEMY_MOVE_INTERP,
+    ENEMY_MOVE_ORBIT,
+};
+
+enum EnemyDeathType
+{
+    ENEMY_DEATH_DESPAWN,
+    ENEMY_DEATH_SCORE_ONLY,
+    ENEMY_DEATH_DROP_ITEMS,
+    ENEMY_DEATH_BOSS,
+};
 
 struct EnemyHistory
 {
@@ -42,6 +58,8 @@ struct SpellcardInfo
     i32 spellcardIdx;
     u32 usedBomb;
 };
+
+#define ENEMY_STACK_SIZE 15
 
 struct Enemy
 {
@@ -112,7 +130,7 @@ struct Enemy
     AnmVm primaryVm;
     AnmVm vms[2];
     EnemyEclContext currentContext;
-    EnemyEclContext savedContextStack[16];
+    EnemyEclContext savedContextStack[ENEMY_STACK_SIZE + 1];
     i32 stackDepth;
     i32 unused_2a80;
     i32 deathCallbackSub;
@@ -257,6 +275,8 @@ struct Enemy
 };
 C_ASSERT(sizeof(Enemy) == 0x4f48);
 
+#define MAX_ENEMIES 480
+
 struct EnemyManager
 {
     EnemyManager()
@@ -295,11 +315,11 @@ struct EnemyManager
         memset(this, 0, sizeof(EnemyManager));
         enemy = &this->enemyTemplate;
         memset(enemy, 0, sizeof(Enemy));
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(enemy->vms); i++)
         {
             enemy->vms[i].anmFileIdx = -1;
         }
-        for (i = 0; i < 96; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(enemy->enemyHistory); i++)
         {
             enemy->enemyHistory[i].pos.x = -999.0f;
         }
@@ -312,7 +332,7 @@ struct EnemyManager
         enemy->angle = 0.0f;
         enemy->moveAcceleration = 0.0f;
         enemy->moveSpeed = 0.0f;
-        enemy->moveMode = 0;
+        enemy->moveMode = ENEMY_MOVE_AXIS;
         enemy->disableBullets = 0;
         enemy->mirror = 0;
         enemy->isBoss = 0;
@@ -334,12 +354,12 @@ struct EnemyManager
         enemy->hasNoCollision = 0;
         enemy->isHittable = 1;
         enemy->isProjectile = 0;
-        enemy->deathType = 0;
+        enemy->deathType = ENEMY_DEATH_DESPAWN;
         enemy->deathCallbackSub = -1;
         enemy->hasMovementBounds = 0;
         enemy->effectsNum = 0;
         enemy->runInterrupt = -1;
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(enemy->lifeCallbackThreshold); i++)
         {
             enemy->lifeCallbackThreshold[i] = -1;
         }
@@ -357,7 +377,7 @@ struct EnemyManager
     const char *stgEnmAnmFilename;
     const char *stgEnm2AnmFilename;
     Enemy enemyTemplate;
-    Enemy enemies[481];
+    Enemy enemies[MAX_ENEMIES + 1];
     Enemy *bosses[8];
     u16 randomItemSpawnIdx;
     u16 randomItemTableIdx;

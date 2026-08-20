@@ -45,7 +45,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     if (!g_GameManager.isInPauseMenu && !g_GameManager.isInRetryMenu)
     {
         curPopup = arg->popups;
-        for (i = 0; i < 723; i++, curPopup++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(arg->popups); i++, curPopup++)
         {
             if (!curPopup->inUse)
             {
@@ -73,7 +73,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
     {
         if (arg->vm.anmFileIdx == 0)
         {
-            g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm, 7);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm, ANM_SCRIPT_ASCII_DEMO_MARKER);
         }
         g_AnmManager->ExecuteScript(&arg->vm);
     }
@@ -108,8 +108,8 @@ u32 AsciiManager::OnDrawPopups(AsciiManager *arg)
 // FUNCTION: TH07 0x00401a00
 void AsciiManager::InitializeVms()
 {
-    memset(&this->vm1, 0, sizeof(AnmVm));
-    memset(&this->vm0, 0, sizeof(AnmVm));
+    memset(&this->largeTextVm, 0, sizeof(AnmVm));
+    memset(&this->smallScorePopupVm, 0, sizeof(AnmVm));
     memset(&this->strings, 0, sizeof(this->strings));
     memset(&this->pauseMenu, 0, sizeof(PauseMenu));
     memset(&this->retryMenu, 0, sizeof(RetryMenu));
@@ -123,10 +123,10 @@ void AsciiManager::InitializeVms()
     this->color = 0xffffffff;
     this->scale.x = 1.0f;
     this->scale.y = 1.0f;
-    this->vm1.anchor = 3;
-    g_AnmManager->InitializeAndSetActiveSprite(&this->vm1, 0);
-    g_AnmManager->InitializeAndSetActiveSprite(&this->vm0, 32);
-    this->vm1.pos.z = 0.1f;
+    this->largeTextVm.anchor = 3;
+    g_AnmManager->InitializeAndSetActiveSprite(&this->largeTextVm, ANM_SPRITE_ASCII_LARGE_FONT);
+    g_AnmManager->InitializeAndSetActiveSprite(&this->smallScorePopupVm, ANM_SPRITE_ASCII_SMALL_SCORE);
+    this->largeTextVm.pos.z = 0.1f;
     this->isSelected = 0;
     this->fontSpacing = 14;
     this->SetFadeState(this->uiFadeState);
@@ -135,13 +135,13 @@ void AsciiManager::InitializeVms()
 // FUNCTION: TH07 0x00401ba0
 void AsciiManager::InitializeOtherVms()
 {
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryGauge, ANM_OFFSET_CHERRY_GAUGE);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryDigit, ANM_OFFSET_CHERRY_DIGIT);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryBorderActive, ANM_OFFSET_CHERRY_BORDER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[0], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[1], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[2], ANM_OFFSET_BOSS_MARKER);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[3], ANM_OFFSET_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryGauge, ANM_SCRIPT_ASCII_CHERRY_GAUGE);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryDigit, ANM_SCRIPT_ASCII_DIGIT);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->cherryBorderActive, ANM_SCRIPT_ASCII_CHERRY_BORDER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[0], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[1], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[2], ANM_SCRIPT_ASCII_BOSS_MARKER);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&this->bossMarkers[3], ANM_SCRIPT_ASCII_BOSS_MARKER);
 }
 
 // FUNCTION: TH07 0x00401d70
@@ -166,10 +166,10 @@ ZunResult AsciiManager::AddedCallback(AsciiManager *arg)
 // FUNCTION: TH07 0x00401de0
 ZunResult AsciiManager::DeletedCallback(AsciiManager *arg)
 {
-    g_AnmManager->ReleaseAnm(1);
-    g_AnmManager->ReleaseAnm(2);
-    g_AnmManager->ReleaseAnm(4);
-    g_AnmManager->ReleaseAnm(3);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_0);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_1);
+    g_AnmManager->ReleaseAnm(ANM_FILE_CAPTURE);
+    g_AnmManager->ReleaseAnm(ANM_FILE_ASCII_2);
     return ZUN_SUCCESS;
 }
 
@@ -214,7 +214,7 @@ void AsciiManager::CutChain()
 // FUNCTION: TH07 0x00401f40
 void AsciiManager::AddString(Float3 *pos, const char *text)
 {
-    if (this->numStrings >= 256)
+    if (this->numStrings >= ARRAY_SIZE_SIGNED(this->strings))
     {
         return;
     }
@@ -269,14 +269,14 @@ void AsciiManager::DrawStrings()
 
     guiString = 1;
     string = this->strings;
-    this->vm0.visible = 1;
-    this->vm0.anchor = 3;
+    this->smallScorePopupVm.visible = 1;
+    this->smallScorePopupVm.anchor = 3;
     for (i = 0; i < this->numStrings; i++, string++)
     {
-        this->vm0.pos = *(Float3 *)&string->pos;
+        this->smallScorePopupVm.pos = *(Float3 *)&string->pos;
         text = string->text;
-        this->vm0.scale.x = string->scale.x;
-        this->vm0.scale.y = string->scale.y;
+        this->smallScorePopupVm.scale.x = string->scale.x;
+        this->smallScorePopupVm.scale.y = string->scale.y;
         charWidth = (f32)this->fontSpacing * string->scale.x;
         if (guiString != string->isGui)
         {
@@ -303,32 +303,32 @@ void AsciiManager::DrawStrings()
         {
             if (*(u8 *)text == '\n')
             {
-                this->vm0.pos.y += 16.0f * string->scale.y;
-                this->vm0.pos.x = string->pos.x;
+                this->smallScorePopupVm.pos.y += 16.0f * string->scale.y;
+                this->smallScorePopupVm.pos.x = string->pos.x;
             }
             else if (*(u8 *)text == ' ')
             {
-                this->vm0.pos.x += charWidth;
+                this->smallScorePopupVm.pos.x += charWidth;
             }
             else
             {
                 if (!string->isSelected)
                 {
-                    this->vm0.sprite = &g_AnmManager->sprites[(u8)*text - 1];
-                    this->vm0.color.color = string->color;
+                    this->smallScorePopupVm.sprite = &g_AnmManager->sprites[(u8)*text - 1];
+                    this->smallScorePopupVm.color.color = string->color;
                 }
                 else
                 {
-                    this->vm0.sprite = &g_AnmManager->sprites[(u8)*text + 124];
-                    this->vm0.color.color = 0xffffffff;
+                    this->smallScorePopupVm.sprite = &g_AnmManager->sprites[(u8)*text + 124];
+                    this->smallScorePopupVm.color.color = 0xffffffff;
                 }
-                g_AnmManager->DrawNoRotation(&this->vm0);
-                this->vm0.pos.x += charWidth;
+                g_AnmManager->DrawNoRotation(&this->smallScorePopupVm);
+                this->smallScorePopupVm.pos.x += charWidth;
             }
             text++;
         }
     }
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bossMarkers); i++)
     {
         if (this->bossMarkers[i].pos.x >= 56.0f &&
             this->bossMarkers[i].pos.x <= 392.0f)
@@ -369,7 +369,7 @@ void AsciiManager::CreatePopup1(Float3 *pos, i32 value,
     i32 characterCount;
     AsciiManagerPopup *popup;
 
-    if (this->nextPopupIndex1 >= 720)
+    if (this->nextPopupIndex1 >= MAX_POPUP1)
     {
         this->nextPopupIndex1 = 0;
     }
@@ -408,11 +408,11 @@ void AsciiManager::CreatePopup2(Float3 *pos, i32 value,
     i32 characterCount;
     AsciiManagerPopup *popup;
 
-    if (this->nextPopupIndex2 >= 3)
+    if (this->nextPopupIndex2 >= MAX_POPUP2)
     {
         this->nextPopupIndex2 = 0;
     }
-    popup = &this->popups[this->nextPopupIndex2 + 720];
+    popup = &this->popups[this->nextPopupIndex2 + MAX_POPUP1];
     popup->inUse = 1;
     characterCount = 0;
     if (value >= 0)
@@ -443,13 +443,13 @@ void AsciiManager::CreatePopup2(Float3 *pos, i32 value,
 // FUNCTION: TH07 0x00402780
 i32 PauseMenu::OnUpdate()
 {
-    u32 i;
+    i32 i;
 
-    if (WAS_PRESSED_RAW(TH_BUTTON_MENU) && this->curState != 4)
+    if (WAS_PRESSED_RAW(TH_BUTTON_MENU) && this->curState != PAUSE_MENU_STATE_UNPAUSING)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-        this->curState = 4;
-        for (i = 0; i < 10; i++)
+        this->curState = PAUSE_MENU_STATE_UNPAUSING;
+        for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
         {
             if (this->menuSprites[i].visible)
             {
@@ -460,11 +460,11 @@ i32 PauseMenu::OnUpdate()
         this->menuBackground.pendingInterrupt = 1;
     }
     if (WAS_PRESSED_RAW(TH_BUTTON_Q) &&
-        this->curState != 9)
+        this->curState != PAUSE_MENU_STATE_RETURN_TO_MENU)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-        this->curState = 9;
-        for (i = 0; i < 10; i++)
+        this->curState = PAUSE_MENU_STATE_RETURN_TO_MENU;
+        for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
         {
             if (this->menuSprites[i].visible)
             {
@@ -475,11 +475,11 @@ i32 PauseMenu::OnUpdate()
     }
     if (!g_GameManager.replay &&
         WAS_PRESSED_RAW(TH_BUTTON_RESET) &&
-        this->curState != 9)
+        this->curState != PAUSE_MENU_STATE_RETURN_TO_MENU)
     {
         g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-        this->curState = 10;
-        for (i = 0; i < 10; i++)
+        this->curState = PAUSE_MENU_STATE_RESTART_STAGE;
+        for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
         {
             if (this->menuSprites[i].visible)
             {
@@ -490,17 +490,18 @@ i32 PauseMenu::OnUpdate()
     }
     switch (this->curState)
     {
-    case 0:
-        for (i = 0; i < 10; i++)
+    case PAUSE_MENU_STATE_INIT:
+        for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
         {
-            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + ANM_OFFSET_RETRY_MENU);
+            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + ANM_SCRIPT_ASCII_PAUSE_MENU);
         }
-        for (i = 0; (i32)i < 4; i++)
+        for (i = 0; i < 4; i++)
         {
             this->menuSprites[i].pendingInterrupt = 1;
         }
-        g_AnmManager->SetActiveSprite(this->menuSprites + 7,
-                                      g_GameManager.difficulty + 269);
+        g_AnmManager->SetActiveSprite(&this->menuSprites[7],
+                                      g_GameManager.difficulty +
+                                          ANM_SPRITE_ASCII_PAUSE_MENU_DIFFICULTY);
         if (!g_GameManager.practice)
         {
             this->menuSprites[8].SetInvisible();
@@ -523,14 +524,14 @@ i32 PauseMenu::OnUpdate()
                                                       this->menuBackground.sprite->heightPx,
                                                       this->menuBackground.sprite->widthPx))
             {
-                this->curState = 0;
+                this->curState = PAUSE_MENU_STATE_INIT;
                 return 0;
             }
             this->menuBackground.pos.x = 32.0f;
             this->menuBackground.pos.y = 16.0f;
             this->menuBackground.pos.z = 0.0f;
         }
-    case 1:
+    case PAUSE_MENU_STATE_SELECTING_UNPAUSE:
         this->menuSprites[1].color.color = 0xffffffff;
         this->menuSprites[3].color.color = 0x80303030;
         this->menuSprites[2].color.color = 0x80303030;
@@ -543,34 +544,34 @@ i32 PauseMenu::OnUpdate()
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_UP))
                 {
-                    this->curState = 3;
+                    this->curState = PAUSE_MENU_STATE_SELECTING_RESTART;
                     g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
                 }
             }
             else if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
-                this->curState = 2;
+                this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                this->curState = 2;
+                this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; (i32)i < 4; i++)
+                for (i = 0; i < 4; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                this->curState = 4;
+                this->curState = PAUSE_MENU_STATE_UNPAUSING;
                 this->numFrames = 0;
                 this->menuBackground.pendingInterrupt = 1;
             }
         }
         break;
-    case 2:
+    case PAUSE_MENU_STATE_SELECTING_RETURN:
         this->menuSprites[3].color.color = 0x80303030;
         this->menuSprites[1].color.color = 0x80303030;
         this->menuSprites[2].color.color = 0xffffffff;
@@ -581,14 +582,14 @@ i32 PauseMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
-                this->curState = 1;
+                this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (g_GameManager.replay)
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
                 {
-                    this->curState = 1;
+                    this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
                     g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
                 }
             }
@@ -596,27 +597,27 @@ i32 PauseMenu::OnUpdate()
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
                 {
-                    this->curState = 3;
+                    this->curState = PAUSE_MENU_STATE_SELECTING_RESTART;
                     g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
                 }
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; (i32)i < 4; i++)
+                for (i = 0; i < 4; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                for (; (i32)i < 7; i++)
+                for (; i < 7; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 1;
                 }
-                this->curState = 6;
+                this->curState = PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_NO;
                 this->numFrames = 0;
             }
         }
         break;
-    case 3:
+    case PAUSE_MENU_STATE_SELECTING_RESTART:
         this->menuSprites[2].color.color = 0x80303030;
         this->menuSprites[1].color.color = 0x80303030;
         this->menuSprites[3].color.color = 0xffffffff;
@@ -627,36 +628,36 @@ i32 PauseMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
-                this->curState = 2;
+                this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                this->curState = 1;
+                this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; (i32)i < 4; i++)
+                for (i = 0; i < 4; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                for (; (i32)i < 7; i++)
+                for (; i < 7; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 1;
                 }
-                this->curState = 8;
+                this->curState = PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_NO;
                 this->numFrames = 0;
             }
         }
         break;
-    case 4:
+    case PAUSE_MENU_STATE_UNPAUSING:
         if (this->numFrames >= 20)
         {
-            this->curState = 0;
+            this->curState = PAUSE_MENU_STATE_INIT;
             g_GameManager.isInPauseMenu = 0;
-            for (i = 0; i < 10; i++)
+            for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
             {
                 this->menuSprites[i].SetInvisible();
             }
@@ -668,8 +669,8 @@ i32 PauseMenu::OnUpdate()
             g_Supervisor.currentTime = timeGetTime();
         }
         break;
-    case 5:
-    case 7:
+    case PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_YES:
+    case PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_YES:
         this->menuSprites[5].color.color = 0xffff8080;
         this->menuSprites[6].color.color = 0x80808080;
         this->menuSprites[5].offset = Float3(-4.0f, -4.0f, 0.0f);
@@ -678,37 +679,37 @@ i32 PauseMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                if (this->curState == 5)
+                if (this->curState == PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_YES)
                 {
-                    this->curState = 6;
+                    this->curState = PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_NO;
                 }
                 else
                 {
-                    this->curState = 8;
+                    this->curState = PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_NO;
                 }
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 4; (i32)i < 7; i++)
+                for (i = 4; i < 7; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                if (this->curState == 5)
+                if (this->curState == PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_YES)
                 {
-                    this->curState = 9;
+                    this->curState = PAUSE_MENU_STATE_RETURN_TO_MENU;
                 }
                 else
                 {
-                    this->curState = 10;
+                    this->curState = PAUSE_MENU_STATE_RESTART_STAGE;
                 }
                 this->numFrames = 0;
             }
         }
         break;
-    case 6:
-    case 8:
+    case PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_NO:
+    case PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_NO:
         this->menuSprites[5].color.color = 0x80808080;
         this->menuSprites[6].color.color = 0xffff8080;
         this->menuSprites[5].offset = Float3(0.0f, 0.0f, 0.0f);
@@ -717,66 +718,66 @@ i32 PauseMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                if (this->curState == 6)
+                if (this->curState == PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_NO)
                 {
-                    this->curState = 5;
+                    this->curState = PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_YES;
                 }
                 else
                 {
-                    this->curState = 7;
+                    this->curState = PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_YES;
                 }
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; (i32)i < 4; i++)
+                for (i = 0; i < 4; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 1;
                 }
-                for (; (i32)i < 7; i++)
+                for (; i < 7; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                if (this->curState == 6)
+                if (this->curState == PAUSE_MENU_STATE_CONFIRM_RETURN_SELECTING_NO)
                 {
-                    this->curState = 2;
+                    this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
                 }
                 else
                 {
-                    this->curState = 3;
+                    this->curState = PAUSE_MENU_STATE_SELECTING_RESTART;
                 }
                 this->numFrames = 0;
             }
         }
         break;
-    case 9:
+    case PAUSE_MENU_STATE_RETURN_TO_MENU:
         if (this->numFrames >= 20)
         {
-            this->curState = 0;
+            this->curState = PAUSE_MENU_STATE_INIT;
             g_GameManager.isInPauseMenu = 0;
-            g_Supervisor.curState = 1;
-            for (i = 0; i < 10; i++)
+            g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
+            for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
             {
                 this->menuSprites[i].SetInvisible();
             }
             g_Supervisor.currentTime = timeGetTime();
         }
         break;
-    case 10:
+    case PAUSE_MENU_STATE_RESTART_STAGE:
         if (this->numFrames >= 20)
         {
-            this->curState = 0;
+            this->curState = PAUSE_MENU_STATE_INIT;
             g_GameManager.isInPauseMenu = 0;
-            g_Supervisor.curState = 10;
-            for (i = 0; i < 10; i++)
+            g_Supervisor.curState = SUPERVISOR_STATE_RESTART_FROM_BEGINNING;
+            for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
             {
                 this->menuSprites[i].SetInvisible();
             }
             g_Supervisor.currentTime = timeGetTime();
         }
     }
-    for (i = 0; i < 10; i++)
+    for (i = 0; i < ARRAY_SIZE(this->menuSprites); i++)
     {
         g_AnmManager->ExecuteScript(&this->menuSprites[i]);
     }
@@ -801,13 +802,13 @@ void PauseMenu::OnDraw()
         g_Supervisor.viewport.Width = (u32)g_GameManager.arcadeRegionSize.x;
         g_Supervisor.viewport.Height = (u32)g_GameManager.arcadeRegionSize.y;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-        if (g_Supervisor.hasLockableBackbuffer && this->curState != 0)
+        if (g_Supervisor.hasLockableBackbuffer && this->curState != PAUSE_MENU_STATE_INIT)
         {
             AnmVm local_25c = this->menuBackground;
             local_25c.zWriteDisable = 1;
             g_AnmManager->DrawNoRotation(&local_25c);
         }
-        for (i = 0; i < 10; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->menuSprites); i++)
         {
             if (this->menuSprites[i].visible)
             {
@@ -826,13 +827,13 @@ i32 RetryMenu::OnUpdate()
     {
         g_GameManager.isInRetryMenu = 0;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
-        g_Supervisor.curState = 6;
+        g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
         return 1;
     }
     if (g_GameManager.replay)
     {
         g_GameManager.isInRetryMenu = 0;
-        g_Supervisor.curState = 7;
+        g_Supervisor.curState = SUPERVISOR_STATE_REPLAY_END;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         return 1;
     }
@@ -840,26 +841,32 @@ i32 RetryMenu::OnUpdate()
         g_GameManager.difficulty >= 4)
     {
         g_GameManager.isInRetryMenu = 0;
-        g_Supervisor.curState = 6;
+        g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
         g_GameManager.globals->guiScore = g_GameManager.globals->score;
         return 1;
     }
     switch (this->curState)
     {
-    case 0:
+    case RETRY_MENU_STATE_INIT:
         if (this->numFrames == 0)
         {
             g_SoundPlayer.PushCommand(AUDIO_PAUSE, 0, "Pause");
-            for (i = 0; i < 4; i++)
+            for (i = 0; i < RETRY_MENU_SPRITES - 1; i++)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[i], i + 264);
+                g_AnmManager->SetAnmIdxAndExecuteScript(
+                    &this->menuSprites[i],
+                    i + ANM_SCRIPT_ASCII_RETRY_MENU);
                 this->menuSprites[i].pendingInterrupt = 1;
             }
-            g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuSprites[4], 268);
-            g_AnmManager->SetActiveSprite(&this->menuSprites[4],
-                                          g_GameManager.maxRetries + 262 -
-                                              (u32)g_GameManager.globals->numRetries);
-            this->menuSprites[4].pendingInterrupt = 1;
+            g_AnmManager->SetAnmIdxAndExecuteScript(
+                &this->menuSprites[RETRY_MENU_SPRITES - 1],
+                ANM_SCRIPT_ASCII_RETRY_MENU_LIVES);
+            g_AnmManager->SetActiveSprite(
+                &this->menuSprites[RETRY_MENU_SPRITES - 1],
+                g_GameManager.maxRetries +
+                    ANM_SPRITE_ASCII_RETRY_MENU_LIVES -
+                    (u32)g_GameManager.globals->numRetries);
+            this->menuSprites[RETRY_MENU_SPRITES - 1].pendingInterrupt = 1;
             if (g_Supervisor.hasLockableBackbuffer)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->menuBackground, ANM_OFFSET_MENU_BG);
@@ -867,7 +874,7 @@ i32 RetryMenu::OnUpdate()
                                                           this->menuBackground.sprite->startPixelInclusive.y,
                                                           this->menuBackground.sprite->heightPx, this->menuBackground.sprite->widthPx))
                 {
-                    this->curState = 0;
+                    this->curState = RETRY_MENU_STATE_INIT;
                     return 0;
                 }
                 this->menuBackground.pos.x = 32.0f;
@@ -876,13 +883,14 @@ i32 RetryMenu::OnUpdate()
             }
             g_Supervisor.UpdateTime();
         }
-        if (8 < this->numFrames)
+        if (this->numFrames > 8)
         {
             break;
         }
-        this->curState += 2;
+        // why +=?
+        this->curState += RETRY_MENU_STATE_SELECTING_RETURN;
         this->numFrames = 0;
-    case 1:
+    case RETRY_MENU_STATE_SELECTING_CONTINUE:
         this->menuSprites[2].color.color = 0xffff8080;
         this->menuSprites[3].color.color = 0x80808080;
         this->menuSprites[2].offset = Float3(-4.0f, -4.0f, 0.0f);
@@ -891,23 +899,23 @@ i32 RetryMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                this->curState = 2;
+                this->curState = RETRY_MENU_STATE_SELECTING_RETURN;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; i < 5; i++)
+                for (i = 0; i < RETRY_MENU_SPRITES; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                this->curState = 3;
+                this->curState = RETRY_MENU_STATE_CONTINUE_GAME;
                 this->menuBackground.pendingInterrupt = 1;
                 this->numFrames = 0;
             }
         }
         break;
-    case 2:
+    case RETRY_MENU_STATE_SELECTING_RETURN:
         this->menuSprites[3].color.color = 0xffff8080;
         this->menuSprites[2].color.color = 0x80808080;
         this->menuSprites[3].offset = Float3(-4.0f, -4.0f, 0.0f);
@@ -916,29 +924,29 @@ i32 RetryMenu::OnUpdate()
         {
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
-                this->curState = 1;
+                this->curState = RETRY_MENU_STATE_SELECTING_CONTINUE;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
-                for (i = 0; i < 5; i++)
+                for (i = 0; i < RETRY_MENU_SPRITES; i++)
                 {
                     this->menuSprites[i].pendingInterrupt = 2;
                 }
-                this->curState = 4;
+                this->curState = RETRY_MENU_STATE_RETURN_TO_MENU;
                 this->numFrames = 0;
             }
         }
         break;
-    case 4:
+    case RETRY_MENU_STATE_RETURN_TO_MENU:
         if (this->numFrames >= 20)
         {
-            this->curState = 0;
+            this->curState = RETRY_MENU_STATE_INIT;
             this->numFrames = 0;
             g_GameManager.isInRetryMenu = 0;
-            g_Supervisor.curState = 6;
-            for (i = 0; i < 5; i++)
+            g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME;
+            for (i = 0; i < RETRY_MENU_SPRITES; i++)
             {
                 this->menuSprites[i].SetInvisible();
             }
@@ -947,13 +955,13 @@ i32 RetryMenu::OnUpdate()
             return 0;
         }
         break;
-    case 3:
+    case RETRY_MENU_STATE_CONTINUE_GAME:
         if (this->numFrames >= 30)
         {
-            this->curState = 0;
+            this->curState = RETRY_MENU_STATE_INIT;
             this->numFrames = 0;
             g_GameManager.isInRetryMenu = 0;
-            for (i = 0; i < 5; i++)
+            for (i = 0; i < RETRY_MENU_SPRITES; i++)
             {
                 this->menuSprites[i].SetInvisible();
             }
@@ -1002,7 +1010,7 @@ i32 RetryMenu::OnUpdate()
         }
         break;
     }
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < RETRY_MENU_SPRITES; i++)
     {
         g_AnmManager->ExecuteScript(&this->menuSprites[i]);
     }
@@ -1028,15 +1036,16 @@ void RetryMenu::OnDraw()
         g_Supervisor.viewport.Height = g_GameManager.arcadeRegionSize.y;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
         if (g_Supervisor.hasLockableBackbuffer &&
-            (this->curState != 0 || 2 < this->numFrames))
+            (this->curState != RETRY_MENU_STATE_INIT || this->numFrames > 2))
         {
             g_AnmManager->DrawNoRotation(&this->menuBackground);
         }
-        if (this->curState == 1 || this->curState == 2)
+        if (this->curState == RETRY_MENU_STATE_SELECTING_CONTINUE ||
+            this->curState == RETRY_MENU_STATE_SELECTING_RETURN)
         {
             g_AnmManager->DrawNoRotation(&this->menuSprites[4]);
         }
-        for (i = 0; i < 5; i++)
+        for (i = 0; i < RETRY_MENU_SPRITES; i++)
         {
             if (this->menuSprites[i].visible)
             {
@@ -1069,18 +1078,18 @@ void AsciiManager::DrawPopups()
     {
         g_Supervisor.DisableFog();
     }
-    g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
+    g_Supervisor.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 
-    for (i = 0; i < 723; i++, popup++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->popups); i++, popup++)
     {
         if (!popup->inUse)
         {
             continue;
         }
 
-        this->vm1.pos.x = popup->pos.x - (f32)(popup->characterCount << 2);
-        this->vm1.pos.y = popup->pos.y;
-        this->vm1.color.color = popup->color;
+        this->largeTextVm.pos.x = popup->pos.x - (f32)(popup->characterCount << 2);
+        this->largeTextVm.pos.y = popup->pos.y;
+        this->largeTextVm.color.color = popup->color;
 
         dx = g_Player.positionCenter.x - popup->pos.x;
         dy = g_Player.positionCenter.y - popup->pos.y;
@@ -1108,22 +1117,22 @@ void AsciiManager::DrawPopups()
         {
             if (popup->timer < 52 || *digits == 10)
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits];
+                this->largeTextVm.color.bytes.a = alpha;
             }
             else if (popup->timer < 56)
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits + 11];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits + 11];
+                this->largeTextVm.color.bytes.a = alpha;
             }
             else
             {
-                this->vm1.sprite = &g_AnmManager->sprites[*digits + 21];
-                this->vm1.color.bytes.a = alpha;
+                this->largeTextVm.sprite = &g_AnmManager->sprites[*digits + 21];
+                this->largeTextVm.color.bytes.a = alpha;
             }
 
-            g_AnmManager->DrawNoRotation(&this->vm1);
-            this->vm1.pos.x += 8.0f;
+            g_AnmManager->DrawNoRotation(&this->largeTextVm);
+            this->largeTextVm.pos.x += 8.0f;
             digits--;
         }
     }
@@ -1178,7 +1187,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1213,7 +1223,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += 7.0f;
@@ -1263,7 +1274,8 @@ void AsciiManager::DrawPopups()
             }
             if (hasNonZeroDigit || divisor == 1)
             {
-                g_AnmManager->SetActiveSprite(&this->cherryDigit, j + 132);
+                g_AnmManager->SetActiveSprite(
+                    &this->cherryDigit, j + ANM_SPRITE_ASCII_DIGITS);
                 g_AnmManager->DrawNoRotation(&this->cherryDigit);
             }
             this->cherryDigit.pos.x += (f32)xInc;

@@ -14,7 +14,6 @@
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "ZunMath.hpp"
-#include "d3dx8.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
 
@@ -194,7 +193,7 @@ i32 ShtData::FireOrbBulletFocused(Player *player, PlayerBullet *bullet,
     bullet->offset.y = shtEntry->offset.y;
     bullet->trailLength = shtEntry->fireInterval;
     DefaultFireBulletCallback(player, bullet, shtEntry);
-    for (i32 i = 15; i >= 0; i--)
+    for (i32 i = ARRAY_SIZE_SIGNED(bullet->posHistory) - 1; i >= 0; i--)
     {
         bullet->posHistory[i].x = -999.0f;
     }
@@ -417,7 +416,7 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
         bullet->vm.pendingInterrupt = 1;
     }
     if ((g_Gui.HasCurrentMsgIdx() || player->bombInfo.isInUse) &&
-        20 < player->timers[bullet->timerIdx].timer.GetCurrent())
+        player->timers[bullet->timerIdx].timer.GetCurrent() > 20)
     {
         player->timers[bullet->timerIdx].timer = 20;
     }
@@ -442,7 +441,7 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
             player->bombDamageBoxes[i + 96].size = bullet->hitboxSize;
         }
     }
-    for (i = 15; 0 < i; i--)
+    for (i = ARRAY_SIZE_SIGNED(bullet->posHistory) - 1; i > 0; i--)
     {
         bullet->posHistory[i] = bullet->posHistory[i - 1];
     }
@@ -560,7 +559,7 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet,
     }
     if (bullet->timer.GetCurrent() % 6 == 0)
     {
-        g_EffectManager.SpawnParticles(5, pos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(5, pos, 1, 0xffffffff);
     }
     return 0;
 }
@@ -576,7 +575,7 @@ i32 ShtData::SpawnHitParticles(Player *player, PlayerBullet *bullet,
     {
         particlePos = *pos;
         particlePos.x = bullet->pos.x;
-        g_EffectManager.SpawnParticles(5, &particlePos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(5, &particlePos, 1, 0xffffffff);
     }
     return 0;
 }
@@ -591,8 +590,8 @@ void Player::SpawnBullets(Player *player, u32 timer)
     ShtLevel *level;
     i32 i;
 
-    level = !player->isFocus ? &player->shooterData->levels
-                             : &player->shooterDataFocus->levels;
+    level = !player->isFocus ? player->shooterData->levels
+                             : player->shooterDataFocus->levels;
 
     while ((i32)g_GameManager.globals->currentPower >= level->requiredPower)
     {
@@ -601,7 +600,7 @@ void Player::SpawnBullets(Player *player, u32 timer)
 
     entry = level->entry;
     bullet = player->bullets;
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(player->bullets); i++, bullet++)
     {
         if (bullet->bulletState != 0)
         {
@@ -665,7 +664,7 @@ void Player::UpdateShots()
     }
     if (this->playerState == PLAYER_STATE_DEAD)
     {
-        for (i = 0; i < 3; i++)
+        for (i = 0; i < ARRAY_SIZE_SIGNED(this->timers); i++)
         {
             if (this->timers[i].bullet)
             {
@@ -674,7 +673,7 @@ void Player::UpdateShots()
             }
         }
     }
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->timers); i++)
     {
         if (!this->timers[i].bullet)
         {
@@ -696,7 +695,7 @@ void Player::UpdateShots()
         }
     }
     bullet = this->bullets;
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bullets); i++, bullet++)
     {
         if (bullet->bulletState == 0)
         {
@@ -737,7 +736,7 @@ void Player::DrawBullets()
     i32 i;
 
     bullet = this->bullets;
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bullets); i++, bullet++)
     {
         if (bullet->bulletState != 1)
         {
@@ -768,7 +767,7 @@ void Player::DrawBulletExplosions()
     i32 i;
 
     bullet = this->bullets;
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bullets); i++, bullet++)
     {
         if (bullet->bulletState != 2)
         {
@@ -852,7 +851,7 @@ i32 Player::CalcDamageToEnemy(Float3 *center, Float3 *size,
     {
         *param_3 = 0;
     }
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bullets); i++, bullet++)
     {
         if (bullet->bulletState == 0 ||
             (bullet->bulletState != 1 && bullet->bulletState2 != 3))
@@ -895,8 +894,8 @@ i32 Player::CalcDamageToEnemy(Float3 *center, Float3 *size,
         {
             if (bullet->bulletState == 1)
             {
-                g_AnmManager->SetAnmIdxAndExecuteScript(&bullet->vm, bullet->vm.anmFileIdx + 32 + this->anmOffsetPlayer);
-                g_EffectManager.SpawnParticles(5, &bullet->pos, 1, 0xffffffff);
+                g_AnmManager->SetAnmIdxAndExecuteScript(&bullet->vm, bullet->vm.anmFileIdx + 32);
+                g_EffectManager.SpawnEffect(5, &bullet->pos, 1, 0xffffffff);
                 bullet->pos.z = 0.1f;
             }
             bullet->bulletState = 2;
@@ -907,7 +906,7 @@ i32 Player::CalcDamageToEnemy(Float3 *center, Float3 *size,
             }
         }
     }
-    for (i = 0; i < 112; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombDamageBoxes); i++)
     {
         if (this->bombDamageBoxes[i].size.x <= 0.0f)
         {
@@ -930,13 +929,13 @@ i32 Player::CalcDamageToEnemy(Float3 *center, Float3 *size,
         this->bombParticleTime++;
         if (this->bombParticleTime % 4 == 0)
         {
-            if (i < 96)
+            if (i < ARRAY_SIZE_SIGNED(this->bombClearBoxes))
             {
-                g_EffectManager.SpawnParticles(3, center, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(3, center, 1, 0xffffffff);
             }
             else
             {
-                g_EffectManager.SpawnParticles(5, center, 1, 0xffffffff);
+                g_EffectManager.SpawnEffect(5, center, 1, 0xffffffff);
             }
         }
         if (this->bombInfo.isInUse && param_3)
@@ -965,7 +964,7 @@ i32 Player::CheckBombGraze(Float3 *center, Float3 *size)
     bulletTopLeft.y = center->y - size->y / 2.0f;
     bulletBottomRight.x = center->x + size->x / 2.0f;
     bulletBottomRight.y = center->y + size->y / 2.0f;
-    for (i = 0; i < 96; i++, bombProjectile++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombClearBoxes); i++, bombProjectile++)
     {
         if (bombProjectile->pos.z != 0.0f)
         {
@@ -1199,16 +1198,16 @@ void Player::ScoreGraze(Float3 *param_1)
     {
         if (this->isFocus)
         {
-            g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
+            g_EffectManager.SpawnEffect(8, &grazePos, 1, 0xffffffff);
         }
         else
         {
-            g_EffectManager.SpawnParticles(8, &grazePos, 3, 0xffff8080);
+            g_EffectManager.SpawnEffect(8, &grazePos, 3, 0xffff8080);
         }
     }
     else
     {
-        g_EffectManager.SpawnParticles(8, &grazePos, 1, 0xffffffff);
+        g_EffectManager.SpawnEffect(8, &grazePos, 1, 0xffffffff);
     }
     g_GameManager.IncreaseSubrank(6);
     g_Gui.grazeDisplayUpdateFrames = 2;
@@ -1236,8 +1235,8 @@ void Player::ScoreGraze(Float3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
-    g_EffectManager.SpawnParticles(6, &this->positionCenter, 16, 0xffffffff);
+    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
+    g_EffectManager.SpawnEffect(6, &this->positionCenter, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN, 0);
@@ -1372,20 +1371,20 @@ i32 Player::HandlePlayerInputs()
 
     if (horizontalSpeed < 0.0f && this->previousHorizontalSpeed >= 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1025 + this->anmOffsetPlayer);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT);
     }
     else if (horizontalSpeed == 0.0f && this->previousHorizontalSpeed < 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1026 + this->anmOffsetPlayer);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_LEFT + this->anmOffsetPlayer);
     }
 
     if (horizontalSpeed > 0.0f && this->previousHorizontalSpeed <= 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1027 + this->anmOffsetPlayer);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_RIGHT + this->anmOffsetPlayer);
     }
     else if (horizontalSpeed == 0.0f && this->previousHorizontalSpeed > 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, 1028 + this->anmOffsetPlayer);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_RIGHT + this->anmOffsetPlayer);
     }
 
     this->previousHorizontalSpeed = horizontalSpeed;
@@ -1440,8 +1439,8 @@ i32 Player::HandlePlayerInputs()
             if (this->isFocus)
             {
                 this->optionState = OPTION_FOCUSING;
-                this->focusEffect = g_EffectManager.SpawnEffect(
-                    this->playerEffectAttach, &this->positionCenter, 2+(this->playerType-1), 1, 0xffffffff);
+                this->focusEffect = g_EffectManager.SpawnSpecialEffect(
+                    24, &this->positionCenter, 2, 1, 0xffffffff);
             }
             else
             {
@@ -1499,7 +1498,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
-                this->focusEffect = g_EffectManager.SpawnEffect(
+                this->focusEffect = g_EffectManager.SpawnSpecialEffect(
                     this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
@@ -1523,7 +1522,7 @@ i32 Player::HandlePlayerInputs()
             if (this->isFocus)
             {
                 this->optionState = OPTION_FOCUSING;
-                this->focusEffect = g_EffectManager.SpawnEffect(
+                this->focusEffect = g_EffectManager.SpawnSpecialEffect(
                     this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
@@ -1591,7 +1590,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
-                this->focusEffect = g_EffectManager.SpawnEffect(
+                this->focusEffect = g_EffectManager.SpawnSpecialEffect(
                     this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
@@ -1665,12 +1664,12 @@ void Player::UpdateBombProjectiles()
     BombClearBox *bomb;
     i32 i;
 
-    for (i = 0; i < 112; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombDamageBoxes); i++)
     {
         this->bombDamageBoxes[i].size.x = 0.0f;
     }
     bomb = this->bombClearBoxes;
-    for (i = 0; i < 96; i++, bomb++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombClearBoxes); i++, bomb++)
     {
         if (bomb->lifetime <= 0)
         {
@@ -1726,7 +1725,7 @@ void Player::UpdateBorderAndBombState()
             if (!g_GameManager.CheckGameIntegrity() &&
                 !g_Gui.HasCurrentMsgIdx() &&
                 this->respawnTimer != 0 &&
-                0 < (i32)g_GameManager.globals->bombsRemaining &&
+                (i32)g_GameManager.globals->bombsRemaining > 0 &&
                 this->borderInvulnerabilityTime == 0 &&
                 IS_PRESSED_GAME(this->buttonBomb))
             {
@@ -1863,7 +1862,7 @@ i32 Player::UpdateDeath()
             this->playerSprite.scale.x = 3.0f;
             this->playerSprite.scale.y = 3.0f;
             g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite,
-                                                    1024 + this->anmOffsetPlayer);
+                                                    ANM_SCRIPT_PLAYER_IDLE + this->anmOffsetPlayer);
             if ((i32)g_GameManager.globals->livesRemaining <= 0)
             {
                 g_GameManager.isInRetryMenu = 1;
@@ -2047,7 +2046,7 @@ BombClearBox *Player::SpawnBombProjectile(Float3 *centerPosition,
     i32 i;
 
     bomb = this->bombClearBoxes;
-    for (i = 0; i < 95; i++, bomb++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombClearBoxes) - 1; i++, bomb++)
     {
         if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
         {
@@ -2072,7 +2071,7 @@ BombClearBox *Player::SpawnBombEffect(Float3 *pos, f32 sizeY, f32 sizeZ,
     i32 i;
 
     bomb = this->bombClearBoxes;
-    for (i = 0; i < 95; i++, bomb++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->bombClearBoxes) - 1; i++, bomb++)
     {
         if (bomb->pos.z == 0.0f && bomb->size.y == 0.0f)
         {
@@ -2128,8 +2127,8 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1,
-                                                    0xffffffff);
+        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1,
+                                                           0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
         spawnedEffect->vm.easeModes[4] = 0;
@@ -2161,8 +2160,8 @@ void Player::BreakBorder(u32 unused)
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnEffect(28, &this->positionCenter, 4, 1,
-                                         0xffffffff);
+    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1,
+                                                0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
     effect->vm.easeModes[4] = 0;
@@ -2188,8 +2187,8 @@ void Player::BreakBorder(u32 unused)
     angle = -ZUN_PI;
     for (i = 0; i < 32; i++, angle += 0.19634955f)
     {
-        effect = g_EffectManager.SpawnParticles(29, &this->positionCenter, 1,
-                                                0xffffffff);
+        effect = g_EffectManager.SpawnEffect(29, &this->positionCenter, 1,
+                                             0xffffffff);
         effect->direction.x = cosf(angle);
         effect->direction.y = sinf(angle);
     }
@@ -2423,8 +2422,9 @@ ZunResult Player::AddedCallback(Player *arg)
         return ZUN_ERROR;
     }
 
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         switch (arg->character)
         {
@@ -2453,7 +2453,7 @@ ZunResult Player::AddedCallback(Player *arg)
             }
         }
     }
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, ANM_OFFSET_PLAYER+arg->anmOffsetPlayer);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, ANM_SCRIPT_PLAYER_IDLE + arg->anmOffsetPlayer);
     arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
     arg->positionCenter.z = 0.49f;
@@ -2485,10 +2485,10 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->playerState = PLAYER_STATE_SPAWNING;
     arg->invulnerabilityTimer = 120;
     arg->optionState = OPTION_UNFOCUSED;
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[0], 1152 + arg->anmOffsetPlayer);
-    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[1], 1153 + arg->anmOffsetPlayer);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[0], ANM_SCRIPT_PLAYER_OPTION_LEFT + arg->anmOffsetPlayer);
+    g_AnmManager->SetAnmIdxAndExecuteScript(&arg->optionsSprite[1], ANM_SCRIPT_PLAYER_OPTION_RIGHT + arg->anmOffsetPlayer);
     bullet = arg->bullets;
-    for (i = 0; i < 96; i++, bullet++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->bullets); i++, bullet++)
     {
         bullet->bulletState = 0;
     }
@@ -2505,8 +2505,9 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->respawnTimer = arg->shooterData->initialRespawnTimer;
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         g_AsciiManager.cherryGauge.pendingInterrupt = 1;
         g_AsciiManager.uiFadeState = 1;
@@ -2525,10 +2526,11 @@ ZunResult Player::AddedCallback(Player *arg)
 // FUNCTION: TH07 0x004428e0
 ZunResult Player::DeletedCallback(Player *arg)
 {
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
-        g_AnmManager->ReleaseAnm(10+arg->anmFilePlayer);
+        g_AnmManager->ReleaseAnm(ANM_FILE_PLAYER+arg->anmFilePlayer);
         g_AsciiManager.cherryGauge.pendingInterrupt = 99;
         g_AsciiManager.uiFadeState = 99;
         g_AsciiManager.GetBossMarker(0)->pendingInterrupt = 99;
@@ -2631,12 +2633,12 @@ ZunResult ShtData::LoadShtData(ShtData **data, const char *shtPath)
         return ZUN_ERROR;
     }
 
-    for (i = 0; i < (i32)(u32)(*data)->entryCount; i++)
+    for (i = 0; i < (i32)(u32)(*data)->numLevels; i++)
     {
-        (&(*data)->levels)[i].entry =
-            (ShtEntry *)((i32)(&(*data)->levels)[i].entry + (i32)*data);
+        (*data)->levels[i].entry =
+            (ShtEntry *)((i32)(*data)->levels[i].entry + (i32)*data);
 
-        entry = (&(*data)->levels)[i].entry;
+        entry = (*data)->levels[i].entry;
         while (entry->fireInterval >= 0)
         {
             entry->fireCallback = g_ShtFireFuncs[(i32)entry->fireCallback];

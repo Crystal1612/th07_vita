@@ -477,7 +477,7 @@ LAB_004061aa: {
         arg->scriptTime++;
     }
     arg->UpdateObjects();
-    if (arg->spellCardState >= 1)
+    if (arg->spellCardState >= SPELLCARD_STATE_STARTING)
     {
         if (arg->ticksSinceSpellcardStarted == 60)
         {
@@ -571,15 +571,15 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     arg->color2.bytes.r = 128;
     arg->color2.bytes.g = 128;
     arg->color2.bytes.b = 128;
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
         if (!g_Gui.IsStageFinished())
         {
-            if (0 < arg->vm1.activeSpriteIdx)
+            if (arg->vm1.activeSpriteIdx > 0)
             {
                 g_AnmManager->DrawAndFlush(&arg->vm1);
             }
-            if (0 < arg->vm2.activeSpriteIdx)
+            if (arg->vm2.activeSpriteIdx > 0)
             {
                 g_AnmManager->DrawAndFlush(&arg->vm2);
             }
@@ -595,7 +595,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
         g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, arg->color, 1.0f,
                                       0);
     }
-    g_Supervisor.SetRenderState(D3DRS_ZFUNC, 4);
+    g_Supervisor.SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
     if (!g_AnmManager->colorMulEnabled)
     {
         g_Supervisor.SetRenderState(D3DRS_FOGCOLOR, arg->skyFog.color.color);
@@ -614,7 +614,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     {
         g_Supervisor.EnableFog();
     }
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
         if (!g_Gui.IsStageFinished())
         {
@@ -634,9 +634,9 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     i32 alpha;
     f32 fog;
 
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
-        if (g_Gui.IsStageFinished() == 0)
+        if (!g_Gui.IsStageFinished())
         {
             arg->RenderObjects(2);
             arg->RenderObjects(3);
@@ -644,8 +644,8 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
             {
                 g_Supervisor.DisableFog();
             }
-            g_EffectManager.UpdateSpecialEffect();
-            if (arg->spellCardState == 1)
+            g_EffectManager.DrawLayer1Effects();
+            if (arg->spellCardState == SPELLCARD_STATE_STARTING)
             {
                 rect.left = 32.0f;
                 rect.top = 16.0f;
@@ -653,22 +653,22 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
                 rect.bottom = 464.0f;
                 alpha = arg->ticksSinceSpellcardStarted * 255 / 60;
                 g_AnmManager->Flush();
-                g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
+                g_Supervisor.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
                 if (!g_Supervisor.cfg.disableFog)
                 {
-                    g_Supervisor.SetRenderState(D3DRS_FOGENABLE, 0);
+                    g_Supervisor.SetRenderState(D3DRS_FOGENABLE, FALSE);
                 }
                 ScreenEffect::DrawSquare(&rect, alpha << 24);
             }
         }
     }
     g_AnmManager->Flush();
-    g_Supervisor.SetRenderState(D3DRS_ZFUNC, 8);
+    g_Supervisor.SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
     if (!g_Supervisor.cfg.disableFog)
     {
         g_Supervisor.DisableFog();
     }
-    if (arg->spellCardState >= 1)
+    if (arg->spellCardState >= SPELLCARD_STATE_STARTING)
     {
         for (i = 0; i < arg->numSpellcardVms; i++)
         {
@@ -700,7 +700,7 @@ ZunResult Stage::AddedCallback(Stage *arg)
     arg->pos.x = 0.0f;
     arg->pos.y = 0.0f;
     arg->pos.z = 0.0f;
-    arg->spellCardState = 0;
+    arg->spellCardState = SPELLCARD_STATE_INACTIVE;
     arg->skyFogInterpDuration = 0;
     switch (g_GameManager.currentStage)
     {
@@ -787,7 +787,7 @@ ZunResult Stage::AddedCallback(Stage *arg)
     arg->cam.fov = ZUN_PI / 6.0f;
     arg->camEnd = arg->cam;
     arg->camStart = arg->cam;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(arg->timers); i++)
     {
         arg->timersMax[i] = 0;
         arg->timers[i] = 0;
@@ -799,11 +799,11 @@ ZunResult Stage::AddedCallback(Stage *arg)
 // FUNCTION: TH07 0x00407410
 ZunResult Stage::DeletedCallback(Stage *arg)
 {
-    g_AnmManager->ReleaseAnm(5);
-    g_AnmManager->ReleaseAnm(6);
-    g_AnmManager->ReleaseAnm(7);
-    g_AnmManager->ReleaseAnm(8);
-    g_AnmManager->ReleaseAnm(9);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG1);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG2);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG3);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG4);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG5);
     SAFE_FREE(arg->quadVms);
     SAFE_FREE(arg->stdData);
     return ZUN_SUCCESS;
@@ -913,7 +913,7 @@ ZunResult Stage::UpdateObjects()
         {
             vmCount = 0;
             quad = &object->firstQuad;
-            while (0 <= quad->type)
+            while (quad->type >= 0)
             {
                 vm = &this->quadVms[quad->vmIndex];
                 switch (quad->type)

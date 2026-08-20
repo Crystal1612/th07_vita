@@ -6,7 +6,7 @@
 #include "dsutil.hpp"
 #include "inttypes.hpp"
 
-typedef enum AudioOpcode
+enum AudioOpcode
 {
     AUDIO_PRELOAD = 1,
     AUDIO_START = 2,
@@ -15,9 +15,9 @@ typedef enum AudioOpcode
     AUDIO_FADEOUT = 5,
     AUDIO_PAUSE = 6,
     AUDIO_UNPAUSE = 7
-} AudioOpcode;
+};
 
-typedef enum SoundIdx
+enum SoundIdx
 {
     SOUND_0 = 0,
     SOUND_PICHUN = 4,
@@ -42,7 +42,7 @@ typedef enum SoundIdx
     SOUND_BORDER_BREAK = 33,
     SOUND_BORDER_ACTIVATE2 = 36,
     SOUND_37 = 37
-} SoundIdx;
+};
 
 struct SoundBufferIdxVolume
 {
@@ -59,6 +59,8 @@ struct SoundPlayerCommand
     char string[256];
 };
 C_ASSERT(sizeof(SoundPlayerCommand) == 0x10c);
+
+#define MAX_SOUND_COMMANDS 31
 
 struct SoundPlayer
 {
@@ -115,7 +117,7 @@ struct SoundPlayer
     DWORD bgmPreloadAllocSizes[16];
     i32 curBgmIdx;
     ThBgmFormat *bgmFmtData;
-    SoundPlayerCommand commandQueue[32];
+    SoundPlayerCommand commandQueue[MAX_SOUND_COMMANDS + 1];
     char bgmFileNames[16][256];
     char bgmArchivePath[256];
     CStreamingSound *backgroundMusic;

@@ -6,6 +6,7 @@
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
 #include "inttypes.hpp"
+#include "utils.hpp"
 
 // GLOBAL: TH07 0x0049fc88
 static JOYCAPSA g_JoystickCaps;
@@ -20,9 +21,9 @@ static u16 g_AutoFocusTimer;
 // FUNCTION: TH07 0x00430290
 u32 Controller::GetJoystickCaps()
 {
-    joyinfoex_tag joyinfo;
+    JOYINFOEX joyinfo;
 
-    joyinfo.dwSize = 52;
+    joyinfo.dwSize = sizeof(JOYINFOEX);
     joyinfo.dwFlags = 255;
     if (joyGetPosEx(0, &joyinfo))
     {
@@ -85,7 +86,7 @@ u32 Controller::GetControllerInput(u32 buttons)
     if (!g_Supervisor.controller)
     {
         memset(&pji, 0, sizeof(JOYINFOEX));
-        pji.dwSize = 52;
+        pji.dwSize = sizeof(JOYINFOEX);
         pji.dwFlags = 255;
         if (joyGetPosEx(0, &pji))
         {
@@ -280,7 +281,7 @@ u8 *Controller::GetControllerState()
     if (!g_Supervisor.controller)
     {
         memset(&joyinfoex, 0, sizeof(JOYINFOEX));
-        joyinfoex.dwSize = 52;
+        joyinfoex.dwSize = sizeof(JOYINFOEX);
         joyinfoex.dwFlags = 255;
         if (joyGetPosEx(0, &joyinfoex))
         {
@@ -452,7 +453,7 @@ void Controller::ResetKeyboard()
     u8 key_states[256];
 
     GetKeyboardState(key_states);
-    for (i32 i = 0; i < 256; i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(key_states); i++)
     {
         key_states[i] = key_states[i] & 0x7f;
     }

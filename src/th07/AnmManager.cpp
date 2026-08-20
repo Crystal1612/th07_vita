@@ -14,7 +14,6 @@
 #include "Supervisor.hpp"
 #include "TextHelper.hpp"
 #include "ZunMath.hpp"
-#include "d3dx8.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
 
@@ -48,7 +47,7 @@ AnmManager::AnmManager()
 {
     memset(this, 0, sizeof(AnmManager));
 
-    for (i32 i = 0; i < THE_2_5_6_0_SPRITE_LIMIT; i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->sprites); i++)
     {
         this->sprites[i].sourceFileIndex = -1;
     }
@@ -452,8 +451,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         g_GameErrorContext.Fatal("�A�j�����ǂݍ��߂܂���B�f�[�^�������Ă邩���Ă��܂�\r\n");
         return ZUN_ERROR;
     }
-    // multiplayer 50 into 150
-    if (textureIdx >= 150)
+    if (textureIdx >= ARRAY_SIZE_SIGNED(this->anmFiles))
     {
         // STRING: TH07 0x00495c5c
         g_GameErrorContext.Fatal("�e�N�X�`���i�[�悪����܂���\r\n");
@@ -536,7 +534,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             id = rawSprite->id;
         }
-        if (rawSprite->id + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
+        if (rawSprite->id + spriteIdxOffset >= 2560)
         {
             // STRING: TH07 0x00495b80
             g_GameErrorContext.Fatal("�X�v���C�g���i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
@@ -546,7 +544,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     }
     for (i = 0; i < data->numScripts; i++, curSprite += 2)
     {
-        if (*curSprite + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
+        if (*curSprite + spriteIdxOffset >= 2560)
         {
             // STRING: TH07 0x00495b4c
             g_GameErrorContext.Fatal("�A�j�����i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
@@ -576,8 +574,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     i32 spriteIdxOffset;
     i32 *spriteIdx;
 
-    // multiplayer 50 into 150
-    if (anmIdx < 0 || (u32)anmIdx >= 150)
+    if (anmIdx < 0 || (u32)anmIdx >= 50)
     {
         return;
     }
@@ -622,7 +619,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 // FUNCTION: TH07 0x0044e6f0
 void AnmManager::ReleaseTexture(i32 textureIdx)
 {
-    if (textureIdx < 0 || (u32)textureIdx >= 264)
+    if (textureIdx < 0 || textureIdx >= ARRAY_SIZE(this->textures))
     {
         return;
     }
@@ -717,11 +714,11 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         this->currentBlendMode = vm->blendMode;
         if (!this->currentBlendMode)
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 6);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         }
         else
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, 2);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
         }
     }
     color.color = vm->useColor2 ? vm->color2.color : vm->color.color;
@@ -765,11 +762,11 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
         this->currentZWriteDisable = vm->zWriteDisable;
         if (!this->currentZWriteDisable)
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 1);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
         }
         else
         {
-            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+            g_Supervisor.d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
         }
     }
     if ((u32)this->currentCameraMode != vm->cameraMode)
@@ -798,11 +795,11 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         this->currentBlendMode = vm->blendMode;
         if (!this->currentBlendMode)
         {
-            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 6);
+            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         }
         else
         {
-            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, 2);
+            g_Supervisor.SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
         }
     }
     if (!g_Supervisor.cfg.disableZBuffer &&
@@ -811,11 +808,11 @@ void AnmManager::SyncRenderState(AnmVm *vm)
         this->currentZWriteDisable = vm->zWriteDisable;
         if (!this->currentZWriteDisable)
         {
-            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 1);
+            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
         }
         else
         {
-            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, 0);
+            g_Supervisor.SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
         }
     }
     this->renderStateChangesThisFrame++;
@@ -967,8 +964,8 @@ void AnmManager::Flush()
         return;
     }
 
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 0);
-    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 0);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+    g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
                                             D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(
@@ -1479,7 +1476,7 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
     SetRenderStateForVm(vm);
     world.m[3][2] = vm->pos.z;
 
-    g_Supervisor.d3dDevice->SetTransform((D3DTRANSFORMSTATETYPE)256, &world);
+    g_Supervisor.d3dDevice->SetTransform(D3DTS_WORLD, &world);
 
     if (this->currentSprite != vm->sprite)
     {
@@ -1510,8 +1507,8 @@ ZunResult AnmManager::Draw3(AnmVm *vm)
                                                     D3DFVF_DIFFUSE |
                                                     D3DFVF_XYZ);
         }
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, 3);
-        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, 3);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_TFACTOR);
+        g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_TFACTOR);
         this->currentVertexShader = 2;
     }
 
@@ -2147,7 +2144,7 @@ stop:
             g_Supervisor.effectiveFramerateMultiplier * vm->angleVel.z);
         vm->updateRotation = 1;
     }
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(vm->interpStartTimes); i++)
     {
         if (vm->interpEndTimes[i] > 0)
         {
@@ -2802,7 +2799,8 @@ ZunResult AnmManager::DrawTriangleStrip(AnmVm *vm,
 
     if (this->currentVertexShader != 3)
     {
-        g_Supervisor.d3dDevice->SetVertexShader(0x144);
+        g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_TEX1 | D3DFVF_DIFFUSE |
+                                                D3DFVF_XYZRHW);
         this->currentVertexShader = 3;
     }
 

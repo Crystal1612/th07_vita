@@ -1,8 +1,6 @@
 #pragma once
 
 #include <windows.h>
-#include <assert.h>
-#include <windef.h>
 
 #include "AnmIdx.hpp"
 #include "ZunColor.hpp"
@@ -16,7 +14,7 @@
 // #define THE_2_5_6_0_SPRITE_LIMIT 2560
 #define THE_2_5_6_0_SPRITE_LIMIT 5120
 
-typedef enum AnmVarId
+enum AnmVarId
 {
     ANM_VAR_INT1_1 = 10000,
     ANM_VAR_INT1_2 = 10001,
@@ -28,9 +26,9 @@ typedef enum AnmVarId
     ANM_VAR_FLOAT_4 = 10007,
     ANM_VAR_INT2_1 = 10008,
     ANM_VAR_INT2_2 = 10009,
-} AnmVarId;
+};
 
-typedef enum AnmOpcode
+enum AnmOpcode
 {
     ANM_EXIT_HIDE = -1,
     ANM_EXIT_HIDE2 = 1,
@@ -114,9 +112,9 @@ typedef enum AnmOpcode
     ANM_WAIT = 79,
     ANM_SET_SCROLLVEL_X = 80,
     ANM_SET_SCROLLVEL_Y = 81
-} AnmOpcode;
+};
 
-typedef enum AnmEaseMode
+enum AnmEaseMode
 {
     ANM_EASE_IN_QUAD = 1,
     ANM_EASE_IN_CUBIC = 2,
@@ -124,7 +122,7 @@ typedef enum AnmEaseMode
     ANM_EASE_OUT_QUAD = 4,
     ANM_EASE_OUT_CUBIC = 5,
     ANM_EASE_OUT_QUART = 6,
-} AnmEaseMode;
+};
 
 struct VertexDiffuseXyzrhw
 {
@@ -274,6 +272,21 @@ struct AnmVmBase
         this->currentTimeInScript.Initialize();
     }
 
+    void SetInvisible()
+    {
+        this->visible = 0;
+    }
+
+    void SetInterrupt(i16 interrupt)
+    {
+        this->pendingInterrupt = interrupt;
+    }
+
+    void SetRotationZ(f32 z)
+    {
+        this->rotation.z = z;
+    }
+
     Float3 rotation;
     Float3 angleVel;
     Float2 scale;
@@ -327,21 +340,6 @@ struct AnmVm : AnmVmBase
     {
         memset(this, 0, sizeof(AnmVm));
         this->activeSpriteIdx = -1;
-    }
-
-    void SetInvisible()
-    {
-        this->visible = 0;
-    }
-
-    void SetInterrupt(i16 interrupt)
-    {
-        this->pendingInterrupt = interrupt;
-    }
-
-    void SetRotationZ(f32 z)
-    {
-        this->rotation.z = z;
     }
 
     static void AssignVm(AnmVm *out, AnmVm *vm)
@@ -465,7 +463,7 @@ struct AnmManager
     // FUNCTION: TH07 0x00433f20
     void ReleaseSurfaces()
     {
-        for (i32 i = 0; i < 32; i++)
+        for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->surfaces); i++)
         {
             SAFE_RELEASE(this->surfaces[i]);
         }
@@ -620,36 +618,33 @@ struct AnmManager
     u32 flushesThisFrame;
     Float2 offset;
     D3DXMATRIX matrix;
-    struct AnmLoadedSprite sprites[THE_2_5_6_0_SPRITE_LIMIT];
-    struct AnmVm vm;
-    struct IDirect3DTexture8 *textures[264];
+    AnmLoadedSprite sprites[2560];
+    AnmVm vm;
+    IDirect3DTexture8 *textures[264];
     void *imageDataArray[256];
     char *textureNames[264];
     i32 loadedSpriteCount;
-    struct AnmRawInstr *scripts[THE_2_5_6_0_SPRITE_LIMIT];
-    i32 spriteIndices[THE_2_5_6_0_SPRITE_LIMIT];
-
-    //multiplayer, from 50 into 150
-    struct AnmEntry anmFiles[150];
-
-    struct IDirect3DSurface8 *surfaces[32];
-    struct IDirect3DSurface8 *surfacesBis[32];
-    struct ZunImageInfo surfaceSourceInfo[32];
+    AnmRawInstr *scripts[2560];
+    i32 spriteIndices[2560];
+    AnmEntry anmFiles[50];
+    IDirect3DSurface8 *surfaces[32];
+    IDirect3DSurface8 *surfacesBis[32];
+    ZunImageInfo surfaceSourceInfo[32];
     ZunColor currentTextureFactor;
-    struct IDirect3DTexture8 *currentTexture;
+    IDirect3DTexture8 *currentTexture;
     u8 currentBlendMode;
     u8 currentColorOp;
     u8 currentVertexShader;
     u8 currentZWriteDisable;
     u8 currentCameraMode;
     // pad 3
-    struct AnmLoadedSprite *currentSprite;
-    struct IDirect3DVertexBuffer8 *vertexBuffer;
-    struct RenderVertexInfo vertexBufferContents[4];
+    AnmLoadedSprite *currentSprite;
+    IDirect3DVertexBuffer8 *vertexBuffer;
+    RenderVertexInfo vertexBufferContents[4];
     u32 spritesToDraw;
-    struct VertexTex1DiffuseXyzrhw spriteVertexBuffer[49152];
-    struct VertexTex1DiffuseXyzrhw *vertexBufferCurPtr;
-    struct VertexTex1DiffuseXyzrhw *vertexBufferStartPtr;
+    VertexTex1DiffuseXyzrhw spriteVertexBuffer[49152];
+    VertexTex1DiffuseXyzrhw *vertexBufferCurPtr;
+    VertexTex1DiffuseXyzrhw *vertexBufferStartPtr;
     i32 screenshotTextureId;
     i32 screenshotSrcLeft;
     i32 screenshotSrcTop;

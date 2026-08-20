@@ -12,43 +12,43 @@ extern const char *g_ShooterTableFocus[6];
 
 typedef void (*BombCallback)(struct Player *);
 
-typedef enum PlayerState
+enum PlayerState
 {
-    PLAYER_STATE_ALIVE = 0,
-    PLAYER_STATE_SPAWNING = 1,
-    PLAYER_STATE_DEAD = 2,
-    PLAYER_STATE_INVULNERABLE = 3,
-    PLAYER_STATE_BORDER = 4
-} PlayerState;
+    PLAYER_STATE_ALIVE,
+    PLAYER_STATE_SPAWNING,
+    PLAYER_STATE_DEAD,
+    PLAYER_STATE_INVULNERABLE,
+    PLAYER_STATE_BORDER,
+};
 
-typedef enum PlayerDirection
+enum PlayerDirection
 {
-    MOVEMENT_NONE = 0,
-    MOVEMENT_UP = 1,
-    MOVEMENT_DOWN = 2,
-    MOVEMENT_LEFT = 3,
-    MOVEMENT_RIGHT = 4,
-    MOVEMENT_UP_LEFT = 5,
-    MOVEMENT_UP_RIGHT = 6,
-    MOVEMENT_DOWN_LEFT = 7,
-    MOVEMENT_DOWN_RIGHT = 8
-} PlayerDirection;
+    MOVEMENT_NONE,
+    MOVEMENT_UP,
+    MOVEMENT_DOWN,
+    MOVEMENT_LEFT,
+    MOVEMENT_RIGHT,
+    MOVEMENT_UP_LEFT,
+    MOVEMENT_UP_RIGHT,
+    MOVEMENT_DOWN_LEFT,
+    MOVEMENT_DOWN_RIGHT
+};
 
-typedef enum OptionState
+enum OptionState
 {
-    OPTION_HIDDEN = 0,
-    OPTION_UNFOCUSED = 1,
-    OPTION_FOCUSING = 2,
-    OPTION_FOCUSED = 3,
-    OPTION_UNFOCUSING = 4
-} OptionState;
+    OPTION_HIDDEN,
+    OPTION_UNFOCUSED,
+    OPTION_FOCUSING,
+    OPTION_FOCUSED,
+    OPTION_UNFOCUSING,
+};
 
-typedef enum BorderState
+enum BorderState
 {
-    BORDER_NONE = 0,
-    BORDER_ACTIVE = 1,
-    BORDER_READY = 2
-} BorderState;
+    BORDER_NONE,
+    BORDER_ACTIVE,
+    BORDER_READY,
+};
 
 struct BombProjectile
 {
@@ -209,9 +209,9 @@ struct Player
     void Respawn();
     void ScoreGraze(Float3 *param_1);
     BombClearBox *SpawnBombEffect(Float3 *pos, f32 sizeY, f32 sizeZ,
-                                    i32 lifetime, i32 itemType);
+                                  i32 lifetime, i32 itemType);
     BombClearBox *SpawnBombProjectile(Float3 *centerPosition, f32 posZ,
-                                        f32 size, i32 itemType);
+                                      f32 size, i32 itemType);
     static void SpawnBullets(Player *player, u32 timer);
     void StartFireBulletTimer();
 
@@ -400,8 +400,8 @@ struct ShtData
     static i32 SpawnHitParticles(Player *player, PlayerBullet *bullet,
                                  Float3 *pos);
 
-    i16 numLevels;
-    u16 entryCount;
+    i16 unused;
+    u16 numLevels;
     f32 initialBombs;
     i32 initialRespawnTimer;
     f32 hitboxRadius;
@@ -414,6 +414,6 @@ struct ShtData
     f32 speedFocus;
     f32 speedDiagonal;
     f32 speedDiagonalFocus;
-    ShtLevel levels;
+    ShtLevel levels[1];
 };
 C_ASSERT(sizeof(ShtData) == 0x3c);
