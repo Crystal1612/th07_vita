@@ -424,7 +424,7 @@ LAB_004061aa: {
         arg->scriptTime++;
     }
     arg->UpdateObjects();
-    if (arg->spellCardState >= 1)
+    if (arg->spellCardState >= SPELLCARD_STATE_STARTING)
     {
         if (arg->ticksSinceSpellcardStarted == 60)
         {
@@ -512,7 +512,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     arg->color2.bytes.r = 128;
     arg->color2.bytes.g = 128;
     arg->color2.bytes.b = 128;
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
         if (!g_Gui.IsStageFinished())
         {
@@ -553,7 +553,7 @@ u32 Stage::OnDrawHighPrio(Stage *arg)
     {
         g_Supervisor.EnableFog();
     }
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
         if (!g_Gui.IsStageFinished())
         {
@@ -570,9 +570,9 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     ZunRect rect;
     i32 alpha;
 
-    if (arg->spellCardState <= 1)
+    if (arg->spellCardState <= SPELLCARD_STATE_STARTING)
     {
-        if (g_Gui.IsStageFinished() == 0)
+        if (!g_Gui.IsStageFinished())
         {
             arg->RenderObjects(2);
             arg->RenderObjects(3);
@@ -581,7 +581,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
                 g_Supervisor.DisableFog();
             }
             g_EffectManager.DrawLayer1Effects();
-            if (arg->spellCardState == 1)
+            if (arg->spellCardState == SPELLCARD_STATE_STARTING)
             {
                 rect.left = 32.0f;
                 rect.top = 16.0f;
@@ -604,7 +604,7 @@ u32 Stage::OnDrawLowPrio(Stage *arg)
     {
         g_Supervisor.DisableFog();
     }
-    if (arg->spellCardState >= 1)
+    if (arg->spellCardState >= SPELLCARD_STATE_STARTING)
     {
         for (i = 0; i < arg->numSpellcardVms; i++)
         {
@@ -632,7 +632,7 @@ ZunResult Stage::AddedCallback(Stage *arg)
     arg->pos.x = 0.0f;
     arg->pos.y = 0.0f;
     arg->pos.z = 0.0f;
-    arg->spellCardState = 0;
+    arg->spellCardState = SPELLCARD_STATE_INACTIVE;
     arg->skyFogInterpDuration = 0;
     switch (g_GameManager.currentStage)
     {

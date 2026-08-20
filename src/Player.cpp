@@ -188,7 +188,7 @@ i32 ShtData::FireHomingBullet(Player *player, PlayerBullet *bullet, i32 fireTime
                                                     player->sakuyaTargetPosition.x - bullet->pos.x),
                                              shtEntry->angle + 1.5707964f);
             speed = shtEntry->speed * 1.5f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, speed);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, speed);
             bullet->angle = angle;
         }
         return 1;
@@ -208,7 +208,7 @@ i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet, i32 fir
         DefaultFireBulletCallback(player, bullet, shtEntry);
         angle = utils::AddNormalizeAngle(player->optionAngle, shtEntry->angle + 1.5707964f);
         speed = shtEntry->speed;
-        AngleToVector((ZunVec3 *)&bullet->velocity, angle, speed);
+        (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, speed);
         bullet->angle = angle;
 
         return 1;
@@ -475,42 +475,42 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet, ZunVec3 *pos)
         case 1089:
             bullet->hitboxSize.x = 32.0f;
             bullet->hitboxSize.y = 32.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 4.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 4.0f);
             break;
         case 1090:
             bullet->hitboxSize.x = 42.0;
             bullet->hitboxSize.y = 42.0;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 4.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 4.0f);
             break;
         case 1091:
             bullet->hitboxSize.x = 48.0f;
             bullet->hitboxSize.y = 48.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 4.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 4.0f);
             break;
         case 1092:
             bullet->hitboxSize.x = 56.0f;
             bullet->hitboxSize.y = 56.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 4.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 4.0f);
             break;
         case 1093:
             bullet->hitboxSize.x = 48.0f;
             bullet->hitboxSize.y = 48.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 6.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 6.0f);
             break;
         case 1094:
             bullet->hitboxSize.x = 64.0f;
             bullet->hitboxSize.y = 64.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 6.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 6.0f);
             break;
         case 1095:
             bullet->hitboxSize.x = 80.0f;
             bullet->hitboxSize.y = 80.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 6.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 6.0f);
             break;
         case 1096:
             bullet->hitboxSize.x = 96.0f;
             bullet->hitboxSize.y = 96.0f;
-            AngleToVector((ZunVec3 *)&bullet->velocity, angle, 6.0f);
+            (*(ZunVec3 *)&bullet->velocity).FromAngleMagnitude(angle, 6.0f);
         }
     }
     if (bullet->timer.GetCurrent() % 6 == 0)
@@ -2244,8 +2244,9 @@ ZunResult Player::AddedCallback(Player *arg)
         return ZUN_ERROR;
     }
 
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         switch (g_GameManager.character)
         {
@@ -2316,8 +2317,9 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->respawnTimer = g_Player.shooterData->initialRespawnTimer;
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         g_AsciiManager.cherryGauge.pendingInterrupt = 1;
         g_AsciiManager.uiFadeState = 1;
@@ -2337,8 +2339,9 @@ ZunResult Player::DeletedCallback(Player *arg)
 {
     (void)arg;
 
-    if ((u32)(g_Supervisor.curState != 3 && g_Supervisor.curState != 11 &&
-              g_Supervisor.curState != 12))
+    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
     {
         g_AnmManager->ReleaseAnm(10);
         g_AsciiManager.cherryGauge.pendingInterrupt = 99;
