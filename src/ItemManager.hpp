@@ -53,6 +53,8 @@ struct Item
     struct Item *next;
 };
 
+#define MAX_ITEMS 1100
+
 struct ItemManager
 {
     ItemManager();
@@ -64,10 +66,10 @@ struct ItemManager
     void RemoveAllItems();
     Item *SpawnItem(ZunVec3 *heading, i32 itemType, i32 state);
 
-    struct Item items[1101];
+    Item items[MAX_ITEMS + 1];
     i32 nextIndex;
     i32 activeItemCount;
-    struct Item listHead;
-    struct Item *listTail;
+    Item listHead;
+    Item *listTail;
 };
 extern ItemManager g_ItemManager;

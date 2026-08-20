@@ -127,13 +127,13 @@ struct GuiImpl
     AnmVm vms0[33];
     u8 bossHealthBarState;
     // pad 3
-    AnmVm vms1[5];
+    AnmVm stageTextVm[5];
     AnmVm bombSpellcardPortrait;
     AnmVm enemySpellcardPortrait;
     AnmVm bombSpellcardDecorLeft;
-    AnmVm enemySpellcardRelated1;
+    AnmVm enemySpellcardDecorHorizontalUp;
     AnmVm bombSpellcardDecorRight;
-    AnmVm enemySpellcardRelated2;
+    AnmVm enemySpellcardDecorHorizontalDown;
     AnmVm bombSpellcardName;
     AnmVm enemySpellcardName;
     AnmVm bombSpellcardNameBg;

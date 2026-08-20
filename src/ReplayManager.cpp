@@ -326,8 +326,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     arg->frameId = 0;
     if (!arg->data)
     {
-        arg->data =
-            (ReplayFile *)FileSystem::OpenFile(arg->replayFilename, !g_GameManager.demo);
+        arg->data = (ReplayFile *)FileSystem::OpenFile(arg->replayFilename, !g_GameManager.demo);
         arg->data = ValidateReplayData(arg->data, g_LastFileSize);
         if (!arg->data)
         {
