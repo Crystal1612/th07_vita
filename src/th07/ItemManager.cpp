@@ -156,15 +156,9 @@ void ItemManager::OnUpdate()
         }
         else
         {
-            if (item->state == 1)
-            {
-                if(this->CollectItemPerPlayer(&g_Player,item,g_GameManager.globals->currentPower)){
-                }else if(this->CollectItemPerPlayer(&g_Player2,item,g_GameManager.globals->currentPower)){
-                }else if(this->CollectItemPerPlayer(&g_Player3,item,g_GameManager.globals->currentPower)){
-                }else{
-                    item->startPosition.y = -0.5f;
-                    item->state = 0;
-                }
+            if(this->CollectItemPerPlayer(&g_Player,item,g_GameManager.globals->currentPower)){
+            }else if(this->CollectItemPerPlayer(&g_Player2,item,g_GameManager.globals->currentPower)){
+            }else if(this->CollectItemPerPlayer(&g_Player3,item,g_GameManager.globals->currentPower)){
             }
             else
             {
@@ -194,17 +188,17 @@ void ItemManager::OnUpdate()
     check_collision:
         //check 3 player;
         playerItemCollector;
-        if (g_Player.CalcItemBoxCollision(&item->currentPosition, &local_20)==1){
+        if (g_Player.CalcItemBoxCollision(&item->currentPosition, &local_20)){
             playerItemCollector = &g_Player;
-        }else if (g_Player2.CalcItemBoxCollision(&item->currentPosition, &local_202)==1){
+        }else if (g_Player2.CalcItemBoxCollision(&item->currentPosition, &local_202)){
             playerItemCollector = &g_Player2;
-        }else if (g_Player3.CalcItemBoxCollision(&item->currentPosition, &local_203)==1){
+        }else if (g_Player3.CalcItemBoxCollision(&item->currentPosition, &local_203)){
             playerItemCollector = &g_Player3;
         }else{
             playerItemCollector = NULL;
         }
         
-        if (playerItemCollector>0)
+        if (playerItemCollector != NULL)
         {
             g_ReplayManager->replayEventFlags |= 0x40;
             switch (item->itemType)
@@ -623,8 +617,8 @@ void ItemManager::OnDraw()
 
 // multiplayer
 bool ItemManager::CollectItemPerPlayer(Player *player, Item *item, i32 currentPower){
-    if(
-        ((128.0 <= currentPower || g_GameManager.difficulty >= 4)
+    if(item->state == 1 ||
+        ((128 <= currentPower || g_GameManager.difficulty >= 4)
         && player->positionCenter.y < player->shooterData->pocY) || player->hasBorder == 1)
     {
         if (player->playerState != 1)
@@ -636,6 +630,11 @@ bool ItemManager::CollectItemPerPlayer(Player *player, Item *item, i32 currentPo
                 item->autoCollect = 1;
             }
             return true;
+        }
+        else
+        {
+            item->startPosition.y = -0.5f;
+            item->state = 0;
         }
     }
     return false;
