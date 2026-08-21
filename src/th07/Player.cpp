@@ -16,6 +16,7 @@
 #include "ZunMath.hpp"
 #include "dxutil.hpp"
 #include "utils.hpp"
+#include <algorithm>
 
 // GLOBAL: TH07 0x0049ecb0
 ShtFunc1 g_ShtFireFuncs[6] = {
@@ -1371,7 +1372,7 @@ i32 Player::HandlePlayerInputs()
 
     if (horizontalSpeed < 0.0f && this->previousHorizontalSpeed >= 0.0f)
     {
-        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT);
+        g_AnmManager->SetAnmIdxAndExecuteScript(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT + this->anmOffsetPlayer);
     }
     else if (horizontalSpeed == 0.0f && this->previousHorizontalSpeed < 0.0f)
     {
@@ -2357,6 +2358,56 @@ u32 Player::OnDrawLowPrio(Player *arg)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
+// multiplayer nearest
+f32 Player::RangeToPlayer(Float3 *pos)
+{
+    D3DXVECTOR3 vecToPlayer(pos->x - this->positionCenter.x, pos->y - this->positionCenter.y, 0.0f);
+    return D3DXVec3LengthSq(&vecToPlayer);
+}
+
+// use https://stackoverflow.com/a/66897689 thanks me later
+int NearestPlayer(Float3 *pos){
+    f32 arr[3] = { 
+        g_Player.RangeToPlayer(pos),
+        g_Player2.RangeToPlayer(pos),
+        g_Player3.RangeToPlayer(pos),
+    } ;   
+    return std::min_element(arr, arr+3) - arr;
+}
+f32 Player::DistanceToNearestPlayer(Float3 *pos)
+{
+    f32 arr[3] = { 
+        g_Player.RangeToPlayer(pos),
+        g_Player2.RangeToPlayer(pos),
+        g_Player3.RangeToPlayer(pos),
+    };
+    return *std::min_element(arr, arr+3);
+}
+f32 Player::AngleToNearestPlayer(Float3 *pos)
+{
+    f32 res[3] = { 
+        g_Player.AngleToPlayer(pos),
+        g_Player2.AngleToPlayer(pos),
+        g_Player3.AngleToPlayer(pos),
+    };
+    return res[NearestPlayer(pos)];
+}
+f32 Player::XToNearestPlayer(Float3 *pos)
+{
+    f32 res[3] = { g_Player.positionCenter.x, g_Player2.positionCenter.x, g_Player3.positionCenter.x};
+    return res[NearestPlayer(pos)];
+}
+f32 Player::YToNearestPlayer(Float3 *pos)
+{
+    f32 res[3] = { g_Player.positionCenter.y, g_Player2.positionCenter.y, g_Player3.positionCenter.y};
+    return res[NearestPlayer(pos)];
+}
+f32 Player::ZToNearestPlayer(Float3 *pos)
+{
+    f32 res[3] = { g_Player.positionCenter.z, g_Player2.positionCenter.z, g_Player3.positionCenter.z};
+    return res[NearestPlayer(pos)];
+}
+
 #pragma var_order(y, x)
 // FUNCTION: TH07 0x00442370
 f32 Player::AngleToPlayer(Float3 *pos)
@@ -2386,6 +2437,7 @@ ZunResult Player::AddedCallback(Player *arg)
     g_GameManager.shotTypeAndCharacter3 = 4;
     g_GameManager.character3 = 2;
 
+    // compatslop
     arg->anmOffsetPlayer = 0;
     arg->anmFilePlayer = 0;
     arg->shotType = g_GameManager.shotType;

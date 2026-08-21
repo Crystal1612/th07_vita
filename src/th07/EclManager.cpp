@@ -202,11 +202,11 @@ i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
     case ECL_VAR_POS_Z:
         return enemy->pos.z;
     case ECL_VAR_PLAYER_POS_X:
-        return g_Player.positionCenter.x;
+        return Player::XToNearestPlayer(&enemy->pos);
     case ECL_VAR_PLAYER_POS_Y:
-        return g_Player.positionCenter.y;
+        return Player::YToNearestPlayer(&enemy->pos);
     case ECL_VAR_PLAYER_POS_Z:
-        return g_Player.positionCenter.z;
+        return Player::ZToNearestPlayer(&enemy->pos);
     case ECL_VAR_MOVE_INTERP_ORIGIN_X:
         return enemy->moveInterpStartPos.x;
     case ECL_VAR_MOVE_INTERP_ORIGIN_Y:
@@ -256,9 +256,11 @@ i32 EclManager::GetVarValue(Enemy *enemy, i32 eclVar)
     case ECL_VAR_SCORE:
         return enemy->score;
     case ECL_VAR_ANGLE_TO_PLAYER:
-        return g_Player.AngleToPlayer(&enemy->pos);
+        return Player::AngleToNearestPlayer(&enemy->pos);
     case ECL_VAR_DISTANCE_FROM_PLAYER:
-        return D3DXVec3Length((g_Player.positionCenter - enemy->pos).asD3DX());
+        // what?
+        return Player::DistanceToNearestPlayer(&enemy->pos);
+        // return D3DXVec3Length((g_Player.positionCenter - enemy->pos).asD3DX());
     default:
         return eclVar;
     }
@@ -449,7 +451,7 @@ f32 EclManager::GetFloatVarValue(Enemy *enemy, f32 eclVar)
     case ECL_VAR_BOSS_LIFE_THRESHOLD4:
         return (f32)enemy->lifeCallbackThreshold[3];
     case ECL_VAR_ANGLE_TO_PLAYER:
-        return g_Player.AngleToPlayer(&enemy->pos);
+        return Player::AngleToNearestPlayer(&enemy->pos);
     case ECL_VAR_ANGLE:
         return enemy->angle;
     case ECL_VAR_ANGULAR_VELOCITY:
@@ -1232,7 +1234,7 @@ restart:
                 enemy->moveMode = ENEMY_MOVE_POLAR;
                 break;
             case ECL_MOVE_AT_PLAYER:
-                enemy->angle = g_Player.AngleToPlayer(&enemy->pos) +
+                enemy->angle = Player::AngleToNearestPlayer(&enemy->pos) +
                                GET_FLOAT_VALUE(enemy, 0);
                 enemy->moveSpeed = GET_FLOAT_VALUE(enemy, 1);
                 enemy->moveMode = ENEMY_MOVE_POLAR;
@@ -1429,7 +1431,7 @@ restart:
                 if (enemy->lasers[arg])
                 {
                     enemy->lasers[arg]->angle =
-                        g_Player.AngleToPlayer(&enemy->lasers[arg]->pos) +
+                        Player::AngleToNearestPlayer(&enemy->lasers[arg]->pos) +
                         GET_FLOAT_VALUE(enemy, 1);
                 }
                 break;

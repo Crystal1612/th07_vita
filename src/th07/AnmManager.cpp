@@ -534,7 +534,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             id = rawSprite->id;
         }
-        if (rawSprite->id + spriteIdxOffset >= 2560)
+        if (rawSprite->id + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
         {
             // STRING: TH07 0x00495b80
             g_GameErrorContext.Fatal("�X�v���C�g���i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
@@ -544,7 +544,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     }
     for (i = 0; i < data->numScripts; i++, curSprite += 2)
     {
-        if (*curSprite + spriteIdxOffset >= 2560)
+        if (*curSprite + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
         {
             // STRING: TH07 0x00495b4c
             g_GameErrorContext.Fatal("�A�j�����i�[�ł��܂���B�e�[�u�����s�����Ă��܂�\r\n");
@@ -574,7 +574,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     i32 spriteIdxOffset;
     i32 *spriteIdx;
 
-    if (anmIdx < 0 || (u32)anmIdx >= 50)
+    if (anmIdx < 0 || (u32)anmIdx >= THE_50_ANM_LIMIT)
     {
         return;
     }

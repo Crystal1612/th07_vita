@@ -13,6 +13,8 @@
 //i'll macro it fror multiplayer
 // #define THE_2_5_6_0_SPRITE_LIMIT 2560
 #define THE_2_5_6_0_SPRITE_LIMIT 5120
+// #define THE_50_ANM_LIMIT 50
+#define THE_50_ANM_LIMIT 100
 
 enum AnmVarId
 {
@@ -618,15 +620,15 @@ struct AnmManager
     u32 flushesThisFrame;
     Float2 offset;
     D3DXMATRIX matrix;
-    AnmLoadedSprite sprites[2560];
+    AnmLoadedSprite sprites[THE_2_5_6_0_SPRITE_LIMIT];
     AnmVm vm;
     IDirect3DTexture8 *textures[264];
     void *imageDataArray[256];
     char *textureNames[264];
     i32 loadedSpriteCount;
-    AnmRawInstr *scripts[2560];
-    i32 spriteIndices[2560];
-    AnmEntry anmFiles[50];
+    AnmRawInstr *scripts[THE_2_5_6_0_SPRITE_LIMIT];
+    i32 spriteIndices[THE_2_5_6_0_SPRITE_LIMIT];
+    AnmEntry anmFiles[THE_50_ANM_LIMIT];
     IDirect3DSurface8 *surfaces[32];
     IDirect3DSurface8 *surfacesBis[32];
     ZunImageInfo surfaceSourceInfo[32];

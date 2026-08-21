@@ -169,6 +169,7 @@ struct PlayerBulletTimer
 
 struct Player
 {
+    // multiplayer
     static ZunResult RegisteringChain(Player *mgr, u32 param_1, u8 playerType);
     static ZunResult RegisterChain(u32 param_1);
     static void CutChain();
@@ -191,7 +192,17 @@ struct Player
     void DrawBulletExplosions();
 
     void ActivateBorder();
+
     f32 AngleToPlayer(Float3 *pos);
+
+    // multiplayer
+    static f32 XToNearestPlayer(Float3 *pos);
+    static f32 YToNearestPlayer(Float3 *pos);
+    static f32 ZToNearestPlayer(Float3 *pos);
+    static f32 AngleToNearestPlayer(Float3 *pos);
+    static f32 DistanceToNearestPlayer(Float3 *pos);
+    f32 RangeToPlayer(Float3 *pos);
+
     void BreakBorder(u32 unused);
     void BreakBorderNaturally();
 

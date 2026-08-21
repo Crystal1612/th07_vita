@@ -629,7 +629,7 @@ bool ItemManager::CollectItemPerPlayer(Player *player, Item *item, i32 currentPo
     {
         if (player->playerState != 1)
         {
-            item->startPosition.FromAngleMagnitude(player->AngleToPlayer(&item->currentPosition), player->shooterData->itemCollectSpeed);
+            item->startPosition.FromAngleMagnitude(Player::AngleToNearestPlayer(&item->currentPosition), player->shooterData->itemCollectSpeed);
             item->state = 1;
             if (player->hasBorder == 1)
             {

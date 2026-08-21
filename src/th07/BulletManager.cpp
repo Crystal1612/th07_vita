@@ -641,7 +641,7 @@ i32 BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
     }
 
     bulletProps->sprites = this->bulletTypeTemplates + bulletProps->sprite;
-    angle = g_Player.AngleToPlayer(&bulletProps->pos);
+    angle = Player::AngleToNearestPlayer(&bulletProps->pos);
     for (x = 0; x < bulletProps->count2; x++)
     {
         for (y = 0; y < bulletProps->count1; y++)
@@ -695,7 +695,7 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *laserShooter)
         if (laserShooter->type == 0)
         {
             laser->angle =
-                g_Player.AngleToPlayer(&laserShooter->pos) + laser->angle;
+                Player::AngleToNearestPlayer(&laserShooter->pos) + laser->angle;
         }
         laser->flags = laserShooter->flags;
         laser->timer = 0;
@@ -856,7 +856,7 @@ void Bullet::UpdateBulletDirChangeAimAtPlayer()
         {
             this->exFlags = this->exFlags & 0xffffff7f;
         }
-        this->angle = utils::AddNormalizeAngle(g_Player.AngleToPlayer(&this->pos),
+        this->angle = utils::AddNormalizeAngle(Player::AngleToNearestPlayer(&this->pos),
                                                this->commandStates[3].angle);
         this->speed = this->commandStates[3].speed;
         local_8 = this->speed;
