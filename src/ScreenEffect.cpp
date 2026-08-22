@@ -21,8 +21,8 @@ void ScreenEffect::SetViewport(u32 color)
     }
     g_Supervisor.viewport.x = 0;
     g_Supervisor.viewport.y = 0;
-    g_Supervisor.viewport.width = 640;
-    g_Supervisor.viewport.height = 480;
+    g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
+    g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
     g_Supervisor.viewport.minZ = 0.0f;
     g_Supervisor.viewport.maxZ = 1.0f;
 
@@ -30,7 +30,7 @@ void ScreenEffect::SetViewport(u32 color)
     Clear(*(ZunColor *)&color);
 }
 
-u32 BombEffects::OnUpdateFadeOut(BombEffects *arg)
+u32 ScreenEffect::OnUpdateFadeOut(ScreenEffect *arg)
 {
     if (arg->duration != 0)
     {
@@ -117,25 +117,25 @@ void ScreenEffect::DrawColoredQuad(ZunRect *rect, u32 param_2, u32 param_3, u32 
     g_Supervisor.gfxDevice->SetTextureArg(TEX_ARG_TEXTURE);
 }
 
-u32 BombEffects::OnDrawFullScreenColor(BombEffects *arg)
+u32 ScreenEffect::OnDrawFullScreenColor(ScreenEffect *arg)
 {
     ZunRect rect;
 
     rect.left = 0.0f;
     rect.top = 0.0f;
-    rect.right = 640.0f;
-    rect.bottom = 480.0f;
+    rect.right = (f32)GAME_WINDOW_WIDTH;
+    rect.bottom = (f32)GAME_WINDOW_HEIGHT;
     g_AnmManager->Flush();
     g_Supervisor.viewport.x = 0;
     g_Supervisor.viewport.y = 0;
-    g_Supervisor.viewport.width = 640;
-    g_Supervisor.viewport.height = 480;
+    g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
+    g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
     g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
     ScreenEffect::DrawSquare(&rect, arg->alpha << 24 | arg->args[0]);
     return 1;
 }
 
-u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
+u32 ScreenEffect::OnUpdateFadeIn(ScreenEffect *arg)
 {
     if (arg->duration != 0)
     {
@@ -154,7 +154,7 @@ u32 BombEffects::OnUpdateFadeIn(BombEffects *arg)
     return 1;
 }
 
-u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
+u32 ScreenEffect::OnDrawPlayAreaColor(ScreenEffect *arg)
 {
     ZunRect rect;
 
@@ -166,7 +166,7 @@ u32 BombEffects::OnDrawPlayAreaColor(BombEffects *arg)
     return 1;
 }
 
-u32 BombEffects::OnUpdatePulse(BombEffects *arg)
+u32 ScreenEffect::OnUpdatePulse(ScreenEffect *arg)
 {
     if (arg->timer < arg->duration)
     {
@@ -191,7 +191,7 @@ u32 BombEffects::OnUpdatePulse(BombEffects *arg)
     return 1;
 }
 
-u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
+u32 ScreenEffect::OnDrawPlayAreaPulseColor(ScreenEffect *arg)
 {
     ZunRect rect;
 
@@ -203,7 +203,7 @@ u32 BombEffects::OnDrawPlayAreaPulseColor(BombEffects *arg)
     return 1;
 }
 
-u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
+u32 ScreenEffect::OnUpdateScreenShake(ScreenEffect *arg)
 {
     if (g_GameManager.isTimeStopped)
     {
@@ -249,13 +249,13 @@ u32 BombEffects::OnUpdateScreenShake(BombEffects *arg)
     return 1;
 }
 
-ZunResult BombEffects::AddedCallback(BombEffects *arg)
+ZunResult ScreenEffect::AddedCallback(ScreenEffect *arg)
 {
     arg->timer = 0;
     return ZUN_SUCCESS;
 }
 
-ZunResult BombEffects::DeletedCallback(BombEffects *arg)
+ZunResult ScreenEffect::DeletedCallback(ScreenEffect *arg)
 {
     arg->calcChain->deletedCallback = NULL;
     g_Chain.Cut(arg->drawChain);
@@ -265,47 +265,48 @@ ZunResult BombEffects::DeletedCallback(BombEffects *arg)
     return ZUN_SUCCESS;
 }
 
-BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2, u32 arg3)
+ScreenEffect *ScreenEffect::RegisterChain(i32 type, i32 duration, u32 arg1,
+                                          u32 arg2, u32 arg3)
 {
     ChainElem *calcChain = NULL;
     ChainElem *drawChain = NULL;
 
-    BombEffects *bombEffects = new BombEffects;
-    if (!bombEffects)
+    ScreenEffect *mgr = new ScreenEffect;
+    if (!mgr)
     {
         return NULL;
     }
 
-    memset(bombEffects, 0, sizeof(BombEffects));
+    memset(mgr, 0, sizeof(ScreenEffect));
     switch (type)
     {
-    case 0:
+    case SCREEN_EFFECT_FADE_OUT:
         calcChain = g_Chain.CreateElem((ChainCallback)OnUpdateFadeOut);
         drawChain = g_Chain.CreateElem((ChainCallback)OnDrawFullScreenColor);
         break;
-    case 1:
+    case SCREEN_EFFECT_SHAKE:
         calcChain = g_Chain.CreateElem((ChainCallback)OnUpdateScreenShake);
         break;
-    case 2:
+    case SCREEN_EFFECT_FADE_IN_PLAY_AREA:
         calcChain = g_Chain.CreateElem((ChainCallback)OnUpdateFadeIn);
         drawChain = g_Chain.CreateElem((ChainCallback)OnDrawPlayAreaColor);
         break;
-    case 4:
+    case SCREEN_EFFECT_FADE_IN_FULLSCREEN:
         calcChain = g_Chain.CreateElem((ChainCallback)OnUpdateFadeIn);
         drawChain = g_Chain.CreateElem((ChainCallback)OnDrawFullScreenColor);
         break;
-    case 3:
+    case SCREEN_EFFECT_PULSE:
         calcChain = g_Chain.CreateElem((ChainCallback)OnUpdatePulse);
         drawChain = g_Chain.CreateElem((ChainCallback)OnDrawPlayAreaPulseColor);
     }
     calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-    calcChain->arg = bombEffects;
-    bombEffects->type = type;
-    bombEffects->duration = duration;
-    bombEffects->args[0] = arg1;
-    bombEffects->args[1] = arg2;
-    bombEffects->args[2] = arg3;
+    calcChain->arg = mgr;
+    mgr->type = type;
+    mgr->duration = duration;
+    mgr->args[0] = arg1;
+    mgr->args[1] = arg2;
+    mgr->args[2] = arg3;
     if (g_Chain.AddToCalcChain(calcChain, 15))
     {
         return NULL;
@@ -313,10 +314,10 @@ BombEffects *BombEffects::RegisterChain(i32 type, i32 duration, u32 arg1, u32 ar
 
     if (drawChain)
     {
-        drawChain->arg = bombEffects;
+        drawChain->arg = mgr;
         g_Chain.AddToDrawChain(drawChain, 17);
     }
-    bombEffects->calcChain = calcChain;
-    bombEffects->drawChain = drawChain;
-    return bombEffects;
+    mgr->calcChain = calcChain;
+    mgr->drawChain = drawChain;
+    return mgr;
 }

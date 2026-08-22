@@ -51,8 +51,8 @@ u32 Ending::OnUpdate(Ending *arg)
 
 u32 Ending::OnDraw(Ending *arg)
 {
-    g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x, (i32)arg->backgroundPos.y, 640,
-                                 480);
+    g_AnmManager->DrawEndingRect(0, 0, 0, (i32)arg->backgroundPos.x, (i32)arg->backgroundPos.y,
+                                 GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
     for (i32 i = 0; i < MAX_ENDING_SPRITES; i++)
     {
         g_AnmManager->Draw(&arg->sprites[i]);
@@ -82,8 +82,8 @@ void Ending::FadingEffect()
 
     rect.left = 0.0f;
     rect.top = 0.0f;
-    rect.right = 640.0f;
-    rect.bottom = 480.0f;
+    rect.right = (f32)GAME_WINDOW_WIDTH;
+    rect.bottom = (f32)GAME_WINDOW_HEIGHT;
     switch (this->fadeType)
     {
     case ENDING_FADE_OUT_BLACK:

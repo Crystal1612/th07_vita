@@ -86,8 +86,8 @@ RenderResult GameWindow::Render()
         g_AnmManager->Flush();
         g_Supervisor.viewport.x = 0;
         g_Supervisor.viewport.y = 0;
-        g_Supervisor.viewport.width = 640;
-        g_Supervisor.viewport.height = 480;
+        g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
+        g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
         g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
 
         chainRes = g_Chain.RunCalcChain();
@@ -195,7 +195,7 @@ ZunResult GameWindow::CreateGameWindow()
 
     g_GameWindow.window =
         SDL_CreateWindow("東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
-                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, flags);
+                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, flags);
     if (!g_GameWindow.window)
     {
         Supervisor::DebugPrint("sdl window create failed: %s\n", SDL_GetError());
@@ -219,8 +219,8 @@ ZunResult GameWindow::InitRendering()
 
     halfWidth = 320.0f;
     halfHeight = 240.0f;
-    aspectRatio = 1.3333334f;
-    fov = 0.5235988f;
+    aspectRatio = 4.0f / 3.0f;
+    fov = ZUN_PI / 6.0f;
     halfCameraDistance = halfHeight / tanf(fov / 2.0f);
     pUp.x = 0.0f;
     pUp.y = 1.0f;
@@ -239,8 +239,8 @@ ZunResult GameWindow::InitRendering()
 
     g_Supervisor.viewport.x = 0;
     g_Supervisor.viewport.y = 0;
-    g_Supervisor.viewport.width = 640;
-    g_Supervisor.viewport.height = 480;
+    g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
+    g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
     g_Supervisor.viewport.minZ = 0.0f;
     g_Supervisor.viewport.maxZ = 1.0f;
     g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
