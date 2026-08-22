@@ -294,8 +294,8 @@ void AsciiManager::DrawStrings()
             {
                 g_Supervisor.viewport.X = 0;
                 g_Supervisor.viewport.Y = 0;
-                g_Supervisor.viewport.Width = 640;
-                g_Supervisor.viewport.Height = 480;
+                g_Supervisor.viewport.Width = GAME_WINDOW_WIDTH;
+                g_Supervisor.viewport.Height = GAME_WINDOW_HEIGHT;
                 g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
             }
         }
@@ -545,18 +545,18 @@ i32 PauseMenu::OnUpdate()
                 if (WAS_PRESSED_RAW(TH_BUTTON_UP))
                 {
                     this->curState = PAUSE_MENU_STATE_SELECTING_RESTART;
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                    g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
                 }
             }
             else if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
                 this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
                 this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
@@ -583,14 +583,14 @@ i32 PauseMenu::OnUpdate()
             if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
                 this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (g_GameManager.replay)
             {
                 if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
                 {
                     this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                    g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
                 }
             }
             else
@@ -598,7 +598,7 @@ i32 PauseMenu::OnUpdate()
                 if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
                 {
                     this->curState = PAUSE_MENU_STATE_SELECTING_RESTART;
-                    g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                    g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
                 }
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
@@ -629,12 +629,12 @@ i32 PauseMenu::OnUpdate()
             if (WAS_PRESSED_RAW(TH_BUTTON_UP))
             {
                 this->curState = PAUSE_MENU_STATE_SELECTING_RETURN;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
                 this->curState = PAUSE_MENU_STATE_SELECTING_UNPAUSE;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
@@ -687,7 +687,7 @@ i32 PauseMenu::OnUpdate()
                 {
                     this->curState = PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_NO;
                 }
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
@@ -726,7 +726,7 @@ i32 PauseMenu::OnUpdate()
                 {
                     this->curState = PAUSE_MENU_STATE_CONFIRM_RESTART_SELECTING_YES;
                 }
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
@@ -900,7 +900,7 @@ i32 RetryMenu::OnUpdate()
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
                 this->curState = RETRY_MENU_STATE_SELECTING_RETURN;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {
@@ -925,7 +925,7 @@ i32 RetryMenu::OnUpdate()
             if (WAS_PRESSED_RAW(TH_BUTTON_UP) || WAS_PRESSED_RAW(TH_BUTTON_DOWN))
             {
                 this->curState = RETRY_MENU_STATE_SELECTING_CONTINUE;
-                g_SoundPlayer.PlaySoundByIdx(SOUND_0, 0);
+                g_SoundPlayer.PlaySoundByIdx(SOUND_SHOOTING, 0);
             }
             if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
             {

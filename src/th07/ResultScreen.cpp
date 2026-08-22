@@ -486,7 +486,7 @@ void ResultScreen::ReleaseScoreDat(ScoreDat *scoreDat)
     free(scoreDat);
 }
 
-#pragma var_order(i, characterSlot, fileBuffer, sizeOfFile,         \
+#pragma var_order(i, characterSlot, fileBuffer, sizeOfFile,                  \
                   currentCharacter, character, clrd, catk, pscr, j, k, vrsm, \
                   compressedBuffer, scoreDat, originalByte, remainingSize,   \
                   xorValue, bytes, sd)
@@ -2190,8 +2190,8 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
     g_AnmManager->Flush();
     g_Supervisor.viewport.X = 0;
     g_Supervisor.viewport.Y = 0;
-    g_Supervisor.viewport.Width = 640;
-    g_Supervisor.viewport.Height = 480;
+    g_Supervisor.viewport.Width = GAME_WINDOW_WIDTH;
+    g_Supervisor.viewport.Height = GAME_WINDOW_HEIGHT;
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     for (i = 0; i < ARRAY_SIZE_SIGNED(arg->vms); i++, vm++)
@@ -2202,7 +2202,7 @@ u32 ResultScreen::OnDraw(ResultScreen *arg)
         vm->pos = pos;
     }
     vm = arg->vms + 16;
-    if (vm->pos.x < 640.0f)
+    if (vm->pos.x < (f32)GAME_WINDOW_WIDTH)
     {
         if (arg->stateStep != 9)
         {

@@ -105,7 +105,7 @@ struct ReplayManager
     static void SaveReplay2(const char *filename);
     static void StopRecording();
     static ReplayFile *ValidateReplayData(ReplayFile *data,
-                                                   i32 size);
+                                          i32 size);
 
     i32 StageReplayExists(i32 stage)
     {

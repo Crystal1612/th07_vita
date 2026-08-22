@@ -216,7 +216,7 @@ i32 ShtData::FireHomingBullet(Player *player, PlayerBullet *bullet,
             angle = utils::AddNormalizeAngle(
                 atan2f(player->sakuyaTargetPosition.y - bullet->pos.y,
                        player->sakuyaTargetPosition.x - bullet->pos.x),
-                shtEntry->angle + 1.5707964f);
+                shtEntry->angle + ZUN_PI / 2.0f);
             speed = shtEntry->speed * 1.5f;
             (*(Float3 *)&bullet->velocity).FromAngleMagnitude(angle, speed);
             bullet->angle = angle;
@@ -239,7 +239,7 @@ i32 ShtData::FireRotatingOrbBullet(Player *player, PlayerBullet *bullet,
     {
         DefaultFireBulletCallback(player, bullet, shtEntry);
         angle = utils::AddNormalizeAngle(player->optionAngle,
-                                         shtEntry->angle + 1.5707964f);
+                                         shtEntry->angle + ZUN_PI / 2.0f);
         speed = shtEntry->speed;
         (*(Float3 *)&bullet->velocity).FromAngleMagnitude(angle, speed);
         bullet->angle = angle;
@@ -290,7 +290,7 @@ i32 ShtData::UpdateHomingBullet(Player *player, PlayerBullet *bullet)
         {
             if (bullet->speed < 10.0f)
             {
-                bullet->speed = bullet->speed + 0.33333334f;
+                bullet->speed += 1.0f / 3.0f;
                 x = bullet->velocity.x;
                 y = bullet->velocity.y;
                 length = sqrtf(x * x + y * y);
@@ -511,7 +511,7 @@ i32 ShtData::OnMissileHit(Player *player, PlayerBullet *bullet,
     }
     else
     {
-        angle = g_Rng.GetRandomFloatInRange(1.5707964f) - 2.3561945f;
+        angle = g_Rng.GetRandomFloatInRange(ZUN_PI / 2.0f) - ZUN_3PI / 4.0f;
         switch (bullet->vm.anmFileIdx)
         {
         case 1089:
@@ -743,7 +743,7 @@ void Player::DrawBullets()
 
         if (bullet->vm.autoRotate)
         {
-            f32 angle = utils::AddNormalizeAngle(bullet->angle, 1.5707964f);
+            f32 angle = utils::AddNormalizeAngle(bullet->angle, ZUN_PI / 2.0f);
             bullet->vm.rotation.z = angle;
             bullet->vm.updateRotation = 1;
         }
@@ -774,7 +774,7 @@ void Player::DrawBulletExplosions()
 
         if (bullet->vm.autoRotate)
         {
-            f32 angle = utils::AddNormalizeAngle(bullet->angle, 1.5707964f);
+            f32 angle = utils::AddNormalizeAngle(bullet->angle, ZUN_PI / 2.0f);
             bullet->vm.rotation.z = angle;
             bullet->vm.updateRotation = 1;
         }
@@ -1511,8 +1511,8 @@ i32 Player::HandlePlayerInputs()
             this->focusMovementTimer = 0;
             break;
         case OPTION_UNFOCUSED:
-            optionOffsetX = cosf(this->optionAngle + 1.5707964f) * 24.0f;
-            optionOffsetY = sinf(this->optionAngle + 1.5707964f) * 24.0f;
+            optionOffsetX = cosf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
+            optionOffsetY = sinf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
             this->focusMovementTimer = 0;
             if (this->isFocus)
             {
@@ -1540,16 +1540,16 @@ i32 Player::HandlePlayerInputs()
             }
             this->focusMovementTimer++;
             t = this->focusMovementTimer.AsFloat() / 8.0f;
-            optionOffsetX = cosf(this->optionAngle + 1.5707964f) * 24.0f;
-            optionOffsetY = sinf(this->optionAngle + 1.5707964f) * 24.0f;
-            targetOffsetX = cosf(this->optionAngle + 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle + 0.22439948f) * 24.0f;
+            optionOffsetX = cosf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
+            optionOffsetY = sinf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
             targetOffsetX = (targetOffsetX - optionOffsetX) * t + optionOffsetX;
             targetOffsetY = (targetOffsetY - optionOffsetY) * t + optionOffsetY;
             this->optionsPosition[1].x += targetOffsetX;
             this->optionsPosition[1].y += targetOffsetY;
-            targetOffsetX = cosf(this->optionAngle - 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle - 0.22439948f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
             targetOffsetX = (targetOffsetX + optionOffsetX) * t - optionOffsetX;
             targetOffsetY = (targetOffsetY + optionOffsetY) * t - optionOffsetY;
             if (this->focusMovementTimer >= 8)
@@ -1570,12 +1570,12 @@ i32 Player::HandlePlayerInputs()
                 }
                 goto CASE_OPTION_UNFOCUSING_2;
             }
-            targetOffsetX = cosf(this->optionAngle + 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle + 0.22439948f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
             this->optionsPosition[1].x += targetOffsetX;
             this->optionsPosition[1].y += targetOffsetY;
-            targetOffsetX = cosf(this->optionAngle - 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle - 0.22439948f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
             this->optionsPosition[0].x += targetOffsetX;
             this->optionsPosition[0].y += targetOffsetY;
             break;
@@ -1591,16 +1591,16 @@ i32 Player::HandlePlayerInputs()
             }
             this->focusMovementTimer++;
             t = 1.0f - this->focusMovementTimer.AsFloat() / 8.0f;
-            optionOffsetX = cosf(this->optionAngle + 1.5707964f) * 24.0f;
-            optionOffsetY = sinf(this->optionAngle + 1.5707964f) * 24.0f;
-            targetOffsetX = cosf(this->optionAngle + 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle + 0.22439948f) * 24.0f;
+            optionOffsetX = cosf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
+            optionOffsetY = sinf(this->optionAngle + ZUN_PI / 2.0f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle + ZUN_PI / 14.0f) * 24.0f;
             targetOffsetX = (targetOffsetX - optionOffsetX) * t + optionOffsetX;
             targetOffsetY = (targetOffsetY - optionOffsetY) * t + optionOffsetY;
             this->optionsPosition[1].x += targetOffsetX;
             this->optionsPosition[1].y += targetOffsetY;
-            targetOffsetX = cosf(this->optionAngle - 0.22439948f) * 24.0f;
-            targetOffsetY = sinf(this->optionAngle - 0.22439948f) * 24.0f;
+            targetOffsetX = cosf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
+            targetOffsetY = sinf(this->optionAngle - ZUN_PI / 14.0f) * 24.0f;
             targetOffsetX = (targetOffsetX + optionOffsetX) * t - optionOffsetX;
             targetOffsetY = (targetOffsetY + optionOffsetY) * t - optionOffsetY;
             if (this->focusMovementTimer >= 8)
@@ -1624,27 +1624,27 @@ i32 Player::HandlePlayerInputs()
             {
                 angleStep = -(this->velocity.x / 4.0f) * ZUN_PI / 5.0f / 10.0f;
                 this->optionAngle -= angleStep;
-                if (this->optionAngle < -2.1991148f)
+                if (this->optionAngle < -(7.0f * ZUN_PI / 10.0f))
                 {
-                    this->optionAngle = -2.1991148f;
+                    this->optionAngle = -(7.0f * ZUN_PI / 10.0f);
                 }
-                else if (this->optionAngle > -0.9424778f)
+                else if (this->optionAngle > -ZUN_3PI / 10.0f)
                 {
-                    this->optionAngle = -0.9424778f;
+                    this->optionAngle = -ZUN_3PI / 10.0f;
                 }
             }
             else
             {
-                if (fabsf(this->optionAngle - -1.5707964f) > 0.03141593f)
+                if (fabsf(this->optionAngle - (-ZUN_PI / 2.0f)) > ZUN_PI / 100.0f)
                 {
-                    angleStep = this->optionAngle < -1.5707964f
-                                    ? 0.06283186f * g_Supervisor.effectiveFramerateMultiplier
-                                    : -0.06283186f * g_Supervisor.effectiveFramerateMultiplier;
+                    angleStep = this->optionAngle < -ZUN_PI / 2.0f
+                                    ? ZUN_PI / 50.0f * g_Supervisor.effectiveFramerateMultiplier
+                                    : -ZUN_PI / 50.0f * g_Supervisor.effectiveFramerateMultiplier;
                     this->optionAngle += angleStep;
                 }
                 else
                 {
-                    this->optionAngle = -1.5707964f;
+                    this->optionAngle = -ZUN_PI / 2.0f;
                 }
             }
         }
@@ -2160,8 +2160,8 @@ void Player::BreakBorder(u32 unused)
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
     effect->vm.easeModes[4] = 0;
-    effect->vm.scaleInterpInitial.x = 0.0625f;
-    effect->vm.scaleInterpInitial.y = 0.0625f;
+    effect->vm.scaleInterpInitial.x = 1.0f / 16.0f;
+    effect->vm.scaleInterpInitial.y = 1.0f / 16.0f;
     effect->vm.scaleInterpFinal.x = 1.3f;
     effect->vm.scaleInterpFinal.y = 1.3f;
     effect->vm.interpStartTimes[2] = 0;
@@ -2180,7 +2180,7 @@ void Player::BreakBorder(u32 unused)
     g_GameManager.cherryPlus = g_GameManager.globals->cherryStart;
     SpawnBombEffect(&this->positionCenter, 32.0f, 16.0f, 50, 8);
     angle = -ZUN_PI;
-    for (i = 0; i < 32; i++, angle += 0.19634955f)
+    for (i = 0; i < 32; i++, angle += ZUN_PI / 16.0f)
     {
         effect = g_EffectManager.SpawnEffect(29, &this->positionCenter, 1,
                                              0xffffffff);
@@ -2361,7 +2361,7 @@ f32 Player::AngleToPlayer(Float3 *pos)
     y = this->positionCenter.y - pos->y;
     if (y == 0.0f && x == 0.0f)
     {
-        return 1.5707964f;
+        return ZUN_PI / 2.0f;
     }
     else
     {
@@ -2464,7 +2464,7 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->bombInfo.drawFocus =
         g_BombData[g_GameManager.shotTypeAndCharacter].drawFocus;
     arg->bombInfo.isInUse = 0;
-    arg->optionAngle = -1.5707964f;
+    arg->optionAngle = -ZUN_PI / 2.0f;
     arg->verticalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->horizontalMovementSpeedMultiplierDuringBomb = 1.0f;
     arg->respawnTimer = g_Player.shooterData->initialRespawnTimer;

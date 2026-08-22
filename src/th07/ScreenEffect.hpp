@@ -6,6 +6,15 @@
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
 
+enum ScreenEffectsType
+{
+    SCREEN_EFFECT_FADE_OUT,
+    SCREEN_EFFECT_SHAKE,
+    SCREEN_EFFECT_FADE_IN_PLAY_AREA,
+    SCREEN_EFFECT_PULSE,
+    SCREEN_EFFECT_FADE_IN_FULLSCREEN,
+};
+
 struct ZunRect
 {
     f32 left;
@@ -14,29 +23,26 @@ struct ZunRect
     f32 bottom;
 };
 
-namespace ScreenEffect
+struct ScreenEffect
 {
-void Clear(D3DCOLOR color);
-void DrawSquare(ZunRect *rect, D3DCOLOR color);
-void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
-                     D3DCOLOR param_4, D3DCOLOR param_5);
-void SetViewport(D3DCOLOR color);
-} // namespace ScreenEffect
+    static ScreenEffect *RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2,
+                                       u32 arg3);
 
-struct BombEffects
-{
-    static BombEffects *RegisterChain(i32 type, i32 duration, u32 arg1, u32 arg2,
-                                      u32 arg3);
+    static ZunResult AddedCallback(ScreenEffect *arg);
+    static ZunResult DeletedCallback(ScreenEffect *arg);
+    static u32 OnUpdateFadeIn(ScreenEffect *arg);
+    static u32 OnUpdateFadeOut(ScreenEffect *arg);
+    static u32 OnUpdatePulse(ScreenEffect *arg);
+    static u32 OnUpdateScreenShake(ScreenEffect *arg);
+    static u32 OnDrawFullScreenColor(ScreenEffect *arg);
+    static u32 OnDrawPlayAreaColor(ScreenEffect *arg);
+    static u32 OnDrawPlayAreaPulseColor(ScreenEffect *arg);
 
-    static ZunResult AddedCallback(BombEffects *arg);
-    static ZunResult DeletedCallback(BombEffects *arg);
-    static u32 OnUpdateFadeIn(BombEffects *arg);
-    static u32 OnUpdateFadeOut(BombEffects *arg);
-    static u32 OnUpdatePulse(BombEffects *arg);
-    static u32 OnUpdateScreenShake(BombEffects *arg);
-    static u32 OnDrawFullScreenColor(BombEffects *arg);
-    static u32 OnDrawPlayAreaColor(BombEffects *arg);
-    static u32 OnDrawPlayAreaPulseColor(BombEffects *arg);
+    static void Clear(D3DCOLOR color);
+    static void DrawSquare(ZunRect *rect, D3DCOLOR color);
+    static void DrawColoredQuad(ZunRect *rect, D3DCOLOR param_2, D3DCOLOR param_3,
+                                D3DCOLOR param_4, D3DCOLOR param_5);
+    static void SetViewport(D3DCOLOR color);
 
     i32 type;
     ChainElem *calcChain;
@@ -47,4 +53,4 @@ struct BombEffects
     u32 args[3];
     ZunTimer timer;
 };
-C_ASSERT(sizeof(BombEffects) == 0x30);
+C_ASSERT(sizeof(ScreenEffect) == 0x30);

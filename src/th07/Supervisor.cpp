@@ -1104,18 +1104,18 @@ i32 Supervisor::SnapshotScreen(const char *filename)
 
         memset(bitmapInfo, 0, sizeof(BITMAPINFO));
         stride = 1920;
-        bitmapData = malloc(stride * 480);
+        bitmapData = malloc(stride * GAME_WINDOW_HEIGHT);
         if (!bitmapData)
         {
             g_GameErrorContext.Log("snapShotScreen : Šm•Û‚µ‚­‚è\r\n");
             break;
         }
 
-        bmfh.bfSize += stride * 480;
+        bmfh.bfSize += stride * GAME_WINDOW_HEIGHT;
         bitmapInfo->bmiHeader.biBitCount = 24;
         bitmapInfo->bmiHeader.biSize = 40;
-        bitmapInfo->bmiHeader.biWidth = 640;
-        bitmapInfo->bmiHeader.biHeight = 480;
+        bitmapInfo->bmiHeader.biWidth = GAME_WINDOW_WIDTH;
+        bitmapInfo->bmiHeader.biHeight = GAME_WINDOW_HEIGHT;
         bitmapInfo->bmiHeader.biPlanes = 1;
         bitmapInfo->bmiHeader.biCompression = 0;
         backBuffer->LockRect(&lockedRect, NULL, 0);
@@ -1124,7 +1124,7 @@ i32 Supervisor::SnapshotScreen(const char *filename)
         {
             dstPixel = (u8 *)((u8 *)bitmapData + stride * bytesPerRow);
             srcPixel = (u8 *)((u8 *)lockedRect.pBits + lockedRect.Pitch * y);
-            for (x = 0; x < 640; x++)
+            for (x = 0; x < GAME_WINDOW_WIDTH; x++)
             {
                 *dstPixel = *srcPixel;
                 srcPixel++;
@@ -1146,7 +1146,7 @@ i32 Supervisor::SnapshotScreen(const char *filename)
 
         WriteFile(bitmapFile, &bmfh, 14, &bytesWritten, NULL);
         WriteFile(bitmapFile, bitmapInfo, 40, &bytesWritten, NULL);
-        WriteFile(bitmapFile, bitmapData, stride * 480, &bytesWritten, NULL);
+        WriteFile(bitmapFile, bitmapData, stride * GAME_WINDOW_HEIGHT, &bytesWritten, NULL);
         CloseHandle(bitmapFile);
         break;
     default:

@@ -937,7 +937,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
         waitObj = MsgWaitForMultipleObjects(
             1, &g_SoundPlayer.backgroundMusicUpdateEvent, 0, 0xffffffff,
             QS_HOTKEY | QS_PAINT | QS_TIMER | QS_POSTMESSAGE |
-            QS_MOUSEBUTTON | QS_MOUSEMOVE | QS_KEY);
+                QS_MOUSEBUTTON | QS_MOUSEMOVE | QS_KEY);
         if (!g_SoundPlayer.backgroundMusic)
         {
             stopped = true;

@@ -163,8 +163,8 @@ RenderResult GameWindow::Render()
         g_AnmManager->Flush();
         g_Supervisor.viewport.X = 0;
         g_Supervisor.viewport.Y = 0;
-        g_Supervisor.viewport.Width = 640;
-        g_Supervisor.viewport.Height = 480;
+        g_Supervisor.viewport.Width = GAME_WINDOW_WIDTH;
+        g_Supervisor.viewport.Height = GAME_WINDOW_HEIGHT;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
 
         chainRes = g_Chain.RunCalcChain();
@@ -291,8 +291,8 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     RegisterClassA(&base_class);
     if (!g_Supervisor.cfg.windowed)
     {
-        width = 640;
-        height = 480;
+        width = GAME_WINDOW_WIDTH;
+        height = GAME_WINDOW_HEIGHT;
         g_GameWindow.window = CreateWindowExA(
             0, "BASE",
             // STRING: TH07 0x00497b9c
@@ -301,8 +301,8 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
     }
     else
     {
-        width = GetSystemMetrics(SM_CXFIXEDFRAME) * 2 + 640;
-        height = 480 + GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
+        width = GetSystemMetrics(SM_CXFIXEDFRAME) * 2 + GAME_WINDOW_WIDTH;
+        height = GAME_WINDOW_HEIGHT + GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
         g_GameWindow.window = CreateWindowExA(
             0, "BASE", "ìåï˚ódÅXñ≤Å@Å` Perfect Cherry Blossom. ver 1.00b",
             WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX,
@@ -399,8 +399,8 @@ i32 GameWindow::InitD3dRendering()
         presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
         presentParams.Windowed = 1;
     }
-    presentParams.BackBufferWidth = 640;
-    presentParams.BackBufferHeight = 480;
+    presentParams.BackBufferWidth = GAME_WINDOW_WIDTH;
+    presentParams.BackBufferHeight = GAME_WINDOW_HEIGHT;
     presentParams.EnableAutoDepthStencil = 1;
     presentParams.AutoDepthStencilFormat = D3DFMT_D16;
     presentParams.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
@@ -493,8 +493,8 @@ i32 GameWindow::InitD3dRendering()
     g_Supervisor.presentParameters = presentParams;
     halfWidth = 320.0f;
     halfHeight = 240.0f;
-    aspectRatio = 1.3333334f;
-    fov = 0.5235988f;
+    aspectRatio = 4.0f / 3.0f;
+    fov = ZUN_PI / 6.0f;
     halfCameraDistance = halfHeight / tanf(fov / 2.0f);
     pUp.x = 0.0f;
     pUp.y = 1.0f;
