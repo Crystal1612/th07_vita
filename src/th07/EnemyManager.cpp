@@ -620,7 +620,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     Float3 enemyDiff;
 
     collisionOut = 0;
-    stageFactor = g_GameManager.currentStage >= 5 ? 10 : g_GameManager.currentStage * 2;
+    stageFactor = g_GameManager.currentStage >= STAGE5 ? 10 : g_GameManager.currentStage * 2;
     if (!g_Gui.HasCurrentMsgIdx())
     {
         timerLimit = 2400;
@@ -821,13 +821,13 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                             {
                                 cherryGain -= 10;
                             }
-                            if (g_GameManager.currentStage >= 5 &&
-                                g_GameManager.currentStage <= 6 &&
+                            if (g_GameManager.currentStage >= STAGE5 &&
+                                g_GameManager.currentStage <= STAGE6 &&
                                 !enemy->isBoss)
                             {
                                 damage = damage / 2;
                             }
-                            if (g_GameManager.currentStage == 4 &&
+                            if (g_GameManager.currentStage == STAGE4 &&
                                 !enemy->isBoss)
                             {
                                 damage -= damage / 4 + damage / 16;

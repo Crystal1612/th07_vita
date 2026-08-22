@@ -135,7 +135,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
         g_GameManager.arcadeRegionSize.x = 384.0f;
         g_GameManager.arcadeRegionSize.y = 448.0f;
         arg->isPaused = 1;
-        if (g_GameManager.currentStage != 6 || g_Gui.frameCounter >= 300)
+        if (g_GameManager.currentStage != STAGE6 || g_Gui.frameCounter >= 300)
         {
             // STRING: TH07 0x00498a40
             g_SoundPlayer.PushCommand(AUDIO_PAUSE, 0, "Pause");
@@ -609,22 +609,22 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             }
             switch (arg->currentStage + 1)
             {
-            case 2:
+            case STAGE2:
                 arg->cherry = arg->cherryMax;
                 break;
-            case 3:
+            case STAGE3:
                 arg->cherryMax += 50000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 4:
+            case STAGE4:
                 arg->cherryMax += 100000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 5:
+            case STAGE5:
                 arg->cherryMax += 150000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 6:
+            case STAGE6:
                 arg->cherryMax += 200000;
                 arg->cherry = arg->cherryMax;
                 break;
@@ -690,7 +690,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->globals->pointItemsCollectedThisStage = 0;
     arg->globals->grazeInStage = 0;
     arg->isInPauseMenu = 0;
-    arg->currentStage = arg->currentStage + 1;
+    arg->currentStage++;
     if (!g_GameManager.replay)
     {
         shotTypeAndChar = g_GameManager.shotTypeAndCharacter;
@@ -716,7 +716,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     {
         switch (arg->currentStage)
         {
-        case 1:
+        case STAGE1:
             break;
         default:
             arg->globals->currentPower = 128.0f;
@@ -784,7 +784,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     }
     g_Supervisor.LoadAudio(0, g_Stage.stdData->bgmPaths[0]);
     g_Supervisor.LoadAudio(1, g_Stage.stdData->bgmPaths[1]);
-    if (arg->currentStage != 6)
+    if (arg->currentStage != STAGE6)
     {
         g_Supervisor.PlayLoadedAudio(0);
     }

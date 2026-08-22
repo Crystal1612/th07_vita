@@ -137,7 +137,7 @@ u32 Gui::OnUpdate(Gui *arg)
     arg->UpdateGui();
     arg->impl->RunMsg();
     arg->frameCounter = arg->frameCounter + 1;
-    if (g_GameManager.currentStage == 6 && arg->frameCounter == 300)
+    if (g_GameManager.currentStage == STAGE6 && arg->frameCounter == 300)
     {
         g_Supervisor.PlayLoadedAudio(0);
     }
@@ -164,7 +164,7 @@ u32 Gui::OnDraw(Gui *arg)
         stringPos.y = 128.0f;
         stringPos.z = 0.0f;
         g_AsciiManager.color = 0xffffff40;
-        if (g_GameManager.currentStage < 6)
+        if (g_GameManager.currentStage < STAGE6)
         {
             AsciiManager::AddFormatText(&g_AsciiManager, &stringPos, "Stage Clear");
         }
@@ -188,8 +188,8 @@ u32 Gui::OnDraw(Gui *arg)
         g_AsciiManager.color = 0xffd0d0ff;
         AsciiManager::AddFormatText(&g_AsciiManager, &stringPos, "Cherry = %8d",
                                     arg->impl->clearCherryMax * 10);
-        if (g_GameManager.currentStage >= 7 ||
-            (g_GameManager.currentStage == 6 &&
+        if (g_GameManager.currentStage >= EXTRASTAGE ||
+            (g_GameManager.currentStage == STAGE6 &&
              !g_GameManager.practice &&
              (!g_GameManager.replay ||
               g_ReplayManager->data->head.stageReplayData[4].data != NULL)))
@@ -510,7 +510,7 @@ ZunResult Gui::ActualAddedCallback()
     }
     switch (g_GameManager.currentStage)
     {
-    case 1:
+    case STAGE1:
         CopyEnemyNameTexture(ENEMY_NAME_CIRNO_MBOSS_ST1);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_01_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -527,7 +527,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 2:
+    case STAGE2:
         CopyEnemyNameTexture(ENEMY_NAME_CHEN_MBOSS_ST2);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_02_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -544,7 +544,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 3:
+    case STAGE3:
         CopyEnemyNameTexture(ENEMY_NAME_ALICE_MBOSS_ST3);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_03_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -561,7 +561,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 4:
+    case STAGE4:
         CopyEnemyNameTexture(ENEMY_NAME_LILY_MBOSS_ST4);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_04_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -578,7 +578,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 5:
+    case STAGE5:
         CopyEnemyNameTexture(ENEMY_NAME_YOUMU_MBOSS_ST5);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_05_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -595,7 +595,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 6:
+    case STAGE6:
         CopyEnemyNameTexture(ENEMY_NAME_YOUMU_MBOSS_ST6);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_06_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -612,7 +612,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 7:
+    case EXTRASTAGE:
         CopyEnemyNameTexture(ENEMY_NAME_CHEN_MBOSS_EX);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_07_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -629,7 +629,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 8:
+    case PHANTASMSTAGE:
         CopyEnemyNameTexture(ENEMY_NAME_RAN_MBOSS_PH);
         if (g_AnmManager->LoadAnms(ANM_FILE_FACE_STAGE, "data/face_08_00.anm", ANM_OFFSET_FACE_STAGE) !=
             ZUN_SUCCESS)
@@ -779,33 +779,33 @@ void GuiImpl::MsgRead(i32 msgIdx)
     {
         switch (g_GameManager.currentStage)
         {
-        case 1:
+        case STAGE1:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_LETTY_BOSS_ST1);
             break;
-        case 2:
+        case STAGE2:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_CHEN_BOSS_ST2);
             break;
-        case 3:
+        case STAGE3:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_ALICE_BOSS_ST3);
             break;
-        case 4:
+        case STAGE4:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_PRISMRIVER_BOSS_ST4);
             break;
-        case 5:
+        case STAGE5:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_YOUMU_BOSS_ST5);
             break;
-        case 6:
+        case STAGE6:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_YUYUKO_BOSS_ST6);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
-        case 7:
+        case EXTRASTAGE:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_RAN_BOSS_EX);
             g_Stage.spellcardVmsIdx = 1;
             g_Stage.numSpellcardVms = 2;
             g_BulletManager.itemType = ITEM_STAR;
             break;
-        case 8:
+        case PHANTASMSTAGE:
             Gui::CopyEnemyNameTexture(ENEMY_NAME_YUKARI_BOSS_PH);
             g_Stage.spellcardVmsIdx = 2;
             g_BulletManager.itemType = ITEM_STAR;
@@ -957,7 +957,7 @@ ZunResult GuiImpl::RunMsg()
             this->msg.ignoreWaitCounter++;
             break;
         case MSG_MUSIC:
-            if (g_GameManager.currentStage != 6)
+            if (g_GameManager.currentStage != STAGE6)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageTextVm[0],
                                                         ANM_SCRIPT_STAGE_TEXT_MUSIC);
@@ -999,7 +999,7 @@ ZunResult GuiImpl::RunMsg()
                 g_GameManager.cherryMax - g_GameManager.globals->cherryStart;
             this->clearGraze = g_GameManager.globals->grazeInStage;
             this->finishedStage = 1;
-            if (g_GameManager.currentStage < 6)
+            if (g_GameManager.currentStage < STAGE6)
             {
                 g_AnmManager->SetAnmIdxAndExecuteScript(&this->stageClearBg,
                                                         ANM_SCRIPT_LOADING_STAGE_CLEAR_BG);
@@ -1036,7 +1036,7 @@ ZunResult GuiImpl::RunMsg()
                 goto SKIP_TIME_INCREMENT;
             }
 
-            if (g_GameManager.currentStage < 6)
+            if (g_GameManager.currentStage < STAGE6)
             {
                 if (g_GameManager.replay &&
                     !g_ReplayManager->StageReplayExists(g_GameManager.currentStage))
@@ -1080,7 +1080,7 @@ ZunResult GuiImpl::RunMsg()
             }
             else
             {
-                if (g_GameManager.currentStage == 8 &&
+                if (g_GameManager.currentStage == PHANTASMSTAGE &&
                     g_GameManager.globals->score !=
                         g_ReplayManager->data->data.score)
                 {
@@ -1125,7 +1125,7 @@ ZunResult GuiImpl::DrawDialogue()
     {
         return ZUN_ERROR;
     }
-    if (g_GameManager.currentStage == 6 &&
+    if (g_GameManager.currentStage == STAGE6 &&
         (this->msg.currentMsgIdx == 1 ||
          this->msg.currentMsgIdx == 11))
     {
@@ -1386,8 +1386,8 @@ void Gui::UpdateGui()
         scoreBonus += this->impl->clearGraze * 50;
         scoreBonus += this->impl->clearPointItems * 5000;
         scoreBonus += this->impl->clearCherryMax;
-        if (g_GameManager.currentStage >= 7 ||
-            (g_GameManager.currentStage == 6 &&
+        if (g_GameManager.currentStage >= EXTRASTAGE ||
+            (g_GameManager.currentStage == STAGE6 &&
              !g_GameManager.practice &&
              (!g_GameManager.replay ||
               g_ReplayManager->data->head.stageReplayData[4].data)))

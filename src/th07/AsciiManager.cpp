@@ -661,7 +661,7 @@ i32 PauseMenu::OnUpdate()
             {
                 this->menuSprites[i].SetInvisible();
             }
-            if (g_GameManager.currentStage != 6 || g_Gui.frameCounter >= 300)
+            if (g_GameManager.currentStage != STAGE6 || g_Gui.frameCounter >= 300)
             {
                 // STRING: TH07 0x00498a38
                 g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, (char *)"UnPause");
