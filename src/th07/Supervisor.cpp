@@ -1251,7 +1251,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         }
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
-    g_Supervisor.cfg.loaded = 1;
+    g_Supervisor.cfg.colorAddEmulation = 1;
     if (this->cfg.noVertexBuffers)
     {
         // STRING: TH07 0x00496e64

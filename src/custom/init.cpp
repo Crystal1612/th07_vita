@@ -24,7 +24,7 @@ static i32 Initialize(HWND hWnd)
     FILE *file;
 
     memset(&g_Config, 0, sizeof(GameConfiguration));
-    g_Config.loaded = 1;
+    g_Config.colorAddEmulation = 1;
     file = fopen("th07.cfg", "rb");
     if (file)
     {
@@ -82,7 +82,7 @@ static i32 Initialize(HWND hWnd)
     cfg.slowMode = 0;
     cfg.effectQuality = QUALITY_BEAUTIFUL;
     cfg.shotSlow = 1;
-    cfg.loaded = 1;
+    cfg.colorAddEmulation = 1;
 
 skip_init:
     g_Config = cfg;

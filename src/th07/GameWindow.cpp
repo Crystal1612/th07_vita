@@ -515,12 +515,12 @@ i32 GameWindow::InitD3dRendering()
                                          &g_Supervisor.projectionMatrix);
     g_Supervisor.d3dDevice->GetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->GetDeviceCaps(&g_Supervisor.d3dCaps);
-    if (!g_Supervisor.cfg.loaded &&
+    if (!g_Supervisor.cfg.colorAddEmulation &&
         (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
         // STRING: TH07 0x00497948
         g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
-        g_Supervisor.cfg.loaded = 1;
+        g_Supervisor.cfg.colorAddEmulation = 1;
     }
     if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
     {
