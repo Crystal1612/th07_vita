@@ -15,6 +15,8 @@
 #define THE_2_5_6_0_SPRITE_LIMIT 5120
 // #define THE_50_ANM_LIMIT 50
 #define THE_50_ANM_LIMIT 150
+// #define DRAW_STRING_BUF_72 72
+#define DRAW_STRING_BUF_72 144
 
 enum AnmVarId
 {

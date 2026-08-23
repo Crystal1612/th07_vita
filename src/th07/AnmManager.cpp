@@ -2313,7 +2313,7 @@ void AnmManager::DrawVmTextFmt(AnmManager *manager, AnmVm *vm,
                                const char *str, ...)
 {
     u32 fontWidth;
-    char text[72];
+    char text[DRAW_STRING_BUF_72];
     va_list args;
 
     fontWidth = vm->fontWidth;
@@ -2345,7 +2345,7 @@ void AnmManager::DrawStringFormat(AnmVm *vm, D3DCOLOR textColor,
                                   u32 outlineType, const char *text, ...)
 {
     i32 fontWidth;
-    char buf[72];
+    char buf[DRAW_STRING_BUF_72];
     i32 x;
     va_list args;
 
@@ -2376,7 +2376,7 @@ void AnmManager::DrawStringFormat2(AnmVm *vm, D3DCOLOR textColor,
                                    u32 outlineType, const char *text, ...)
 {
     i32 fontWidth;
-    char buf[72];
+    char buf[DRAW_STRING_BUF_72];
     i32 x;
     va_list args;
 
