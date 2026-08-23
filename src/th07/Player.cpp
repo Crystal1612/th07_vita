@@ -2432,10 +2432,25 @@ ZunResult Player::AddedCallback(Player *arg)
 {
     PlayerBullet *bullet;
     i32 i;
-    g_GameManager.shotTypeAndCharacter2 = 2;
+
+    // delete later
+    g_GameManager.shotType2 = g_GameManager.shotType;
+    g_GameManager.shotType3 = g_GameManager.shotType;
+
+    // always big 3
     g_GameManager.character2 = 1;
-    g_GameManager.shotTypeAndCharacter3 = 4;
     g_GameManager.character3 = 2;
+    if(g_GameManager.character==1){
+        g_GameManager.character2 = 0;
+        g_GameManager.character3 = 2;
+    }
+    if(g_GameManager.character==2){
+        g_GameManager.character2 = 0;
+        g_GameManager.character3 = 1;
+    }
+
+    g_GameManager.shotTypeAndCharacter2 = g_GameManager.character2 * 2 + g_GameManager.shotType2;
+    g_GameManager.shotTypeAndCharacter3 = g_GameManager.character3 * 2 + g_GameManager.shotType3;
 
     // compatslop
     arg->anmOffsetPlayer = 0;
