@@ -199,8 +199,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
             (arg->demoIdx == 1 && arg->demoFrames == 7020) ||
             (arg->demoIdx == 2 && arg->demoFrames == 4620))
         {
-            ScreenEffect::RegisterChain(
-                SCREEN_EFFECT_FADE_IN_PLAY_AREA, 120, 0, 0, 0);
+            ScreenEffect::RegisterChain(SCREEN_EFFECT_FADE_IN_PLAY_AREA, 120, 0, 0, 0);
             g_Supervisor.FadeOutMusic(3.0f);
         }
         if ((arg->demoIdx == 0 && arg->demoFrames >= 8220) ||
@@ -634,21 +633,21 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     999999);
                 if (g_Supervisor.curState == SUPERVISOR_STATE_RESTART_FROM_BEGINNING)
                 {
-                    IncrementCappedAgain(&((Plst *)(g_GameManager.pscr + 6))
-                                              ->playDataByDifficulty[g_GameManager.difficulty]
-                                              .clearCount,
-                                         999999);
-                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].clearCount,
+                    IncrementCappedAgain(
+                        &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                             .retryCount,
+                        999999);
+                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].retryCount,
                                          999999);
                 }
                 if (g_GameManager.practice)
                 {
-                    IncrementCappedAgain(&((Plst *)(g_GameManager.pscr + 6))
-                                              ->playDataByDifficulty[g_GameManager.difficulty]
-                                              .extraClearCount,
-                                         999999);
                     IncrementCappedAgain(
-                        &g_GameManager.plst.playDataByDifficulty[6].extraClearCount, 999999);
+                        &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                             .practiceCount,
+                        999999);
+                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].practiceCount,
+                                         999999);
                 }
             }
         }
@@ -949,8 +948,7 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
             numSuccesses++;
         }
     }
-    if (numSuccesses >= 60 &&
-        this->clrd[shotType].difficultyClearedWithRetries[DIFF_EXTRA] == 99)
+    if (numSuccesses >= 60 && this->clrd[shotType].difficultyClearedWithRetries[DIFF_EXTRA] == 99)
     {
         this->clrd[shotType].difficultyClearedWithRetries[DIFF_PHANTASM] = 99;
     }
@@ -959,12 +957,9 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
 
 i32 GameManager::HasReachedMaxClearsAllShotTypes()
 {
-    return !HasReachedMaxClears(SHOT_REIMU_A) &&
-                   !HasReachedMaxClears(SHOT_REIMU_B) &&
-                   !HasReachedMaxClears(SHOT_MARISA_A) &&
-                   !HasReachedMaxClears(SHOT_MARISA_B) &&
-                   !HasReachedMaxClears(SHOT_SAKUYA_A) &&
-                   !HasReachedMaxClears(SHOT_SAKUYA_B)
+    return !HasReachedMaxClears(SHOT_REIMU_A) && !HasReachedMaxClears(SHOT_REIMU_B) &&
+                   !HasReachedMaxClears(SHOT_MARISA_A) && !HasReachedMaxClears(SHOT_MARISA_B) &&
+                   !HasReachedMaxClears(SHOT_SAKUYA_A) && !HasReachedMaxClears(SHOT_SAKUYA_B)
                ? 0
                : 1;
 }

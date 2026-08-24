@@ -990,9 +990,18 @@ i32 RetryMenu::OnUpdate()
                                  .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
                             999999);
             IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty].retryCount,
+                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
                 999999);
-            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].retryCount, 999999);
+            IncrementCapped(
+                &g_GameManager.plst.playDataByDifficulty[6]
+                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
+                999999);
+            IncrementCapped(
+                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                     .continueCount,
+                999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].continueCount, 999999);
             g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, "UnPause");
             g_Supervisor.currentTime = SDL_GetTicks64();
             return 0;
