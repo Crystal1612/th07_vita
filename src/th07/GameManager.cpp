@@ -652,8 +652,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                 if (g_Supervisor.curState == SUPERVISOR_STATE_RESTART_FROM_BEGINNING)
                 {
                     IncrementCappedAgain(
-                        &((Plst *)(g_GameManager.pscr + 6))
-                             ->playDataByDifficulty[g_GameManager.difficulty]
+                        &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
                              .retryCount,
                         999999);
                     IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].retryCount,
@@ -662,8 +661,8 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                 if (g_GameManager.practice)
                 {
                     IncrementCappedAgain(
-                        &((Plst *)(g_GameManager.pscr + 6))
-                             ->playDataByDifficulty[g_GameManager.difficulty]
+                        &g_GameManager.plst
+                            .playDataByDifficulty[g_GameManager.difficulty]
                              .practiceCount,
                         999999);
                     IncrementCappedAgain(
