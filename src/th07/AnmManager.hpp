@@ -17,6 +17,8 @@
 #define THE_50_ANM_LIMIT 150
 // #define DRAW_STRING_BUF_72 72
 #define DRAW_STRING_BUF_72 144
+#define GAME_WINDOW_WIDTH 640
+#define GAME_WINDOW_HEIGHT 480
 
 enum AnmVarId
 {
@@ -383,6 +385,11 @@ struct AnmVm : AnmVmBase
 };
 C_ASSERT(sizeof(AnmVm) == 0x24c);
 
+#define MAX_SCRIPTS_SPRITES 2560
+#define MAX_TEXTURES 264
+#define MAX_ANM_FILES 50
+#define MAX_SURFACES 32
+
 struct AnmManager
 {
     AnmManager();
@@ -623,10 +630,11 @@ struct AnmManager
     Float2 offset;
     D3DXMATRIX matrix;
     AnmLoadedSprite sprites[THE_2_5_6_0_SPRITE_LIMIT];
+    AnmLoadedSprite sprites[MAX_SCRIPTS_SPRITES];
     AnmVm vm;
-    IDirect3DTexture8 *textures[264];
+    IDirect3DTexture8 *textures[MAX_TEXTURES];
     void *imageDataArray[256];
-    char *textureNames[264];
+    char *textureNames[MAX_TEXTURES];
     i32 loadedSpriteCount;
     AnmRawInstr *scripts[THE_2_5_6_0_SPRITE_LIMIT];
     i32 spriteIndices[THE_2_5_6_0_SPRITE_LIMIT];
@@ -634,6 +642,12 @@ struct AnmManager
     IDirect3DSurface8 *surfaces[32];
     IDirect3DSurface8 *surfacesBis[32];
     ZunImageInfo surfaceSourceInfo[32];
+    AnmRawInstr *scripts[MAX_SCRIPTS_SPRITES];
+    i32 spriteIndices[MAX_SCRIPTS_SPRITES];
+    AnmEntry anmFiles[MAX_ANM_FILES];
+    IDirect3DSurface8 *surfaces[MAX_SURFACES];
+    IDirect3DSurface8 *surfacesBis[MAX_SURFACES];
+    ZunImageInfo surfaceSourceInfo[MAX_SURFACES];
     ZunColor currentTextureFactor;
     IDirect3DTexture8 *currentTexture;
     u8 currentBlendMode;

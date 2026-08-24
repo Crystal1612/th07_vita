@@ -6,6 +6,7 @@
 
 #include "Supervisor.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "inttypes.hpp"
 
 // GLOBAL: TH07 0x0049ed98
@@ -394,8 +395,7 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth,
     hFont =
         CreateFontA(fontHeight * 2 - 2, 0, 0, 0, FW_BOLD, false, false, false,
                     SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                    // STRING: TH07 0x00497cbc
-                    ANTIALIASED_QUALITY, FF_ROMAN | FIXED_PITCH, "‚l‚r ƒSƒVƒbƒN");
+                    ANTIALIASED_QUALITY, FF_ROMAN | FIXED_PITCH, TH_FONT_MS_GOTHIC);
     TextHelper textHelper;
     g_TextBufferSurface->GetDesc(&textSurfaceDesc);
     textHelper.AllocateBufferWithFallback(

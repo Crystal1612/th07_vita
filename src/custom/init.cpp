@@ -2,6 +2,7 @@
 #include <windows.h>
 
 #include "Supervisor.hpp"
+#include "i18n.hpp"
 #include "resource.h"
 
 // GLOBAL: CUSTOM 0x0040a040
@@ -24,7 +25,7 @@ static i32 Initialize(HWND hWnd)
     FILE *file;
 
     memset(&g_Config, 0, sizeof(GameConfiguration));
-    g_Config.loaded = 1;
+    g_Config.colorAddEmulation = 1;
     file = fopen("th07.cfg", "rb");
     if (file)
     {
@@ -82,7 +83,7 @@ static i32 Initialize(HWND hWnd)
     cfg.slowMode = 0;
     cfg.effectQuality = QUALITY_BEAUTIFUL;
     cfg.shotSlow = 1;
-    cfg.loaded = 1;
+    cfg.colorAddEmulation = 1;
 
 skip_init:
     g_Config = cfg;
@@ -96,7 +97,7 @@ skip_init:
     SendMessageA(GetDlgItem(hWnd, 1014), BM_SETCHECK, g_Config.unused, 0);
     SendMessageA(GetDlgItem(hWnd, IDC_REDRAW_EVERY_FRAME), BM_SETCHECK, g_Config.redrawEveryFrame, 0);
     SendMessageA(GetDlgItem(hWnd, IDC_PRELOAD_BGM), BM_SETCHECK, g_Config.preloadBgm, 0);
-    SendMessageA(GetDlgItem(hWnd, IDC_DISABLE_VSYNC), BM_SETCHECK, g_Config.enableVsync, 0);
+    SendMessageA(GetDlgItem(hWnd, IDC_DISABLE_VSYNC), BM_SETCHECK, g_Config.disableVsync, 0);
     if (!g_Config.windowed)
     {
         SendMessageA(GetDlgItem(hWnd, IDC_FULLSCREEN), BM_SETCHECK, BST_CHECKED, 0);
@@ -257,19 +258,19 @@ INT_PTR __stdcall DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             if (g_PadState & 0x10)
             {
-                strcat(str, "上 ");
+                strcat(str, TH_CUSTOM_PAD_UP);
             }
             if (g_PadState & 0x20)
             {
-                strcat(str, "下 ");
+                strcat(str, TH_CUSTOM_PAD_DOWN);
             }
             if (g_PadState & 0x40)
             {
-                strcat(str, "左 ");
+                strcat(str, TH_CUSTOM_PAD_LEFT);
             }
             if (g_PadState & 0x80)
             {
-                strcat(str, "右 ");
+                strcat(str, TH_CUSTOM_PAD_RIGHT);
             }
             SetDlgItemTextA(hWnd, IDC_ACTIVE_JOY_DIR, str);
         }
@@ -401,11 +402,11 @@ INT_PTR __stdcall DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             if (IsDlgButtonChecked(hWnd, IDC_DISABLE_VSYNC) == BST_CHECKED)
             {
-                g_Config.enableVsync = 1;
+                g_Config.disableVsync = 1;
             }
             else
             {
-                g_Config.enableVsync = 0;
+                g_Config.disableVsync = 0;
             }
 
             GetDlgItemTextA(hWnd, IDC_JOY_DEADZONE_X, str, 6);
@@ -435,13 +436,13 @@ INT_PTR __stdcall DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             FILE *file = fopen("th07.cfg", "wb");
             if (file == NULL)
             {
-                MessageBoxA(hWnd, "ファイルが吐き出せません\n書き込み禁止属性かついていませんか？", "error", MB_ICONHAND | MB_OK);
+                MessageBoxA(hWnd, TH_CUSTOM_ERR_FILE_WRITE, "error", MB_ICONHAND | MB_OK);
             }
             else
             {
                 fwrite(&g_Config, sizeof(GameConfiguration), 1, file);
                 fclose(file);
-                MessageBoxA(hWnd, "環境を書き換えました", "確認", MB_ICONASTERISK | MB_OK);
+                MessageBoxA(hWnd, TH_CUSTOM_CONFIG_WRITTEN, TH_CUSTOM_CONFIRM, MB_ICONASTERISK | MB_OK);
             }
             EndDialog(hWnd, 1);
             return TRUE;

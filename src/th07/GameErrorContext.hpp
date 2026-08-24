@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FileSystem.hpp"
+#include "i18n.hpp"
 
 struct GameErrorContext
 {
@@ -13,8 +14,7 @@ struct GameErrorContext
         m_BufferEnd = m_Buffer;
         m_Buffer[0] = '\0';
         m_ShowMessageBox = false;
-        // STRING: TH07 0x00497dc8
-        Log("“Œ•û“®ì‹L˜^ --------------------------------------------- \r\n");
+        Log(TH_LOG_START);
     }
 
     const char *Fatal(const char *fmt, ...);

@@ -193,9 +193,9 @@ struct MainMenu
     i32 chosenReplay;
     i32 selectedStage;
     i32 idleFrames;
-    AnmVm *vmHead;
-    AnmVm *cursorVm;
-    AnmVm vms[14];
+    AnmVm *vms;
+    AnmVm *curDescriptionVm;
+    AnmVm descriptionVms[14];
     i32 vmCount;
     i32 menuState;
     i32 stateTimer;

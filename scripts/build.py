@@ -257,6 +257,12 @@ with open("build.ninja", "w") as f:
     f.write("  command = $link $in $in_lflags $in_libs /OUT:$out\n")
     f.write("  description = link $out\n\n")
 
+    f.write("rule i18n\n")
+    f.write("  command = python ../scripts/generate_i18n.py $in $out\n")
+    f.write("  description = i18n $out\n\n")
+
+    f.write("build ../src/th07/i18n.hpp: i18n ../resources/csv/i18n.csv\n")
+
     th07_objects = []
     for src in TH07_SOURCES:
         src_path = f"../src/th07/{src}"
@@ -269,7 +275,7 @@ with open("build.ninja", "w") as f:
         elif src in TH07_SMALL:
             cflags_to_use = "$cflags_th07_small"
 
-        f.write(f"build {obj_path}: cxx {src_path}\n")
+        f.write(f"build {obj_path}: cxx {src_path} | ../src/th07/i18n.hpp\n")
         f.write(f"  in_cflags = {cflags_to_use}\n")
         f.write(f"  pdb = {pdb_path}\n")
         th07_objects.append(obj_path)
@@ -292,13 +298,15 @@ with open("build.ninja", "w") as f:
     f.write(f"  in_libs = $libs_th07\n")
 
     if args.with_custom:
+        f.write("build ../src/custom/i18n.hpp: i18n ../resources/custom/csv/i18n.csv\n")
+
         custom_objects = []
         for src in CUSTOM_SOURCES:
             src_path = f"../src/custom/{src}"
             obj_path = f"obj/custom/{Path(src).with_suffix('.obj').as_posix()}"
             pdb_path = f"obj/custom/{Path(src).with_suffix('.pdb').as_posix()}"
 
-            f.write(f"build {obj_path}: cxx {src_path}\n")
+            f.write(f"build {obj_path}: cxx {src_path} | ../src/custom/i18n.hpp\n")
             f.write("  in_cflags = $cflags_custom\n")
             f.write(f"  pdb = {pdb_path}\n")
             custom_objects.append(obj_path)

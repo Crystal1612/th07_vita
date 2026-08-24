@@ -20,6 +20,7 @@
 #include "TextHelper.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "pbg4/Pbg4Archive.hpp"
 
 // GLOBAL: TH07 0x0049ee40
@@ -124,8 +125,7 @@ void Supervisor::CheckTiming()
                 this->timingBadCount++;
                 this->timingSpikeAccumulator = 0;
             }
-            // STRING: TH07 0x00497244
-            Supervisor::DebugPrint2("alq �`�F�b�N %f / %f = %f\r\n", timeDiff, perfDiff,
+            Supervisor::DebugPrint2(TH_LOG_ALQ_CHECK, timeDiff, perfDiff,
                                     timeDiff / perfDiff);
         }
         else if (this->timingErrorCount != 0)
@@ -282,7 +282,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                 GameManager::CutChain();
                 if (!g_GameManager.practice && g_GameManager.difficulty < 4)
                 {
-                    g_GameManager.currentStage = 0;
+                    g_GameManager.currentStage = DUMMYSTAGE;
                 }
                 else
                 {
@@ -469,8 +469,7 @@ ZunResult Supervisor::SetupDInput()
                                   (LPVOID *)&this->directInput, NULL)))
     {
         this->directInput = NULL;
-        // STRING: TH07 0x00497208
-        g_GameErrorContext.Log("DirectInput ���g�p�ł��܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_DINPUT_INIT_FAIL);
         return ZUN_ERROR;
     }
     else
@@ -479,7 +478,7 @@ ZunResult Supervisor::SetupDInput()
                                                    &this->keyboard, NULL)))
         {
             SAFE_RELEASE(this->directInput);
-            g_GameErrorContext.Log("DirectInput ���g�p�ł��܂���\r\n");
+            g_GameErrorContext.Log(TH_ERR_DINPUT_INIT_FAIL);
             return ZUN_ERROR;
         }
         else
@@ -489,7 +488,7 @@ ZunResult Supervisor::SetupDInput()
                 SAFE_RELEASE(this->keyboard);
                 SAFE_RELEASE(this->directInput);
                 // STRING: TH07 0x004971d8
-                g_GameErrorContext.Log("DirectInput SetDataFormat ���g�p�ł��܂���\r\n");
+                g_GameErrorContext.Log(TH_ERR_DINPUT_SETDATAFORMAT_FAIL);
                 return ZUN_ERROR;
             }
             else
@@ -500,15 +499,13 @@ ZunResult Supervisor::SetupDInput()
                 {
                     SAFE_RELEASE(this->keyboard);
                     SAFE_RELEASE(this->directInput);
-                    // STRING: TH07 0x004971a4
-                    g_GameErrorContext.Log("DirectInput SetCooperativeLevel ���g�p�ł��܂���\r\n");
+                    g_GameErrorContext.Log(TH_ERR_DINPUT_SETCOOPERATIVELEVEL_FAIL);
                     return ZUN_ERROR;
                 }
                 else
                 {
                     this->keyboard->Acquire();
-                    // STRING: TH07 0x0049717c
-                    g_GameErrorContext.Log("DirectInput �͐���ɏ���������܂���\r\n");
+                    g_GameErrorContext.Log(TH_LOG_DINPUT_INIT_SUCCESS);
                     this->directInput->EnumDevices(4, EnumGameControllersCb, NULL, 1);
                     if (this->controller)
                     {
@@ -517,8 +514,7 @@ ZunResult Supervisor::SetupDInput()
                         g_Supervisor.controllerCaps.dwSize = sizeof(DIDEVCAPS);
                         this->controller->GetCapabilities(&g_Supervisor.controllerCaps);
                         this->controller->EnumObjects(ControllerCallback, NULL, 0);
-                        // STRING: TH07 0x0049715c
-                        g_GameErrorContext.Log("�L���ȃp�b�h�𔭌����܂���\r\n");
+                        g_GameErrorContext.Log(TH_LOG_FOUND_PAD);
                     }
                     return ZUN_SUCCESS;
                 }
@@ -541,15 +537,13 @@ ZunResult Supervisor::LoadGameData()
         g_Supervisor.versionTableSize = g_LastFileSize;
         if (!g_Supervisor.version)
         {
-            // STRING: TH07 0x00497118
-            g_GameErrorContext.Fatal("error : �f�[�^�̃o�[�W�������Ⴂ�܂�\r\n");
+            g_GameErrorContext.Fatal(TH_ERR_DATA_VER_MISMATCH);
             return ZUN_ERROR;
         }
     }
     else
     {
-        // STRING: TH07 0x004970f0
-        g_GameErrorContext.Fatal("error : �f�[�^�t�@�C�������݂��܂���\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_DAT_NOT_FOUND);
         return ZUN_ERROR;
     }
     return ZUN_SUCCESS;
@@ -616,7 +610,7 @@ i32 Supervisor::CheckVSync()
         }
     }
 
-    if (!g_Supervisor.cfg.enableVsync)
+    if (!g_Supervisor.cfg.disableVsync)
     {
         fpsSum = 0.0f;
         if (fpsCount >= 2)
@@ -634,15 +628,15 @@ i32 Supervisor::CheckVSync()
 
         if (fpsSum > 160.0f)
         {
-            g_GameErrorContext.Log("�������������ĂȂ����A���t���b�V�����[�g���������܂�\r\n");
-            g_GameErrorContext.Log("�����U�O�t���[�����[�h�œ��삵�܂�\r\n");
-            g_Supervisor.vsyncEnabled = 1;
+            g_GameErrorContext.Log(TH_LOG_VSYNC_FAIL);
+            g_GameErrorContext.Log(TH_LOG_FORCE_60FPS);
+            g_Supervisor.vsyncDisabled = 1;
         }
         else if (fpsSum >= 65.0f)
         {
-            g_GameErrorContext.Log("�������������ĂȂ����A���t���b�V�����[�g���������܂��B\r\n");
-            g_GameErrorContext.Log("�����U�O�t���[�����[�h�œ��삵�܂�\r\n");
-            g_Supervisor.vsyncEnabled = 1;
+            g_GameErrorContext.Log(TH_LOG_VSYNC_FAIL_2);
+            g_GameErrorContext.Log(TH_LOG_FORCE_60FPS);
+            g_Supervisor.vsyncDisabled = 1;
             return -2;
         }
     }
@@ -678,7 +672,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     // STRING: TH07 0x00497038
     g_AnmManager->LoadSurface(0, "data/title/th07logo.jpg");
     g_Supervisor.isInEnding = 1;
-    if (!g_Supervisor.vsyncEnabled)
+    if (!g_Supervisor.vsyncDisabled)
     {
         if (CheckVSync())
         {
@@ -725,8 +719,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
 
     if (AsciiManager::RegisterChain() != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00496ff0
-        g_GameErrorContext.Log("error : �����̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_BGM_ASCII_INIT_FAIL);
         return ZUN_ERROR;
     }
 
@@ -735,8 +728,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     // STRING: TH07 0x00496fe0
     if (g_SoundPlayer.LoadFmt("bgm/thbgm.fmt"))
     {
-        // STRING: TH07 0x00496fb8
-        g_GameErrorContext.Log("error : BGM �̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_BGM_INIT_FAIL);
         return ZUN_ERROR;
     }
 
@@ -1090,32 +1082,30 @@ i32 Supervisor::SnapshotScreen(const char *filename)
     switch (this->presentParameters.BackBufferFormat)
     {
     case D3DFMT_R5G6B5:
-        // STRING: TH07 0x00496f80
-        g_GameErrorContext.Log("16bit �͎�荞�߂Ȃ�\r\n");
+        g_GameErrorContext.Log(TH_LOG_16BIT_NOT_SUPPORTED);
         break;
     case D3DFMT_X8R8G8B8:
         bitmapInfo = (BITMAPINFO *)ZunMemory::Alloc2(sizeof(BITMAPINFO));
         if (!bitmapInfo)
         {
-            // STRING: TH07 0x00496f60
-            g_GameErrorContext.Log("snapShotScreen : �m�ۂ�����\r\n");
+            g_GameErrorContext.Log(TH_LOG_BITMAP_ALLOC_FAIL);
             break;
         }
 
         memset(bitmapInfo, 0, sizeof(BITMAPINFO));
         stride = 1920;
-        bitmapData = malloc(stride * 480);
+        bitmapData = malloc(stride * GAME_WINDOW_HEIGHT);
         if (!bitmapData)
         {
-            g_GameErrorContext.Log("snapShotScreen : �m�ۂ�����\r\n");
+            g_GameErrorContext.Log(TH_LOG_BITMAP_ALLOC_FAIL);
             break;
         }
 
-        bmfh.bfSize += stride * 480;
+        bmfh.bfSize += stride * GAME_WINDOW_HEIGHT;
         bitmapInfo->bmiHeader.biBitCount = 24;
         bitmapInfo->bmiHeader.biSize = 40;
-        bitmapInfo->bmiHeader.biWidth = 640;
-        bitmapInfo->bmiHeader.biHeight = 480;
+        bitmapInfo->bmiHeader.biWidth = GAME_WINDOW_WIDTH;
+        bitmapInfo->bmiHeader.biHeight = GAME_WINDOW_HEIGHT;
         bitmapInfo->bmiHeader.biPlanes = 1;
         bitmapInfo->bmiHeader.biCompression = 0;
         backBuffer->LockRect(&lockedRect, NULL, 0);
@@ -1124,7 +1114,7 @@ i32 Supervisor::SnapshotScreen(const char *filename)
         {
             dstPixel = (u8 *)((u8 *)bitmapData + stride * bytesPerRow);
             srcPixel = (u8 *)((u8 *)lockedRect.pBits + lockedRect.Pitch * y);
-            for (x = 0; x < 640; x++)
+            for (x = 0; x < GAME_WINDOW_WIDTH; x++)
             {
                 *dstPixel = *srcPixel;
                 srcPixel++;
@@ -1146,7 +1136,7 @@ i32 Supervisor::SnapshotScreen(const char *filename)
 
         WriteFile(bitmapFile, &bmfh, 14, &bytesWritten, NULL);
         WriteFile(bitmapFile, bitmapInfo, 40, &bytesWritten, NULL);
-        WriteFile(bitmapFile, bitmapData, stride * 480, &bytesWritten, NULL);
+        WriteFile(bitmapFile, bitmapData, stride * GAME_WINDOW_HEIGHT, &bytesWritten, NULL);
         CloseHandle(bitmapFile);
         break;
     default:
@@ -1176,8 +1166,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     configFile = (u32 *)FileSystem::OpenFile((char *)configFilename, 1);
     if (!configFile)
     {
-        // STRING: TH07 0x00496f14
-        g_GameErrorContext.Log("�R���t�B�O�f�[�^��������Ȃ��̂ŏ��������܂���\r\n");
+        g_GameErrorContext.Log(TH_LOG_CONFIG_INIT);
     init:
         g_Supervisor.cfg.lifeCount = 2;
         g_Supervisor.cfg.bombCount = 3;
@@ -1193,8 +1182,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             if (bgm2Data[0] != 0x5641575a || bgm2Data[1] != 1 ||
                 bgm2Data[2] != 0x700)
             {
-                // STRING: TH07 0x00496ee4
-                g_GameErrorContext.Fatal("BGM �f�[�^�̃o�[�W�������Ⴂ�܂�\r\n");
+                g_GameErrorContext.Fatal(TH_ERR_BGM_VER_MISMATCH);
                 return ZUN_ERROR;
             }
             g_Supervisor.cfg.musicMode = MUSIC_WAV;
@@ -1202,8 +1190,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         else
         {
             g_Supervisor.cfg.musicMode = MUSIC_MIDI;
-            // STRING: TH07 0x00496ebc
-            Supervisor::DebugPrint2("wave �f�[�^�������̂ŁAmidi �ɂ��܂�\r\n");
+            Supervisor::DebugPrint2(TH_LOG_WAV_UNAVAILABLE);
         }
         g_Supervisor.cfg.playSounds = 1;
         g_Supervisor.cfg.defaultDifficulty = (u8)DIFF_NORMAL;
@@ -1227,7 +1214,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             if (bgmData[0] != 0x5641575a || bgmData[1] != 1 ||
                 bgmData[2] != 0x700)
             {
-                g_GameErrorContext.Fatal("BGM �f�[�^�̃o�[�W�������Ⴂ�܂�\r\n");
+                g_GameErrorContext.Fatal(TH_ERR_BGM_VER_MISMATCH);
                 return ZUN_ERROR;
             }
         }
@@ -1245,93 +1232,76 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
               g_Supervisor.cfg.version == 0x70002 &&
               g_LastFileSize == sizeof(GameConfiguration)))
         {
-            // STRING: TH07 0x00496e88
-            g_GameErrorContext.Log("�R���t�B�O�f�[�^���ُ�ł����̂ōď��������܂���\r\n");
+            g_GameErrorContext.Log(TH_LOG_CONFIG_REINIT);
             goto init;
         }
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
-    g_Supervisor.cfg.loaded = 1;
+    g_Supervisor.cfg.colorAddEmulation = 1;
     if (this->cfg.noVertexBuffers)
     {
-        // STRING: TH07 0x00496e64
-        g_GameErrorContext.Log("���_�o�b�t�@�̎g�p��}�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_NO_VERTEX_BUFFERS);
     }
     if (this->cfg.disableFog)
     {
-        // STRING: TH07 0x00496e48
-        g_GameErrorContext.Log("�t�H�O�̎g�p��}�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_NO_FOG);
     }
     if (this->cfg.use16BitTextures)
     {
-        // STRING: TH07 0x00496e20
-        g_GameErrorContext.Log("16Bit �̃e�N�X�`���̎g�p���������܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_FORCE_16BIT);
     }
     if (this->IsClearingBackbuffer())
     {
-        // STRING: TH07 0x00496dfc
-        g_GameErrorContext.Log("�o�b�N�o�b�t�@�̏������������܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_FORCE_BACKBUFFER_CLEAR);
     }
     if (this->cfg.disableItemDrawAroundPlayfield)
     {
-        // STRING: TH07 0x00496dd0
-        g_GameErrorContext.Log("�Q�[������̃A�C�e���̕`���}�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_ITEM_DRAW_AROUND_PLAYFIELD);
     }
     if (this->cfg.disableGouraud)
     {
-        // STRING: TH07 0x00496da8
-        g_GameErrorContext.Log("�O�[���[�V�F�[�f�B���O��}�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_GOURAUD);
     }
     if (this->cfg.disableZBuffer)
     {
-        // STRING: TH07 0x00496d8c
-        g_GameErrorContext.Log("�f�v�X�e�X�g��}�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_DEPTH_TEST);
     }
-    this->vsyncEnabled = 0;
+    this->vsyncDisabled = 0;
     this->cfg.unused = 0;
     if (this->cfg.disableTextureBlend)
     {
-        // STRING: TH07 0x00496d6c
-        g_GameErrorContext.Log("�e�N�X�`���̐F������}�����܂�n");
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_TEXTURE_BLEND);
     }
     if (this->cfg.windowed)
     {
-        // STRING: TH07 0x00496d4c
-        g_GameErrorContext.Log("�E�B���h�E���[�h�ŋN�����܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_WINDOWED);
     }
     if (this->cfg.forceReferenceRender)
     {
-        // STRING: TH07 0x00496d24
-        g_GameErrorContext.Log("���t�@�����X���X�^���C�U���������܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_FORCE_REFERENCE_RENDER);
     }
     if (this->cfg.disableDinput)
     {
-        // STRING: TH07 0x00496cec
-        g_GameErrorContext.Log("�p�b�h�A�L�[�{�[�h�̓��͂� DirectInput ���g�p���܂���\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_DINPUT);
     }
     if (this->cfg.redrawEveryFrame)
     {
-        // STRING: TH07 0x00496cd0
-        g_GameErrorContext.Log("��ʎ���𖈉�`�悵�܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_REDRAW_EVERY_FRAME);
     }
     if (this->cfg.preloadBgm)
     {
-        // STRING: TH07 0x00496cb0
-        g_GameErrorContext.Log("�a�f�l���������ɓǂݍ��݂܂�\r\n");
+        g_GameErrorContext.Log(TH_CONFIG_PRELOAD_BGM);
     }
-    if (this->cfg.enableVsync)
+    if (this->cfg.disableVsync)
     {
-        // STRING: TH07 0x00496c98
-        g_GameErrorContext.Log("�������������܂���\r\n");
-        g_Supervisor.vsyncEnabled = 1;
+        g_GameErrorContext.Log(TH_CONFIG_DISABLE_VSYNC);
+        g_Supervisor.vsyncDisabled = 1;
     }
     if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg,
                                     sizeof(GameConfiguration)))
     {
-        // STRING: TH07 0x00496c78
-        g_GameErrorContext.Fatal("�t�@�C���������o���܂��� %s\r\n", configFilename);
-        // STRING: TH07 0x00496c20
-        g_GameErrorContext.Fatal("�t�H���_�������݋֎~�����ɂȂ��Ă��邩�A�f�B�X�N�������ς������ς��ɂȂ��Ă܂��񂩁H\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_WRITE_CONFIG_FAIL, configFilename);
+        g_GameErrorContext.Fatal(TH_ERR_WRITE_CONFIG_FAIL_HELP);
         return ZUN_ERROR;
     }
 

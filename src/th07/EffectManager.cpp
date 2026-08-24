@@ -9,6 +9,8 @@
 #include "ZunResult.hpp"
 #include "utils.hpp"
 
+// TODO: a lot of these names suck. find better names and remove script
+// comments
 // GLOBAL: TH07 0x0049efc0
 EffectTypeInfo g_EffectMapping[36] = {
     {0x2ab, NULL, NULL}, //0
@@ -64,6 +66,69 @@ EffectTypeInfo g_EffectMapping[36] = {
     // multiplayer, anm index borrowed from unused 1 and 2
     {0x2c2, EffectManager::UpdateAttachToPlayer2, NULL}, //34
     {0x2c2, EffectManager::UpdateAttachToPlayer3, NULL}, //35
+EffectTypeInfo g_EffectMapping[34] = {
+    {ANM_SCRIPT_BULLETS_ENEMY_DEATH_EXPLOSION, NULL, NULL},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK1, NULL, NULL}, // script29
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK2, NULL, NULL}, // script30
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK3,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurst}, // script31
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK8,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script36
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK9,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script37
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK10,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script38
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK11,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script39
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK12,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script40
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK13,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script41
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK14,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script42
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK15,
+     EffectManager::UpdatePhysics, EffectManager::InitDeceleratingBurstFast}, // script43
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK16, NULL, NULL},                             // script44
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK17,
+     EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect}, // script45
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK17,
+     EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK17,
+     EffectManager::UpdateOrbitEffect, EffectManager::Init2dEffect},
+    {ANM_SCRIPT_EFFECTS_SPELLCARD_BG_ARRAY, NULL, NULL},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK4,
+     EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir}, // script32
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK5,
+     EffectManager::UpdateGather240Frames, EffectManager::InitRandomDir}, // script33
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK18,
+     EffectManager::UpdateNoOp, NULL}, // script46
+    {ANM_SCRIPT_BULLETS_FALLING_WEATHER,
+     EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherForward}, // script48
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK21, NULL, NULL},                             // script52
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK19,
+     EffectManager::UpdateBurstEaseOut30Frames, EffectManager::InitRandomDirWithSpeed}, // script49
+    {ANM_SCRIPT_STAGE_BG_SHOW_CRESCENT_ST3,
+     EffectManager::UpdateAttachToCamera, NULL},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK20,
+     EffectManager::UpdateAttachToPlayer, NULL}, // script51
+    {ANM_SCRIPT_BULLETS_SHOW_SPELL_RING,
+     EffectManager::UpdateNoOp, NULL},
+    {ANM_SCRIPT_BULLETS_FALLING_WEATHER,
+     EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherVortex},
+    {ANM_SCRIPT_BULLETS_FALLING_WEATHER,
+     EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherBackward},
+    {ANM_SCRIPT_BULLETS_SHOW_BORDER,
+     EffectManager::UpdateNoOp, NULL},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK7,
+     EffectManager::UpdateBurst30Frames, EffectManager::InitRandomDir}, // script35
+    {ANM_SCRIPT_BULLETS_FALLING_WEATHER,
+     EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherSlow},
+    {ANM_SCRIPT_BULLETS_FALLING_WEATHER,
+     EffectManager::UpdateWeatherPhysics, EffectManager::InitWeatherFalling},
+    {ANM_SCRIPT_BULLETS_RANDOM_CHERRY_PETAL,
+     EffectManager::UpdateBurstEaseOut30Frames, EffectManager::InitRandomDirWithSpeed},
+    {ANM_SCRIPT_BULLETS_ENEMY_UNK6,
+     EffectManager::UpdateGather60Frames, EffectManager::InitRandomDir}, // script34
 };
 
 // GLOBAL: TH07 0x012fe250
@@ -350,7 +415,7 @@ i32 EffectManager::InitWeatherForward(Effect *effect)
     effect->acceleration = effect->acceleration * g_Supervisor.effectiveFramerateMultiplier;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
-    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.03141593f) - 0.015707964f;
+    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(ZUN_PI / 100.0f) - ZUN_PI / 200.0f;
 
     chance = g_GameManager.cherry - g_GameManager.globals->cherryStart;
     chance = chance * 100 / g_GameManager.cherryMax;
@@ -380,7 +445,7 @@ i32 EffectManager::InitWeatherVortex(Effect *effect)
     effect->velocity = effect->velocity * g_Supervisor.effectiveFramerateMultiplier;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
-    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
+    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(ZUN_PI / 50.0f) - ZUN_PI / 100.0f;
 
     chance = g_GameManager.cherry - g_GameManager.globals->cherryStart;
     chance = chance * 100 / g_GameManager.cherryMax;
@@ -411,7 +476,7 @@ i32 EffectManager::InitWeatherBackward(Effect *effect)
     effect->velocity = effect->velocity * g_Supervisor.effectiveFramerateMultiplier;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
-    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
+    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(ZUN_PI / 50.0f) - ZUN_PI / 100.0f;
     g_AnmManager->SetActiveSprite(&effect->vm, ANM_SPRITE_BULLETS_CHERRY_PETAL);
     effect->vm.color.bytes.r = 255;
     effect->vm.color.bytes.g = 255;
@@ -437,7 +502,7 @@ i32 EffectManager::InitWeatherSlow(Effect *effect)
     effect->basePosition += g_Stage.cam.lookAt / 2.0f + g_Stage.cam.pos;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
-    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
+    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(ZUN_PI / 50.0f) - ZUN_PI / 100.0f;
     g_AnmManager->SetActiveSprite(&effect->vm, ANM_SPRITE_BULLETS_CHERRY_PETAL);
     effect->vm.color.bytes.r = 255;
     effect->vm.color.bytes.g = 255;
@@ -463,7 +528,7 @@ i32 EffectManager::InitWeatherFalling(Effect *effect)
     effect->velocity = effect->velocity * g_Supervisor.effectiveFramerateMultiplier;
     effect->is2D = 1;
     effect->vm.rotation.z = g_Rng.GetRandomFloatInRange(ZUN_2PI) - ZUN_PI;
-    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(0.06283186f) - 0.03141593f;
+    effect->vm.rotation.x = g_Rng.GetRandomFloatInRange(ZUN_PI / 50.0f) - ZUN_PI / 100.0f;
     g_AnmManager->SetActiveSprite(&effect->vm, ANM_SPRITE_BULLETS_CHERRY_PETAL);
     effect->vm.angleVel.z *= 2;
     effect->vm.color.bytes.r = 255;
@@ -875,29 +940,29 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
     g_Stage.spellcardVmsIdx = 0;
     switch (g_GameManager.currentStage)
     {
-    case 0:
-    case 1:
+    case DUMMYSTAGE:
+    case STAGE1:
         g_Stage.numSpellcardVms = 1;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff01.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 2:
+    case STAGE2:
         g_Stage.numSpellcardVms = 1;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 3:
+    case STAGE3:
         g_Stage.numSpellcardVms = 1;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff03.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 4:
+    case STAGE4:
         g_Stage.numSpellcardVms = 2;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff04.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
@@ -908,14 +973,14 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
             return ZUN_ERROR;
         }
         break;
-    case 5:
+    case STAGE5:
         g_Stage.numSpellcardVms = 2;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 6:
+    case STAGE6:
         g_Stage.numSpellcardVms = 2;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff05.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
@@ -926,7 +991,7 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
             return ZUN_ERROR;
         }
         break;
-    case 7:
+    case EXTRASTAGE:
         g_Stage.numSpellcardVms = 1;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff02.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {
@@ -937,7 +1002,7 @@ ZunResult EffectManager::AddedCallback(EffectManager *arg)
             return ZUN_ERROR;
         }
         break;
-    case 8:
+    case PHANTASMSTAGE:
         g_Stage.numSpellcardVms = 2;
         if (g_AnmManager->LoadAnms(ANM_FILE_EFFECTS, "data/eff07.anm", ANM_OFFSET_EFFECTS) != ZUN_SUCCESS)
         {

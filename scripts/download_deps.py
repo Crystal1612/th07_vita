@@ -97,8 +97,22 @@ def download_msvc(path: Path, vs_path: Path, vc_path: Path):
                         f"TARGETDIR={tempdir}",
                     ]
                 )
-                for file in (tempdir / "Program Files" / "Microsoft Visual Studio .NET" / "Vc7" / "PlatformSDK" / "common").iterdir():
-                    _ = shutil.move(file, tempdir / "Program Files" / "Microsoft Visual Studio .NET" / "Vc7" / "PlatformSDK")
+                for file in (
+                    tempdir
+                    / "Program Files"
+                    / "Microsoft Visual Studio .NET"
+                    / "Vc7"
+                    / "PlatformSDK"
+                    / "common"
+                ).iterdir():
+                    _ = shutil.move(
+                        file,
+                        tempdir
+                        / "Program Files"
+                        / "Microsoft Visual Studio .NET"
+                        / "Vc7"
+                        / "PlatformSDK",
+                    )
             else:
                 _ = subprocess.check_call(
                     [

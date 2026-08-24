@@ -11,6 +11,7 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f588
@@ -188,7 +189,7 @@ loop_begin:
     {
         switch (curInstr->opcode)
         {
-        case 0:
+        case STD_CAM_POS_KEY:
             if (curInstr->frame == -1)
             {
                 arg->positionInterpInitial = *curInstr->args.AsVec();
@@ -213,18 +214,18 @@ loop_begin:
                 arg->positionStart = *curInstr->args.AsVec();
             }
             break;
-        case 1:
+        case STD_FOG:
             arg->skyFog.color.color = curInstr->args.args[0].u;
             arg->skyFog.nearPlane = curInstr->args.args[1].f;
             arg->skyFog.farPlane = curInstr->args.args[2].f;
             arg->fogStart = arg->skyFog;
             break;
-        case 2:
+        case STD_FOG_INTERP:
             arg->fogEnd = arg->skyFog;
             arg->skyFogInterpDuration = curInstr->args.args[0].i;
             arg->skyFogInterpTimer = 0;
             break;
-        case 5:
+        case STD_CAM_POS:
             if (arg->cameraTeleported)
             {
                 Float3 diff = *curInstr->args.AsVec() - arg->camEnd.pos;
@@ -238,12 +239,12 @@ loop_begin:
                 arg->cam.pos = *curInstr->args.AsVec();
             }
             break;
-        case 6:
+        case STD_CAM_POS_INTERP:
             arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
             arg->easeModes[0] = curInstr->args.args[1].i;
             break;
-        case 7:
+        case STD_CAM_LOOKAT:
             arg->camStart.lookAt = arg->camEnd.lookAt;
             arg->camEnd.lookAt = *curInstr->args.AsVec();
             if (arg->timersMax[1] == 0)
@@ -251,12 +252,12 @@ loop_begin:
                 arg->cam.lookAt = *curInstr->args.AsVec();
             }
             break;
-        case 8:
+        case STD_CAM_LOOKAT_INTERP:
             arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
             arg->easeModes[1] = curInstr->args.args[1].i;
             break;
-        case 9:
+        case STD_CAM_UP:
             arg->camStart.up = arg->camEnd.up;
             arg->camEnd.up = *curInstr->args.AsVec();
             if (arg->timersMax[2] == 0)
@@ -264,12 +265,12 @@ loop_begin:
                 arg->cam.up = *curInstr->args.AsVec();
             }
             break;
-        case 10:
+        case STD_CAM_UP_INTERP:
             arg->timersMax[2] = curInstr->args.args[0].i;
             arg->easeModes[2] = curInstr->args.args[1].i;
             arg->timers[2] = 0;
             break;
-        case 11:
+        case STD_CAM_FOV:
             arg->camStart.fov = arg->camEnd.fov;
             arg->camEnd.fov = curInstr->args.args[0].f;
             if (arg->timersMax[3] == 0)
@@ -277,92 +278,92 @@ loop_begin:
                 arg->cam.fov = curInstr->args.args[0].f;
             }
             break;
-        case 12:
+        case STD_CAM_FOV_INTERP:
             arg->timersMax[3] = curInstr->args.args[0].i;
             arg->timers[3] = 0;
             arg->easeModes[3] = curInstr->args.args[1].i;
             break;
-        case 13:
+        case STD_COLOR:
             arg->color = curInstr->args.args[0].u;
             break;
-        case 3:
+        case STD_HALT:
             if (arg->scriptWaitTime != 0)
             {
                 arg->scriptWaitTime = 0;
                 break;
             }
             goto LAB_004061aa;
-        case 4:
+        case STD_JUMP:
             arg->instructionIndex = curInstr->args.args[0].i;
             arg->scriptTime = curInstr->args.args[1].i;
             arg->timersMax[0] = 0;
             arg->cameraTeleported = 1;
             goto loop_begin;
-        case 14:
+        case STD_CAM_POS_INTERP_START:
             arg->camStart.pos = *curInstr->args.AsVec();
             break;
-        case 15:
+        case STD_CAM_POS_INTERP_END:
             arg->camEnd.pos = *curInstr->args.AsVec();
             break;
-        case 16:
+        case STD_CAM_POS_INTERP_TAN_START:
             arg->camTangentStart.pos = *curInstr->args.AsVec();
             break;
-        case 17:
+        case STD_CAM_POS_INTERP_TAN_END:
             arg->camTangentEnd.pos = *curInstr->args.AsVec();
             break;
-        case 18:
+        case STD_CAM_POS_INTERP_BEZIER:
             arg->timersMax[0] = curInstr->args.args[0].i;
             arg->timers[0] = 0;
             arg->easeModes[0] = STAGE_EASE_CUBIC_INTERP;
             break;
-        case 19:
+        case STD_CAM_LOOKAT_INTERP_START:
             arg->camStart.lookAt = *curInstr->args.AsVec();
             break;
-        case 20:
+        case STD_CAM_LOOKAT_INTERP_END:
             arg->camEnd.lookAt = *curInstr->args.AsVec();
             break;
-        case 21:
+        case STD_CAM_LOOKAT_INTERP_TAN_START:
             arg->camTangentStart.lookAt = *curInstr->args.AsVec();
             break;
-        case 22:
+        case STD_CAM_LOOKAT_INTERP_TAN_END:
             arg->camTangentEnd.lookAt = *curInstr->args.AsVec();
             break;
-        case 23:
+        case STD_CAM_LOOKAT_INTERP_BEZIER:
             arg->timersMax[1] = curInstr->args.args[0].i;
             arg->timers[1] = 0;
             arg->easeModes[1] = STAGE_EASE_CUBIC_INTERP;
             break;
-        case 24:
+        case STD_CAM_UP_INTERP_START:
             arg->camStart.up = *curInstr->args.AsVec();
             break;
-        case 25:
+        case STD_CAM_UP_INTERP_END:
             arg->camEnd.up = *curInstr->args.AsVec();
             break;
-        case 26:
+        case STD_CAM_UP_INTERP_TAN_START:
             arg->camTangentStart.up = *curInstr->args.AsVec();
             break;
-        case 27:
+        case STD_CAM_UP_INTERP_TAN_END:
             arg->camTangentEnd.up = *curInstr->args.AsVec();
             break;
-        case 28:
+        case STD_CAM_UP_INTERP_BEZIER:
             arg->timersMax[2] = curInstr->args.args[0].i;
             arg->timers[2] = 0;
             arg->easeModes[2] = STAGE_EASE_CUBIC_INTERP;
             break;
-        case 29:
+        case STD_BG_SCRIPT1:
             if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm1, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm1, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG);
             }
             else
             {
                 arg->vm1.activeSpriteIdx = -1;
             }
             break;
-        case 30:
+        case STD_BG_SCRIPT2:
             if (curInstr->args.args[0].i >= 0)
             {
-                g_AnmManager->ExecuteAnmIdx(&arg->vm2, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG1);
+                g_AnmManager->ExecuteAnmIdx(&arg->vm2, curInstr->args.args[0].i + ANM_OFFSET_STAGE_BG);
             }
             else
             {
@@ -704,70 +705,70 @@ ZunResult Stage::AddedCallback(Stage *arg)
     arg->skyFogInterpDuration = 0;
     switch (g_GameManager.currentStage)
     {
-    case 1:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg1bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE1:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg1bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 2:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg2bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE2:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg2bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 3:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg3bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE3:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg3bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 4:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg4bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE4:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg4bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG2, "data/stg4bg2.anm", ANM_OFFSET_STAGE_BG2) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE4_BG2, "data/stg4bg2.anm", ANM_OFFSET_STAGE4_BG2) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG3, "data/stg4bg3.anm", ANM_OFFSET_STAGE_BG3) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE4_BG3, "data/stg4bg3.anm", ANM_OFFSET_STAGE4_BG3) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG4, "data/stg4bg4.anm", ANM_OFFSET_STAGE_BG4) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE4_BG4, "data/stg4bg4.anm", ANM_OFFSET_STAGE4_BG4) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
 
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG5, "data/stg4bg5.anm", ANM_OFFSET_STAGE_BG5) != ZUN_SUCCESS)
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE4_BG5, "data/stg4bg5.anm", ANM_OFFSET_STAGE4_BG5) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 5:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg5bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE5:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg5bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 6:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg6bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case STAGE6:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg6bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 7:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg7bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case EXTRASTAGE:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg7bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
-    case 8:
-        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG1, "data/stg8bg.anm", ANM_OFFSET_STAGE_BG1) != ZUN_SUCCESS)
+    case PHANTASMSTAGE:
+        if (g_AnmManager->LoadAnms(ANM_FILE_STAGE_BG, "data/stg8bg.anm", ANM_OFFSET_STAGE_BG) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
@@ -799,11 +800,11 @@ ZunResult Stage::AddedCallback(Stage *arg)
 // FUNCTION: TH07 0x00407410
 ZunResult Stage::DeletedCallback(Stage *arg)
 {
-    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG1);
-    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG2);
-    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG3);
-    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG4);
-    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG5);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE_BG);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE4_BG2);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE4_BG3);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE4_BG4);
+    g_AnmManager->ReleaseAnm(ANM_FILE_STAGE4_BG5);
     SAFE_FREE(arg->quadVms);
     SAFE_FREE(arg->stdData);
     return ZUN_SUCCESS;
@@ -861,8 +862,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     this->stdData = (StdRawHeader *)FileSystem::OpenFile(stdPath, 0);
     if (!this->stdData)
     {
-        // STRING: TH07 0x0049888c
-        g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\r\n");
+        g_GameErrorContext.Log(TH_ERR_STD_LOAD_FAIL);
         return ZUN_ERROR;
     }
 
@@ -887,7 +887,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
         while (quad->type >= 0)
         {
             g_AnmManager->ExecuteAnmIdx(&this->quadVms[vmIdx],
-                                        quad->anmScript + ANM_OFFSET_STAGE_BG1);
+                                        quad->anmScript + ANM_OFFSET_STAGE_BG);
             quad->vmIndex = vmIdx++;
             quad = (StdRawQuadBasic *)((i32)quad + quad->byteSize);
         }

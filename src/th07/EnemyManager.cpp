@@ -157,7 +157,7 @@ void Enemy::UpdateEffects()
             effect->radius = effect->radius + 0.3f;
         }
         effect->angularVelocity =
-            utils::AddNormalizeAngle(effect->angularVelocity, 0.03141593f);
+            utils::AddNormalizeAngle(effect->angularVelocity, ZUN_PI / 100.0f);
     }
 }
 
@@ -623,7 +623,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
     i32 stageFactor;
 
     collisionOut = 0;
-    stageFactor = g_GameManager.currentStage >= 5 ? 10 : g_GameManager.currentStage * 2;
+    stageFactor = g_GameManager.currentStage >= STAGE5 ? 10 : g_GameManager.currentStage * 2;
     if (!g_Gui.HasCurrentMsgIdx())
     {
         timerLimit = 2400;
@@ -791,6 +791,165 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 if(damage>0){
                     playedDamageSound = 1;
                 }
+                damage = g_Player.CalcDamageToEnemy(
+                    &enemy->pos, &enemy->hitboxSize, &collisionOut);
+                if (enemy->grazeSize.x > 0.0f)
+                {
+                    grazeDamage = g_Player.CalcDamageToEnemy(
+                        &enemy->pos, &enemy->grazeSize, &collisionOut);
+                    if (collisionOut == 0)
+                    {
+                        damage = (i32)((f32)damage + (f32)grazeDamage / 2.5f);
+                    }
+                }
+                if (damage > 0)
+                {
+                    if ((enemy->isBoss || !g_Player.isFocus) &&
+                        g_Player.bombInfo.isInUse == 0)
+                    {
+                        if (enemy->isBoss && !g_Player.isFocus)
+                        {
+                            cherryGain = damage / (10 - stageFactor / 3) * 10;
+                        }
+                        else
+                        {
+                            cherryGain = damage / (30 - stageFactor) * 10;
+                        }
+                        if (cherryGain > 70)
+                        {
+                            cherryGain = 70;
+                        }
+                        if (cherryGain == 0 && (g_Player.isFocus == 0 ||
+                                                (enemy->timer.GetCurrent() & 1) != 0))
+                        {
+                            cherryGain = 10;
+                        }
+
+                        // ABSOLUTELY no reason for this to be a switch statement
+                        switch (g_GameManager.shotTypeAndCharacter)
+                        {
+                        default:
+                            break;
+                        case SHOT_REIMU_A:
+                            if ((cherryGain == 20 || cherryGain == 30) &&
+                                (enemy->timer.GetCurrent() & 1) != 0)
+                            {
+                                cherryGain -= 10;
+                            }
+                            if (g_GameManager.currentStage >= STAGE5 &&
+                                g_GameManager.currentStage <= STAGE6 &&
+                                !enemy->isBoss)
+                            {
+                                damage = damage / 2;
+                            }
+                            if (g_GameManager.currentStage == STAGE4 &&
+                                !enemy->isBoss)
+                            {
+                                damage -= damage / 4 + damage / 16;
+                            }
+                        }
+                        if (cherryGain != 0)
+                        {
+                            g_GameManager.AddCherryPlus(cherryGain);
+                        }
+                    }
+                    if (damage >= 70)
+                    {
+                        damage = 70;
+                    }
+                    g_GameManager.AddScore(damage / 5 * 10);
+                    if (enemy->canBeDamaged)
+                    {
+                        if (arg->spellcardInfo.isActive)
+                        {
+                            if (collisionOut == 0)
+                            {
+                                if (damage > 7)
+                                {
+                                    damage = damage / 7;
+                                }
+                                else if (damage != 0)
+                                {
+                                    damage = 1;
+                                }
+                            }
+                            else if (arg->spellcardInfo.usedBomb)
+                            {
+                                if (damage > 2)
+                                {
+                                    damage = (i32)((f32)damage / 2.5f);
+                                }
+                                else if (damage != 0)
+                                {
+                                    damage = 1;
+                                }
+                            }
+                            else
+                            {
+                                damage = 0;
+                            }
+                        }
+                        if (enemy->invincibilityTimer > 0)
+                        {
+                            if (enemy->isBoss)
+                            {
+                                damage /= 9;
+                            }
+                            else
+                            {
+                                damage = 0;
+                            }
+                        }
+                        enemy->life -= damage;
+                        enemy->lastDamage = damage;
+                    }
+                    playedDamageSound = 1;
+                }
+                if (enemy->isBoss)
+                {
+                    diffToPlayer = g_Player.positionOfLastEnemyHit - g_Player.positionCenter;
+                    enemyDiff = enemy->pos - g_Player.positionCenter;
+
+                    if (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x))
+                    {
+                        g_Player.positionOfLastEnemyHit = enemy->pos;
+                    }
+
+                    if (g_GameManager.character == CHAR_SAKUYA)
+                    {
+                        diffToPlayer = g_Player.sakuyaTargetPosition - g_Player.positionCenter;
+                        angle = atan2f(enemy->pos.y - g_Player.positionCenter.y,
+                                       enemy->pos.x - g_Player.positionCenter.x);
+
+                        if (angle >= -ZUN_2PI / 3.0f && angle <= -ZUN_PI / 3.0f &&
+                            (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
+                        {
+                            g_Player.sakuyaTargetPosition = enemy->pos;
+                            g_Player.targetingEnemy = 1;
+                        }
+                    }
+                    else
+                    {
+                        g_Player.targetingEnemy = 1;
+                    }
+                }
+                if (!g_Player.targetingEnemy)
+                {
+                    if (g_Player.positionOfLastEnemyHit.y < enemy->pos.y)
+                    {
+                        g_Player.positionOfLastEnemyHit = enemy->pos;
+                    }
+                    if (g_GameManager.character == CHAR_SAKUYA &&
+                        g_Player.sakuyaTargetPosition.y < -900.0f)
+                    {
+                        angle = atan2f(enemy->pos.y - g_Player.positionCenter.y,
+                                       enemy->pos.x - g_Player.positionCenter.x);
+                        if (angle >= -ZUN_2PI / 3.0f && angle <= -ZUN_PI / 3.0f)
+                        {
+                            g_Player.sakuyaTargetPosition = enemy->pos;
+                        }
+                    }
+                }
             }
         }
         if (enemy->life <= 0 && enemy->canDie)
@@ -904,7 +1063,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         else if (playedDamageSound != 0)
         {
-            g_SoundPlayer.PlaySoundByIdx(SOUND_20, 0);
+            g_SoundPlayer.PlaySoundByIdx(SOUND_ENEMY_DAMAGED, 0);
             enemy->primaryVm.color2.bytes.r = 255;
             enemy->primaryVm.color2.bytes.g = 128;
             enemy->primaryVm.color2.bytes.b = 192;

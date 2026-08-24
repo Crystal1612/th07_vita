@@ -96,7 +96,7 @@ struct GameConfiguration
         u32 opts;
         struct
         {
-            u32 loaded : 1;
+            u32 colorAddEmulation : 1;
             u32 noVertexBuffers : 1;
             u32 use16BitTextures : 1;
             u32 forceBackBufferClear : 1;
@@ -110,7 +110,7 @@ struct GameConfiguration
             u32 disableDinput : 1;
             u32 redrawEveryFrame : 1;
             u32 preloadBgm : 1;
-            u32 enableVsync : 1;
+            u32 disableVsync : 1;
         };
     };
 };
@@ -156,14 +156,19 @@ struct Supervisor
     static i32 __stdcall EnumGameControllersCb(LPCDIDEVICEINSTANCEA param_1,
                                                void *param_2);
 
+    i32 IsSoftwareTexturing()
+    {
+        return this->cfg.disableTextureBlend | this->cfg.colorAddEmulation;
+    }
+
     i32 IsClearingBackbuffer()
     {
         return this->cfg.forceBackBufferClear | this->cfg.disableItemDrawAroundPlayfield;
     }
 
-    i32 VsyncEnabled()
+    i32 VsyncDisabled()
     {
-        return this->vsyncEnabled;
+        return this->vsyncDisabled;
     }
 
     HINSTANCE hInstance;
@@ -187,7 +192,7 @@ struct Supervisor
     i32 unused_160;
     i32 renderSkipFrames;
     i32 isInEnding;
-    i32 vsyncEnabled;
+    i32 vsyncDisabled;
     i32 lockableBackBuffer;
     u32 lastFrameTime;
     f32 effectiveFramerateMultiplier;

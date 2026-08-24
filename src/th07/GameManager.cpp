@@ -18,6 +18,7 @@
 #include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x0049f5d0
 i32 g_RankArray[6][3] = {
@@ -135,12 +136,12 @@ u32 GameManager::OnUpdate(GameManager *arg)
         g_GameManager.arcadeRegionSize.x = 384.0f;
         g_GameManager.arcadeRegionSize.y = 448.0f;
         arg->isPaused = 1;
-        if (g_GameManager.currentStage != 6 || g_Gui.frameCounter >= 300)
+        if (g_GameManager.currentStage != STAGE6 || g_Gui.frameCounter >= 300)
         {
             // STRING: TH07 0x00498a40
             g_SoundPlayer.PushCommand(AUDIO_PAUSE, 0, "Pause");
         }
-        g_SoundPlayer.PlaySoundByIdx(SOUND_37, 0);
+        g_SoundPlayer.PlaySoundByIdx(SOUND_PAUSED, 0);
         g_Supervisor.UpdateTime();
     }
     g_Supervisor.viewport.X = arg->arcadeRegionTopLeftPos.x;
@@ -174,7 +175,8 @@ u32 GameManager::OnUpdate(GameManager *arg)
             (arg->demoIdx == 1 && arg->demoFrames == 7020) ||
             (arg->demoIdx == 2 && arg->demoFrames == 4620))
         {
-            BombEffects::RegisterChain(2, 120, 0, 0, 0);
+            ScreenEffect::RegisterChain(
+                SCREEN_EFFECT_FADE_IN_PLAY_AREA, 120, 0, 0, 0);
             g_Supervisor.FadeOutMusic(3.0f);
         }
         if ((arg->demoIdx == 0 && arg->demoFrames >= 8220) ||
@@ -332,8 +334,8 @@ void GameManager::DrawLoadingSprite()
 
     rect.left = 0.0f;
     rect.top = 0.0f;
-    rect.right = 640.0f;
-    rect.bottom = 480.0f;
+    rect.right = (f32)GAME_WINDOW_WIDTH;
+    rect.bottom = (f32)GAME_WINDOW_HEIGHT;
     g_AnmManager->InitializeAndSetActiveSprite(&spriteVm, ANM_SPRITE_ASCII_LOADING);
     spritePos.x = 528.0f;
     spritePos.y = 448.0f;
@@ -445,7 +447,7 @@ ZunResult ResultScreen::ParseScores()
     if (!scoreDat)
     {
         // STRING: TH07 0x00498090
-        g_GameErrorContext.Log("error : �X�R�A�t�@�C���̓ǂݎ��Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_SCORE_LOAD_FAIL);
         return ZUN_ERROR;
     }
 
@@ -522,7 +524,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         }
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : �v���C���[�̏������Ɏ��s���܂���\r\n");
+            g_GameErrorContext.Log(TH_ERR_PLAYER_INIT_FAIL);
             return ZUN_ERROR;
         }
         if (!g_GameManager.replay)
@@ -608,22 +610,22 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             }
             switch (arg->currentStage + 1)
             {
-            case 2:
+            case STAGE2:
                 arg->cherry = arg->cherryMax;
                 break;
-            case 3:
+            case STAGE3:
                 arg->cherryMax += 50000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 4:
+            case STAGE4:
                 arg->cherryMax += 100000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 5:
+            case STAGE5:
                 arg->cherryMax += 150000;
                 arg->cherry = arg->cherryMax;
                 break;
-            case 6:
+            case STAGE6:
                 arg->cherryMax += 200000;
                 arg->cherry = arg->cherryMax;
                 break;
@@ -650,22 +652,21 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                 if (g_Supervisor.curState == SUPERVISOR_STATE_RESTART_FROM_BEGINNING)
                 {
                     IncrementCappedAgain(
-                        &((Plst *)(g_GameManager.pscr + 6))
-                             ->playDataByDifficulty[g_GameManager.difficulty]
-                             .clearCount,
+                        &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                             .retryCount,
                         999999);
-                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].clearCount,
+                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].retryCount,
                                          999999);
                 }
                 if (g_GameManager.practice)
                 {
                     IncrementCappedAgain(
-                        &((Plst *)(g_GameManager.pscr + 6))
-                             ->playDataByDifficulty[g_GameManager.difficulty]
-                             .extraClearCount,
+                        &g_GameManager.plst
+                            .playDataByDifficulty[g_GameManager.difficulty]
+                             .practiceCount,
                         999999);
                     IncrementCappedAgain(
-                        &g_GameManager.plst.playDataByDifficulty[6].extraClearCount, 999999);
+                        &g_GameManager.plst.playDataByDifficulty[6].practiceCount, 999999);
                 }
             }
         }
@@ -680,8 +681,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals->guiScoreDifference = 0;
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            // STRING: TH07 0x00498064
-            g_GameErrorContext.Log("error : �v���C���[�̏������Ɏ��s���܂���\r\n");
+            g_GameErrorContext.Log(TH_ERR_PLAYER_INIT_FAIL);
             return ZUN_ERROR;
         }
     }
@@ -689,7 +689,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->globals->pointItemsCollectedThisStage = 0;
     arg->globals->grazeInStage = 0;
     arg->isInPauseMenu = 0;
-    arg->currentStage = arg->currentStage + 1;
+    arg->currentStage++;
     if (!g_GameManager.replay)
     {
         shotTypeAndChar = g_GameManager.shotTypeAndCharacter;
@@ -715,7 +715,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     {
         switch (arg->currentStage)
         {
-        case 1:
+        case STAGE1:
             break;
         default:
             arg->globals->currentPower = 128.0f;
@@ -734,15 +734,13 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->stageRngSeed = g_Rng.seed;
     if (Stage::RegisterChain(arg->currentStage) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00498038
-        g_GameErrorContext.Log("error : �w�i�f�[�^�̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_STAGE_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (BulletManager::RegisterChain("data/etama.anm") != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00498010
-        g_GameErrorContext.Log("error : �G�e�̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_BULLET_INIT_FAIL);
         return ZUN_ERROR;
     }
 
@@ -750,29 +748,25 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             g_EnemyAnmStageFiles[arg->currentStage].anmPath1,
             g_EnemyAnmStageFiles[arg->currentStage].anmPath2) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497f4c
-        g_GameErrorContext.Log("error : �G�̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_ENEMY_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (g_EclManager.Load(g_EclPaths[arg->currentStage]) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e84
-        g_GameErrorContext.Log("error : �G���]�̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_ECL_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (EffectManager::RegisterChain() != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e58
-        g_GameErrorContext.Log("error : �G�t�F�N�g�̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_EFFECT_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (Gui::RegisterChain() != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e30
-        g_GameErrorContext.Log("error : 2D�\���̏������Ɏ��s���܂���\r\n");
+        g_GameErrorContext.Log(TH_ERR_GUI_INIT_FAIL);
         return ZUN_ERROR;
     }
 
@@ -783,7 +777,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     }
     g_Supervisor.LoadAudio(0, g_Stage.stdData->bgmPaths[0]);
     g_Supervisor.LoadAudio(1, g_Stage.stdData->bgmPaths[1]);
-    if (arg->currentStage != 6)
+    if (arg->currentStage != STAGE6)
     {
         g_Supervisor.PlayLoadedAudio(0);
     }

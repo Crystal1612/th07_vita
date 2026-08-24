@@ -36,6 +36,19 @@ enum ShotType
     SHOT_COUNT,
 };
 
+enum GameStage
+{
+    DUMMYSTAGE,
+    STAGE1,
+    STAGE2,
+    STAGE3,
+    STAGE4,
+    STAGE5,
+    STAGE6,
+    EXTRASTAGE,
+    PHANTASMSTAGE,
+};
+
 enum SpellcardNumber
 {
     SPELLCARD_ST1_MBOSS_1H,
@@ -277,10 +290,10 @@ struct PlstPlayCounts
 {
     u32 playCount;
     u32 playCountPerShotType[SHOT_COUNT];
-    u32 clearCount;
-    u32 noContinueClearCount;
     u32 retryCount;
-    u32 extraClearCount;
+    u32 noContinueClearCount;
+    u32 continueCount;
+    u32 practiceCount;
 };
 
 struct Plst : Th7k

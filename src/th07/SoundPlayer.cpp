@@ -5,6 +5,7 @@
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ea88
@@ -97,8 +98,7 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     this->manager = new CSoundManager;
     if (FAILED(this->manager->Initialize(gameWindow, 2, 2, 44100, 16)))
     {
-        // STRING: TH07 0x0049604c
-        g_GameErrorContext.Log("DirectSound オブジェクトの初期化が失敗したよ\r\n");
+        g_GameErrorContext.Log(TH_ERR_DSOUND_INIT_FAIL);
         SAFE_DELETE(this->manager);
         return ZUN_ERROR;
     }
@@ -137,8 +137,7 @@ ZunResult SoundPlayer::InitializeDSound(HWND gameWindow)
     this->initSoundBuffer->Play(0, 0, 1);
     SetTimer(gameWindow, 0, 250, NULL);
     this->gameWindow = gameWindow;
-    // STRING: TH07 0x00496024
-    g_GameErrorContext.Log("DirectSound は正常に初期化されました\r\n");
+    g_GameErrorContext.Log(TH_LOG_DSOUND_INIT_SUCCESS);
     return ZUN_SUCCESS;
 }
 
@@ -262,8 +261,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
     // STRING: TH07 0x0049601c
     if (strncmp((char *)cursor, "RIFF", 4) != 0)
     {
-        // STRING: TH07 0x00496000
-        g_GameErrorContext.Log("Wav ファイルじゃない %s\r\n", path);
+        g_GameErrorContext.Log(TH_ERR_NOT_A_WAV, path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -275,7 +273,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
     // STRING: TH07 0x00495ff8
     if (strncmp((char *)cursor, "WAVE", 4) != 0)
     {
-        g_GameErrorContext.Log("Wav ファイルじゃない? %s\r\n", path);
+        g_GameErrorContext.Log(TH_ERR_PROBABLY_NOT_A_WAV, path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -286,8 +284,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
                                   &formatSize, fileSize - 12);
     if (!wavDataPtr)
     {
-        // STRING: TH07 0x00495fdc
-        g_GameErrorContext.Log("Wav ファイルじゃない? %s\r\n", path);
+        g_GameErrorContext.Log(TH_ERR_PROBABLY_NOT_A_WAV, path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -298,7 +295,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
                                   &formatSize, fileSize - 12);
     if (!wavDataPtr)
     {
-        g_GameErrorContext.Log("Wav ファイルじゃない? %s\r\n", path);
+        g_GameErrorContext.Log(TH_ERR_PROBABLY_NOT_A_WAV, path);
         free(soundFileDat);
         return ZUN_ERROR;
     }
@@ -380,8 +377,7 @@ ZunResult SoundPlayer::StartBGM(const char *path)
                    GUID_NULL, 16,
                    notifySize, this->backgroundMusicUpdateEvent, pzwf)))
     {
-        // STRING: TH07 0x00495f70
-        DebugPrint("error : ストリーミング用サウンドバッファを作成出来ませんでした\r\n");
+        DebugPrint(TH_ERR_STREAMING_SOUND_BUFFER_CREATE_FAIL);
         return ZUN_ERROR;
     }
 
@@ -514,8 +510,7 @@ ZunResult SoundPlayer::LoadBGM(i32 idx)
                    DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLPOSITIONNOTIFY,
                    GUID_NULL, 16, notifySize, this->backgroundMusicUpdateEvent)))
     {
-        DebugPrint(
-            "error : ストリーミング用サウンドバッファを作成出来ませんでした\r\n");
+        DebugPrint(TH_ERR_STREAMING_SOUND_BUFFER_CREATE_FAIL);
         return ZUN_ERROR;
     }
 
@@ -575,10 +570,7 @@ ZunResult SoundPlayer::InitSoundBuffers()
     {
         if (LoadSound(i, g_SFXList[i]) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log(
-                // STRING: TH07 0x00495e78
-                "error : Sound ファイルが読み込めない データを確認 %s\r\n",
-                g_SFXList[i]);
+            g_GameErrorContext.Log(TH_ERR_SOUND_READ_FAIL, g_SFXList[i]);
             return ZUN_ERROR;
         }
     }
@@ -937,7 +929,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
         waitObj = MsgWaitForMultipleObjects(
             1, &g_SoundPlayer.backgroundMusicUpdateEvent, 0, 0xffffffff,
             QS_HOTKEY | QS_PAINT | QS_TIMER | QS_POSTMESSAGE |
-            QS_MOUSEBUTTON | QS_MOUSEMOVE | QS_KEY);
+                QS_MOUSEBUTTON | QS_MOUSEMOVE | QS_KEY);
         if (!g_SoundPlayer.backgroundMusic)
         {
             stopped = true;
@@ -965,8 +957,7 @@ DWORD __stdcall SoundPlayer::BackgroundMusicPlayerThread(LPVOID lpThreadParamete
             break;
         }
     }
-    // STRING: TH07 0x00495cf4
-    DebugPrint("atention : ストリーミング用スレッドは終了しました。\r\n");
+    DebugPrint(TH_LOG_BGM_THREAD_EXIT);
     return 0;
 }
 
