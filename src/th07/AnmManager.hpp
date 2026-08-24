@@ -10,13 +10,6 @@
 #include "dxutil.hpp"
 #include "utils.hpp"
 
-//i'll macro it fror multiplayer
-// #define THE_2_5_6_0_SPRITE_LIMIT 2560
-#define THE_2_5_6_0_SPRITE_LIMIT 5120
-// #define THE_50_ANM_LIMIT 50
-#define THE_50_ANM_LIMIT 150
-// #define DRAW_STRING_BUF_72 72
-#define DRAW_STRING_BUF_72 144
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480
 
@@ -385,10 +378,13 @@ struct AnmVm : AnmVmBase
 };
 C_ASSERT(sizeof(AnmVm) == 0x24c);
 
-#define MAX_SCRIPTS_SPRITES 2560
-#define MAX_TEXTURES 264
-#define MAX_ANM_FILES 50
-#define MAX_SURFACES 32
+// i extend it for multiplayer
+#define MAX_SCRIPTS_SPRITES 5120 // double
+#define MAX_TEXTURES 510 // double
+#define MAX_ANM_FILES 150 // triple
+#define MAX_SURFACES 32 // NO
+
+#define DRAW_STRING_BUF_72 144 // added
 
 struct AnmManager
 {
@@ -629,19 +625,12 @@ struct AnmManager
     u32 flushesThisFrame;
     Float2 offset;
     D3DXMATRIX matrix;
-    AnmLoadedSprite sprites[THE_2_5_6_0_SPRITE_LIMIT];
     AnmLoadedSprite sprites[MAX_SCRIPTS_SPRITES];
     AnmVm vm;
     IDirect3DTexture8 *textures[MAX_TEXTURES];
     void *imageDataArray[256];
     char *textureNames[MAX_TEXTURES];
     i32 loadedSpriteCount;
-    AnmRawInstr *scripts[THE_2_5_6_0_SPRITE_LIMIT];
-    i32 spriteIndices[THE_2_5_6_0_SPRITE_LIMIT];
-    AnmEntry anmFiles[THE_50_ANM_LIMIT];
-    IDirect3DSurface8 *surfaces[32];
-    IDirect3DSurface8 *surfacesBis[32];
-    ZunImageInfo surfaceSourceInfo[32];
     AnmRawInstr *scripts[MAX_SCRIPTS_SPRITES];
     i32 spriteIndices[MAX_SCRIPTS_SPRITES];
     AnmEntry anmFiles[MAX_ANM_FILES];

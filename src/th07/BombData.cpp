@@ -137,7 +137,7 @@ void BombData::BombReimuACalc(Player *player)
     if (bombInfo->bombTimer.HasTicked() &&
         bombInfo->bombTimer == 0)
     {
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_REIMU_A);
         bombInfo->bombDuration = 140;
         player->invulnerabilityTimer = 200;
@@ -337,7 +337,7 @@ void BombData::BombReimuACalcFocus(Player *player)
     if (bombInfo->bombTimer.HasTicked() &&
         bombInfo->bombTimer == 0)
     {
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_REIMU_A_FOCUS);
         bombInfo->bombDuration = 300;
         player->invulnerabilityTimer = 360;
@@ -539,7 +539,7 @@ void BombData::BombReimuBCalc(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_REIMU_B);
         player->bombInfo.bombDuration = 140;
         player->invulnerabilityTimer = 200;
@@ -652,7 +652,7 @@ void BombData::BombReimuBCalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_REIMU_B_FOCUS);
         player->bombInfo.bombDuration = 190;
         player->invulnerabilityTimer = 250;
@@ -732,7 +732,7 @@ void BombData::BombMarisaACalc(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 3,
                                    TH_BOMB_MARISA_A);
         player->bombInfo.bombDuration = 200;
         player->invulnerabilityTimer = 250;
@@ -843,7 +843,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 2,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 2,
                                    TH_BOMB_MARISA_A_FOCUS);
         player->bombInfo.bombDuration = 260;
         player->invulnerabilityTimer = 310;
@@ -995,7 +995,7 @@ void BombData::BombMarisaBCalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         player->bombInfo.startPos = player->positionCenter;
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_MARISA_B);
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 300;
@@ -1124,7 +1124,7 @@ void BombData::BombMarisaBCalcFocus(Player *player)
         player->bombInfo.bombTimer == 0)
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 2,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 2,
                                    TH_BOMB_MARISA_B_FOCUS);
         player->bombInfo.bombDuration = 340;
         player->invulnerabilityTimer = 390;
@@ -1226,7 +1226,7 @@ void BombData::BombSakuyaACalc(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_SAKUYA_A);
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 210;
@@ -1360,7 +1360,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 1,
                                    TH_BOMB_SAKUYA_A_FOCUS);
         player->bombInfo.bombDuration = 250;
         player->invulnerabilityTimer = 290;
@@ -1532,7 +1532,7 @@ void BombData::BombSakuyaBCalc(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 3,
                                    TH_BOMB_SAKUYA_B);
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 260;
@@ -1659,7 +1659,7 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     if (player->GetBombTimer()->HasTickedAndIsEq(0))
     {
         g_ItemManager.RemoveAllItems();
-        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
+        g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY_PER_PLAYER + 3,
                                    TH_BOMB_SAKUYA_B_FOCUS);
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 420;

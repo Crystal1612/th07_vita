@@ -743,10 +743,8 @@ void EnemyEclInstr::ExInsYoumuRedirectBulletsToPlayer(Enemy *enemy,
 
         if (bullet->state2 == 1)
         {
-            bullet->AddTargetVelocityCommand(0, 0, 90, 0.026666667f,
-                                             Player::AngleToNearestPlayer(&bullet->pos));
             bullet->AddTargetVelocityCommand(0, 0, 90, 2.0f / 75.0f,
-                                             g_Player.AngleToPlayer(&bullet->pos));
+                                             Player::AngleToNearestPlayer(&bullet->pos));
             bullet->ClearCommand(1);
             bullet->state2 = 2;
         }

@@ -529,7 +529,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         {
             id = rawSprite->id;
         }
-        if (rawSprite->id + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
+        if (rawSprite->id + spriteIdxOffset >= MAX_SCRIPTS_SPRITES)
         {
             g_GameErrorContext.Fatal(TH_ERR_LOW_SPRITE_TABLE);
             return ZUN_ERROR;
@@ -538,7 +538,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     }
     for (i = 0; i < data->numScripts; i++, curSprite += 2)
     {
-        if (*curSprite + spriteIdxOffset >= THE_2_5_6_0_SPRITE_LIMIT)
+        if (*curSprite + spriteIdxOffset >= MAX_SCRIPTS_SPRITES)
         {
             g_GameErrorContext.Fatal(TH_ERR_LOW_SCRIPT_TABLE);
             return ZUN_ERROR;
@@ -567,7 +567,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
     i32 spriteIdxOffset;
     i32 *spriteIdx;
 
-    if (anmIdx < 0 || (u32)anmIdx >= THE_50_ANM_LIMIT)
+    if (anmIdx < 0 || (u32)anmIdx >= MAX_ANM_FILES)
     {
         return;
     }
