@@ -5,6 +5,7 @@
 #include "GameErrorContext.hpp"
 #include "Supervisor.hpp"
 #include "dsutil.hpp"
+#include "i18n.hpp"
 #include "inttypes.hpp"
 #include "utils.hpp"
 
@@ -27,8 +28,7 @@ u16 Controller::GetJoystickCaps()
     joyinfo.dwFlags = 255;
     if (joyGetPosEx(0, &joyinfo))
     {
-        // STRING: TH07 0x00497d9c
-        g_GameErrorContext.Log("使えるパッドが存在しないようです、残念\r\n");
+        g_GameErrorContext.Log(TH_CONTROL_NO_USABLE_PADS);
         return 1;
     }
     joyGetDevCapsA(0, &g_JoystickCaps, 0x194);

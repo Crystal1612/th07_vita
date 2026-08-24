@@ -17,6 +17,7 @@
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
 #include "dsutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 #define GET_INT_PTR(enemy, argIdx) \
@@ -73,8 +74,7 @@ ZunResult EclManager::Load(const char *path)
     this->eclFile = (EclRawHeader *)FileSystem::OpenFile(path, 0);
     if (!this->eclFile)
     {
-        // STRING: TH07 0x00498700
-        g_GameErrorContext.Log("敵データの読み込みに失敗しました、データが壊れてるか失われています\r\n");
+        g_GameErrorContext.Log(TH_ERR_ECL_LOAD_FAIL);
         return ZUN_ERROR;
     }
 

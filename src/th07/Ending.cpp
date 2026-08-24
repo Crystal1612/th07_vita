@@ -8,6 +8,7 @@
 #include "GameManager.hpp"
 #include "ScreenEffect.hpp"
 #include "Supervisor.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x0049f628
 const char *g_BadEndingPaths[3] = {
@@ -437,8 +438,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     this->endFileData = (char *)FileSystem::OpenFile(endFilePath, 0);
     if (!this->endFileData)
     {
-        // STRING: TH07 0x004985d8
-        g_GameErrorContext.Log("error : エンディングファイルが読み込めない、ファイルが破壊されています\r\n");
+        g_GameErrorContext.Log(TH_ERR_END_LOAD_FAIL);
         return ZUN_ERROR;
     }
 

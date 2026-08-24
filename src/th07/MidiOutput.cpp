@@ -6,6 +6,7 @@
 #include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dsutil.hpp"
+#include "i18n.hpp"
 #include "inttypes.hpp"
 #include "utils.hpp"
 
@@ -236,8 +237,7 @@ ZunResult MidiOutput::ReadFileData(i32 fileIdx, const char *path)
     this->midiFileData[fileIdx] = FileSystem::OpenFile(path, 0);
     if (!this->midiFileData[fileIdx])
     {
-        // STRING: TH07 0x004972d0
-        g_GameErrorContext.Log("error : MIDI File Ç™ì«Ç›çûÇﬂÇ»Ç¢ %s \rv\r\n", path);
+        g_GameErrorContext.Log(TH_ERR_MIDI_LOAD_FAIL, path);
         return ZUN_ERROR;
     }
     else
@@ -286,8 +286,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     fileData = currentCursor;
     if (!currentCursor)
     {
-        // STRING: TH07 0x00497290
-        DebugPrint("error : Ç‹ÇæMIDIÇ™ì«Ç›çûÇ‹ÇÍÇƒÇ¢Ç»Ç¢ÇÃÇ…çƒê∂ÇµÇÊÇ§Ç∆ÇµÇƒÇ¢ÇÈ\r\n");
+        DebugPrint(TH_ERR_MIDI_NOT_LOADED);
         return ZUN_ERROR;
     }
 

@@ -2,13 +2,10 @@
 
 #include <d3d8.h>
 #include <direct.h>
-#include <io.h>
 #include <math.h>
-#include <stdio.h>
-
-typedef __w64 long SHANDLE_PTR; // i dont know anymore bro
-
 #include <shlobj.h>
+#include <stdio.h>
+#include <windows.h>
 
 #include "AnmManager.hpp"
 #include "Chain.hpp"
@@ -21,6 +18,7 @@ typedef __w64 long SHANDLE_PTR; // i dont know anymore bro
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x00575c20
 GameWindow g_GameWindow;
@@ -182,7 +180,7 @@ RenderResult GameWindow::Render()
         this->curFrame++;
     }
 
-    if (g_Supervisor.cfg.windowed || g_Supervisor.VsyncEnabled())
+    if (g_Supervisor.cfg.windowed || g_Supervisor.VsyncDisabled())
     {
         if (this->curFrame != 0)
         {
@@ -241,7 +239,7 @@ RenderResult GameWindow::Render()
         }
     }
 
-    if (!g_Supervisor.cfg.windowed && !g_Supervisor.VsyncEnabled())
+    if (!g_Supervisor.cfg.windowed && !g_Supervisor.VsyncDisabled())
     {
         if ((i32)g_Supervisor.cfg.frameskipConfig >= (i32)this->curFrame)
         {
@@ -264,8 +262,7 @@ i32 GameWindow::InitD3dInterface()
     g_Supervisor.d3dIface = Direct3DCreate8(D3D_SDK_VERSION);
     if (!g_Supervisor.d3dIface)
     {
-        // STRING: TH07 0x00497bd8
-        g_GameErrorContext.Fatal("Direct3D オブジェクトは何故か作成出来なかった\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_D3D_CREATE_FAIL);
         return true;
     }
 
@@ -294,9 +291,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
         width = GAME_WINDOW_WIDTH;
         height = GAME_WINDOW_HEIGHT;
         g_GameWindow.window = CreateWindowExA(
-            0, "BASE",
-            // STRING: TH07 0x00497b9c
-            "東方妖々夢　～ Perfect Cherry Blossom. ver 1.00b", WS_OVERLAPPEDWINDOW,
+            0, "BASE", TH_WINDOW_TITLE, WS_OVERLAPPEDWINDOW,
             0, 0, width, height, NULL, NULL, hInstance, NULL);
     }
     else
@@ -304,7 +299,7 @@ i32 GameWindow::CreateGameWindow(HINSTANCE hInstance)
         width = GetSystemMetrics(SM_CXFIXEDFRAME) * 2 + GAME_WINDOW_WIDTH;
         height = GAME_WINDOW_HEIGHT + GetSystemMetrics(SM_CYFIXEDFRAME) * 2 + GetSystemMetrics(SM_CYCAPTION);
         g_GameWindow.window = CreateWindowExA(
-            0, "BASE", "東方妖々夢　～ Perfect Cherry Blossom. ver 1.00b",
+            0, "BASE", TH_WINDOW_TITLE,
             WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX,
             CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL,
             hInstance, NULL);
@@ -353,8 +348,7 @@ i32 GameWindow::InitD3dRendering()
         {
             presentParams.BackBufferFormat = D3DFMT_X8R8G8B8;
             g_Supervisor.cfg.colorMode16bit = 0;
-            // STRING: TH07 0x00497b70
-            g_GameErrorContext.Log("初回起動、画面を 32Bits で初期化しました\r\n");
+            g_GameErrorContext.Log(TH_LOG_DISPLAY_INIT_32BITS);
         }
         else if (!g_Supervisor.cfg.colorMode16bit)
         {
@@ -366,14 +360,13 @@ i32 GameWindow::InitD3dRendering()
         }
         if (g_GameWindow.usesRelativePath != false)
         {
-            g_Supervisor.vsyncEnabled = 1;
+            g_Supervisor.vsyncDisabled = 1;
         }
-        if (!g_Supervisor.vsyncEnabled)
+        if (!g_Supervisor.vsyncDisabled)
         {
             presentParams.FullScreen_RefreshRateInHz = 60;
             presentParams.FullScreen_PresentationInterval = 1;
-            // STRING: TH07 0x00497b44
-            g_GameErrorContext.Log("リフレッシュレートを60Hzに変更を試みます\r\n");
+            g_GameErrorContext.Log(TH_LOG_DISPLAY_CHANGE_60_HZ);
             if (!g_Supervisor.cfg.frameskipConfig)
             {
                 presentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
@@ -389,8 +382,7 @@ i32 GameWindow::InitD3dRendering()
             presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
             presentParams.FullScreen_PresentationInterval =
                 D3DPRESENT_INTERVAL_IMMEDIATE;
-            // STRING: TH07 0x00497b20
-            g_GameErrorContext.Log("VSync非同期可能かどうかを試みます\r\n");
+            g_GameErrorContext.Log(TH_LOG_TRY_ASYNC_VSYNC);
         }
     }
     else
@@ -420,8 +412,7 @@ i32 GameWindow::InitD3dRendering()
         {
             if (retryWithoutRefreshRate)
             {
-                // STRING: TH07 0x00497afc
-                g_GameErrorContext.Log("T&L HAL は使用できないようです\r\n");
+                g_GameErrorContext.Log(TH_LOG_TL_HAL_UNUSABLE);
             }
             if (FAILED(g_Supervisor.d3dIface->CreateDevice(
                     0, D3DDEVTYPE_HAL, g_GameWindow.window, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
@@ -429,8 +420,7 @@ i32 GameWindow::InitD3dRendering()
             {
                 if (retryWithoutRefreshRate)
                 {
-                    // STRING: TH07 0x00497adc
-                    g_GameErrorContext.Log("HAL も使用できないようです\r\n");
+                    g_GameErrorContext.Log(TH_LOG_HAL_UNUSABLE);
                 }
             fallback_to_software:
                 if (FAILED(g_Supervisor.d3dIface->CreateDevice(
@@ -438,10 +428,9 @@ i32 GameWindow::InitD3dRendering()
                         D3DCREATE_SOFTWARE_VERTEXPROCESSING, &presentParams,
                         &g_Supervisor.d3dDevice)))
                 {
-                    if (!g_Supervisor.vsyncEnabled)
+                    if (!g_Supervisor.vsyncDisabled)
                     {
-                        // STRING: TH07 0x00497ab4
-                        g_GameErrorContext.Log("リフレッシュレートが変更できません\r\n");
+                        g_GameErrorContext.Log(TH_LOG_REFRESH_RATE_UNCHANGED);
                         presentParams.FullScreen_RefreshRateInHz = 0;
                         g_Supervisor.lockableBackBuffer = 0;
                         retryWithoutRefreshRate = 1;
@@ -450,18 +439,15 @@ i32 GameWindow::InitD3dRendering()
 
                     if (presentParams.FullScreen_PresentationInterval == D3DPRESENT_INTERVAL_IMMEDIATE)
                     {
-                        // STRING: TH07 0x00497a7c
-                        g_GameErrorContext.Log("非同期更新も行えません。一番汚いモードに変更します\r\n");
-                        // STRING: TH07 0x00497a3c
-                        g_GameErrorContext.Fatal("*** リフレッシュレートを60Hzに変更することを推奨します ***\r\n");
+                        g_GameErrorContext.Log(TH_LOG_ASYNC_VSYNC_UNAVAILABLE);
+                        g_GameErrorContext.Fatal(TH_ERR_CHANGE_YO_REFRESH_RATE);
                         presentParams.FullScreen_PresentationInterval = 1;
                         presentParams.SwapEffect = D3DSWAPEFFECT_COPY;
                         continue;
                     }
                     else
                     {
-                        // STRING: TH07 0x00497a04
-                        g_GameErrorContext.Fatal("Direct3D の初期化に失敗、これではゲームは出来ません\r\n");
+                        g_GameErrorContext.Fatal(TH_ERR_D3D_INIT_FAIL);
                         SAFE_RELEASE(g_Supervisor.d3dIface);
                         return 1;
                     }
@@ -469,22 +455,20 @@ i32 GameWindow::InitD3dRendering()
                 else
                 {
                     // STRING: TH07 0x004979c8
-                    g_GameErrorContext.Log("REF で動作しますが、重すぎて恐らくゲームになりません...\r\n");
+                    g_GameErrorContext.Log(TH_LOG_USING_REF_RENDER);
                     g_Supervisor.usingTnLHal = 0;
                     usingD3dHal = false;
                 }
             }
             else
             {
-                // STRING: TH07 0x004979b4
-                g_GameErrorContext.Log("HAL で動作します\r\n");
+                g_GameErrorContext.Log(TH_LOG_USING_HAL);
                 g_Supervisor.usingTnLHal = 0;
             }
         }
         else
         {
-            // STRING: TH07 0x00497998
-            g_GameErrorContext.Log("T&L HAL で動作しま～す\r\n");
+            g_GameErrorContext.Log(TH_LOG_USING_TL_HAL);
             g_Supervisor.usingTnLHal = 1;
         }
         break;
@@ -518,14 +502,12 @@ i32 GameWindow::InitD3dRendering()
     if (!g_Supervisor.cfg.colorAddEmulation &&
         (g_Supervisor.d3dCaps.TextureOpCaps & 0x40) == 0)
     {
-        // STRING: TH07 0x00497948
-        g_GameErrorContext.Log("D3DTEXOPCAPS_ADD をサポートしていません、色加算エミュレートモードで動作します\r\n");
+        g_GameErrorContext.Log(TH_LOG_USING_COLOR_ADD_EMU);
         g_Supervisor.cfg.colorAddEmulation = 1;
     }
     if (g_Supervisor.d3dCaps.MaxTextureWidth <= 256)
     {
-        // STRING: TH07 0x004978f8
-        g_GameErrorContext.Log("512 以上のテクスチャをサポートしていません。殆どの絵がボケて表示されます。\r\n");
+        g_GameErrorContext.Log(TH_LOG_LARGE_TEX_UNSUPPORTED);
     }
     FormatD3DCapabilities(&g_Supervisor.d3dCaps, capsBuffer);
     g_GameErrorContext.Log(capsBuffer);
@@ -541,8 +523,7 @@ i32 GameWindow::InitD3dRendering()
         {
             g_Supervisor.supports32BitTex = 0;
             g_Supervisor.cfg.use16BitTextures = 1;
-            // STRING: TH07 0x004978b0
-            g_GameErrorContext.Log("D3DFMT_A8R8G8B8 をサポートしていません、減色モードで動作します\r\n");
+            g_GameErrorContext.Log(TH_LOG_USING_REDUCED_COLOR);
         }
     }
     ResetRenderState();
@@ -559,13 +540,11 @@ char *GameWindow::FormatCapability(const char *capabilityName,
     buf += sprintf(buf, capabilityName);
     if ((capabilityFlags & mask) == 0)
     {
-        // STRING: TH07 0x004978a4
-        buf += sprintf(buf, "不可\r\n");
+        buf += sprintf(buf, TH_CAP_UNSUPPORTED);
     }
     else
     {
-        // STRING: TH07 0x0049789c
-        buf += sprintf(buf, "可\r\n");
+        buf += sprintf(buf, TH_CAP_SUPPORTED);
     }
     return buf;
 }
@@ -576,132 +555,92 @@ void GameWindow::FormatD3DCapabilities(D3DCAPS8 *caps, char *buf)
     char *strPos;
 
     strPos = buf;
-    // STRING: TH07 0x0049786c
-    strPos += sprintf(strPos, "現在のビデオカード、及びドライバの能力詳細\r\n");
-    // STRING: TH07 0x00497858
-    strPos = FormatCapability("　走査線取得能力 : ", caps->Caps,
+    strPos += sprintf(strPos, TH_CAP_VIDEO_SUMMARY);
+    strPos = FormatCapability(TH_CAP_VIDEO_SCANLINE, caps->Caps,
                               D3DCAPS_READ_SCANLINE, strPos);
-    // STRING: TH07 0x00497834
-    strPos = FormatCapability("　ウィンドウモードのレンダリング : ", caps->Caps2,
+    strPos = FormatCapability(TH_CAP_VIDEO_WINDOWED, caps->Caps2,
                               D3DCAPS2_CANRENDERWINDOWED, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x00497810
-        "　プレゼンテーション間隔（直接）: ", caps->PresentationIntervals,
+        TH_CAP_VIDEO_PRESENT_INTERVAL_IMMEDIATE, caps->PresentationIntervals,
         D3DPRESENT_INTERVAL_IMMEDIATE, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x004977e8
-        "　プレゼンテーション間隔（垂直同期）: ", caps->PresentationIntervals,
+        TH_CAP_VIDEO_PRESENT_INTERVAL_VSYNC, caps->PresentationIntervals,
         D3DPRESENT_INTERVAL_ONE, strPos);
-    // STRING: TH07 0x004977b4
-    strPos += sprintf(strPos, "　-- デバイス能力 ------------------------------\r\n");
+    strPos += sprintf(strPos, TH_CAP_DEV_SUMMARY);
     strPos =
-        // STRING: TH07 0x0049778c
-        FormatCapability("　System -> 非ローカルVRAMブリット : ", caps->DevCaps,
+        FormatCapability(TH_CAP_DEV_NON_LOCAL_VRAM_BLIT, caps->DevCaps,
                          D3DDEVCAPS_CANBLTSYSTONONLOCAL, strPos);
-    // STRING: TH07 0x00497774
-    strPos = FormatCapability("　ハードウェア T&L : ", caps->DevCaps,
+    strPos = FormatCapability(TH_CAP_DEV_HARDWARE_TL, caps->DevCaps,
                               D3DDEVCAPS_HWTRANSFORMANDLIGHT, strPos);
     strPos =
-        // STRING: TH07 0x0049774c
-        FormatCapability("　非ローカルVRAMからテクスチャ取得 : ", caps->DevCaps,
+        FormatCapability(TH_CAP_DEV_NON_LOCAL_VRAM_TEX, caps->DevCaps,
                          D3DDEVCAPS_TEXTURENONLOCALVIDMEM, strPos);
     strPos =
-        // STRING: TH07 0x00497724
-        FormatCapability("　システムメモリからテクスチャ取得 : ", caps->DevCaps,
+        FormatCapability(TH_CAP_DEV_SYS_MEM_TEX, caps->DevCaps,
                          D3DDEVCAPS_TEXTURESYSTEMMEMORY, strPos);
-    // STRING: TH07 0x00497704
-    strPos = FormatCapability("　VRAM からテクスチャ取得 : ", caps->DevCaps,
+    strPos = FormatCapability(TH_CAP_DEV_VRAM_TEX, caps->DevCaps,
                               D3DDEVCAPS_TEXTUREVIDEOMEMORY, strPos);
     strPos =
-        // STRING: TH07 0x004976dc
-        FormatCapability("　頂点バッファにシステムメモリを使用 : ", caps->DevCaps,
+        FormatCapability(TH_CAP_DEV_SYS_MEM_VERTEX_BUF, caps->DevCaps,
                          D3DDEVCAPS_TLVERTEXSYSTEMMEMORY, strPos);
     strPos =
-        // STRING: TH07 0x004976b4
-        FormatCapability("　頂点バッファにビデオメモリを使用 : ", caps->DevCaps,
+        FormatCapability(TH_CAP_DEV_VMEM_VERTEX_BUF, caps->DevCaps,
                          D3DDEVCAPS_TLVERTEXVIDEOMEMORY, strPos);
-    strPos +=
-        // STRING: TH07 0x00497680
-        sprintf(strPos, "　-- プリミティブ能力 ---------------------------\r\n");
-    // STRING: TH07 0x00497670
-    strPos = FormatCapability("　半透明処理 : ", caps->PrimitiveMiscCaps,
+    strPos += sprintf(strPos, TH_CAP_PRIMITIVE_SUMMARY);
+    strPos = FormatCapability(TH_CAP_PRIMITIVE_TRANSPARENCY,
+                              caps->PrimitiveMiscCaps,
                               D3DPMISCCAPS_BLENDOP, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x00497650
-        "　ポイントのクリッピング処理 : ", caps->PrimitiveMiscCaps,
+        TH_CAP_PRIMITIVE_POINT_CLIPPING, caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CLIPPLANESCALEDPOINTS, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x0049762c
-        "　プリミティブのクリッピング処理 : ", caps->PrimitiveMiscCaps,
+        TH_CAP_PRIMITIVE_TL_CLIPPING, caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CLIPTLVERTS, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x0049760c
-        "　法線クリップ（反時計周り） : ", caps->PrimitiveMiscCaps,
+        TH_CAP_PRIMITIVE_CLIP_CCW, caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_CULLCCW, strPos);
     strPos =
-        // STRING: TH07 0x004975ec
-        FormatCapability("　法線クリップ（時計周り） : ", caps->PrimitiveMiscCaps,
+        FormatCapability(TH_CAP_PRIMITIVE_CLIP_CW, caps->PrimitiveMiscCaps,
                          D3DPMISCCAPS_CULLCW, strPos);
-    // STRING: TH07 0x004975d4
-    strPos = FormatCapability("　法線クリップ無し : ", caps->PrimitiveMiscCaps,
+    strPos = FormatCapability(TH_CAP_PRIMITIVE_CLIP_NONE, caps->PrimitiveMiscCaps,
                               D3DPMISCCAPS_CULLNONE, strPos);
     strPos = FormatCapability(
-        // STRING: TH07 0x004975b4
-        "　デプステストON/OFF切り替え : ", caps->PrimitiveMiscCaps,
+        TH_CAP_PRIMITIVE_DEPTH_TEST, caps->PrimitiveMiscCaps,
         D3DPMISCCAPS_MASKZ, strPos);
-    // STRING: TH07 0x00497580
-    strPos += sprintf(strPos, "　-- ラスタ能力 --------------------------------\r\n");
-    // STRING: TH07 0x00497564
-    strPos = FormatCapability("　異方性フィルタリング : ", caps->RasterCaps,
+    strPos += sprintf(strPos, TH_CAP_RASTER_SUMMARY);
+    strPos = FormatCapability(TH_CAP_RASTER_ANISOTROPIC_FILTER, caps->RasterCaps,
                               D3DPRASTERCAPS_ANISOTROPY, strPos);
-    // STRING: TH07 0x00497548
-    strPos = FormatCapability("　アンチエイリアシング : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_ANTIALIASING, caps->RasterCaps,
                               D3DPRASTERCAPS_ANTIALIASEDGES, strPos);
-    // STRING: TH07 0x00497538
-    strPos = FormatCapability("　ディザ処理 : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_DITHER, caps->RasterCaps,
                               D3DPRASTERCAPS_DITHER, strPos);
-    // STRING: TH07 0x00497520
-    strPos = FormatCapability("　範囲ベースのフォグ : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_RANGE_FOG, caps->RasterCaps,
                               D3DPRASTERCAPS_FOGRANGE, strPos);
-    // STRING: TH07 0x00497508
-    strPos = FormatCapability("　Zベースのフォグ : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_Z_FOG, caps->RasterCaps,
                               D3DPRASTERCAPS_ZFOG, strPos);
-    // STRING: TH07 0x004974f4
-    strPos = FormatCapability("　テーブルフォグ : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_TABLE_FOG, caps->RasterCaps,
                               D3DPRASTERCAPS_FOGTABLE, strPos);
-    // STRING: TH07 0x004974e4
-    strPos = FormatCapability("　頂点フォグ : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_VERTEX_FOG, caps->RasterCaps,
                               D3DPRASTERCAPS_FOGVERTEX, strPos);
-    // STRING: TH07 0x004974d0
-    strPos = FormatCapability("　デプステスト : ", caps->RasterCaps,
+    strPos = FormatCapability(TH_CAP_RASTER_DEPTH_TEST, caps->RasterCaps,
                               D3DPRASTERCAPS_ZTEST, strPos);
-    // STRING: TH07 0x0049749c
-    strPos += sprintf(strPos, "　-- シェーディング能力 -----------------------\r\n");
-    // STRING: TH07 0x00497480
-    strPos = FormatCapability("　グーローシェーディング : ", caps->ShadeCaps,
+    strPos += sprintf(strPos, TH_CAP_SHADE_SUMMARY);
+    strPos = FormatCapability(TH_CAP_SHADE_GOURAUD, caps->ShadeCaps,
                               D3DPSHADECAPS_COLORGOURAUDRGB, strPos);
-    // STRING: TH07 0x0049745c
-    strPos = FormatCapability("　α成分のグーローシェーディング : ", caps->ShadeCaps,
+    strPos = FormatCapability(TH_CAP_SHADE_ALPHA_GOURAUD, caps->ShadeCaps,
                               D3DPSHADECAPS_ALPHAGOURAUDBLEND, strPos);
-    // STRING: TH07 0x00497438
-    strPos = FormatCapability("　グーローシェーディングでフォグ : ", caps->ShadeCaps,
+    strPos = FormatCapability(TH_CAP_SHADE_FOG_GOURAUD, caps->ShadeCaps,
                               D3DPSHADECAPS_FOGGOURAUD, strPos);
-    // STRING: TH07 0x00497404
-    strPos += sprintf(strPos, "　-- テクスチャ能力 ---------------------------\r\n");
-    // STRING: TH07 0x004973e0
-    strPos += sprintf(strPos, "　最大テクスチャサイズ : (%d, %d)\r\n",
+    strPos += sprintf(strPos, TH_CAP_TEX_SUMMARY);
+    strPos += sprintf(strPos, TH_CAP_TEX_MAX_SIZE,
                       caps->MaxTextureWidth, caps->MaxTextureHeight);
-    // STRING: TH07 0x004973c8
-    strPos = FormatCapability("　α付きテクスチャ : ", caps->TextureCaps,
+    strPos = FormatCapability(TH_CAP_TEX_ALPHA, caps->TextureCaps,
                               D3DPTEXTURECAPS_ALPHA, strPos);
-    // STRING: TH07 0x004973a8
-    strPos = FormatCapability("　テクスチャトランスフォーム : ", caps->TextureCaps,
+    strPos = FormatCapability(TH_CAP_TEX_TRANSFORM, caps->TextureCaps,
                               D3DPTEXTURECAPS_PROJECTED, strPos);
-    // STRING: TH07 0x0049738c
-    strPos = FormatCapability("　バイリニア補間（拡大） : ", caps->TextureFilterCaps,
+    strPos = FormatCapability(TH_CAP_BILINEAR_UPSCALE, caps->TextureFilterCaps,
                               D3DPTFILTERCAPS_MAGFLINEAR, strPos);
-    // STRING: TH07 0x00497370
-    strPos = FormatCapability("　バイリニア補間（縮小） : ", caps->TextureFilterCaps,
+    strPos = FormatCapability(TH_CAP_BILINEAR_DOWNSCALE, caps->TextureFilterCaps,
                               D3DPTFILTERCAPS_MINFLINEAR, strPos);
     // STRING: TH07 0x00497340
     strPos += sprintf(strPos, "--------------------------------------------\r\n");
@@ -824,8 +763,7 @@ ZunResult GameWindow::CheckForRunningGameInstance(HINSTANCE hInstance)
     g_Mutex = CreateMutexA(NULL, 1, "Touhou YouYouMu App");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
     {
-        // STRING: TH07 0x00497314
-        g_GameErrorContext.Fatal("二つは起動できません\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_ALREADY_OPEN);
         return ZUN_ERROR;
     }
 

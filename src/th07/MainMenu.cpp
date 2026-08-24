@@ -17,6 +17,7 @@
 #include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ea7c
@@ -102,72 +103,43 @@ i16 g_LastJoystickInput = 32;
 
 // GLOBAL: TH07 0x0049f478
 const char *g_KeyConfigStrings[12] = {
-    // STRING: TH07 0x004957e8
-    "ショット、決定ボタンを設定します",
-    // STRING: TH07 0x004957c4
-    "ボム、キャンセルボタンを設定します",
-    // STRING: TH07 0x004957a8
-    "低速移動ボタンを設定します",
-    // STRING: TH07 0x00495780
-    "メッセージスキップボタンを設定します",
-    // STRING: TH07 0x00495764
-    "ポーズボタンを設定します",
-    // STRING: TH07 0x00495748
-    "上移動ボタンを設定します",
-    // STRING: TH07 0x0049572c
-    "下移動ボタンを設定します",
-    // STRING: TH07 0x00495710
-    "左移動ボタンを設定します",
-    // STRING: TH07 0x004956f4
-    "右移動ボタンを設定します",
-    // STRING: TH07 0x004956c0
-    "ショット押しっぱなしで低速移動になるようにします",
-    // STRING: TH07 0x004956ac
-    "初期設定に戻します",
-    // STRING: TH07 0x00495698
-    "おおよそ終了します",
+    TH_KEY_CONFIG_SHOOT,
+    TH_KEY_CONFIG_BOMB,
+    TH_KEY_CONFIG_FOCUS,
+    TH_KEY_CONFIG_SKIP,
+    TH_KEY_CONFIG_PAUSE,
+    TH_KEY_CONFIG_UP,
+    TH_KEY_CONFIG_DOWN,
+    TH_KEY_CONFIG_LEFT,
+    TH_KEY_CONFIG_RIGHT,
+    TH_KEY_CONFIG_SHOT_SLOW,
+    TH_KEY_CONFIG_RESET,
+    TH_KEY_CONFIG_EXIT,
 };
 
 // GLOBAL: TH07 0x0049f4a8
 const char *g_OptionsStrings[9] = {
-    // STRING: TH07 0x0049596c
-    "プレイヤーの初期数を変更します。（初期設定　３）",
-    // STRING: TH07 0x0049592c
-    "画面の色数を変更します。３２ＢＩＴだと最も綺麗に表示されます。",
-    // STRING: TH07 0x004958f8
-    "ＢＧＭの再生方法を変更します。（初期設定　ＷＡＶ）",
-    // STRING: TH07 0x004958d8
-    "効果音を再生するか選択します",
-    // STRING: TH07 0x004958b0
-    "ウィンドウかフルスクリーンか選択します",
-    // STRING: TH07 0x00495870
-    "弾が多い場面でわざと処理落ちさせます(スコア、リプレイ記録不可)",
-    // STRING: TH07 0x00495858
-    "全て初期設定にします",
-    // STRING: TH07 0x00495834
-    "パッド操作のボタン配置を変更します",
-    // STRING: TH07 0x0049581c
-    "おいそれと終了します",
+    TH_OPTIONS_INITIAL_LIVES,
+    TH_OPTIONS_COLOR_MODE,
+    TH_OPTIONS_BGM_MODE,
+    TH_OPTIONS_SOUND_MODE,
+    TH_OPTIONS_WINDOW_MODE,
+    TH_OPTIONS_SLOW_MODE,
+    TH_OPTIONS_RESET,
+    TH_OPTIONS_KEY_CONFIG,
+    TH_OPTIONS_EXIT,
 };
 
 // GLOBAL: TH07 0x0049f4cc
 const char *g_MainMenuStrings[8] = {
-    // STRING: TH07 0x00495aa4
-    "ゲームを開始します",
-    // STRING: TH07 0x00495a84
-    "エキストラステージを開始します",
-    // STRING: TH07 0x00495a60
-    "ステージを選択し、練習を開始します",
-    // STRING: TH07 0x00495a48
-    "リプレイを鑑賞できます",
-    // STRING: TH07 0x00495a18
-    "過去のスコアやスペルカードの取得歴を見られます",
-    // STRING: TH07 0x00495a08
-    "音楽を聴けます",
-    // STRING: TH07 0x004959f4
-    "各種設定できます",
-    // STRING: TH07 0x004959dc
-    "いろいろと終了します",
+    TH_MAIN_MENU_START,
+    TH_MAIN_MENU_START_EXTRA,
+    TH_MAIN_MENU_PRACTICE,
+    TH_MAIN_MENU_REPLAY,
+    TH_MAIN_MENU_RESULT,
+    TH_MAIN_MENU_MUSIC_ROOM,
+    TH_MAIN_MENU_OPTIONS,
+    TH_MAIN_MENU_EXIT,
 };
 
 // FUNCTION: TH07 0x004554d6
@@ -2132,8 +2104,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 this->cursor++;
                 if (this->cursor >= 7)
                 {
-                    // STRING: TH07 0x00495634
-                    g_GameErrorContext.Fatal("リプレイデータが異常\r\n");
+                    g_GameErrorContext.Fatal(TH_ERR_INVALID_REPLAY_DATA);
                     return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
                 }
             }

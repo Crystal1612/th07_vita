@@ -18,6 +18,7 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f618
@@ -722,8 +723,7 @@ ZunResult Gui::LoadMsg(const char *filename)
     this->impl->msg.msgFile = (MsgRawHeader *)FileSystem::OpenFile(filename, 0);
     if (!this->impl->msg.msgFile)
     {
-        // STRING: TH07 0x00498108
-        g_GameErrorContext.Log("error : メッセージファイル %s が読み込めませんでした\r\n", filename);
+        g_GameErrorContext.Log(TH_ERR_MSG_LOAD_FAIL, filename);
         return ZUN_ERROR;
     }
 

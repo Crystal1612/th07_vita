@@ -18,6 +18,7 @@
 #include "ZunMemory.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x0049f5d0
 i32 g_RankArray[6][3] = {
@@ -446,7 +447,7 @@ ZunResult ResultScreen::ParseScores()
     if (!scoreDat)
     {
         // STRING: TH07 0x00498090
-        g_GameErrorContext.Log("error : スコアファイルの読み取りに失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_SCORE_LOAD_FAIL);
         return ZUN_ERROR;
     }
 
@@ -523,7 +524,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         }
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\r\n");
+            g_GameErrorContext.Log(TH_ERR_PLAYER_INIT_FAIL);
             return ZUN_ERROR;
         }
         if (!g_GameManager.replay)
@@ -653,9 +654,9 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     IncrementCappedAgain(
                         &((Plst *)(g_GameManager.pscr + 6))
                              ->playDataByDifficulty[g_GameManager.difficulty]
-                             .clearCount,
+                             .retryCount,
                         999999);
-                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].clearCount,
+                    IncrementCappedAgain(&g_GameManager.plst.playDataByDifficulty[6].retryCount,
                                          999999);
                 }
                 if (g_GameManager.practice)
@@ -663,10 +664,10 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
                     IncrementCappedAgain(
                         &((Plst *)(g_GameManager.pscr + 6))
                              ->playDataByDifficulty[g_GameManager.difficulty]
-                             .extraClearCount,
+                             .practiceCount,
                         999999);
                     IncrementCappedAgain(
-                        &g_GameManager.plst.playDataByDifficulty[6].extraClearCount, 999999);
+                        &g_GameManager.plst.playDataByDifficulty[6].practiceCount, 999999);
                 }
             }
         }
@@ -681,8 +682,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->globals->guiScoreDifference = 0;
         if (Player::RegisterChain(0) != ZUN_SUCCESS)
         {
-            // STRING: TH07 0x00498064
-            g_GameErrorContext.Log("error : プレイヤーの初期化に失敗しました\r\n");
+            g_GameErrorContext.Log(TH_ERR_PLAYER_INIT_FAIL);
             return ZUN_ERROR;
         }
     }
@@ -735,15 +735,13 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     arg->stageRngSeed = g_Rng.seed;
     if (Stage::RegisterChain(arg->currentStage) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00498038
-        g_GameErrorContext.Log("error : 背景データの初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_STAGE_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (BulletManager::RegisterChain("data/etama.anm") != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00498010
-        g_GameErrorContext.Log("error : 敵弾の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_BULLET_INIT_FAIL);
         return ZUN_ERROR;
     }
 
@@ -751,29 +749,25 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
             g_EnemyAnmStageFiles[arg->currentStage].anmPath1,
             g_EnemyAnmStageFiles[arg->currentStage].anmPath2) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497f4c
-        g_GameErrorContext.Log("error : 敵の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_ENEMY_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (g_EclManager.Load(g_EclPaths[arg->currentStage]) != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e84
-        g_GameErrorContext.Log("error : 敵頭脳の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_ECL_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (EffectManager::RegisterChain() != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e58
-        g_GameErrorContext.Log("error : エフェクトの初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_EFFECT_INIT_FAIL);
         return ZUN_ERROR;
     }
 
     if (Gui::RegisterChain() != ZUN_SUCCESS)
     {
-        // STRING: TH07 0x00497e30
-        g_GameErrorContext.Log("error : 2D表示の初期化に失敗しました\r\n");
+        g_GameErrorContext.Log(TH_ERR_GUI_INIT_FAIL);
         return ZUN_ERROR;
     }
 

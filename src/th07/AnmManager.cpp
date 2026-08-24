@@ -16,6 +16,7 @@
 #include "ZunMath.hpp"
 #include "dxutil.hpp"
 #include "utils.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x004b9e44
 AnmManager *g_AnmManager;
@@ -307,8 +308,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx,
         surfaceDesc.Format != D3DFMT_A4R4G4B4 &&
         surfaceDesc.Format != D3DFMT_A1R5G5B5)
     {
-        // STRING: TH07 0x00495cb8
-        g_GameErrorContext.Fatal("error : イメージがαを持っていません\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_NO_ALPHA_CHANNEL);
         goto err;
     }
 
@@ -406,8 +406,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 startIdx = anmIdx;
     if (!entry)
     {
-        // STRING: TH07 0x00495c7c
-        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_ANM_LOAD_FAIL);
         return ZUN_ERROR;
     }
     while (true)
@@ -448,21 +447,19 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     id = 0;
     if (!rawEntry)
     {
-        g_GameErrorContext.Fatal("アニメが読み込めません。データが失われてるか壊れています\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_ANM_LOAD_FAIL);
         return ZUN_ERROR;
     }
     if (textureIdx >= ARRAY_SIZE_SIGNED(this->anmFiles))
     {
-        // STRING: TH07 0x00495c5c
-        g_GameErrorContext.Fatal("テクスチャ格納先が足りません\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_LOW_TEXTURE_STORAGE);
         return ZUN_ERROR;
     }
     ReleaseAnm(textureIdx);
     data = rawEntry;
     if (data->version != 2)
     {
-        // STRING: TH07 0x00495c3c
-        g_GameErrorContext.Fatal("アニメのバージョンが違います\r\n");
+        g_GameErrorContext.Fatal(TH_ERR_DIFF_ANM_VER);
         return ZUN_ERROR;
     }
     data->textureIdx = textureIdx;
@@ -480,8 +477,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
             if (LoadTexture(data->textureIdx, name, data->format, data->color_key) !=
                 ZUN_SUCCESS)
             {
-                // STRING: TH07 0x00495bf8
-                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                g_GameErrorContext.Fatal(TH_ERR_TEX_LOAD_FAIL, name);
                 return ZUN_ERROR;
             }
         }
@@ -491,7 +487,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
             if (LoadTextureAlphaChannel(data->textureIdx, name, data->format,
                                         data->color_key) != ZUN_SUCCESS)
             {
-                g_GameErrorContext.Fatal("テクスチャ %s が読み込めません。データが失われてるか壊れています\r\n", name);
+                g_GameErrorContext.Fatal(TH_ERR_TEX_LOAD_FAIL, name);
                 return ZUN_ERROR;
             }
         }
@@ -503,8 +499,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                 (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
                 data->format) != ZUN_SUCCESS)
         {
-            // STRING: TH07 0x00495bb8
-            g_GameErrorContext.Fatal("テクスチャが読み込めません。データが失われてるか壊れています\r\n");
+            g_GameErrorContext.Fatal(TH_ERR_EMBED_TEX_LOAD_FAIL);
             return ZUN_ERROR;
         }
     }
@@ -536,8 +531,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         }
         if (rawSprite->id + spriteIdxOffset >= ARRAY_SIZE_SIGNED(this->sprites))
         {
-            // STRING: TH07 0x00495b80
-            g_GameErrorContext.Fatal("スプライトが格納できません。テーブルが不足しています\r\n");
+            g_GameErrorContext.Fatal(TH_ERR_LOW_SPRITE_TABLE);
             return ZUN_ERROR;
         }
         LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
@@ -546,8 +540,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
     {
         if (*curSprite + spriteIdxOffset >= ARRAY_SIZE_SIGNED(this->sprites))
         {
-            // STRING: TH07 0x00495b4c
-            g_GameErrorContext.Fatal("アニメが格納できません。テーブルが不足しています\r\n");
+            g_GameErrorContext.Fatal(TH_ERR_LOW_SCRIPT_TABLE);
             return ZUN_ERROR;
         }
         if (id < *curSprite)
@@ -2412,8 +2405,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
     u8 *data = FileSystem::OpenFile(path, 0);
     if (!data)
     {
-        // STRING: TH07 0x00495b30
-        g_GameErrorContext.Fatal("%sが読み込めないです。\r\n", path);
+        g_GameErrorContext.Fatal(TH_ERR_SURFACE_LOAD_FAIL, path);
         return ZUN_ERROR;
     }
     if (g_Supervisor.d3dDevice->CreateImageSurface(

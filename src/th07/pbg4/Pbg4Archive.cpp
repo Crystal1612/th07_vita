@@ -4,6 +4,7 @@
 #include "Pbg4File.hpp"
 #include "dsutil.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 
 // GLOBAL: TH07 0x004b9e68
 Pbg4Archive g_UnusedPbg4ArchiveArray[20];
@@ -271,7 +272,7 @@ err:
     }
     SAFE_DELETE(this->fileAbstraction);
     // STRING: TH07 0x00495084
-    DebugPrint("ファイル %s のオープン中にエラーが発生しました\r\n", path);
+    DebugPrint(TH_ERR_PBG4_ARC_OPEN_FAIL, path);
     while (false)
         ; // ZUN bloat: ??????
     return false;

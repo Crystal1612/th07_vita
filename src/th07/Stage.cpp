@@ -11,6 +11,7 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049f588
@@ -861,8 +862,7 @@ ZunResult Stage::LoadStageData(const char *stdPath)
     this->stdData = (StdRawHeader *)FileSystem::OpenFile(stdPath, 0);
     if (!this->stdData)
     {
-        // STRING: TH07 0x0049888c
-        g_GameErrorContext.Log("ステージデータが見つかりません。データが壊れています\r\n");
+        g_GameErrorContext.Log(TH_ERR_STD_LOAD_FAIL);
         return ZUN_ERROR;
     }
 

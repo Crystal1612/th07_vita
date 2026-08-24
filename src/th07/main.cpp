@@ -16,6 +16,7 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include "i18n.hpp"
 
 // FUNCTION: TH07 0x00433f90
 void AnmManager::TakeScreenshotIfRequested()
@@ -167,8 +168,7 @@ stop:
     {
         g_GameErrorContext.m_BufferEnd = g_GameErrorContext.m_Buffer;
         *g_GameErrorContext.m_BufferEnd = NULL;
-        // STRING: TH07 0x00497c28
-        g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\r\n");
+        g_GameErrorContext.Log(TH_LOG_RESTARTING);
         if (!g_Supervisor.cfg.windowed)
         {
             WINNLSEnableIME(0, 1);

@@ -10,6 +10,7 @@
 #include "Stage.hpp"
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
+#include "i18n.hpp"
 #include "utils.hpp"
 
 // GLOBAL: TH07 0x0049ec50
@@ -134,7 +135,7 @@ void BombData::BombReimuACalc(Player *player)
         bombInfo->bombTimer == 0)
     {
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "霊符「夢想封印　散」");
+                                   TH_BOMB_REIMU_A);
         bombInfo->bombDuration = 140;
         player->invulnerabilityTimer = 200;
         SpawnBombInvulnEffect(player);
@@ -334,7 +335,7 @@ void BombData::BombReimuACalcFocus(Player *player)
         bombInfo->bombTimer == 0)
     {
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "霊符「夢想封印　集」");
+                                   TH_BOMB_REIMU_A_FOCUS);
         bombInfo->bombDuration = 300;
         player->invulnerabilityTimer = 360;
         SpawnBombInvulnEffect(player);
@@ -536,7 +537,7 @@ void BombData::BombReimuBCalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "夢符「封魔陣」");
+                                   TH_BOMB_REIMU_B);
         player->bombInfo.bombDuration = 140;
         player->invulnerabilityTimer = 200;
         SpawnBombInvulnEffect(player);
@@ -649,7 +650,7 @@ void BombData::BombReimuBCalcFocus(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "夢符「二重結界」");
+                                   TH_BOMB_REIMU_B_FOCUS);
         player->bombInfo.bombDuration = 190;
         player->invulnerabilityTimer = 250;
         SpawnBombInvulnEffect(player);
@@ -729,7 +730,7 @@ void BombData::BombMarisaACalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
-                                   "魔符「スターダストレヴァリエ」");
+                                   TH_BOMB_MARISA_A);
         player->bombInfo.bombDuration = 200;
         player->invulnerabilityTimer = 250;
         SpawnBombInvulnEffect(player);
@@ -840,7 +841,7 @@ void BombData::BombMarisaACalcFocus(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 2,
-                                   "魔符「ミルキーウェイ」");
+                                   TH_BOMB_MARISA_A_FOCUS);
         player->bombInfo.bombDuration = 260;
         player->invulnerabilityTimer = 310;
         SpawnBombInvulnEffect(player);
@@ -992,7 +993,7 @@ void BombData::BombMarisaBCalc(Player *player)
         g_ItemManager.RemoveAllItems();
         player->bombInfo.startPos = player->positionCenter;
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "恋符「ノンディレクショナルレーザー」");
+                                   TH_BOMB_MARISA_B);
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 300;
         SpawnBombInvulnEffect(player);
@@ -1121,7 +1122,7 @@ void BombData::BombMarisaBCalcFocus(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 2,
-                                   "恋符「マスタースパーク」");
+                                   TH_BOMB_MARISA_B_FOCUS);
         player->bombInfo.bombDuration = 340;
         player->invulnerabilityTimer = 390;
         SpawnBombInvulnEffect(player);
@@ -1223,7 +1224,7 @@ void BombData::BombSakuyaACalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "幻符「インディスクリミネイト」");
+                                   TH_BOMB_SAKUYA_A);
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 210;
         SpawnBombInvulnEffect(player);
@@ -1357,7 +1358,7 @@ void BombData::BombSakuyaACalcFocus(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 1,
-                                   "幻符「殺人ドール」");
+                                   TH_BOMB_SAKUYA_A_FOCUS);
         player->bombInfo.bombDuration = 250;
         player->invulnerabilityTimer = 290;
         SpawnBombInvulnEffect(player);
@@ -1529,7 +1530,7 @@ void BombData::BombSakuyaBCalc(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
-                                   "時符「パーフェクトスクウェア」");
+                                   TH_BOMB_SAKUYA_B);
         player->bombInfo.bombDuration = 160;
         player->invulnerabilityTimer = 260;
         SpawnBombInvulnEffect(player);
@@ -1656,7 +1657,7 @@ void BombData::BombSakuyaBCalcFocus(Player *player)
     {
         g_ItemManager.RemoveAllItems();
         g_Gui.ShowBombNamePortrait(ANM_SPRITE_FACE_PORTRAIT_ARRAY + 3,
-                                   "時符「プライベートスクウェア」");
+                                   TH_BOMB_SAKUYA_B_FOCUS);
         player->bombInfo.bombDuration = 300;
         player->invulnerabilityTimer = 420;
         SpawnBombInvulnEffect(player);

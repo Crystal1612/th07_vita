@@ -1001,9 +1001,9 @@ i32 RetryMenu::OnUpdate()
                 999999);
             IncrementCapped(
                 &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .retryCount,
+                     .continueCount,
                 999999);
-            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].retryCount, 999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].continueCount, 999999);
             g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, "UnPause");
             g_Supervisor.currentTime = timeGetTime();
             return 0;
