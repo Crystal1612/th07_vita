@@ -20,6 +20,10 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
+// netplay
+bool g_istry_to_reconnect = false;
+extern bool g_is_connected;
+
 // GLOBAL: TH07 0x0049ea7c
 const char *g_DemoReplayPaths[3] = {
     // STRING: TH07 0x00495ae8
@@ -278,12 +282,22 @@ u32 MainMenu::OnUpdatePreInput()
                 &this->vms[this->cursor + 1],
                 (i32)this->vms[this->cursor + 1].baseSpriteIdx);
         }
+        // netplay
+        {
+            if(this->cursor==0 && !g_is_connected)
+            {
+                g_istry_to_reconnect = true;
+            }else{
+                g_istry_to_reconnect = false;
+            }
+        }
         this->demoFramesCount++;
         if (g_CurFrameRawInput != 0)
         {
             this->demoFramesCount = 0;
         }
-        if (this->demoFramesCount > 900)
+        // netplay disable demo
+        if (this->demoFramesCount > 900 && false)
         {
             g_GameManager.demoIdx++;
             g_GameManager.demoIdx %= 3;

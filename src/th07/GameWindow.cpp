@@ -37,6 +37,137 @@ LARGE_INTEGER g_LastPerfCounter;
 
 // winmain should probably be here
 
+
+
+// netplay limiter, directly by rueee
+bool g_force_wind = false;
+class Limiter {
+public:
+	static void Initialize();
+	static void Tick();
+
+	static bool SetGameFPS(int fps);
+
+private:
+	static bool UpdateTargetFPS();
+
+	
+	static LARGE_INTEGER start_time;
+	static unsigned int frame_num;
+	static LARGE_INTEGER wait_amount;
+	static LARGE_INTEGER last_wait_amount;
+	static LARGE_INTEGER blt_prepare_time;
+	static LARGE_INTEGER perf_freq;
+	static LARGE_INTEGER frame_start;
+	static LARGE_INTEGER frame_end;
+public:
+    static bool initialized;
+    static UINT GameFPS;
+    static UINT BltPrepareTime;
+};
+
+bool Limiter::initialized = false;
+LARGE_INTEGER Limiter::start_time;
+unsigned int Limiter::frame_num = 0;
+LARGE_INTEGER Limiter::wait_amount;
+LARGE_INTEGER Limiter::last_wait_amount;
+LARGE_INTEGER Limiter::blt_prepare_time;
+LARGE_INTEGER Limiter::perf_freq;
+LARGE_INTEGER Limiter::frame_start;
+LARGE_INTEGER Limiter::frame_end;
+
+UINT Limiter::BltPrepareTime=0;
+UINT Limiter::GameFPS=60;
+
+// Initializes the limiter's timers, settings, etc
+void Limiter::Initialize() {
+	QueryPerformanceFrequency(&perf_freq);
+	QueryPerformanceCounter(&start_time);
+
+	last_wait_amount.QuadPart = 0;
+	frame_start.QuadPart = 0;
+	frame_end.QuadPart = 0;
+
+	initialized = true;
+}
+
+// Updates the limiter's parameters to reflect things such as replay skipping or external FPS changes via the API
+// Returns true if the player is skipping or slowing down a replay
+bool Limiter::UpdateTargetFPS() {
+	UINT target = Limiter::GameFPS;
+	wait_amount.QuadPart = (LONGLONG)((double)perf_freq.QuadPart / (double)target);
+	blt_prepare_time.QuadPart = min(wait_amount.QuadPart / 2, perf_freq.QuadPart / 1000 * (LONGLONG)Limiter::BltPrepareTime);
+	return target != Limiter::GameFPS;
+}
+
+// Exposed function for outside tools such as thprac to set the framerate
+bool Limiter::SetGameFPS(int fps) {
+	if (!initialized)
+		return false;
+	if (fps <= 0)
+		return false;
+	Limiter::GameFPS = fps;
+	return true;
+}
+
+// Simple spinwait function
+// As precise as possible, but eats up lots of CPU
+inline void spin_wait(__int64 target) {
+	LARGE_INTEGER cur_time;
+	QueryPerformanceCounter(&cur_time);
+	while (cur_time.QuadPart < target)
+		QueryPerformanceCounter(&cur_time);
+}
+
+// Half-spinwait, half-timer wait from vpatch
+// Creates a waitable timer until 1 ms before the target, then spins for the rest
+// Timer accuracy check not included
+bool half_spin_wait_inited = false;
+__int64 timer_1ms = 0; // 1 ms relative to the performance counter frequency
+double timer_freq_scale = 0; // Used for converting from performance counter -> FILETIME
+HANDLE waitable_timer = NULL;
+
+// Performs the actual frame limiting
+void Limiter::Tick() {
+	if (!initialized)
+		MessageBoxA(NULL,"Tried to tick the limiter before initialization.","",0);
+
+	// Calculate how much time it took for the game to process this frame
+	__int64 frame_elapsed = 0;
+	if (frame_start.QuadPart != 0) {
+		LARGE_INTEGER frame_end;
+		QueryPerformanceCounter(&frame_end);
+		frame_elapsed = frame_end.QuadPart - frame_start.QuadPart;
+
+	}
+	// Set up the target time before returning
+	bool temp_fps_change = UpdateTargetFPS();
+	__int64 target = start_time.QuadPart + ++frame_num * wait_amount.QuadPart;
+	if (!temp_fps_change) // Don't care about input latency if skipping/slowing down a replay
+		target -= blt_prepare_time.QuadPart;
+
+	// Perform the frame limiting
+	LARGE_INTEGER cur_time;
+	QueryPerformanceCounter(&cur_time);
+
+	// Only resync the timer if a full frame has been skipped
+	if (target + wait_amount.QuadPart >= cur_time.QuadPart && last_wait_amount.QuadPart == wait_amount.QuadPart) {
+		spin_wait(target);
+	} else {
+		last_wait_amount.QuadPart = wait_amount.QuadPart;
+		// if (Config::D3D9Ex && d3d9_device && !temp_fps_change)
+		// 	((IDirect3DDevice9Ex*)d3d9_device)->WaitForVBlank(0);
+		QueryPerformanceCounter(&cur_time);
+		start_time.QuadPart = cur_time.QuadPart;
+		frame_num = 0;
+	}
+
+	// Record the frame start time
+	QueryPerformanceCounter(&frame_start);
+}
+// end
+
+
 // FUNCTION: TH07 0x00434490
 LRESULT __stdcall GameWindow::WindowProc(HWND hWnd, u32 uMsg, WPARAM wParam,
                                          LPARAM lParam)
@@ -138,6 +269,7 @@ RenderResult GameWindow::Render()
     LARGE_INTEGER perfCounter;
     i32 chainRes;
 
+    /*
     if (!this->isAppActive)
     {
         return RENDER_RESULT_KEEP_RUNNING;
@@ -252,13 +384,52 @@ RenderResult GameWindow::Render()
         this->curFrame = 0;
         g_FrameCount++;
     }
+    return RENDER_RESULT_KEEP_RUNNING;
+    */
 
+    // netplay
+    if(!Limiter::initialized)
+    {
+        Limiter::Initialize();
+        Limiter::SetGameFPS(60);
+    }
+
+    Limiter::Tick();
+    g_AnmManager->Flush();
+    g_Supervisor.viewport.X = 0;
+    g_Supervisor.viewport.Y = 0;
+    g_Supervisor.viewport.Width = 640;
+    g_Supervisor.viewport.Height = 480;
+    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
+    chainRes = g_Chain.RunCalcChain();
+    g_SoundPlayer.ProcessQueues();
+    if (chainRes == 0)  return RENDER_RESULT_EXIT_SUCCESS;
+    if (chainRes == -1) return RENDER_RESULT_EXIT_ERROR;
+    if (g_Supervisor.d3dDevice->BeginScene() >= 0)
+    {
+        g_AnmManager->ResetVertexBuffer();
+        g_Supervisor.fogEnabled = 255;
+        g_Supervisor.DisableFog();
+        g_Chain.RunDrawChain();
+        g_AnmManager->Flush();
+        g_Supervisor.d3dDevice->SetTexture(0, NULL);
+        g_Supervisor.d3dDevice->EndScene();
+    }
+    
+    Present();
+    g_Supervisor.effectiveFramerateMultiplier = 1.0f;
+    this->curFrame = 0; 
+    g_FrameCount++;
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
 // FUNCTION: TH07 0x00434a40
 i32 GameWindow::InitD3dInterface()
 {
+    // netplay
+    if(g_force_wind)
+        g_Supervisor.cfg.windowed = true; 
+
     g_Supervisor.d3dIface = Direct3DCreate8(D3D_SDK_VERSION);
     if (!g_Supervisor.d3dIface)
     {

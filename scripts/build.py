@@ -40,6 +40,10 @@ TH07_SOURCES = [
     "Gui.cpp",
     "GameManager.cpp",
     "Chain.cpp",
+
+    "Connection.cpp",
+    "ConnectionUI.cpp",
+    
     "Controller.cpp",
     "FileSystem.cpp",
     "GameErrorContext.cpp",

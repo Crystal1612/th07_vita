@@ -1,3 +1,5 @@
+// netplay
+#include "Connection.hpp"
 #include "Supervisor.hpp"
 
 #include <dinput.h>
@@ -22,6 +24,33 @@
 #include "dxutil.hpp"
 #include "i18n.hpp"
 #include "pbg4/Pbg4Archive.hpp"
+
+// netplay
+#include <map>
+#include <stdio.h>
+#include <string.h>
+extern std::map<int, BITS_32> g_ctrl_bits_self;
+extern std::map<int, BITS_32> g_ctrl_bits_rcved;
+extern std::map<int, int> g_ctrl_rng_rcved;
+extern std::map<int, int> g_ctrl_rng_self;
+extern std::map<int, InGameCtrlType> g_ctrl_rcved;
+extern std::map<int, InGameCtrlType> g_ctrl_self;
+InGameCtrlType g_cur_ctrl = IGC_NONE;
+
+extern bool g_is_connected;
+extern bool g_is_sync;
+extern bool g_istry_to_reconnect;
+extern Host g_host;
+extern Guest g_guest;
+extern int g_delay;
+extern bool g_is_host;
+extern bool g_is_single_mode;
+extern bool g_restart_flag;
+extern bool g_is_in_insane_mode = false;
+
+bool g_resync_trigger = false;
+int g_resync_stage_frame = 0;// end
+int g_change_option_hotkey_cd = 40;
 
 // GLOBAL: TH07 0x0049ee40
 ControllerMapping g_ControllerMapping = {0, 1, 2, 4, -1, -1, -1, -1, 3};
@@ -154,6 +183,9 @@ void AnmManager::ReleaseVertexBuffer()
 // FUNCTION: TH07 0x00437c70
 u32 Supervisor::OnUpdate(Supervisor *arg)
 {
+    Supervisor *s = arg;
+    Float3 pos;
+
     g_AnmManager->SetVertexShader(255);
     g_AnmManager->SetSprite(NULL);
     g_AnmManager->SetTexture(NULL);
@@ -172,8 +204,183 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     }
     if (!g_GameManager.slowModeSlowActive)
     {
+        static last_frame_a = 0;
+        bool is_in_UI = (s->curState != SUPERVISOR_STATE_GAMEMANAGER) ||
+                        (s->curState == SUPERVISOR_STATE_GAMEMANAGER && g_GameManager.isInPauseMenu);
         g_LastFrameRawInput = g_CurFrameRawInput;
-        g_CurFrameRawInput = Controller::GetInput();
+        // g_CurFrameRawInput = Controller::GetInput();
+        // netplay
+        int frame_a = s->calcCount;
+        if (last_frame_a > frame_a)
+        {
+            frame_a = s->calcCount = 0;
+            g_ctrl_bits_rcved.clear();
+            g_ctrl_rng_rcved.clear();
+            g_ctrl_rcved.clear();
+            // g_ctrl_bits_self.clear();
+            // g_ctrl_rng_self.clear();
+            // g_ctrl_self.clear();
+            g_cur_ctrl = IGC_NONE;
+        }
+        last_frame_a = frame_a;
+        // if(s->calcCount % 300 == 299)
+        // {
+        //     LARGE_INTEGER q;
+        //     QueryPerformanceCounter(&q);
+        //     g_Rng.seed = q.QuadPart%65535;
+        // }
+        // if(GetAsyncKeyState('W'))
+        // {
+        //     g_GameManager.livesRemaining = 0;
+        //     g_GameManager.livesRemaining2 = 0;
+        // }
+
+        g_cur_ctrl = IGC_NONE;
+        if (g_SoundPlayer.backgroundMusic != NULL)
+        {
+            g_SoundPlayer.backgroundMusic->UpdateFadeOut();
+        }
+
+        if (g_is_single_mode)
+        {
+            int cur_ctrl_i;
+            g_CurFrameRawInput = Controller::GetInput_Single(cur_ctrl_i);
+            g_cur_ctrl = (InGameCtrlType)cur_ctrl_i;
+            g_change_option_hotkey_cd--;
+            if (g_change_option_hotkey_cd < 0)
+                g_change_option_hotkey_cd = 0;
+        }
+        else
+        {
+            if (g_is_connected && !g_is_sync)
+            {
+                if (g_resync_trigger == true)
+                {
+                    if (g_resync_stage_frame <= s->calcCount)
+                    {
+                        g_resync_trigger = false;
+                        Controller::RcvPacks();
+                        g_Rng.seed = 0;
+                        // s->calcCount = 0;
+                        // frame_a = s->calcCount;
+                        g_ctrl_bits_rcved.clear();
+                        g_ctrl_rng_rcved.clear();
+                        g_ctrl_rcved.clear();
+                        g_cur_ctrl = IGC_NONE;
+
+                        g_is_sync = true;
+                    }
+                }
+                if (g_is_host && !g_is_sync)
+                {
+                    if (g_resync_trigger == false)
+                    {
+                        g_resync_stage_frame = s->calcCount + g_delay * 2 + 2;
+                        if (g_resync_stage_frame > g_delay * 2 + 2)
+                        {
+                            g_resync_trigger = true;
+                        }
+                    }
+                    if (g_resync_trigger)
+                    {
+                        Pack pack;
+                        pack.echoTick = 0;
+                        pack.sendTick = 0;
+                        pack.seq = 0;
+                        pack.type = 4;
+
+                        pack.ctrl.ctrl_type = Ctrl_Try_Resync;
+                        pack.ctrl.resync_setting.frame_to_re_sync = g_resync_stage_frame;
+                        g_host.SendPack(pack);
+                    }
+                }
+            }
+            int cur_ctrl_i;
+            if (g_Supervisor.curState != SUPERVISOR_STATE_RESULTSCREEN &&
+                g_Supervisor.curState != SUPERVISOR_STATE_RESULTSCREEN_FROM_GAME)
+            {
+                g_CurFrameRawInput = Controller::GetInput_Net(frame_a, is_in_UI, cur_ctrl_i);
+            }
+            else
+            {
+                // disconnect for a while
+                g_is_connected = false;
+                g_CurFrameRawInput = Controller::GetInput_Net(frame_a, is_in_UI, cur_ctrl_i);
+            }
+            g_cur_ctrl = (InGameCtrlType)cur_ctrl_i;
+            g_change_option_hotkey_cd--;
+            if (g_change_option_hotkey_cd < 0)
+                g_change_option_hotkey_cd = 0;
+
+            pos.x = 0;
+            pos.y = 0;
+            pos.z = 0;
+            if (g_istry_to_reconnect || ((GetAsyncKeyState(VK_F8) & 0x8000) == 0x8000))
+            {
+                g_CurFrameRawInput = 0;
+                AsciiManager::AddFormatText(&g_AsciiManager, &pos, "try to reconnect...(%s)", g_is_sync ? "sync" : "desynced");
+                Controller::SendKeys(frame_a);
+                if (Controller::RcvPacks())
+                {
+                    g_Rng.seed = 0;
+                    g_is_connected = true;
+                    g_istry_to_reconnect = false;
+                    g_ctrl_bits_rcved.clear();
+                    g_ctrl_rng_rcved.clear();
+                    g_ctrl_rcved.clear();
+                    s->calcCount = 0;
+                    g_cur_ctrl = IGC_NONE;
+                }
+            }
+            else
+            {
+                AsciiManager::AddFormatText(&g_AsciiManager,&pos, "%s: %s %s(%d/%d);[%d,%d]", g_is_host ? "H" : "G",
+                                            g_is_connected ? "connected" : "disconnected", g_is_sync ? "sync" : "desynced",
+                                            s->calcCount, g_GameManager.framesThisStage, g_resync_stage_frame,
+                                            g_resync_trigger ? 1 : 0);
+            }
+        }
+
+        switch (g_cur_ctrl)
+        {
+        default:
+            break;
+        case Add_Delay:
+            if (g_change_option_hotkey_cd == 0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_delay++;
+                if (g_delay >= 10)
+                    g_delay = 10;
+                break;
+            }
+        case Dec_Delay:
+            if (g_change_option_hotkey_cd == 0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_delay--;
+                if (g_delay < 0)
+                    g_delay = 0;
+                break;
+            }
+        case Insane_Mode:
+            if (g_change_option_hotkey_cd == 0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_is_in_insane_mode = !g_is_in_insane_mode;
+                break;
+            }
+            break;
+        }
+
+        pos.x = 500;
+        pos.y = 440;
+        pos.z = 0;
+        if (!g_is_single_mode)
+        {
+            AsciiManager::AddFormatText(&g_AsciiManager,&pos, "delay: %d", g_delay);
+        }
+        //end
         g_IsEighthFrameOfHeldInput = 0;
         if (g_LastFrameRawInput == g_CurFrameRawInput)
         {
@@ -201,6 +408,11 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     }
     if (arg->wantedState != arg->curState)
     {
+        // netplay
+        g_ctrl_bits_rcved.clear();
+        g_ctrl_rng_rcved.clear();
+        g_ctrl_rcved.clear();
+
         arg->prevState = arg->wantedState;
         // STRING: TH07 0x00497230
         Supervisor::DebugPrint2("scene %d -> %d\r\n", arg->wantedState,
@@ -699,7 +911,11 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
     arg->isInEnding = 0;
     arg->renderSkipFrames = 0;
     arg->lastTotalPlayTimeUpdate = timeGetTime();
-    g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
+
+    // g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
+    // netplay
+    g_Rng.SetSeed(0);
+
     arg->SetupDInput();
     if (!arg->midiOutput)
     {
@@ -1235,6 +1451,13 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
             g_GameErrorContext.Log(TH_LOG_CONFIG_REINIT);
             goto init;
         }
+
+        // netplay
+        g_Supervisor.cfg.lifeCount = 2;
+        g_Supervisor.cfg.bombCount = 3;
+        g_Supervisor.cfg.frameskipConfig = 0;
+        // force 2-3
+
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
     g_Supervisor.cfg.colorAddEmulation = 1;

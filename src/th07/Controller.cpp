@@ -1,3 +1,6 @@
+// netplay
+#include "Connection.hpp"
+
 #include "Controller.hpp"
 
 #include <dinput.h>
@@ -8,6 +11,42 @@
 #include "i18n.hpp"
 #include "inttypes.hpp"
 #include "utils.hpp"
+// netplay
+#include "Rng.hpp"
+#include <map>
+#define BITS_32 Bits<32>
+std::map<int, BITS_32> g_ctrl_bits_self;
+std::map<int, BITS_32> g_ctrl_bits_rcved;
+std::map<int, int> g_ctrl_rng_rcved;
+std::map<int, int> g_ctrl_rng_self;
+std::map<int, InGameCtrlType> g_ctrl_rcved;
+std::map<int, InGameCtrlType> g_ctrl_self;
+
+extern Host g_host;
+extern Guest g_guest;
+extern int g_delay;
+extern bool g_is_host;
+extern bool g_is_host_p1;
+extern bool g_is_connected;
+bool g_is_sync = true;
+extern bool g_istry_to_reconnect;
+extern bool g_is_single_mode;
+extern bool g_resync_trigger;
+extern int g_resync_stage_frame;
+struct CurKeyStates
+{
+    bool K_F2; // life
+    bool K_F3; // bomb
+    bool K_F4; // power
+    bool K_R;
+    bool K_Q;
+
+    bool K_F6; // insane mode
+
+    bool K_N; // add delay
+    bool K_M; // dec delay
+} g_cur_ctrl_key_state;
+// end netplay
 
 // GLOBAL: TH07 0x0049fc88
 static JOYCAPSA g_JoystickCaps;
@@ -339,6 +378,9 @@ u32 Controller::GetInput()
 {
     u8 keyboardState[256];
 
+    // netplay, not sure
+    memset(keyboardState,0,sizeof(keyboardState));
+
     u32 buttons = 0;
 
     if (!g_Supervisor.keyboard)
@@ -369,23 +411,25 @@ u32 Controller::GetInput()
         buttons |= KEY_PRESSED('R', TH_BUTTON_RESET);
         buttons |= KEY_PRESSED(VK_RETURN, TH_BUTTON_ENTER);
 
-        //Player 2
-        buttons |= KEY_PRESSED('W', TH_BUTTON_SHOOT2);
-        buttons |= KEY_PRESSED('E', TH_BUTTON_BOMB2);
-        buttons |= KEY_PRESSED('Q', TH_BUTTON_FOCUS2);
-        buttons |= KEY_PRESSED('T', TH_BUTTON_UP2);
-        buttons |= KEY_PRESSED('G', TH_BUTTON_DOWN2);
-        buttons |= KEY_PRESSED('F', TH_BUTTON_LEFT2);
-        buttons |= KEY_PRESSED('H', TH_BUTTON_RIGHT2);
+        if(g_is_single_mode){
+            //Player 2
+            buttons |= KEY_PRESSED('W', TH_BUTTON_SHOOT2);
+            buttons |= KEY_PRESSED('E', TH_BUTTON_BOMB2);
+            buttons |= KEY_PRESSED('Q', TH_BUTTON_FOCUS2);
+            buttons |= KEY_PRESSED('T', TH_BUTTON_UP2);
+            buttons |= KEY_PRESSED('G', TH_BUTTON_DOWN2);
+            buttons |= KEY_PRESSED('F', TH_BUTTON_LEFT2);
+            buttons |= KEY_PRESSED('H', TH_BUTTON_RIGHT2);
 
-        //Player 3
-        buttons |= KEY_PRESSED('V', TH_BUTTON_SHOOT3);
-        buttons |= KEY_PRESSED('B', TH_BUTTON_BOMB3);
-        buttons |= KEY_PRESSED('C', TH_BUTTON_FOCUS3);
-        buttons |= KEY_PRESSED('I', TH_BUTTON_UP3);
-        buttons |= KEY_PRESSED('K', TH_BUTTON_DOWN3);
-        buttons |= KEY_PRESSED('J', TH_BUTTON_LEFT3);
-        buttons |= KEY_PRESSED('L', TH_BUTTON_RIGHT3);
+            //Player 3
+            buttons |= KEY_PRESSED('V', TH_BUTTON_SHOOT3);
+            buttons |= KEY_PRESSED('B', TH_BUTTON_BOMB3);
+            buttons |= KEY_PRESSED('C', TH_BUTTON_FOCUS3);
+            buttons |= KEY_PRESSED('I', TH_BUTTON_UP3);
+            buttons |= KEY_PRESSED('K', TH_BUTTON_DOWN3);
+            buttons |= KEY_PRESSED('J', TH_BUTTON_LEFT3);
+            buttons |= KEY_PRESSED('L', TH_BUTTON_RIGHT3);
+        }
     }
     else
     {
@@ -417,34 +461,35 @@ u32 Controller::GetInput()
         buttons |= KEY_PRESSED(DIK_RSHIFT, TH_BUTTON_FOCUS);
         buttons |= KEY_PRESSED(DIK_ESCAPE, TH_BUTTON_MENU);
         buttons |= KEY_PRESSED(DIK_LCONTROL, TH_BUTTON_SKIP);
-        buttons |= KEY_PRESSED(DIK_RCONTROL, TH_BUTTON_SKIP);
+        // buttons |= KEY_PRESSED(DIK_RCONTROL, TH_BUTTON_SKIP);
         buttons |= KEY_PRESSED(DIK_Q, TH_BUTTON_Q);
         buttons |= KEY_PRESSED(DIK_S, TH_BUTTON_S);
         buttons |= KEY_PRESSED(DIK_RETURN, TH_BUTTON_ENTER);
         buttons |= KEY_PRESSED(DIK_R, TH_BUTTON_RESET);
 
-        //Player 2
-        buttons |= KEY_PRESSED(DIK_W, TH_BUTTON_SHOOT2);
-        buttons |= KEY_PRESSED(DIK_E, TH_BUTTON_BOMB2);
-        buttons |= KEY_PRESSED(DIK_Q, TH_BUTTON_FOCUS2);
-        buttons |= KEY_PRESSED(DIK_T, TH_BUTTON_UP2);
-        buttons |= KEY_PRESSED(DIK_G, TH_BUTTON_DOWN2);
-        buttons |= KEY_PRESSED(DIK_F, TH_BUTTON_LEFT2);
-        buttons |= KEY_PRESSED(DIK_H, TH_BUTTON_RIGHT2);
+        if(g_is_single_mode){
+            //Player 2
+            buttons |= KEY_PRESSED(DIK_W, TH_BUTTON_SHOOT2);
+            buttons |= KEY_PRESSED(DIK_E, TH_BUTTON_BOMB2);
+            buttons |= KEY_PRESSED(DIK_Q, TH_BUTTON_FOCUS2);
+            buttons |= KEY_PRESSED(DIK_T, TH_BUTTON_UP2);
+            buttons |= KEY_PRESSED(DIK_G, TH_BUTTON_DOWN2);
+            buttons |= KEY_PRESSED(DIK_F, TH_BUTTON_LEFT2);
+            buttons |= KEY_PRESSED(DIK_H, TH_BUTTON_RIGHT2);
 
-        //Player 3
-        buttons |= KEY_PRESSED(DIK_V, TH_BUTTON_SHOOT3);
-        buttons |= KEY_PRESSED(DIK_B, TH_BUTTON_BOMB3);
-        buttons |= KEY_PRESSED(DIK_C, TH_BUTTON_FOCUS3);
-        buttons |= KEY_PRESSED(DIK_I, TH_BUTTON_UP3);
-        buttons |= KEY_PRESSED(DIK_K, TH_BUTTON_DOWN3);
-        buttons |= KEY_PRESSED(DIK_J, TH_BUTTON_LEFT3);
-        buttons |= KEY_PRESSED(DIK_L, TH_BUTTON_RIGHT3);
-
+            //Player 3
+            buttons |= KEY_PRESSED(DIK_V, TH_BUTTON_SHOOT3);
+            buttons |= KEY_PRESSED(DIK_B, TH_BUTTON_BOMB3);
+            buttons |= KEY_PRESSED(DIK_C, TH_BUTTON_FOCUS3);
+            buttons |= KEY_PRESSED(DIK_I, TH_BUTTON_UP3);
+            buttons |= KEY_PRESSED(DIK_K, TH_BUTTON_DOWN3);
+            buttons |= KEY_PRESSED(DIK_J, TH_BUTTON_LEFT3);
+            buttons |= KEY_PRESSED(DIK_L, TH_BUTTON_RIGHT3);
+        }
     }
     
     return buttons;
-    // return GetControllerInput(buttons);
+    return GetControllerInput(buttons);
 }
 
 // FUNCTION: TH07 0x004312c0
@@ -458,4 +503,286 @@ void Controller::ResetKeyboard()
         key_states[i] = key_states[i] & 0x7f;
     }
     SetKeyboardState(key_states);
+}
+
+// netplay
+
+bool Controller::RcvPacks()
+{
+    bool hasdata_all = false;
+    bool hasdata;
+    do
+    {
+        Pack pack;
+        if (g_is_host)
+        {
+            g_host.PollReceive(pack, hasdata);
+        }
+        else
+        {
+            g_guest.PollReceive(pack, hasdata);
+        }
+        hasdata_all |= hasdata;
+        if (!hasdata)
+            return hasdata_all;
+        if (pack.ctrl.ctrl_type == Ctrl_Key)
+        {
+            int frame = pack.ctrl.frame;
+            for (int i = 0; i < KeyPackFrameNum; i++)
+            {
+                g_ctrl_bits_rcved[frame - i] = pack.ctrl.keys[i];
+                g_ctrl_rng_rcved[frame - i] = pack.ctrl.rng_seed[i];
+                g_ctrl_rcved[frame - i] = pack.ctrl.igc_type[i];
+            }
+        }
+        else if (pack.ctrl.ctrl_type == Ctrl_Try_Resync)
+        {
+            if ((pack.ctrl.resync_setting.frame_to_re_sync > g_Supervisor.calcCount) &&
+                (pack.ctrl.resync_setting.frame_to_re_sync <= g_Supervisor.calcCount + g_delay * 2 + 2))
+            {
+                g_resync_trigger = true;
+                g_resync_stage_frame = pack.ctrl.resync_setting.frame_to_re_sync;
+            }
+        }
+    } while (hasdata);
+    return hasdata_all;
+}
+
+void Controller::SendKeys(int frame)
+{
+    Pack pack;
+    pack.echoTick = 0;
+    pack.sendTick = 0;
+    pack.seq = 0;
+    pack.type = 4;
+
+    pack.ctrl.ctrl_type = Ctrl_Key;
+    pack.ctrl.frame = frame;
+    for (int i = 0; i < KeyPackFrameNum; i++)
+    {
+        std::map<int, BITS_32>::iterator find_res = g_ctrl_bits_self.find(frame - i);
+        if (find_res == g_ctrl_bits_self.end())
+            ReadFromInt(pack.ctrl.keys[i], 0);
+        else
+            pack.ctrl.keys[i] = find_res->second;
+
+        std::map<int, int>::iterator find_res2 = g_ctrl_rng_self.find(frame - i);
+        if (find_res2 == g_ctrl_rng_self.end())
+            pack.ctrl.rng_seed[i] = 0;
+        else
+            pack.ctrl.rng_seed[i] = find_res2->second;
+
+        std::map<int, InGameCtrlType>::iterator find_res3 = g_ctrl_self.find(frame - i);
+        if (find_res3 == g_ctrl_self.end())
+            pack.ctrl.igc_type[i] = IGC_NONE;
+        else
+            pack.ctrl.igc_type[i] = find_res3->second;
+    }
+    if (g_is_host)
+    {
+        g_host.SendPack(pack);
+    }
+    else
+    {
+        g_guest.SendPack(pack);
+    }
+}
+
+// todo, get rid of it
+void HandleControlKeys(int frame)
+{
+    InGameCtrlType igctrl = IGC_NONE;
+    if (g_cur_ctrl_key_state.K_F2)
+        igctrl = Inf_Life;
+    else if (g_cur_ctrl_key_state.K_F3)
+        igctrl = Inf_Bomb;
+    else if (g_cur_ctrl_key_state.K_F4)
+        igctrl = Inf_Power;
+    else if (g_cur_ctrl_key_state.K_Q)
+        igctrl = Quick_Quit;
+    else if (g_cur_ctrl_key_state.K_R)
+        igctrl = Quick_Restart;
+    else if (g_cur_ctrl_key_state.K_M)
+        igctrl = Add_Delay;
+    else if (g_cur_ctrl_key_state.K_N)
+        igctrl = Dec_Delay;
+    else if (g_cur_ctrl_key_state.K_F6)
+        igctrl = Insane_Mode;
+    g_ctrl_self[frame] = igctrl;
+}
+
+#define TH_ISDOWN(a,mask,b) ((a)&(mask)?(b):0)
+
+u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
+{
+    InGameCtrlType self_ctrl = IGC_NONE;
+    InGameCtrlType rcv_ctrl = IGC_NONE;
+
+    out_ctrl = IGC_NONE;
+    if (frame - g_delay < 0)
+        return 0;
+
+    u32 self_key = 0;
+    std::map<int, BITS_32>::iterator res = g_ctrl_bits_self.find(frame - g_delay);
+    if (res != g_ctrl_bits_self.end())
+        WriteToInt(res->second, self_key);
+
+    std::map<int, InGameCtrlType>::iterator res2 = g_ctrl_self.find(frame - g_delay);
+    if (res2 != g_ctrl_self.end())
+        self_ctrl = res2->second;
+
+    u32 rcv_key = 0;
+
+    bool has_rcv_data = false;
+    static bool inited = false;
+    static LARGE_INTEGER freq;
+    LARGE_INTEGER cur;
+    LARGE_INTEGER ping_key_time;
+    LARGE_INTEGER max_wait_to_time;
+    if (!inited)
+    {
+        inited = true;
+        QueryPerformanceFrequency(&freq);
+    }
+    QueryPerformanceCounter(&cur);
+    max_wait_to_time.QuadPart = cur.QuadPart + freq.QuadPart * 5.0; // 5.0s
+    ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1;    // 0.1s
+    do
+    {
+        res = g_ctrl_bits_rcved.find(frame - g_delay);
+        if (res != g_ctrl_bits_rcved.end())
+        {
+            WriteToInt(res->second, rcv_key);
+            g_is_sync = (g_ctrl_rng_rcved[frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+            rcv_ctrl = g_ctrl_rcved[frame - g_delay];
+            has_rcv_data = true;
+            break;
+        }
+        else
+        {
+            int n_transfer = 1;
+            while (cur.QuadPart < max_wait_to_time.QuadPart)
+            {
+                if (Controller::RcvPacks())
+                {
+                    Sleep(1);
+                    break;
+                }
+                Sleep(1);
+                QueryPerformanceCounter(&cur);
+                // send key to another player to avoid lock
+                if (cur.QuadPart > ping_key_time.QuadPart)
+                {
+                    ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
+                    Controller::SendKeys(frame);
+                }
+            }
+        }
+    } while (cur.QuadPart < max_wait_to_time.QuadPart);
+    if (!has_rcv_data)
+    {
+        rcv_key = 0;
+        self_key = 0;
+        self_ctrl = IGC_NONE;
+        rcv_ctrl = IGC_NONE;
+        g_is_connected = false;
+        g_istry_to_reconnect = false;
+    }
+
+    if (self_ctrl != IGC_NONE && rcv_ctrl != IGC_NONE)
+    {
+        out_ctrl = g_is_host ? self_ctrl : rcv_ctrl;
+    }
+    else
+    {
+        out_ctrl = (self_ctrl == IGC_NONE) ? rcv_ctrl : self_ctrl;
+    }
+
+    if (is_in_UI)
+        return self_key | rcv_key;
+    u32 finres = 0;
+    if (g_is_host)
+    {
+        finres = self_key;
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_UP, TH_BUTTON_UP2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
+
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
+        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+    }
+    else
+    {
+        finres = rcv_key;
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
+
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
+        finres |= TH_ISDOWN(self_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+    }
+    return finres;
+}
+
+u32 Controller::GetInput_Single(int &cur_ctrl)
+{
+    u32 input = GetInput();
+    HandleControlKeys(0);
+    cur_ctrl = g_ctrl_self[0];
+    return input;
+}
+
+u32 Controller::GetInput_Net(int frame, bool is_in_UI, int &cur_ctrl)
+{
+    if (!g_is_connected)
+    {
+        u32 input = GetInput();
+        HandleControlKeys(frame);
+        cur_ctrl = g_ctrl_self[frame];
+        return input;
+    }
+    u32 btn = GetInput();
+    BITS_32 cur_btn_bits;
+    ReadFromInt(cur_btn_bits, btn);
+    g_ctrl_bits_self[frame] = cur_btn_bits;
+    g_ctrl_rng_self[frame] = g_Rng.seed;
+
+    // remove frames
+    int frame_rem = 80;
+    std::map<int, BITS_32>::iterator last_res = g_ctrl_bits_self.find(frame - frame_rem);
+    if (last_res != g_ctrl_bits_self.end())
+        g_ctrl_bits_self.erase(last_res);
+
+    last_res = g_ctrl_bits_rcved.find(frame - frame_rem);
+    if (last_res != g_ctrl_bits_rcved.end())
+        g_ctrl_bits_rcved.erase(last_res);
+
+    std::map<int, int>::iterator last_res_seed = g_ctrl_rng_rcved.find(frame - frame_rem);
+    if (last_res_seed != g_ctrl_rng_rcved.end())
+        g_ctrl_rng_rcved.erase(last_res_seed);
+    last_res_seed = g_ctrl_rng_self.find(frame - frame_rem);
+    if (last_res_seed != g_ctrl_rng_self.end())
+        g_ctrl_rng_self.erase(last_res_seed);
+
+    std::map<int, InGameCtrlType>::iterator last_res_ctrl = g_ctrl_rcved.find(frame - frame_rem);
+    if (last_res_ctrl != g_ctrl_rcved.end())
+        g_ctrl_rcved.erase(last_res_ctrl);
+    last_res_ctrl = g_ctrl_self.find(frame - frame_rem);
+    if (last_res_ctrl != g_ctrl_self.end())
+        g_ctrl_self.erase(last_res_ctrl);
+
+    HandleControlKeys(frame);
+    Controller::SendKeys(frame);
+    RcvPacks();
+
+    u32 res = GetKeys(frame, is_in_UI, cur_ctrl);
+    return res;
 }

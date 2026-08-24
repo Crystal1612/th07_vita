@@ -2,6 +2,10 @@
 #include <windows.h>
 #include <winnls32.h>
 
+// netplay
+#include "Connection.hpp"
+#include "ConnectionUI.hpp"
+
 // pull in gameerrorcontext::flush before anmmanager::releasesurfaces
 #include "AnmManager.hpp"
 #include "BulletManager.hpp"
@@ -17,6 +21,14 @@
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 #include "i18n.hpp"
+
+// netplay
+Host g_host;
+Guest g_guest;
+int g_delay = 1;
+bool g_is_host = false;
+bool g_is_connected = false;
+bool g_is_single_mode = false;
 
 // FUNCTION: TH07 0x00433f90
 void AnmManager::TakeScreenshotIfRequested()
@@ -52,11 +64,29 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, 0, NULL, 2);
     SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, 0, NULL, 2);
     SystemParametersInfoA(SPI_SETPOWEROFFACTIVE, 0, NULL, 2);
-    if (GameWindow::CheckForRunningGameInstance(hInstance) == ZUN_ERROR)
-    {
-        goto stop;
-    }
 
+    // netplay
+    // if (GameWindow::CheckForRunningGameInstance(hInstance) == ZUN_ERROR)
+    // {
+    //     goto stop;
+    // }
+    ConnectionUI ui(g_host, g_guest);
+    ui.Show();
+    g_delay = ui.GetDelay();
+    g_is_host = ui.IsHost();
+    if (!ui.IsGameStarted())
+        return 1;
+    if (!ui.IsConnected())
+    {
+        g_is_connected = false;
+        g_is_single_mode = true;
+    }
+    else
+    {
+        g_is_connected = true;
+        g_is_single_mode = false;
+    }
+    
     // STRING: TH07 0x00497c60
     if (g_Supervisor.LoadConfig("th07.cfg") != ZUN_SUCCESS)
     {

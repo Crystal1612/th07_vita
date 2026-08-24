@@ -1,14 +1,14 @@
 #pragma once
-#define MULTI_NET_VER 1000
-#define MULTI_NET_VER_S "Debug Release 1.0.0"
-#include <windows.h>
+#define MULTI_NET_VER 1010
+#define MULTI_NET_VER_S "Stable Release 1.0.1"
+#include "Windows.h"
 #include <Winsock2.h>
 #include <Ws2tcpip.h>
 
 #include <cstring>
 #include <string>
 #pragma comment(lib, "Ws2_32.lib")
-#define BITS_16 Bits<16>
+#define BITS_32 Bits<32>
 
 void PrintError(char *msg);
 void PrintError(char *msg, int err);
@@ -116,7 +116,7 @@ struct CtrlPack
     Control ctrl_type;
 
     union {
-        Bits<16> keys[KeyPackFrameNum];
+        Bits<32> keys[KeyPackFrameNum];
         struct
         {
             int delay;
