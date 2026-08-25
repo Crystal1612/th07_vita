@@ -339,7 +339,7 @@ void AsciiManager::DrawStrings()
     {
         if (this->bossMarkers[i].pos.x >= 56.0f && this->bossMarkers[i].pos.x <= 392.0f)
         {
-            charWidth = fabsf(this->bossMarkers[i].pos.x - 32.0f - g_Player.positionCenter.x);
+            charWidth = fabsf(this->bossMarkers[i].pos.x - 32.0f - g_Player.pos.x);
             if (charWidth < 64.0f)
             {
                 this->bossMarkers[i].color.bytes.a = charWidth * 128.0f / 64.0f + 48.0f;
@@ -989,17 +989,14 @@ i32 RetryMenu::OnUpdate()
             IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6]
                                  .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
                             999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
+                                 .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
+                            999999);
+            IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6]
+                                 .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
+                            999999);
             IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
-                999999);
-            IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[6]
-                     .playCountPerShotType[g_GameManager.shotTypeAndCharacter],
-                999999);
-            IncrementCapped(
-                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty]
-                     .continueCount,
+                &g_GameManager.plst.playDataByDifficulty[g_GameManager.difficulty].continueCount,
                 999999);
             IncrementCapped(&g_GameManager.plst.playDataByDifficulty[6].continueCount, 999999);
             g_SoundPlayer.PushCommand(AUDIO_UNPAUSE, 0, "UnPause");
@@ -1084,8 +1081,8 @@ void AsciiManager::DrawPopups()
         this->largeTextVm.pos.y = popup->pos.y;
         this->largeTextVm.color.color = popup->color;
 
-        dx = g_Player.positionCenter.x - popup->pos.x;
-        dy = g_Player.positionCenter.y - popup->pos.y;
+        dx = g_Player.pos.x - popup->pos.x;
+        dy = g_Player.pos.y - popup->pos.y;
         alpha = (i32)(dx * dx + dy * dy);
 
         if (alpha > 4096)

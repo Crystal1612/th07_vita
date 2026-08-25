@@ -459,11 +459,6 @@ i32 Supervisor::CheckVSync()
             fpsSum = 1000.0f;
         }
 
-        if (g_Supervisor.gfxDevice->GetType() == RENDERER_SOFTWARE)
-        {
-            return 0;
-        }
-
         if (fpsSum > 160.0f)
         {
             g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます\n");

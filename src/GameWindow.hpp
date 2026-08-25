@@ -31,10 +31,6 @@ struct GameWindow
     // pad 3
     i64 frequency;
     bool usesRelativePath;
-    // pad 3
-    u32 screen_save_active;
-    u32 low_power_active;
-    u32 power_off_active;
 };
 
 extern GameWindow g_GameWindow;

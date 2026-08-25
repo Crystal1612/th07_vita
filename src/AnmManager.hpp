@@ -46,7 +46,7 @@ struct VertexTex1DiffuseXyzrhw
 
     ZunVec3 pos;
     f32 w;
-    ZunColor color;
+    ZunColor diffuse;
     Float2 textureUV;
 };
 

@@ -43,14 +43,14 @@ void Enemy::Move()
     this->prevPos = this->pos;
     if (!this->mirror)
     {
-        this->pos.x += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
+        this->pos.x += g_Supervisor.effectiveFramerateMultiplier * this->velocity.x;
     }
     else
     {
-        this->pos.x -= g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.x;
+        this->pos.x -= g_Supervisor.effectiveFramerateMultiplier * this->velocity.x;
     }
-    this->pos.y += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.y;
-    this->pos.z += g_Supervisor.effectiveFramerateMultiplier * this->axisSpeed.z;
+    this->pos.y += g_Supervisor.effectiveFramerateMultiplier * this->velocity.y;
+    this->pos.z += g_Supervisor.effectiveFramerateMultiplier * this->velocity.z;
 }
 
 EnemyManager::EnemyManager()
@@ -165,13 +165,12 @@ void Enemy::UpdateEffects()
         }
 
         effect->vm.active = !this->hasNoCollision;
-        effect->emitterPosition = this->pos;
+        effect->emitterPos = this->pos;
         if (effect->radius < this->effectDistance)
         {
             effect->radius = effect->radius + 0.3f;
         }
-        effect->angularVelocity =
-            utils::AddNormalizeAngle(effect->angularVelocity, ZUN_PI / 100.0f);
+        effect->angleVel = utils::AddNormalizeAngle(effect->angleVel, ZUN_PI / 100.0f);
     }
 }
 
@@ -196,7 +195,7 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
     ZunVec3 pos3;
     EclTimelineInstrArgs *args4;
     ZunVec3 pos2;
-    ZunVec3 pos1;
+    ZunVec3 pos;
     EclTimelineInstrArgs *args3;
     EclTimelineInstrArgs *args2;
     EclTimelineInstrArgs *args1;
@@ -245,24 +244,21 @@ void EnemyManager::RunEclTimeline(EclTimeline *timeline)
                 if (!g_Gui.BossPresent())
                 {
                     args3 = &timeline->timelineInstr->args;
-                    pos1 = *args3->AsVec();
+                    pos = *args3->AsVec();
                     if (args3->AsVec()->x <= -990.0f)
                     {
-                        pos1.x =
-                            g_Rng.GetRandomFloatInRange(g_GameManager.playerMovementAreaSize.x);
+                        pos.x = g_Rng.GetRandomFloatInRange(g_GameManager.playerMovementAreaSize.x);
                     }
                     if (args3->AsVec()->y <= -990.0f)
                     {
-                        pos1.y =
-                            g_Rng.GetRandomFloatInRange(g_GameManager.playerMovementAreaSize.y);
+                        pos.y = g_Rng.GetRandomFloatInRange(g_GameManager.playerMovementAreaSize.y);
                     }
                     if (args3->AsVec()->z <= -990.0f)
                     {
-                        pos1.z = g_Rng.GetRandomFloatInRange(800.0f);
+                        pos.z = g_Rng.GetRandomFloatInRange(800.0f);
                     }
-                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos1,
-                                              args3->args[3].i, args3->args[4].i, args3->args[5].i,
-                                              0);
+                    g_EnemyManager.SpawnEnemy(timeline->timelineInstr->arg0, &pos, args3->args[3].i,
+                                              args3->args[4].i, args3->args[5].i, 0);
                 }
                 break;
             case 5:
@@ -658,8 +654,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             enemy->ClampPos();
             if (enemy->specialEffect && !enemy->customSpecialEffectPos)
             {
-                enemy->specialEffect->pos1 =
-                    enemy->specialEffect->pos1 + (enemy->pos - enemy->specialEffect->pos1) / 16.0f;
+                enemy->specialEffect->pos =
+                    enemy->specialEffect->pos + (enemy->pos - enemy->specialEffect->pos) / 16.0f;
             }
         }
         if (enemy->trailFlags != 0)
@@ -667,11 +663,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
             for (j = enemy->trailCount - 1; j > 0; j--)
             {
                 enemy->enemyHistory[j].pos = enemy->enemyHistory[j - 1].pos;
-                enemy->enemyHistory[j].axisSpeed = enemy->enemyHistory[j - 1].axisSpeed;
+                enemy->enemyHistory[j].velocity = enemy->enemyHistory[j - 1].velocity;
                 enemy->enemyHistory[j].angle = enemy->enemyHistory[j - 1].angle;
             }
             enemy->enemyHistory[0].pos = enemy->pos;
-            enemy->enemyHistory[0].axisSpeed = enemy->axisSpeed;
+            enemy->enemyHistory[0].velocity = enemy->velocity;
             enemy->enemyHistory[0].angle = enemy->angle;
         }
         if (!enemy->primaryVm.sprite)
@@ -858,8 +854,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 if (enemy->isBoss)
                 {
-                    diffToPlayer = g_Player.positionOfLastEnemyHit - g_Player.positionCenter;
-                    enemyDiff = enemy->pos - g_Player.positionCenter;
+                    diffToPlayer = g_Player.positionOfLastEnemyHit - g_Player.pos;
+                    enemyDiff = enemy->pos - g_Player.pos;
 
                     if (!g_Player.targetingEnemy || fabsf(diffToPlayer.x) > fabsf(enemyDiff.x))
                     {
@@ -868,9 +864,9 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
 
                     if (g_GameManager.character == CHAR_SAKUYA)
                     {
-                        diffToPlayer = g_Player.sakuyaTargetPosition - g_Player.positionCenter;
-                        angle = atan2f(enemy->pos.y - g_Player.positionCenter.y,
-                                       enemy->pos.x - g_Player.positionCenter.x);
+                        diffToPlayer = g_Player.sakuyaTargetPosition - g_Player.pos;
+                        angle =
+                            atan2f(enemy->pos.y - g_Player.pos.y, enemy->pos.x - g_Player.pos.x);
 
                         if (angle >= -ZUN_2PI / 3.0f && angle <= -ZUN_PI / 3.0f &&
                             (!g_Player.targetingEnemy ||
@@ -894,8 +890,8 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                     if (g_GameManager.character == CHAR_SAKUYA &&
                         g_Player.sakuyaTargetPosition.y < -900.0f)
                     {
-                        angle = atan2f(enemy->pos.y - g_Player.positionCenter.y,
-                                       enemy->pos.x - g_Player.positionCenter.x);
+                        angle =
+                            atan2f(enemy->pos.y - g_Player.pos.y, enemy->pos.x - g_Player.pos.x);
                         if (angle >= -ZUN_2PI / 3.0f && angle <= -ZUN_PI / 3.0f)
                         {
                             g_Player.sakuyaTargetPosition = enemy->pos;
@@ -1276,14 +1272,14 @@ u32 EnemyManager::ActualOnDraw(EnemyManager *arg, i32 first, i32 last)
                                 yOffset *= angle1;
                             }
 
-                            trailVert[1].color.color = enemy->primaryVm.color.color;
-                            trailVert[0].color.color = trailVert[1].color.color;
+                            trailVert[1].diffuse.color = enemy->primaryVm.color.color;
+                            trailVert[0].diffuse.color = trailVert[1].diffuse.color;
 
                             if ((enemy->trailFlags & 4) != 0)
                             {
-                                trailVert[1].color.bytes.a =
+                                trailVert[1].diffuse.bytes.a =
                                     baseColor.bytes.a - baseColor.bytes.a * j / enemy->trailCount;
-                                trailVert[0].color.bytes.a = trailVert[1].color.bytes.a;
+                                trailVert[0].diffuse.bytes.a = trailVert[1].diffuse.bytes.a;
                             }
 
                             trailVert[0].pos = enemy->enemyHistory[j].pos;

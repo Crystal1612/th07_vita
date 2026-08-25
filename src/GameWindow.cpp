@@ -16,7 +16,6 @@
 #include "Stage.hpp"
 #include "Supervisor.hpp"
 #include "graphics/Gles.hpp"
-#include "graphics/Software.hpp"
 #include "graphics/ZunGraphics.hpp"
 
 GameWindow g_GameWindow;
@@ -26,7 +25,6 @@ u64 g_LastPerfCounter;
 
 static GfxInit g_RenderingBackends[] = {
     GlesGraphics::Init,
-    SoftwareGraphics::Init,
 };
 
 void GameWindow::Present()
@@ -193,9 +191,9 @@ ZunResult GameWindow::CreateGameWindow()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    g_GameWindow.window =
-        SDL_CreateWindow("東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
-                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, flags);
+    g_GameWindow.window = SDL_CreateWindow("東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",
+                                           SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                           GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, flags);
     if (!g_GameWindow.window)
     {
         Supervisor::DebugPrint("sdl window create failed: %s\n", SDL_GetError());

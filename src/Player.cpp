@@ -64,7 +64,7 @@ void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet, ShtEntry *s
 {
     if (shtEntry->option == 0)
     {
-        bullet->pos = player->positionCenter;
+        bullet->pos = player->pos;
     }
     else
     {
@@ -407,11 +407,11 @@ i32 ShtData::UpdatePlayerLaser(Player *player, PlayerBullet *bullet)
     }
     else
     {
-        bullet->pos = player->positionCenter;
+        bullet->pos = player->pos;
         bullet->pos.x += bullet->offset.x;
         bullet->pos.z = 0.44f;
         bullet->vm.scale.y = (bullet->pos.y + 64.0f) / 14.0f;
-        bullet->hitboxSize.y = player->positionCenter.y + 64.0f;
+        bullet->hitboxSize.y = player->pos.y + 64.0f;
         bullet->pos.y = bullet->pos.y / 2.0f - 32.0f;
         return 0;
     }
@@ -1021,7 +1021,7 @@ i32 Player::CalcLaserHitbox(ZunVec3 *center, ZunVec3 *size, ZunVec3 *origin, f32
     ZunVec3 laserTopLeft;
     ZunVec3 laserBottomRight;
 
-    laserTopLeft = this->positionCenter - *origin;
+    laserTopLeft = this->pos - *origin;
     utils::Rotate(&laserBottomRight, &laserTopLeft, rotation);
     laserBottomRight.z = 0;
     laserTopLeft = laserBottomRight + *origin;
@@ -1060,7 +1060,7 @@ i32 Player::CalcLaserHitbox(ZunVec3 *center, ZunVec3 *size, ZunVec3 *origin, f32
         return 0;
     }
 
-    ScoreGraze(&this->positionCenter);
+    ScoreGraze(&this->pos);
     return 2;
 
 LASER_COLLISION:
@@ -1096,7 +1096,7 @@ void Player::ScoreGraze(ZunVec3 *param_1)
             g_GameManager.globals->grazeInTotal++;
         }
     }
-    grazePos = (this->positionCenter + *param_1) / 2.0f;
+    grazePos = (this->pos + *param_1) / 2.0f;
     if (this->hasBorder == BORDER_ACTIVE)
     {
         if (this->isFocus)
@@ -1137,8 +1137,8 @@ void Player::ScoreGraze(ZunVec3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
-    g_EffectManager.SpawnEffect(6, &this->positionCenter, 16, 0xffffffff);
+    g_EffectManager.SpawnSpecialEffect(12, &this->pos, 3, 1, 0xff4040ff);
+    g_EffectManager.SpawnEffect(6, &this->pos, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN, 0);
@@ -1297,39 +1297,39 @@ i32 Player::HandlePlayerInputs()
                        g_Supervisor.effectiveFramerateMultiplier;
     this->velocity.y = verticalSpeed * this->verticalMovementSpeedMultiplierDuringBomb *
                        g_Supervisor.effectiveFramerateMultiplier;
-    *GetPosCenterX() += this->velocity.x;
-    *GetPosCenterY() += this->velocity.y;
+    *GetPosX() += this->velocity.x;
+    *GetPosY() += this->velocity.y;
 
-    if (this->positionCenter.x < g_GameManager.playerMovementAreaTopLeftPos.x)
+    if (this->pos.x < g_GameManager.playerMovementAreaTopLeftPos.x)
     {
-        this->positionCenter.x = g_GameManager.playerMovementAreaTopLeftPos.x;
+        this->pos.x = g_GameManager.playerMovementAreaTopLeftPos.x;
     }
-    else if (this->positionCenter.x >
+    else if (this->pos.x >
              g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x)
     {
-        this->positionCenter.x =
+        this->pos.x =
             g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x;
     }
 
-    if (this->positionCenter.y < g_GameManager.playerMovementAreaTopLeftPos.y)
+    if (this->pos.y < g_GameManager.playerMovementAreaTopLeftPos.y)
     {
-        this->positionCenter.y = g_GameManager.playerMovementAreaTopLeftPos.y;
+        this->pos.y = g_GameManager.playerMovementAreaTopLeftPos.y;
     }
-    else if (this->positionCenter.y >
+    else if (this->pos.y >
              g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y)
     {
-        this->positionCenter.y =
+        this->pos.y =
             g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y;
     }
 
-    this->hitboxTopLeft = this->positionCenter - this->hitboxSize;
-    this->hitboxBottomRight = this->positionCenter + this->hitboxSize;
-    this->grazeTopLeft = this->positionCenter - this->grazeSize;
-    this->grazeBottomRight = this->positionCenter + this->grazeSize;
-    this->grabItemTopLeft = this->positionCenter - this->grabItemSize;
-    this->grabItemBottomRight = this->positionCenter + this->grabItemSize;
-    this->optionsPosition[0] = this->positionCenter;
-    this->optionsPosition[1] = this->positionCenter;
+    this->hitboxTopLeft = this->pos - this->hitboxSize;
+    this->hitboxBottomRight = this->pos + this->hitboxSize;
+    this->grazeTopLeft = this->pos - this->grazeSize;
+    this->grazeBottomRight = this->pos + this->grazeSize;
+    this->grabItemTopLeft = this->pos - this->grabItemSize;
+    this->grabItemBottomRight = this->pos + this->grabItemSize;
+    this->optionsPosition[0] = this->pos;
+    this->optionsPosition[1] = this->pos;
     optionOffsetX = optionOffsetY = 0.0f;
 
     if (g_GameManager.character != CHAR_SAKUYA || g_GameManager.shotType != 1)
@@ -1346,7 +1346,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect =
-                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->pos, 2, 1, 0xffffffff);
             }
             else
             {
@@ -1405,7 +1405,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect =
-                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->pos, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
         }
@@ -1429,7 +1429,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect =
-                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->pos, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->optionsPosition[0].x -= optionOffsetX;
@@ -1497,7 +1497,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect =
-                    g_EffectManager.SpawnSpecialEffect(24, &this->positionCenter, 2, 1, 0xffffffff);
+                    g_EffectManager.SpawnSpecialEffect(24, &this->pos, 2, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->focusMovementTimer++;
@@ -1695,12 +1695,12 @@ i32 Player::UpdateDeath()
                 {
                     g_GameManager.AddCurrentPower(-16);
                 }
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_BIG, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_POWER_SMALL, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_BIG, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_SMALL, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_SMALL, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_SMALL, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_SMALL, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_POWER_SMALL, 2);
                 g_Gui.powerDisplayUpdateFrames = 2;
                 cherryPenalty = (f32)(g_GameManager.cherry - g_GameManager.globals->cherryStart) *
                                 g_Player.shooterData->cherryPenaltyMultiplier;
@@ -1724,11 +1724,11 @@ i32 Player::UpdateDeath()
             {
                 g_GameManager.globals->currentPower = 0.0f;
                 g_GameManager.RegenerateGameIntegrityCsum();
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
-                g_ItemManager.SpawnItem(&this->positionCenter, ITEM_FULL_POWER, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_FULL_POWER, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_FULL_POWER, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_FULL_POWER, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_FULL_POWER, 2);
+                g_ItemManager.SpawnItem(&this->pos, ITEM_FULL_POWER, 2);
                 g_Gui.powerDisplayUpdateFrames = 2;
             }
             g_GameManager.DecreaseSubrank(1600);
@@ -1747,9 +1747,9 @@ i32 Player::UpdateDeath()
         if (this->invulnerabilityTimer.GetCurrent() >= 30)
         {
             this->playerState = PLAYER_STATE_SPAWNING;
-            this->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
-            this->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-            this->positionCenter.z = 0.2f;
+            this->pos.x = g_GameManager.arcadeRegionSize.x / 2.0f;
+            this->pos.y = g_GameManager.arcadeRegionSize.y - 64.0f;
+            this->pos.z = 0.2f;
             this->invulnerabilityTimer = 0;
             this->playerSprite.scale.x = 3.0f;
             this->playerSprite.scale.y = 3.0f;
@@ -1808,7 +1808,7 @@ void Player::UpdateState()
     {
         if (this->effect)
         {
-            this->effect->pos1 = this->positionCenter;
+            this->effect->pos = this->pos;
         }
         this->invulnerabilityTimer--;
         if (this->invulnerabilityTimer.GetCurrent() <= 0)
@@ -1838,7 +1838,7 @@ void Player::UpdateState()
     {
         if (this->borderEffect)
         {
-            this->borderEffect->pos1 = this->positionCenter;
+            this->borderEffect->pos = this->pos;
         }
         g_GameManager.cherryPlus =
             this->invulnerabilityTimer.GetCurrent() * 50000 / this->borderTimer.GetCurrent();
@@ -2003,8 +2003,7 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect =
-            g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
+        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->pos, 4, 1, 0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
         spawnedEffect->vm.easeModes[4] = 0;
@@ -2034,7 +2033,7 @@ void Player::BreakBorder()
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1, 0xffffffff);
+    effect = g_EffectManager.SpawnSpecialEffect(28, &this->pos, 4, 1, 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
     effect->vm.easeModes[4] = 0;
@@ -2056,11 +2055,11 @@ void Player::BreakBorder()
     this->invulnerabilityTimer = 40;
     this->borderInvulnerabilityTime = 40;
     g_GameManager.cherryPlus = g_GameManager.globals->cherryStart;
-    SpawnBombEffect(&this->positionCenter, 32.0f, 16.0f, 50, 8);
+    SpawnBombEffect(&this->pos, 32.0f, 16.0f, 50, 8);
     angle = -ZUN_PI;
     for (i = 0; i < 32; i++, angle += ZUN_PI / 16.0f)
     {
-        effect = g_EffectManager.SpawnEffect(29, &this->positionCenter, 1, 0xffffffff);
+        effect = g_EffectManager.SpawnEffect(29, &this->pos, 1, 0xffffffff);
         effect->direction.x = cosf(angle);
         effect->direction.y = sinf(angle);
     }
@@ -2074,14 +2073,14 @@ void Player::UpdateUI()
     this->positionOfLastEnemyHit = ZunVec3(-999.0f, -999.0f, 0.0f);
     this->sakuyaTargetPosition = ZunVec3(-999.0f, -999.0f, 0.0f);
     this->targetingEnemy = 0;
-    if (this->positionCenter.y >= 400.0f)
+    if (this->pos.y >= 400.0f)
     {
-        if (g_AsciiManager.GetFadeState() != 2 && this->positionCenter.x < 160.0f)
+        if (g_AsciiManager.GetFadeState() != 2 && this->pos.x < 160.0f)
         {
             g_AsciiManager.cherryGauge.pendingInterrupt = 2;
             g_AsciiManager.uiFadeState = 2;
         }
-        else if (g_AsciiManager.GetFadeState() == 2 && this->positionCenter.x > 160.0f)
+        else if (g_AsciiManager.GetFadeState() == 2 && this->pos.x > 160.0f)
         {
             g_AsciiManager.cherryGauge.pendingInterrupt = 3;
             g_AsciiManager.uiFadeState = 3;
@@ -2154,8 +2153,8 @@ u32 Player::OnDrawHighPrio(Player *arg)
     }
     if (!g_GameManager.isInRetryMenu)
     {
-        arg->playerSprite.pos.x = g_GameManager.arcadeRegionTopLeftPos.x + arg->positionCenter.x;
-        arg->playerSprite.pos.y = g_GameManager.arcadeRegionTopLeftPos.y + arg->positionCenter.y;
+        arg->playerSprite.pos.x = g_GameManager.arcadeRegionTopLeftPos.x + arg->pos.x;
+        arg->playerSprite.pos.y = g_GameManager.arcadeRegionTopLeftPos.y + arg->pos.y;
         arg->playerSprite.pos.z = 0.0f;
         g_AnmManager->DrawNoRotation(&arg->playerSprite);
         if (arg->optionState != OPTION_HIDDEN &&
@@ -2217,8 +2216,8 @@ f32 Player::AngleToPlayer(ZunVec3 *pos)
     f32 y;
     f32 x;
 
-    x = this->positionCenter.x - pos->x;
-    y = this->positionCenter.y - pos->y;
+    x = this->pos.x - pos->x;
+    y = this->pos.y - pos->y;
     if (y == 0.0f && x == 0.0f)
     {
         return ZUN_PI / 2.0f;
@@ -2276,9 +2275,9 @@ ZunResult Player::AddedCallback(Player *arg)
         }
     }
     g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
-    arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
-    arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-    arg->positionCenter.z = 0.49f;
+    arg->pos.x = g_GameManager.arcadeRegionSize.x / 2.0f;
+    arg->pos.y = g_GameManager.arcadeRegionSize.y - 64.0f;
+    arg->pos.z = 0.49f;
     arg->optionsPosition[0].z = 0.49f;
     arg->optionsPosition[1].z = 0.49f;
 
