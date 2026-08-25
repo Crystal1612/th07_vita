@@ -1441,7 +1441,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnSpecialEffect(
-                    24, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+(this->playerType-1), 1, 0xffffffff);
             }
             else
             {

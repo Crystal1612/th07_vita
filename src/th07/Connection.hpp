@@ -193,8 +193,12 @@ class Host : public ConnectionBase
     std::string m_hostIp;
     int m_hostPort;
 
-    std::string m_guestIp;
-    int m_guestPort;
+    std::string m_player2Ip;
+    int m_player2Port;
+    std::string m_player3Ip;
+    int m_player3Port;
+    int m_player3ListenPort;
+
     std::string m_lastBindIp;
     int m_lastBindPort;
     int m_lastFamily;
@@ -204,26 +208,35 @@ class Host : public ConnectionBase
     virtual ~Host();
 
   public:
-    bool Start(const std::string &bindIp, int port, int family = AF_INET6);
-    bool PollReceive(Pack &outPack, bool &hasData);
+    bool Start(const std::string &hostIp, int hostPort,
+        const std::string &otherIp, int otherPort, int otherhostPort, int family = AF_INET6);
+    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
     bool SendPack(const Pack &pack);
 
-    bool IsHost() const;
-    bool IsGuest() const;
+    bool IsHost() {return true;};
+    bool IsPlayer2() {return false;};
+    bool IsPlayer3() {return false;};
 
     std::string GetHostIp() const;
     int GetHostPort() const;
 
-    void SetGuestIp(std::string ip);
-    void SetGuestPort(int port);
+    void SetPlayer2Ip(std::string ip);
+    void SetPlayer2Port(int port);
 
-    std::string GetGuestIp() const;
-    int GetGuestPort() const;
+    std::string GetPlayer2Ip() const;
+    int GetPlayer2Port() const;
+
+    void SetPlayer3Ip(std::string ip);
+    void SetPlayer3Port(int port);
+
+    std::string GetPlayer3Ip() const;
+    int GetPlayer3Port() const;
+
     void Reset();
     void Reconnect();
 };
 
-class Guest : public ConnectionBase
+class Player2 : public ConnectionBase
 {
   private:
     std::string m_hostIp;
@@ -231,22 +244,67 @@ class Guest : public ConnectionBase
 
     int m_localPort;
 
+    std::string m_player3Ip;
+    int m_player3Port;
+    int m_player3ListenPort;
+
     std::string m_lastHostIp;
     int m_lastHostPort;
     int m_lastLocalPort;
     int m_lastFamily;
 
   public:
-    Guest();
-    virtual ~Guest();
+    Player2();
+    virtual ~Player2();
 
   public:
-    bool Start(const std::string &hostIp, int hostPort, int localPort, int family);
-    bool PollReceive(Pack &outPack, bool &hasData);
+    bool Start(const std::string &hostIp, int hostPort, int localhostPort,
+        const std::string &otherIp, int otherPort, int otherhostPort, int family);
+    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
     bool SendPack(const Pack &pack);
 
-    bool IsHost() const;
-    bool IsGuest() const;
+    bool IsHost() {return false;};
+    bool IsPlayer2() {return true;};
+    bool IsPlayer3() {return false;};
+
+    std::string GetHostIp() const;
+    int GetHostPort() const;
+    int GetLocalPort() const;
+    void Reset();
+    void Reconnect();
+};
+
+// slop as hell
+class Player3 : public ConnectionBase
+{
+  private:
+    std::string m_hostIp;
+    int m_hostPort;
+
+    int m_localPort;
+
+    std::string m_player2Ip;
+    int m_player2Port;
+    int m_player2ListenPort;
+
+    std::string m_lastHostIp;
+    int m_lastHostPort;
+    int m_lastLocalPort;
+    int m_lastFamily;
+
+  public:
+    Player3();
+    virtual ~Player3();
+
+  public:
+    bool Start(const std::string &hostIp, int hostPort, int localhostPort,
+        const std::string &otherIp, int otherPort, int otherhostPort, int family);
+    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
+    bool SendPack(const Pack &pack);
+
+    bool IsHost() {return false;};
+    bool IsPlayer2() {return false;};
+    bool IsPlayer3() {return true;};
 
     std::string GetHostIp() const;
     int GetHostPort() const;

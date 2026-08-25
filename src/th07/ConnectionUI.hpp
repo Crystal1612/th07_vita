@@ -7,7 +7,7 @@
 class ConnectionUI
 {
   public:
-    ConnectionUI(Host &h, Guest &g);
+    ConnectionUI(Host &h, Player2 &g, Player3 &f);
     ~ConnectionUI();
 
   public:
@@ -16,7 +16,8 @@ class ConnectionUI
     void SetDelay(int delay);
 
     bool IsHost() const;
-    bool IsGuest() const;
+    bool IsPlayer2() const;
+    bool IsPlayer3() const;
     bool IsConnected();
     bool IsGameStarted();
 
@@ -30,10 +31,12 @@ class ConnectionUI
 
   private:
     Host &m_host;
-    Guest &m_guest;
+    Player2 &m_player2;
+    Player3 &m_player3;
 
     bool m_isHost;
-    bool m_isGuest;
+    bool m_isPlayer2;
+    bool m_isPlayer3;
     int m_delay;
 
     bool m_connected;
@@ -43,16 +46,21 @@ class ConnectionUI
 
     HWND m_editHostIp;
     HWND m_editHostPort;
+    HWND m_editOtherIp;
+    HWND m_editOtherPort;
     HWND m_editListenPort;
+    HWND m_editOtherListenPort;
     HWND m_btnHost;
-    HWND m_btnGuest;
-    HWND m_staticLatency;
+    HWND m_btnPlayer2;
+    HWND m_btnPlayer3;
+    HWND m_staticLatencyHost;
+    HWND m_staticLatencyOther;
     HWND m_editTargetLatency;
     HWND m_btnStartGame;
     HWND m_btnStartGameLocal;
     HWND m_checkBoxIsHost1P;
 
-    ULONGLONG m_guestWaitStartTick;
+    ULONGLONG m_player2WaitStartTick;
     ULONGLONG m_lastPeriodicPingTick;
 
     unsigned int m_seq;
@@ -67,29 +75,35 @@ class ConnectionUI
     void CreateControls(HWND hWnd);
 
     void OnClickHost();
-    void OnClickGuest();
+    void OnClickPlayer2();
     void OnClickStartGame();
     void OnTimer();
 
     void ProcessHostNetwork();
-    void ProcessGuestNetwork();
+    void ProcessPlayer2Network();
 
     void TryPeriodicPing();
     void SendPingAsHost(Control ctrl);
-    void SendPingAsGuest(Control ctrl);
+    void SendPingAsPlayer2(Control ctrl);
 
     void EnterHostWaitingState();
-    void EnterGuestWaitingState();
+    void EnterPlayer2WaitingState();
+    void EnterPlayer3WaitingState();
     void EnterConnectedState();
-    void ResetGuestButtonAfterTimeout();
+    void ResetPlayer2ButtonAfterTimeout();
 
     std::string GetEditText(HWND hEdit);
     int GetEditInt(HWND hEdit);
     void SetText(HWND hWnd, const std::string &s);
-    void SetLatencyText(const std::string &s);
+    void SetLatencyHostText(const std::string &s);
+    void SetLatencyOtherText(const std::string &s);
 
     std::string BuildLatencyText(const std::string &ip, int port, ULONGLONG rtt);
 
-    bool TryStartHost(int listenPort);
-    bool TryStartGuest(const std::string &hostIp, int hostPort, int listenPort);
+    bool TryStartHost(int listenPort,
+    const std::string &otherIp, int otherPort, int otherListenPort);
+    bool TryStartPlayer2(const std::string &hostIp, int hostPort, int hostListenPort,
+    const std::string &otherIp, int otherPort, int otherListenPort);
+    bool TryStartPlayer3(const std::string &hostIp, int hostPort, int hostListenPort,
+    const std::string &otherIp, int otherPort, int otherListenPort);
 };

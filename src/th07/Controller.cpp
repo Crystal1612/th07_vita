@@ -16,17 +16,24 @@
 #include <map>
 #define BITS_32 Bits<32>
 std::map<int, BITS_32> g_ctrl_bits_self;
-std::map<int, BITS_32> g_ctrl_bits_rcved;
-std::map<int, int> g_ctrl_rng_rcved;
 std::map<int, int> g_ctrl_rng_self;
-std::map<int, InGameCtrlType> g_ctrl_rcved;
 std::map<int, InGameCtrlType> g_ctrl_self;
 
+std::map<int, BITS_32> g_ctrl_bits_rcved;
+std::map<int, int> g_ctrl_rng_rcved;
+std::map<int, InGameCtrlType> g_ctrl_rcved;
+
+std::map<int, BITS_32> g_ctrl_bits_rcved_other;
+std::map<int, int> g_ctrl_rng_rcved_other;
+std::map<int, InGameCtrlType> g_ctrl_rcved_other;
+
 extern Host g_host;
-extern Guest g_guest;
+extern Player2 g_player2;
+extern Player3 g_player3;
 extern int g_delay;
 extern bool g_is_host;
 extern bool g_is_host_p1;
+extern bool g_is_player_3;
 extern bool g_is_connected;
 bool g_is_sync = true;
 extern bool g_istry_to_reconnect;
@@ -511,16 +518,21 @@ bool Controller::RcvPacks()
 {
     bool hasdata_all = false;
     bool hasdata;
+    bool fromOther;
     do
     {
         Pack pack;
         if (g_is_host)
         {
-            g_host.PollReceive(pack, hasdata);
+            g_host.PollReceive(pack, hasdata, fromOther);
         }
         else
         {
-            g_guest.PollReceive(pack, hasdata);
+            if(g_is_player_3){
+                g_player3.PollReceive(pack, hasdata, fromOther);
+            }else{
+                g_player2.PollReceive(pack, hasdata, fromOther);
+            }
         }
         hasdata_all |= hasdata;
         if (!hasdata)
@@ -528,11 +540,20 @@ bool Controller::RcvPacks()
         if (pack.ctrl.ctrl_type == Ctrl_Key)
         {
             int frame = pack.ctrl.frame;
-            for (int i = 0; i < KeyPackFrameNum; i++)
-            {
-                g_ctrl_bits_rcved[frame - i] = pack.ctrl.keys[i];
-                g_ctrl_rng_rcved[frame - i] = pack.ctrl.rng_seed[i];
-                g_ctrl_rcved[frame - i] = pack.ctrl.igc_type[i];
+            if(fromOther){
+                for (int i = 0; i < KeyPackFrameNum; i++)
+                {
+                    g_ctrl_bits_rcved_other[frame - i] = pack.ctrl.keys[i];
+                    g_ctrl_rng_rcved_other[frame - i] = pack.ctrl.rng_seed[i];
+                    g_ctrl_rcved_other[frame - i] = pack.ctrl.igc_type[i];
+                }
+            }else{
+                for (int i = 0; i < KeyPackFrameNum; i++)
+                {
+                    g_ctrl_bits_rcved[frame - i] = pack.ctrl.keys[i];
+                    g_ctrl_rng_rcved[frame - i] = pack.ctrl.rng_seed[i];
+                    g_ctrl_rcved[frame - i] = pack.ctrl.igc_type[i];
+                }
             }
         }
         else if (pack.ctrl.ctrl_type == Ctrl_Try_Resync)
@@ -584,7 +605,11 @@ void Controller::SendKeys(int frame)
     }
     else
     {
-        g_guest.SendPack(pack);
+        if(g_is_player_3){
+            g_player3.SendPack(pack);
+        }else{
+            g_player2.SendPack(pack);
+        }
     }
 }
 
@@ -617,6 +642,7 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
 {
     InGameCtrlType self_ctrl = IGC_NONE;
     InGameCtrlType rcv_ctrl = IGC_NONE;
+    InGameCtrlType rcv_ctrl_other = IGC_NONE;
 
     out_ctrl = IGC_NONE;
     if (frame - g_delay < 0)
@@ -626,12 +652,14 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     std::map<int, BITS_32>::iterator res = g_ctrl_bits_self.find(frame - g_delay);
     if (res != g_ctrl_bits_self.end())
         WriteToInt(res->second, self_key);
+    std::map<int, BITS_32>::iterator res_other;
 
     std::map<int, InGameCtrlType>::iterator res2 = g_ctrl_self.find(frame - g_delay);
     if (res2 != g_ctrl_self.end())
         self_ctrl = res2->second;
 
     u32 rcv_key = 0;
+    u32 rcv_key_other = 0;
 
     bool has_rcv_data = false;
     static bool inited = false;
@@ -650,15 +678,21 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     do
     {
         res = g_ctrl_bits_rcved.find(frame - g_delay);
-        if (res != g_ctrl_bits_rcved.end())
+        res_other = g_ctrl_bits_rcved.find(frame - g_delay);
+        if (res != g_ctrl_bits_rcved.end()&&res_other != g_ctrl_bits_rcved_other.end())
         {
             WriteToInt(res->second, rcv_key);
             g_is_sync = (g_ctrl_rng_rcved[frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
             rcv_ctrl = g_ctrl_rcved[frame - g_delay];
             has_rcv_data = true;
+
+            WriteToInt(res_other->second, rcv_key_other);
+            g_is_sync = g_is_sync && (g_ctrl_rng_rcved_other[frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+            rcv_ctrl_other = g_ctrl_rcved_other[frame - g_delay];
+            // has_rcv_data = true;
             break;
         }
-        else
+        if (res != g_ctrl_bits_rcved.end() || res_other != g_ctrl_bits_rcved_other.end() )
         {
             int n_transfer = 1;
             while (cur.QuadPart < max_wait_to_time.QuadPart)
@@ -679,6 +713,7 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
             }
         }
     } while (cur.QuadPart < max_wait_to_time.QuadPart);
+
     if (!has_rcv_data)
     {
         rcv_key = 0;
@@ -711,13 +746,46 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
-
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+
+        // player 3
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_UP, TH_BUTTON_UP3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_MENU, TH_BUTTON_MENU);
+        finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
     }
     else
     {
-        finres = rcv_key;
+        finres = rcv_key;        
+        if(g_is_player_3){
+            // player 2
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_UP, TH_BUTTON_UP2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_MENU, TH_BUTTON_MENU);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        }else{
+            // player 3
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_UP, TH_BUTTON_UP3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_MENU, TH_BUTTON_MENU);
+            finres |= TH_ISDOWN(rcv_key_other, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        }
         finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
         finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
         finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP2);

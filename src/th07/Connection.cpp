@@ -365,8 +365,11 @@ Host::Host()
 {
     m_hostIp = "";
     m_hostPort = 0;
-    m_guestIp = "";
-    m_guestPort = 0;
+    m_player2Ip = "";
+    m_player2Port = 0;
+    m_player3Ip = "";
+    m_player3Port = 0;
+    m_player3ListenPort = 0;
     m_lastBindIp = "";
     m_lastBindPort = 0;
     m_lastFamily = AF_INET6;
@@ -376,7 +379,8 @@ Host::~Host()
 {
 }
 
-bool Host::Start(const std::string &bindIp, int port, int family)
+bool Host::Start(const std::string &bindIp, int port, 
+        const std::string &otherIp, int otherPort, int otherhostPort, int family)
 {
     Reset();
     if (!InitWinsock())
@@ -392,11 +396,14 @@ bool Host::Start(const std::string &bindIp, int port, int family)
     m_lastBindIp = bindIp;
     m_lastBindPort = port;
     m_lastFamily = family;
+    m_player3Ip = otherIp;
+    m_player3Port = otherPort;
+    m_player3ListenPort = otherhostPort;
     PrintLog("Host started");
     return true;
 }
 
-bool Host::PollReceive(Pack &outPack, bool &hasData)
+bool Host::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
 {
     std::string fromIp;
     int fromPort = 0;
@@ -406,8 +413,11 @@ bool Host::PollReceive(Pack &outPack, bool &hasData)
 
     if (hasData)
     {
-        m_guestIp = fromIp;
-        m_guestPort = fromPort;
+        fromOther = m_player3Ip != fromIp;
+        if(!fromOther){
+            m_player2Ip = fromIp;
+            m_player2Port = fromPort;
+        }
     }
 
     return true;
@@ -415,23 +425,20 @@ bool Host::PollReceive(Pack &outPack, bool &hasData)
 
 bool Host::SendPack(const Pack &pack)
 {
-    if (m_guestIp.empty() || m_guestPort <= 0)
+    if (m_player2Ip.empty() || m_player2Port <= 0)
     {
-        PrintError("Host SendPack guest target invalid");
+        PrintError("Host SendPack player2 target invalid");
         return false;
     }
 
-    return SendPackTo(pack, m_guestIp, m_guestPort);
-}
+    if (m_player3Ip.empty() || m_player3Port <= 0)
+    {
+        PrintError("Host SendPack player3 target invalid");
+        return false;
+    }
 
-bool Host::IsHost() const
-{
-    return true;
-}
-
-bool Host::IsGuest() const
-{
-    return false;
+    return SendPackTo(pack, m_player2Ip, m_player2Port) &
+        SendPackTo(pack, m_player3Ip, m_player3Port) ;
 }
 
 std::string Host::GetHostIp() const
@@ -444,27 +451,49 @@ int Host::GetHostPort() const
     return m_hostPort;
 }
 
-void Host::SetGuestIp(std::string ip)
+void Host::SetPlayer2Ip(std::string ip)
 {
-    m_guestIp = ip;
+    m_player2Ip = ip;
 }
 
-void Host::SetGuestPort(int port)
+void Host::SetPlayer2Port(int port)
 {
-    m_guestPort = port;
+    m_player2Port = port;
 }
 
-std::string Host::GetGuestIp() const
+std::string Host::GetPlayer2Ip() const
 {
-    return m_guestIp;
+    return m_player2Ip;
 }
 
-int Host::GetGuestPort() const
+int Host::GetPlayer2Port() const
 {
-    return m_guestPort;
+    return m_player2Port;
 }
 
-Guest::Guest()
+void Host::SetPlayer3Ip(std::string ip)
+{
+    m_player3Ip = ip;
+}
+
+void Host::SetPlayer3Port(int port)
+{
+    m_player3Port = port;
+}
+
+std::string Host::GetPlayer3Ip() const
+{
+    return m_player3Ip;
+}
+
+int Host::GetPlayer3Port() const
+{
+    return m_player3Port;
+}
+
+// player 2
+
+Player2::Player2()
 {
     m_hostIp = "";
     m_hostPort = 0;
@@ -472,14 +501,18 @@ Guest::Guest()
     m_lastHostIp = "";
     m_lastHostPort = 0;
     m_lastLocalPort = 0;
+    m_player3Ip = "";
+    m_player3Port = 0;
+    m_player3ListenPort = 0;
     m_lastFamily = AF_INET;
 }
 
-Guest::~Guest()
+Player2::~Player2()
 {
 }
 
-bool Guest::Start(const std::string &hostIp, int hostPort, int localPort, int family)
+bool Player2::Start(const std::string &hostIp, int hostPort, int localhostPort, 
+        const std::string &otherIp, int otherPort, int otherhostPort, int family)
 {
     Reset();
     if (!InitWinsock())
@@ -489,62 +522,159 @@ bool Guest::Start(const std::string &hostIp, int hostPort, int localPort, int fa
     if (!SetNonBlocking())
         return false;
     std::string bindIp = "";
-    if (!BindSocket(bindIp, localPort, family))
+    if (!BindSocket(bindIp, localhostPort, family))
         return false;
     m_hostIp = hostIp;
     m_hostPort = hostPort;
-    m_localPort = localPort;
+    m_localPort = localhostPort;
     m_lastHostIp = hostIp;
     m_lastHostPort = hostPort;
-    m_lastLocalPort = localPort;
+    m_lastLocalPort = localhostPort;
+
+    m_player3Ip = otherIp;
+    m_player3Port = otherPort;
+    m_player3ListenPort = otherhostPort;
+
     m_lastFamily = family;
-    PrintLog("Guest started");
+    PrintLog("Player2 started");
     return true;
 }
 
-bool Guest::PollReceive(Pack &outPack, bool &hasData)
+bool Player2::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
 {
     std::string fromIp;
     int fromPort = 0;
 
     if (!ReceiveOnePack(outPack, fromIp, fromPort, hasData))
         return false;
+    fromOther = m_hostIp != fromIp;
 
     return true;
 }
 
-bool Guest::SendPack(const Pack &pack)
+bool Player2::SendPack(const Pack &pack)
 {
     if (m_hostIp.empty() || m_hostPort <= 0)
     {
-        PrintError("Guest SendPack host target invalid");
+        PrintError("Player2 SendPack host target invalid");
         return false;
     }
 
-    return SendPackTo(pack, m_hostIp, m_hostPort);
+    if (m_player3Ip.empty() || m_player3Port <= 0)
+    {
+        PrintError("Host SendPack player3 target invalid");
+        return false;
+    }
+
+    return SendPackTo(pack, m_hostIp, m_hostPort) &
+        SendPackTo(pack, m_player3Ip, m_player3Port);
 }
 
-bool Guest::IsHost() const
-{
-    return false;
-}
-
-bool Guest::IsGuest() const
-{
-    return true;
-}
-
-std::string Guest::GetHostIp() const
+std::string Player2::GetHostIp() const
 {
     return m_hostIp;
 }
 
-int Guest::GetHostPort() const
+int Player2::GetHostPort() const
 {
     return m_hostPort;
 }
 
-int Guest::GetLocalPort() const
+int Player2::GetLocalPort() const
+{
+    return m_localPort;
+}
+
+// player 3
+
+Player3::Player3()
+{
+    m_hostIp = "";
+    m_hostPort = 0;
+    m_localPort = 0;
+    m_lastHostIp = "";
+    m_lastHostPort = 0;
+    m_lastLocalPort = 0;
+    m_player2Ip = "";
+    m_player2Port = 0;
+    m_player2ListenPort = 0;
+    m_lastFamily = AF_INET;
+}
+
+Player3::~Player3()
+{
+}
+
+bool Player3::Start(const std::string &hostIp, int hostPort, int localhostPort, 
+        const std::string &otherIp, int otherPort, int otherhostPort, int family)
+{
+    Reset();
+    if (!InitWinsock())
+        return false;
+    if (!CreateUdpSocket(family))
+        return false;
+    if (!SetNonBlocking())
+        return false;
+    std::string bindIp = "";
+    if (!BindSocket(bindIp, localhostPort, family))
+        return false;
+    m_hostIp = hostIp;
+    m_hostPort = hostPort;
+    m_localPort = localhostPort;
+    m_lastHostIp = hostIp;
+    m_lastHostPort = hostPort;
+    m_lastLocalPort = localhostPort;
+    m_lastFamily = family;
+
+    m_player2Ip = otherIp;
+    m_player2Port = otherPort;
+    m_player2ListenPort = otherhostPort;
+
+    PrintLog("Player3 started");
+    return true;
+}
+
+bool Player3::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
+{
+    std::string fromIp;
+    int fromPort = 0;
+
+    if (!ReceiveOnePack(outPack, fromIp, fromPort, hasData))
+        return false;
+    fromOther = m_hostIp != fromIp;
+
+    return true;
+}
+
+bool Player3::SendPack(const Pack &pack)
+{
+    if (m_hostIp.empty() || m_hostPort <= 0)
+    {
+        PrintError("Player3 SendPack host target invalid");
+        return false;
+    }
+
+    if (m_player2Ip.empty() || m_player2Port <= 0)
+    {
+        PrintError("Host SendPack player3 target invalid");
+        return false;
+    }
+
+    return SendPackTo(pack, m_hostIp, m_hostPort) &
+        SendPackTo(pack, m_player2Ip, m_player2Port);
+}
+
+std::string Player3::GetHostIp() const
+{
+    return m_hostIp;
+}
+
+int Player3::GetHostPort() const
+{
+    return m_hostPort;
+}
+
+int Player3::GetLocalPort() const
 {
     return m_localPort;
 }
@@ -561,11 +691,19 @@ void Host::Reset()
     ConnectionBase::Reset();
     m_hostIp = "";
     m_hostPort = 0;
-    m_guestIp = "";
-    m_guestPort = 0;
+    m_player2Ip = "";
+    m_player2Port = 0;
 }
 
-void Guest::Reset()
+void Player2::Reset()
+{
+    ConnectionBase::Reset();
+    m_hostIp = "";
+    m_hostPort = 0;
+    m_localPort = 0;
+}
+
+void Player3::Reset()
 {
     ConnectionBase::Reset();
     m_hostIp = "";
@@ -580,7 +718,7 @@ void Host::Reconnect()
         PrintError("Host Reconnect failed: no last bind port");
         return;
     }
-    if (!Start(m_lastBindIp, m_lastBindPort, m_lastFamily))
+    if (!Start(m_lastBindIp, m_lastBindPort, m_player3Ip, m_player3Port, m_player3ListenPort, m_lastFamily))
     {
         PrintError("Host Reconnect failed");
         return;
@@ -588,19 +726,36 @@ void Host::Reconnect()
     PrintLog("Host reconnected");
 }
 
-void Guest::Reconnect()
+void Player2::Reconnect()
 {
     if (m_lastHostIp.empty() || m_lastHostPort <= 0 || m_lastLocalPort <= 0)
     {
-        PrintError("Guest Reconnect failed: last params invalid");
+        PrintError("Player2 Reconnect failed: last params invalid");
         return;
     }
 
-    if (!Start(m_lastHostIp, m_lastHostPort, m_lastLocalPort, m_lastFamily))
+    if (!Start(m_lastHostIp, m_lastHostPort, m_lastLocalPort, m_player3Ip, m_player3Port, m_player3ListenPort, m_lastFamily))
     {
-        PrintError("Guest Reconnect failed");
+        PrintError("Player2 Reconnect failed");
         return;
     }
 
-    PrintLog("Guest reconnected");
+    PrintLog("Player2 reconnected");
+}
+
+void Player3::Reconnect()
+{
+    if (m_lastHostIp.empty() || m_lastHostPort <= 0 || m_lastLocalPort <= 0)
+    {
+        PrintError("Player3 Reconnect failed: last params invalid");
+        return;
+    }
+
+    if (!Start(m_lastHostIp, m_lastHostPort, m_lastLocalPort, m_player2Ip, m_player2Port, m_player2ListenPort, m_lastFamily))
+    {
+        PrintError("Player3 Reconnect failed");
+        return;
+    }
+
+    PrintLog("Player3 reconnected");
 }
