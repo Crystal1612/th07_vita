@@ -40,6 +40,7 @@ class ConnectionUI
     int m_delay;
 
     bool m_connected;
+    bool m_connected_other;
     bool m_startGame;
 
     HWND m_hWnd;
@@ -76,21 +77,25 @@ class ConnectionUI
 
     void OnClickHost();
     void OnClickPlayer2();
+    void OnClickPlayer3();
     void OnClickStartGame();
     void OnTimer();
 
     void ProcessHostNetwork();
     void ProcessPlayer2Network();
+    void ProcessPlayer3Network();
 
     void TryPeriodicPing();
     void SendPingAsHost(Control ctrl);
     void SendPingAsPlayer2(Control ctrl);
+    void SendPingAsPlayer3(Control ctrl);
 
     void EnterHostWaitingState();
     void EnterPlayer2WaitingState();
     void EnterPlayer3WaitingState();
     void EnterConnectedState();
     void ResetPlayer2ButtonAfterTimeout();
+    void ResetPlayer3ButtonAfterTimeout();
 
     std::string GetEditText(HWND hEdit);
     int GetEditInt(HWND hEdit);

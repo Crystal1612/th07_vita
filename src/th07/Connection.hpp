@@ -138,6 +138,7 @@ struct CtrlPack
 
 struct Pack
 {
+    int playerType;
     int type; // 1=HELLO, 2=PING, 3=PONG, 4=usual trans
     unsigned int seq;
     ULONGLONG sendTick;
@@ -158,7 +159,9 @@ class ConnectionBase
 {
   protected:
     SOCKET m_socket;
+    SOCKET m_socket_other;
     int m_family;
+    int m_family_other;
 
   protected:
     static bool s_winsockInited;
@@ -176,11 +179,15 @@ class ConnectionBase
     bool CreateUdpSocket(int family);
     bool SetNonBlocking();
     bool BindSocket(const std::string &bindIp, int port, int family);
+    bool BindSocketOther(const std::string &bindIp, int port, int family);
 
     bool SendPackTo(const Pack &pack, const std::string &ip, int port);
+    bool SendPackToOther(const Pack &pack, const std::string &ip, int port);
     bool ReceiveOnePack(Pack &outPack, std::string &fromIp, int &fromPort, bool &hasData);
+    bool ReceiveOnePackOther(Pack &outPack, std::string &fromIp, int &fromPort, bool &hasData);
 
     void CloseSocket();
+    void CloseSocketOther();
 
     bool IpPortToSockAddr(const std::string &ip, int port, sockaddr_storage &addr, int &addrLen, int family);
 
@@ -210,8 +217,10 @@ class Host : public ConnectionBase
   public:
     bool Start(const std::string &hostIp, int hostPort,
         const std::string &otherIp, int otherPort, int otherhostPort, int family = AF_INET6);
-    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
+    bool PollReceive(Pack &outPack, bool &hasData);
+    bool PollReceiveOther(Pack &outPack, bool &hasData);
     bool SendPack(const Pack &pack);
+    bool SendPackOther(const Pack &pack);
 
     bool IsHost() {return true;};
     bool IsPlayer2() {return false;};
@@ -260,8 +269,10 @@ class Player2 : public ConnectionBase
   public:
     bool Start(const std::string &hostIp, int hostPort, int localhostPort,
         const std::string &otherIp, int otherPort, int otherhostPort, int family);
-    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
+    bool PollReceive(Pack &outPack, bool &hasData);
+    bool PollReceiveOther(Pack &outPack, bool &hasData);
     bool SendPack(const Pack &pack);
+    bool SendPackOther(const Pack &pack);
 
     bool IsHost() {return false;};
     bool IsPlayer2() {return true;};
@@ -299,8 +310,10 @@ class Player3 : public ConnectionBase
   public:
     bool Start(const std::string &hostIp, int hostPort, int localhostPort,
         const std::string &otherIp, int otherPort, int otherhostPort, int family);
-    bool PollReceive(Pack &outPack, bool &hasData, bool &fromOther);
+    bool PollReceive(Pack &outPack, bool &hasData);
+    bool PollReceiveOther(Pack &outPack, bool &hasData);
     bool SendPack(const Pack &pack);
+    bool SendPackOther(const Pack &pack);
 
     bool IsHost() {return false;};
     bool IsPlayer2() {return false;};

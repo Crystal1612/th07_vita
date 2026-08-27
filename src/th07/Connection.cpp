@@ -95,6 +95,7 @@ const char *MyInetNtop(int family, const void *src, char *dst, size_t size)
 ConnectionBase::ConnectionBase()
 {
     m_socket = INVALID_SOCKET;
+    m_socket_other = INVALID_SOCKET;
     m_family = AF_INET;
 }
 
@@ -145,6 +146,15 @@ void ConnectionBase::CloseSocket()
     }
 }
 
+void ConnectionBase::CloseSocketOther()
+{
+    if (m_socket_other != INVALID_SOCKET)
+    {
+        closesocket(m_socket_other);
+        m_socket_other = INVALID_SOCKET;
+    }
+}
+
 bool ConnectionBase::CreateUdpSocket(int family)
 {
     m_family = family;
@@ -156,10 +166,22 @@ bool ConnectionBase::CreateUdpSocket(int family)
         return false;
     }
 
+    m_socket_other = socket(family, SOCK_DGRAM, IPPROTO_UDP);
+    if (m_socket_other == INVALID_SOCKET)
+    {
+        PrintError("socket failed", WSAGetLastError());
+        return false;
+    }
+
     if (family == AF_INET6)
     {
         DWORD off = 0;
         if (setsockopt(m_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&off, sizeof(off)) == SOCKET_ERROR)
+        {
+            PrintError("setsockopt IPV6_V6ONLY failed", WSAGetLastError());
+            // continue
+        }
+        if (setsockopt(m_socket_other, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&off, sizeof(off)) == SOCKET_ERROR)
         {
             PrintError("setsockopt IPV6_V6ONLY failed", WSAGetLastError());
             // continue
@@ -174,6 +196,13 @@ bool ConnectionBase::SetNonBlocking()
     u_long mode = 1;
     int ret = ioctlsocket(m_socket, FIONBIO, &mode);
     if (ret != NO_ERROR)
+    {
+        PrintError("ioctlsocket FIONBIO failed", WSAGetLastError());
+        return false;
+    }
+
+    int ret_other = ioctlsocket(m_socket_other, FIONBIO, &mode);
+    if (ret_other != NO_ERROR)
     {
         PrintError("ioctlsocket FIONBIO failed", WSAGetLastError());
         return false;
@@ -194,6 +223,26 @@ bool ConnectionBase::BindSocket(const std::string &bindIp, int port, int family)
     }
 
     if (bind(m_socket, (sockaddr *)&localAddr, localAddrLen) == SOCKET_ERROR)
+    {
+        PrintError("bind failed", WSAGetLastError());
+        return false;
+    }
+
+    return true;
+}
+
+bool ConnectionBase::BindSocketOther(const std::string &bindIp, int port, int family)
+{
+    sockaddr_storage localAddr;
+    int localAddrLen = 0;
+
+    if (!IpPortToSockAddr(bindIp, port, localAddr, localAddrLen, family))
+    {
+        PrintError("IpPortToSockAddr failed in BindSocketOther");
+        return false;
+    }
+
+    if (bind(m_socket_other, (sockaddr *)&localAddr, localAddrLen) == SOCKET_ERROR)
     {
         PrintError("bind failed", WSAGetLastError());
         return false;
@@ -241,6 +290,45 @@ bool ConnectionBase::SendPackTo(const Pack &pack, const std::string &ip, int por
     return true;
 }
 
+bool ConnectionBase::SendPackToOther(const Pack &pack, const std::string &ip, int port)
+{
+    if (m_socket_other == INVALID_SOCKET)
+    {
+        PrintError("SendPackToOther invalid socket");
+        return false;
+    }
+
+    if (ip.empty() || port <= 0)
+    {
+        PrintError("SendPackToOther invalid target ip/port");
+        return false;
+    }
+
+    sockaddr_storage remoteAddr;
+    int remoteAddrLen = 0;
+
+    int family = AF_INET;
+    if (ip.find(':') != std::string::npos)
+        family = AF_INET6;
+
+    if (!IpPortToSockAddr(ip, port, remoteAddr, remoteAddrLen, family))
+    {
+        PrintError("IpPortToSockAddr failed in SendPackToOther");
+        return false;
+    }
+
+    int ret = sendto(m_socket_other, (const char *)&pack, sizeof(Pack), 0, (sockaddr *)&remoteAddr, remoteAddrLen);
+
+    if (ret == SOCKET_ERROR)
+    {
+        int err = WSAGetLastError();
+        PrintError("sendto failed", err);
+        return false;
+    }
+
+    return true;
+}
+
 bool ConnectionBase::ReceiveOnePack(Pack &outPack, std::string &fromIp, int &fromPort, bool &hasData)
 {
     hasData = false;
@@ -258,6 +346,47 @@ bool ConnectionBase::ReceiveOnePack(Pack &outPack, std::string &fromIp, int &fro
     memset(&fromAddr, 0, sizeof(fromAddr));
 
     int ret = recvfrom(m_socket, (char *)&outPack, sizeof(Pack), 0, (sockaddr *)&fromAddr, &fromLen);
+
+    if (ret == SOCKET_ERROR)
+    {
+        int err = WSAGetLastError();
+        if (err == WSAEWOULDBLOCK)
+        {
+            hasData = false;
+            return true;
+        }
+
+        PrintError("recvfrom failed", err);
+        return false;
+    }
+
+    if (!SockAddrToIpPort((sockaddr *)&fromAddr, fromLen, fromIp, fromPort))
+    {
+        PrintError("SockAddrToIpPort failed");
+        return false;
+    }
+
+    hasData = true;
+    return true;
+}
+
+bool ConnectionBase::ReceiveOnePackOther(Pack &outPack, std::string &fromIp, int &fromPort, bool &hasData)
+{
+    hasData = false;
+    fromIp.clear();
+    fromPort = 0;
+
+    if (m_socket == INVALID_SOCKET)
+    {
+        PrintError("ReceiveOnePack invalid socket");
+        return false;
+    }
+
+    sockaddr_storage fromAddr;
+    int fromLen = sizeof(fromAddr);
+    memset(&fromAddr, 0, sizeof(fromAddr));
+
+    int ret = recvfrom(m_socket_other, (char *)&outPack, sizeof(Pack), 0, (sockaddr *)&fromAddr, &fromLen);
 
     if (ret == SOCKET_ERROR)
     {
@@ -391,6 +520,8 @@ bool Host::Start(const std::string &bindIp, int port,
         return false;
     if (!BindSocket(bindIp, port, family))
         return false;
+    if (!BindSocketOther(bindIp, otherhostPort, family))
+        return false;
     m_hostIp = bindIp;
     m_hostPort = port;
     m_lastBindIp = bindIp;
@@ -403,7 +534,7 @@ bool Host::Start(const std::string &bindIp, int port,
     return true;
 }
 
-bool Host::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
+bool Host::PollReceive(Pack &outPack, bool &hasData)
 {
     std::string fromIp;
     int fromPort = 0;
@@ -413,11 +544,25 @@ bool Host::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
 
     if (hasData)
     {
-        fromOther = m_player3Ip != fromIp;
-        if(!fromOther){
-            m_player2Ip = fromIp;
-            m_player2Port = fromPort;
-        }
+        m_player2Ip = fromIp;
+        m_player2Port = fromPort;
+    }
+
+    return true;
+}
+
+bool Host::PollReceiveOther(Pack &outPack, bool &hasData)
+{
+    std::string fromIp;
+    int fromPort = 0;
+
+    if (!ReceiveOnePackOther(outPack, fromIp, fromPort, hasData))
+        return false;
+
+    if (hasData)
+    {
+        m_player3Ip = fromIp;
+        m_player3Port = fromPort;
     }
 
     return true;
@@ -431,14 +576,18 @@ bool Host::SendPack(const Pack &pack)
         return false;
     }
 
+    return SendPackTo(pack, m_player2Ip, m_player2Port);
+}
+
+bool Host::SendPackOther(const Pack &pack)
+{
     if (m_player3Ip.empty() || m_player3Port <= 0)
     {
         PrintError("Host SendPack player3 target invalid");
         return false;
     }
 
-    return SendPackTo(pack, m_player2Ip, m_player2Port) &
-        SendPackTo(pack, m_player3Ip, m_player3Port) ;
+    return SendPackToOther(pack, m_player3Ip, m_player3Port);
 }
 
 std::string Host::GetHostIp() const
@@ -524,6 +673,8 @@ bool Player2::Start(const std::string &hostIp, int hostPort, int localhostPort,
     std::string bindIp = "";
     if (!BindSocket(bindIp, localhostPort, family))
         return false;
+    if (!BindSocketOther(bindIp, otherhostPort, family))
+        return false;
     m_hostIp = hostIp;
     m_hostPort = hostPort;
     m_localPort = localhostPort;
@@ -540,14 +691,24 @@ bool Player2::Start(const std::string &hostIp, int hostPort, int localhostPort,
     return true;
 }
 
-bool Player2::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
+bool Player2::PollReceive(Pack &outPack, bool &hasData)
 {
     std::string fromIp;
     int fromPort = 0;
 
     if (!ReceiveOnePack(outPack, fromIp, fromPort, hasData))
         return false;
-    fromOther = m_hostIp != fromIp;
+
+    return true;
+}
+
+bool Player2::PollReceiveOther(Pack &outPack, bool &hasData)
+{
+    std::string fromIp;
+    int fromPort = 0;
+
+    if (!ReceiveOnePackOther(outPack, fromIp, fromPort, hasData))
+        return false;
 
     return true;
 }
@@ -560,14 +721,18 @@ bool Player2::SendPack(const Pack &pack)
         return false;
     }
 
+    return SendPackTo(pack, m_hostIp, m_hostPort);
+}
+
+bool Player2::SendPackOther(const Pack &pack)
+{
     if (m_player3Ip.empty() || m_player3Port <= 0)
     {
-        PrintError("Host SendPack player3 target invalid");
+        PrintError("Player2 SendPack player3 target invalid");
         return false;
     }
 
-    return SendPackTo(pack, m_hostIp, m_hostPort) &
-        SendPackTo(pack, m_player3Ip, m_player3Port);
+    return SendPackToOther(pack, m_player3Ip, m_player3Port);
 }
 
 std::string Player2::GetHostIp() const
@@ -618,6 +783,8 @@ bool Player3::Start(const std::string &hostIp, int hostPort, int localhostPort,
     std::string bindIp = "";
     if (!BindSocket(bindIp, localhostPort, family))
         return false;
+    if (!BindSocketOther(bindIp, otherhostPort, family))
+        return false;
     m_hostIp = hostIp;
     m_hostPort = hostPort;
     m_localPort = localhostPort;
@@ -634,14 +801,24 @@ bool Player3::Start(const std::string &hostIp, int hostPort, int localhostPort,
     return true;
 }
 
-bool Player3::PollReceive(Pack &outPack, bool &hasData, bool &fromOther)
+bool Player3::PollReceive(Pack &outPack, bool &hasData)
 {
     std::string fromIp;
     int fromPort = 0;
 
     if (!ReceiveOnePack(outPack, fromIp, fromPort, hasData))
         return false;
-    fromOther = m_hostIp != fromIp;
+
+    return true;
+}
+
+bool Player3::PollReceiveOther(Pack &outPack, bool &hasData)
+{
+    std::string fromIp;
+    int fromPort = 0;
+
+    if (!ReceiveOnePackOther(outPack, fromIp, fromPort, hasData))
+        return false;
 
     return true;
 }
@@ -654,15 +831,20 @@ bool Player3::SendPack(const Pack &pack)
         return false;
     }
 
+    return SendPackTo(pack, m_hostIp, m_hostPort);
+}
+
+bool Player3::SendPackOther(const Pack &pack)
+{
     if (m_player2Ip.empty() || m_player2Port <= 0)
     {
-        PrintError("Host SendPack player3 target invalid");
+        PrintError("Player3 SendPack player2 target invalid");
         return false;
     }
 
-    return SendPackTo(pack, m_hostIp, m_hostPort) &
-        SendPackTo(pack, m_player2Ip, m_player2Port);
+    return SendPackToOther(pack, m_player2Ip, m_player2Port);
 }
+
 
 std::string Player3::GetHostIp() const
 {

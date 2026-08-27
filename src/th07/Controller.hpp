@@ -91,6 +91,8 @@ u32 SetButtonFromDirectInputJoystate(u32 *outButtons,
 // netplay
 bool RcvPacks();
 void SendKeys(int frame);
+bool RcvPacksOther();
+void SendKeysOther(int frame);
 u32 GetInput_Net(int frame, bool is_in_UI, int &cur_ctrl);
 u32 GetInput_Single(int &cur_ctrl);
 
