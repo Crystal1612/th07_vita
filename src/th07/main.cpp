@@ -24,11 +24,9 @@
 
 // netplay
 Host g_host;
-Player2 g_player2;
-Player3 g_player3;
+Guest g_guest;
 int g_delay = 1;
 bool g_is_host = false;
-bool g_is_player_3 = false;
 bool g_is_connected = false;
 bool g_is_single_mode = false;
 
@@ -72,11 +70,10 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     // {
     //     goto stop;
     // }
-    ConnectionUI ui(g_host, g_player2, g_player3);
+    ConnectionUI ui(g_host, g_guest);
     ui.Show();
     g_delay = ui.GetDelay();
     g_is_host = ui.IsHost();
-    g_is_player_3 = ui.IsPlayer3();
     if (!ui.IsGameStarted())
         return 1;
     if (!ui.IsConnected())

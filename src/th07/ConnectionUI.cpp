@@ -2,27 +2,15 @@
 #include <cstdlib>
 #include <sstream>
 
-#define IDC_EDIT_HOST_IP             1001
-#define IDC_EDIT_HOST_PORT           1002
-#define IDC_EDIT_LISTEN_PORT         1003
-
-#define IDC_BTN_START_HOST           1004
-#define IDC_BTN_START_PLAYER2        1005
-#define IDC_BTN_START_PLAYER3        1006
-
-#define IDC_STATIC_LATENCY           1010
-#define IDC_EDIT_TARGET_LATENCY      1011
-#define IDC_BTN_START_GAME           1012
-#define IDC_BTN_START_GAME_LOCAL     1013
-
-// Other connection
-#define IDC_EDIT_OTHER_IP            1014
-#define IDC_EDIT_OTHER_PORT          1015
-#define IDC_EDIT_OTHER_LISTEN_PORT   1016
-
-// Separate status controls
-#define IDC_STATIC_LATENCY_HOST      1017
-#define IDC_STATIC_LATENCY_OTHER     1018
+#define IDC_EDIT_HOST_IP 1001
+#define IDC_EDIT_HOST_PORT 1002
+#define IDC_EDIT_LISTEN_PORT 1003
+#define IDC_BTN_START_HOST 1004
+#define IDC_BTN_START_GUEST 1005
+#define IDC_STATIC_LATENCY 1006
+#define IDC_EDIT_TARGET_LATENCY 1007
+#define IDC_BTN_START_GAME 1008
+#define IDC_BTN_START_GAME_LOCAL 1010
 
 #define TIMER_ID_POLL 1
 #define TIMER_INTERVAL_MS 15
@@ -45,29 +33,24 @@ ULONGLONG MyGetTickCount()
     return l.QuadPart * 1000 / f.QuadPart;
 }
 
-ConnectionUI::ConnectionUI(Host &h, Player2 &g, Player3 &f) : m_host(h), m_player2(g), m_player3(f)
+ConnectionUI::ConnectionUI(Host &h, Guest &g) : m_host(h), m_guest(g)
 {
     m_isHost = false;
-    m_isPlayer2 = false;
+    m_isGuest = false;
     m_connected = false;
     m_startGame = false;
 
     m_hWnd = NULL;
     m_editHostIp = NULL;
     m_editHostPort = NULL;
-    m_editOtherIp = NULL;
-    m_editOtherPort = NULL;
     m_editListenPort = NULL;
-    m_editOtherListenPort = NULL;
     m_btnHost = NULL;
-    m_btnPlayer2 = NULL;
-    m_btnPlayer3 = NULL;
-    m_staticLatencyHost = NULL;
-    m_staticLatencyOther = NULL;
+    m_btnGuest = NULL;
+    m_staticLatency = NULL;
     m_editTargetLatency = NULL;
     m_btnStartGame = NULL;
 
-    m_player2WaitStartTick = 0;
+    m_guestWaitStartTick = 0;
     m_lastPeriodicPingTick = 0;
     m_seq = 1;
 }
@@ -103,14 +86,9 @@ bool ConnectionUI::IsHost() const
     return m_isHost;
 }
 
-bool ConnectionUI::IsPlayer2() const
+bool ConnectionUI::IsGuest() const
 {
-    return m_isPlayer2;
-}
-
-bool ConnectionUI::IsPlayer3() const
-{
-    return m_isPlayer3;
+    return m_isGuest;
 }
 
 std::string ConnectionUI::GetEditText(HWND hEdit)
@@ -139,14 +117,9 @@ void ConnectionUI::SetText(HWND hWnd, const std::string &s)
     SetWindowTextA(hWnd, s.c_str());
 }
 
-void ConnectionUI::SetLatencyHostText(const std::string &s)
+void ConnectionUI::SetLatencyText(const std::string &s)
 {
-    SetText(m_staticLatencyHost, s);
-}
-
-void ConnectionUI::SetLatencyOtherText(const std::string &s)
-{
-    SetText(m_staticLatencyOther, s);
+    SetText(m_staticLatency, s);
 }
 
 std::string ConnectionUI::BuildLatencyText(const std::string &ip, int port, ULONGLONG rtt)
@@ -172,7 +145,7 @@ bool ConnectionUI::CreateMainWindow(HINSTANCE hInst)
     LPCSTR windowTitle = myString.c_str();
 
     m_hWnd = CreateWindowA("ConnectionUIClass", windowTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-                           CW_USEDEFAULT, CW_USEDEFAULT, 900, 500, NULL, NULL, hInst, this);
+                           CW_USEDEFAULT, CW_USEDEFAULT, 500, 500, NULL, NULL, hInst, this);
 
     return (m_hWnd != NULL);
 }
@@ -199,538 +172,73 @@ void ConnectionUI::CreateControls(HWND hWnd)
 {
     static char ip[128];
     static char port_host[128];
-    static char port_listen_host[128];
-
-    static char ip_other[128];
-    static char port_other[128];
-    static char port_listen_other[128];
-
+    static char port_listen[128];
     static char target_delay[128];
 
-    GetPrivateProfileStringA(
-        "Connection", "ip", "::1",
-        ip, sizeof(ip), g_iniPath);
+    GetPrivateProfileStringA("Connection", "ip", "::1", ip, sizeof(ip), g_iniPath);
+    GetPrivateProfileStringA("Connection", "port_host", "3036", port_host, sizeof(port_host), g_iniPath);
+    GetPrivateProfileStringA("Connection", "port_listen", "3036", port_listen, sizeof(port_listen), g_iniPath);
+    GetPrivateProfileStringA("Connection", "target_delay", "2", target_delay, sizeof(target_delay), g_iniPath);
 
-    GetPrivateProfileStringA(
-        "Connection", "port_host", "3036",
-        port_host, sizeof(port_host), g_iniPath);
+    CreateWindowA("STATIC", "Host IP:", WS_CHILD | WS_VISIBLE, 20, 20, 80, 20, hWnd, NULL, NULL, NULL);
 
-    GetPrivateProfileStringA(
-        "Connection", "port_listen_host", "3036",
-        port_listen_host, sizeof(port_listen_host), g_iniPath);
+    m_editHostIp = CreateWindowA("EDIT", ip, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 130, 20, 310, 24, hWnd,
+                                 (HMENU)IDC_EDIT_HOST_IP, NULL, NULL);
 
-    // Fixed sizeof() bug here.
-    GetPrivateProfileStringA(
-        "Connection", "ip_other", "123.123.123.123",
-        ip_other, sizeof(ip_other), g_iniPath);
+    CreateWindowA("STATIC", "Host Port:", WS_CHILD | WS_VISIBLE, 20, 60, 80, 20, hWnd, NULL, NULL, NULL);
 
-    GetPrivateProfileStringA(
-        "Connection", "port_other", "3036",
-        port_other, sizeof(port_other), g_iniPath);
+    m_editHostPort = CreateWindowA("EDIT", port_host, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER,
+                                   130, 60, 100, 24, hWnd, (HMENU)IDC_EDIT_HOST_PORT, NULL, NULL);
 
-    GetPrivateProfileStringA(
-        "Connection", "port_listen_other", "3036",
-        port_listen_other, sizeof(port_listen_other), g_iniPath);
+    CreateWindowA("STATIC", "Listen Port:", WS_CHILD | WS_VISIBLE, 20, 100, 80, 20, hWnd, NULL, NULL, NULL);
 
-    GetPrivateProfileStringA(
-        "Connection", "target_delay", "2",
-        target_delay, sizeof(target_delay), g_iniPath);
+    m_editListenPort =
+        CreateWindowA("EDIT", port_listen, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 130, 100,
+                      100, 24, hWnd, (HMENU)IDC_EDIT_LISTEN_PORT, NULL, NULL);
 
+    m_btnHost = CreateWindowA("BUTTON", "as host", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 200, 32, hWnd,
+                              (HMENU)IDC_BTN_START_HOST, NULL, NULL);
 
-    // ---------------------------------------------------------------------
-    // Layout constants
-    // ---------------------------------------------------------------------
+    m_btnGuest = CreateWindowA("BUTTON", "as guest", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 150, 200, 32, hWnd,
+                               (HMENU)IDC_BTN_START_GUEST, NULL, NULL);
 
-    const int margin       = 20;
-    const int columnWidth  = 430;
-    const int labelWidth   = 120;
-    const int editWidth    = 270;
-    const int editHeight   = 24;
-    const int rowHeight    = 38;
+    CreateWindowA("STATIC", "current state:", WS_CHILD | WS_VISIBLE, 20, 210, 80, 20, hWnd, NULL, NULL, NULL);
 
-    const int hostX  = margin;
-    const int otherX = margin + columnWidth + 20;
+    m_staticLatency = CreateWindowA("STATIC", "no connection", WS_CHILD | WS_VISIBLE | WS_BORDER, 130, 210, 310, 24,
+                                    hWnd, (HMENU)IDC_STATIC_LATENCY, NULL, NULL);
 
-    const int labelXOffset = 0;
-    const int editXOffset  = labelWidth;
+    CreateWindowA("STATIC", "target delay:", WS_CHILD | WS_VISIBLE, 20, 250, 120, 20, hWnd, NULL, NULL, NULL);
 
+    m_editTargetLatency =
+        CreateWindowA("EDIT", target_delay, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 130, 250,
+                      100, 24, hWnd, (HMENU)IDC_EDIT_TARGET_LATENCY, NULL, NULL);
 
-    // ---------------------------------------------------------------------
-    // Section headers
-    // ---------------------------------------------------------------------
+    m_btnStartGame = CreateWindowA("BUTTON", "Start Online", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, 20,
+                                   300, 200, 32, hWnd, (HMENU)IDC_BTN_START_GAME, NULL, NULL);
 
-    CreateWindowA(
-        "STATIC",
-        "Host Connection",
-        WS_CHILD | WS_VISIBLE,
-        hostX,
-        15,
-        columnWidth,
-        28,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
+    m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Offline", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 300, 200,
+                                        32, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
 
-    CreateWindowA(
-        "STATIC",
-        "Other Connection",
-        WS_CHILD | WS_VISIBLE,
-        otherX,
-        15,
-        columnWidth,
-        28,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Host IP
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "IP Address:",
-        WS_CHILD | WS_VISIBLE,
-        hostX + labelXOffset,
-        50,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editHostIp = CreateWindowA(
-        "EDIT",
-        ip,
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        hostX + editXOffset,
-        48,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_HOST_IP,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Host Port
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "Port:",
-        WS_CHILD | WS_VISIBLE,
-        hostX + labelXOffset,
-        88,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editHostPort = CreateWindowA(
-        "EDIT",
-        port_host,
-        WS_CHILD | WS_VISIBLE | WS_BORDER |
-            ES_AUTOHSCROLL | ES_NUMBER,
-        hostX + editXOffset,
-        86,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_HOST_PORT,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Host Listen Port
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "Listen Port:",
-        WS_CHILD | WS_VISIBLE,
-        hostX + labelXOffset,
-        126,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editListenPort = CreateWindowA(
-        "EDIT",
-        port_listen_host,
-        WS_CHILD | WS_VISIBLE | WS_BORDER |
-            ES_AUTOHSCROLL | ES_NUMBER,
-        hostX + editXOffset,
-        124,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_LISTEN_PORT,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Other IP
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "IP Address:",
-        WS_CHILD | WS_VISIBLE,
-        otherX + labelXOffset,
-        50,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editOtherIp = CreateWindowA(
-        "EDIT",
-        ip_other,
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        otherX + editXOffset,
-        48,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_OTHER_IP,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Other Port
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "Port:",
-        WS_CHILD | WS_VISIBLE,
-        otherX + labelXOffset,
-        88,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editOtherPort = CreateWindowA(
-        "EDIT",
-        port_other,
-        WS_CHILD | WS_VISIBLE | WS_BORDER |
-            ES_AUTOHSCROLL | ES_NUMBER,
-        otherX + editXOffset,
-        86,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_OTHER_PORT,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Other Listen Port
-    // ---------------------------------------------------------------------
-
-    CreateWindowA(
-        "STATIC",
-        "Listen Port:",
-        WS_CHILD | WS_VISIBLE,
-        otherX + labelXOffset,
-        126,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editOtherListenPort = CreateWindowA(
-        "EDIT",
-        port_listen_other,
-        WS_CHILD | WS_VISIBLE | WS_BORDER |
-            ES_AUTOHSCROLL | ES_NUMBER,
-        otherX + editXOffset,
-        124,
-        editWidth,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_OTHER_LISTEN_PORT,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Role buttons
-    // ---------------------------------------------------------------------
-
-    const int buttonY = 170;
-    const int buttonWidth = 200;
-    const int buttonHeight = 34;
-
-    m_btnHost = CreateWindowA(
-        "BUTTON",
-        "Start as Host",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        margin,
-        buttonY,
-        buttonWidth,
-        buttonHeight,
-        hWnd,
-        (HMENU)IDC_BTN_START_HOST,
-        NULL,
-        NULL);
-
-    m_btnPlayer2 = CreateWindowA(
-        "BUTTON",
-        "Start as Player 2",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        margin + buttonWidth + 10,
-        buttonY,
-        buttonWidth,
-        buttonHeight,
-        hWnd,
-        (HMENU)IDC_BTN_START_PLAYER2,
-        NULL,
-        NULL);
-
-    m_btnPlayer3 = CreateWindowA(
-        "BUTTON",
-        "Start as Player 3",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        margin + (buttonWidth + 10) * 2,
-        buttonY,
-        buttonWidth,
-        buttonHeight,
-        hWnd,
-        (HMENU)IDC_BTN_START_PLAYER3,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Connection status
-    // ---------------------------------------------------------------------
-
-    const int statusY = 225;
-
-    CreateWindowA(
-        "STATIC",
-        "Host Status:",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        statusY,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_staticLatencyHost = CreateWindowA(
-        "STATIC",
-        "No connection",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER,
-        margin + labelWidth,
-        statusY - 2,
-        300,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_STATIC_LATENCY_HOST,
-        NULL,
-        NULL);
-
-
-    CreateWindowA(
-        "STATIC",
-        "Other Status:",
-        WS_CHILD | WS_VISIBLE,
-        margin + 450,
-        statusY,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_staticLatencyOther = CreateWindowA(
-        "STATIC",
-        "No connection",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER,
-        margin + 450 + labelWidth,
-        statusY - 2,
-        300,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_STATIC_LATENCY_OTHER,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Target delay
-    // ---------------------------------------------------------------------
-
-    const int delayY = 270;
-
-    CreateWindowA(
-        "STATIC",
-        "Target Delay:",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        delayY,
-        labelWidth,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    m_editTargetLatency = CreateWindowA(
-        "EDIT",
-        target_delay,
-        WS_CHILD | WS_VISIBLE | WS_BORDER |
-            ES_AUTOHSCROLL | ES_NUMBER,
-        margin + labelWidth,
-        delayY - 2,
-        100,
-        editHeight,
-        hWnd,
-        (HMENU)IDC_EDIT_TARGET_LATENCY,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Game buttons
-    // ---------------------------------------------------------------------
-
-    const int gameY = 315;
-
-    m_btnStartGame = CreateWindowA(
-        "BUTTON",
-        "Start Online",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
-        margin,
-        gameY,
-        300,
-        36,
-        hWnd,
-        (HMENU)IDC_BTN_START_GAME,
-        NULL,
-        NULL);
-
-    m_btnStartGameLocal = CreateWindowA(
-        "BUTTON",
-        "Start Offline",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-        margin + 310,
-        gameY,
-        300,
-        36,
-        hWnd,
-        (HMENU)IDC_BTN_START_GAME_LOCAL,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Information / credits
-    // ---------------------------------------------------------------------
-
-    const int infoY = 375;
-
-    CreateWindowA(
-        "STATIC",
-        "Credits: Team Sanghai Alice and Gensokyo Club",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        infoY,
-        650,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    CreateWindowA(
-        "STATIC",
-        "Modders: Rueee and Cardana Wandra",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        infoY + 25,
-        650,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    CreateWindowA(
-        "STATIC",
-        "Cheats: F2 life, F3 bombs, F4 power",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        infoY + 50,
-        650,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-    CreateWindowA(
-        "STATIC",
-        "Offline P2 Controls: DFG IJKL",
-        WS_CHILD | WS_VISIBLE,
-        margin,
-        infoY + 75,
-        650,
-        20,
-        hWnd,
-        NULL,
-        NULL,
-        NULL);
-
-
-    // ---------------------------------------------------------------------
-    // Clamp target delay
-    // ---------------------------------------------------------------------
+    CreateWindowA("STATIC", "Note: maybe y'all want sbrik1111 mod instead", WS_CHILD | WS_VISIBLE, 20, 350, 300, 20,
+                  hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Modders: Rueee and Cardana Wandra", WS_CHILD | WS_VISIBLE, 20, 375, 300, 20, hWnd, NULL,
+                  NULL, NULL);
+    CreateWindowA("STATIC", "Offline P2 Controls: CVB IJKL", WS_CHILD | WS_VISIBLE, 20, 400, 300, 20, hWnd, NULL,
+                  NULL, NULL);
+    CreateWindowA("STATIC", "Offline P3 Controls: ASD TFGH", WS_CHILD | WS_VISIBLE, 20, 425, 300, 20, hWnd, NULL, NULL,
+                  NULL);
 
     m_delay = atoi(target_delay);
-
     if (m_delay < 0)
     {
         m_delay = 0;
-        SetWindowTextA(
-            m_editTargetLatency,
-            "0");
+        SetWindowTextA(m_editTargetLatency, "0");
     }
-
     if (m_delay > max_delay)
     {
         m_delay = max_delay;
-        SetWindowTextA(
-            m_editTargetLatency,
-            max_delay_s);
-    }
+        SetWindowTextA(m_editTargetLatency, max_delay_s);
+    };
 }
 
 bool ConnectionUI::IsGameStarted()
@@ -742,67 +250,40 @@ bool ConnectionUI::IsConnected()
     return m_connected;
 }
 
-bool ConnectionUI::TryStartHost(int listenPort
-, const std::string &otherIp, int otherPort, int otherListenPort)
+bool ConnectionUI::TryStartHost(int listenPort)
 {
-    return m_host.Start("", listenPort, otherIp,otherPort,otherListenPort, AF_INET);
+    return m_host.Start("", listenPort, AF_INET6);
 }
 
-bool ConnectionUI::TryStartPlayer2(const std::string &hostIp, int hostPort, int hostListenPort
-, const std::string &otherIp, int otherPort, int otherListenPort)
+bool ConnectionUI::TryStartGuest(const std::string &hostIp, int hostPort, int listenPort)
 {
     int family = (hostIp.find(':') != std::string::npos) ? AF_INET6 : AF_INET;
-    return m_player2.Start(hostIp, hostPort, hostListenPort, otherIp,otherPort,otherListenPort, family);
-}
-
-bool ConnectionUI::TryStartPlayer3(const std::string &hostIp, int hostPort, int hostListenPort
-, const std::string &otherIp, int otherPort, int otherListenPort)
-{
-    int family = (hostIp.find(':') != std::string::npos) ? AF_INET6 : AF_INET;
-    return m_player3.Start(hostIp, hostPort, hostListenPort, otherIp,otherPort,otherListenPort, family);
+    return m_guest.Start(hostIp, hostPort, listenPort, family);
 }
 
 void ConnectionUI::EnterHostWaitingState()
 {
     m_isHost = true;
-    m_isPlayer2 = false;
+    m_isGuest = false;
     m_connected = false;
     m_lastPeriodicPingTick = 0;
 
-    EnableWindow(m_btnPlayer2, FALSE);
-    SetText(m_btnHost, "waiting players");
-    SetLatencyHostText("waiting player2...");
-    SetLatencyOtherText("waiting player3...");
+    EnableWindow(m_btnGuest, FALSE);
+    SetText(m_btnHost, "waiting guest");
+    SetLatencyText("waiting guest...");
 }
 
-void ConnectionUI::EnterPlayer2WaitingState()
+void ConnectionUI::EnterGuestWaitingState()
 {
     m_isHost = false;
-    m_isPlayer2 = true;
-    m_isPlayer3 = false;
+    m_isGuest = true;
     m_connected = false;
-    m_player2WaitStartTick = MyGetTickCount();
+    m_guestWaitStartTick = MyGetTickCount();
     m_lastPeriodicPingTick = 0;
 
     EnableWindow(m_btnHost, FALSE);
-    SetText(m_btnPlayer2, "waiting msg...");
-    SetLatencyHostText("trying connection...");
-    SetLatencyOtherText("waiting player3...");
-}
-
-void ConnectionUI::EnterPlayer3WaitingState()
-{
-    m_isHost = false;
-    m_isPlayer2 = false;
-    m_isPlayer3 = true;
-    m_connected = false;
-    m_player2WaitStartTick = MyGetTickCount();
-    m_lastPeriodicPingTick = 0;
-
-    EnableWindow(m_btnHost, FALSE);
-    SetText(m_btnPlayer2, "waiting msg...");
-    SetLatencyHostText("trying connection...");
-    SetLatencyOtherText("waiting player2...");
+    SetText(m_btnGuest, "waiting msg...");
+    SetLatencyText("trying connection...");
 }
 
 void ConnectionUI::EnterConnectedState()
@@ -817,29 +298,17 @@ void ConnectionUI::EnterConnectedState()
 
     if (m_isHost)
         SetText(m_btnHost, "connected");
-    else if (m_isPlayer2)
-        SetText(m_btnPlayer2, "connected");
+    else if (m_isGuest)
+        SetText(m_btnGuest, "connected");
 }
 
-void ConnectionUI::ResetPlayer2ButtonAfterTimeout()
+void ConnectionUI::ResetGuestButtonAfterTimeout()
 {
-    m_player2.Reset();
-    SetText(m_btnPlayer2, "as player2");
+    m_guest.Reset();
+    SetText(m_btnGuest, "as guest");
     EnableWindow(m_btnHost, TRUE);
-    SetLatencyHostText("no connection");
-    SetLatencyOtherText("no connection");
-    m_isPlayer2 = false;
-    m_connected = false;
-}
-
-void ConnectionUI::ResetPlayer3ButtonAfterTimeout()
-{
-    m_player3.Reset();
-    SetText(m_btnPlayer2, "as player3");
-    EnableWindow(m_btnHost, TRUE);
-    SetLatencyHostText("no connection");
-    SetLatencyOtherText("no connection");
-    m_isPlayer2 = false;
+    SetLatencyText("no connection");
+    m_isGuest = false;
     m_connected = false;
 }
 
@@ -858,10 +327,9 @@ void ConnectionUI::SendPingAsHost(Control ctrl)
     p.echoTick = 0;
 
     m_host.SendPack(p);
-    m_host.SendPackOther(p);
 }
 
-void ConnectionUI::SendPingAsPlayer2(Control ctrl)
+void ConnectionUI::SendPingAsGuest(Control ctrl)
 {
     CtrlPack cp;
     cp.ctrl_type = ctrl;
@@ -869,34 +337,13 @@ void ConnectionUI::SendPingAsPlayer2(Control ctrl)
     cp.init_setting.ver = MULTI_NET_VER;
 
     Pack p;
-    p.playerType = 2;
     p.ctrl = cp;
     p.type = PACK_PING;
     p.seq = m_seq++;
     p.sendTick = MyGetTickCount();
     p.echoTick = 0;
 
-    m_player2.SendPack(p);
-    m_player2.SendPackOther(p);
-}
-
-void ConnectionUI::SendPingAsPlayer3(Control ctrl)
-{
-    CtrlPack cp;
-    cp.ctrl_type = ctrl;
-    cp.init_setting.delay = GetDelay();
-    cp.init_setting.ver = MULTI_NET_VER;
-
-    Pack p;
-    p.playerType = 3;
-    p.ctrl = cp;
-    p.type = PACK_PING;
-    p.seq = m_seq++;
-    p.sendTick = MyGetTickCount();
-    p.echoTick = 0;
-
-    m_player2.SendPack(p);
-    m_player2.SendPackOther(p);
+    m_guest.SendPack(p);
 }
 
 void ConnectionUI::TryPeriodicPing()
@@ -911,13 +358,9 @@ void ConnectionUI::TryPeriodicPing()
         {
             SendPingAsHost(Ctrl_Set_InitSetting);
         }
-        else if (m_isPlayer2)
+        else if (m_isGuest)
         {
-            SendPingAsPlayer2(Ctrl_Set_InitSetting);
-        }
-        else if (m_isPlayer3)
-        {
-            SendPingAsPlayer3(Ctrl_Set_InitSetting);
+            SendPingAsGuest(Ctrl_Set_InitSetting);
         }
 
         m_lastPeriodicPingTick = now;
@@ -930,12 +373,7 @@ void ConnectionUI::OnClickHost()
     int listenPort = GetEditInt(m_editListenPort);
     if (listenPort == -1)
         return;
-
-    std::string otherIp = GetEditText(m_editOtherIp);
-    int otherPort = GetEditInt(m_editOtherPort);
-    int otherListenPort = GetEditInt(m_editOtherListenPort);
-
-    if (!TryStartHost(listenPort, otherIp, otherPort, otherListenPort))
+    if (!TryStartHost(listenPort))
     {
         MessageBoxA(m_hWnd, "fail to start as host", "err", MB_OK | MB_ICONERROR);
         return;
@@ -944,60 +382,27 @@ void ConnectionUI::OnClickHost()
     EnterHostWaitingState();
 }
 
-void ConnectionUI::OnClickPlayer2()
+void ConnectionUI::OnClickGuest()
 {
     is_ver_matched = true;
     std::string hostIp = GetEditText(m_editHostIp);
     int hostPort = GetEditInt(m_editHostPort);
     int listenPort = GetEditInt(m_editListenPort);
-
-    std::string otherIp = GetEditText(m_editOtherIp);
-    int otherPort = GetEditInt(m_editOtherPort);
-    int otherListenPort = GetEditInt(m_editOtherListenPort);
-
     EnableWindow(m_editTargetLatency, FALSE);
 
     if (listenPort == -1 || hostPort == -1)
         return;
 
-    if (!TryStartPlayer2(hostIp, hostPort, listenPort, otherIp, otherPort, otherListenPort))
+    if (!TryStartGuest(hostIp, hostPort, listenPort))
     {
-        MessageBoxA(m_hWnd, "fail to start as player2", "err", MB_OK | MB_ICONERROR);
+        MessageBoxA(m_hWnd, "fail to start as guest", "err", MB_OK | MB_ICONERROR);
         return;
     }
 
-    EnterPlayer2WaitingState();
+    EnterGuestWaitingState();
 
     // ping
-    SendPingAsPlayer2(Ctrl_Set_InitSetting);
-}
-
-void ConnectionUI::OnClickPlayer3()
-{
-    is_ver_matched = true;
-    std::string hostIp = GetEditText(m_editHostIp);
-    int hostPort = GetEditInt(m_editHostPort);
-    int listenPort = GetEditInt(m_editListenPort);
-
-    std::string otherIp = GetEditText(m_editOtherIp);
-    int otherPort = GetEditInt(m_editOtherPort);
-    int otherListenPort = GetEditInt(m_editOtherListenPort);
-
-    EnableWindow(m_editTargetLatency, FALSE);
-
-    if (listenPort == -1 || hostPort == -1)
-        return;
-
-    if (!TryStartPlayer3(hostIp, hostPort, listenPort, otherIp, otherPort, otherListenPort))
-    {
-        MessageBoxA(m_hWnd, "fail to start as player3", "err", MB_OK | MB_ICONERROR);
-        return;
-    }
-
-    EnterPlayer2WaitingState();
-
-    // ping
-    SendPingAsPlayer3(Ctrl_Set_InitSetting);
+    SendPingAsGuest(Ctrl_Set_InitSetting);
 }
 
 void ConnectionUI::OnClickStartGame()
@@ -1007,10 +412,8 @@ void ConnectionUI::OnClickStartGame()
     m_startGame = true;
     if (this->IsHost())
         SendPingAsHost(Ctrl_Start_Game);
-    else if (this->IsPlayer2())
-        SendPingAsPlayer2(Ctrl_Start_Game);
     else
-        SendPingAsPlayer3(Ctrl_Start_Game);
+        SendPingAsGuest(Ctrl_Start_Game);
     return;
 
     // DestroyWindow(m_hWnd);
@@ -1023,140 +426,71 @@ void ConnectionUI::ProcessHostNetwork()
     while (true)
     {
         Pack p;
-        bool hasData = false, hasDataOther;
-        bool connected = false, connectedOther;
+        bool hasData = false;
 
+        if (!m_host.PollReceive(p, hasData))
+            break;
+
+        if (!hasData)
+            break;
+
+        if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
+            is_ver_matched = false;
+
+        // host pong
+        if (p.type == PACK_PING)
         {
-            if (!m_host.PollReceive(p, hasData))
-                break;
 
-            if (!hasData)
-                break;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // host pong
-            if (p.type == PACK_PING)
+            Pack reply;
+            reply.type = PACK_PONG;
+            reply.seq = p.seq;
+            reply.sendTick = p.sendTick; // cal RTT
+            reply.echoTick = MyGetTickCount();
+            reply.ctrl = p.ctrl;
+            reply.ctrl.init_setting.ver = MULTI_NET_VER;
+            m_host.SendPack(reply);
+            if (!m_connected)
+                EnterConnectedState();
+            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
-
-                Pack reply;
-                reply.playerType = 1;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick; // cal RTT
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_host.SendPack(reply);
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-            }
-            // host pong2
-            else if (p.type == PACK_PONG)
-            {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyHostText(BuildLatencyText(m_host.GetPlayer2Ip(), m_host.GetPlayer2Port(), rtt));
-
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
-            }
-
-            if (!is_ver_matched)
-            {
-                MessageBoxA(NULL, "not matched player2/host version", "warning", MB_OK | MB_ICONWARNING);
-                m_host.Reset();
-                m_isHost = false;
-                m_isPlayer2 = false;
-                m_isPlayer3 = false;
-                m_connected = false;
-                m_lastPeriodicPingTick = 0;
-
-                EnableWindow(m_btnPlayer2, TRUE);
-                EnableWindow(m_btnPlayer3, TRUE);
-                SetText(m_btnHost, "as host");
-                SetLatencyHostText("no connection");
-                EnableWindow(m_btnStartGame, FALSE);
-                return;
+                m_startGame = true;
+                DestroyWindow(m_hWnd);
             }
         }
+        // host pong2
+        else if (p.type == PACK_PONG)
         {
-            if (!m_host.PollReceiveOther(p, hasDataOther))
-                break;
+            ULONGLONG now = MyGetTickCount();
+            ULONGLONG rtt = now - p.sendTick;
+            SetLatencyText(BuildLatencyText(m_host.GetGuestIp(), m_host.GetGuestPort(), rtt));
 
-            if (!hasData)
-                break;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // host pong
-            if (p.type == PACK_PING)
+            if (!m_connected)
+                EnterConnectedState();
+            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
-
-                Pack reply;
-                reply.playerType = 1;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick; // cal RTT
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_host.SendPackOther(reply);
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-            }
-            // host pong2
-            else if (p.type == PACK_PONG)
-            {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyOtherText(BuildLatencyText(m_host.GetPlayer3Ip(), m_host.GetPlayer3Port(), rtt));
-
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
-            }
-
-            if (!is_ver_matched)
-            {
-                MessageBoxA(NULL, "not matched player2/host version", "warning", MB_OK | MB_ICONWARNING);
-                m_host.Reset();
-                m_isHost = false;
-                m_isPlayer2 = false;
-                m_isPlayer3 = false;
-                m_connected = false;
-                m_lastPeriodicPingTick = 0;
-
-                EnableWindow(m_btnPlayer2, TRUE);
-                EnableWindow(m_btnPlayer3, TRUE);
-                SetText(m_btnHost, "as host");
-                SetLatencyOtherText("no connection");
-                EnableWindow(m_btnStartGame, FALSE);
-                return;
+                DestroyWindow(m_hWnd);
             }
         }
-        if (!m_connected && connected && connectedOther){
-            EnterConnectedState();
+
+        if (!is_ver_matched)
+        {
+            MessageBoxA(NULL, "not matched guest/host version", "warning", MB_OK | MB_ICONWARNING);
+            m_host.Reset();
+            m_isHost = false;
+            m_isGuest = false;
+            m_connected = false;
+            m_lastPeriodicPingTick = 0;
+
+            EnableWindow(m_btnGuest, TRUE);
+            SetText(m_btnHost, "as host");
+            SetLatencyText("no connection");
+            EnableWindow(m_btnStartGame, FALSE);
+            return;
         }
     }
 }
 
-void ConnectionUI::ProcessPlayer2Network()
+void ConnectionUI::ProcessGuestNetwork()
 {
     bool gotAnyData = false;
     if (!is_ver_matched)
@@ -1164,281 +498,84 @@ void ConnectionUI::ProcessPlayer2Network()
     while (true)
     {
         Pack p;
-        bool hasData = false, hasDataOther;
-        bool connected = false, connectedOther;
+        bool hasData = false;
 
+        if (!m_guest.PollReceive(p, hasData))
+            break;
+
+        if (!hasData)
+            break;
+
+        gotAnyData = true;
+
+        if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
+            is_ver_matched = false;
+
+        // guest rcv ping
+        if (p.type == PACK_PING)
         {
-            if (!m_player2.PollReceive(p, hasData))
-                break;
+            Pack reply;
+            reply.type = PACK_PONG;
+            reply.seq = p.seq;
+            reply.sendTick = p.sendTick;
+            reply.echoTick = MyGetTickCount();
+            reply.ctrl = p.ctrl;
+            reply.ctrl.init_setting.ver = MULTI_NET_VER;
+            m_guest.SendPack(reply);
 
-            if (!hasData)
-                break;
+            if (!m_connected)
+                EnterConnectedState();
 
-            gotAnyData = true;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // player2 rcv ping
-            if (p.type == PACK_PING)
+            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
-                Pack reply;
-                reply.playerType = 2;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick;
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_player2.SendPack(reply);
-
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-                else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
-                {
-                    SetDelay(p.ctrl.init_setting.delay);
-                }
+                m_startGame = true;
+                DestroyWindow(m_hWnd);
             }
-            // player2 rcv pong
-            else if (p.type == PACK_PONG)
+            else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
             {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyHostText(BuildLatencyText(m_player2.GetHostIp(), m_player2.GetHostPort(), rtt));
-
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
+                SetDelay(p.ctrl.init_setting.delay);
             }
         }
+        // guest rcv pong
+        else if (p.type == PACK_PONG)
         {
-            if (!m_player2.PollReceiveOther(p, hasDataOther))
-                break;
+            ULONGLONG now = MyGetTickCount();
+            ULONGLONG rtt = now - p.sendTick;
+            SetLatencyText(BuildLatencyText(m_guest.GetHostIp(), m_guest.GetHostPort(), rtt));
 
-            if (!hasData)
-                break;
+            if (!m_connected)
+                EnterConnectedState();
 
-            gotAnyData = true;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // player2 rcv ping
-            if (p.type == PACK_PING)
+            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
-                Pack reply;
-                reply.playerType = 2;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick;
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_player2.SendPackOther(reply);
-
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-                else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
-                {
-                    SetDelay(p.ctrl.init_setting.delay);
-                }
+                DestroyWindow(m_hWnd);
             }
-            // player2 rcv pong
-            else if (p.type == PACK_PONG)
-            {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyHostText(BuildLatencyText(m_player2.GetHostIp(), m_player2.GetHostPort(), rtt));
-
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
-            }
-        }
-        if (!m_connected && connected && connectedOther){
-            EnterConnectedState();
         }
     }
 
-    // player2 waiting
+    // guest waiting
     if (!m_connected)
     {
         ULONGLONG now = MyGetTickCount();
-        if (!gotAnyData && now - m_player2WaitStartTick > 1000)
+        if (!gotAnyData && now - m_guestWaitStartTick > 1000)
         {
-            ResetPlayer2ButtonAfterTimeout();
+            ResetGuestButtonAfterTimeout();
             MessageBoxA(m_hWnd, "no connection", "warning", MB_OK | MB_ICONWARNING);
         }
     }
     else if (!is_ver_matched)
     {
-        MessageBoxA(NULL, "not matched player2/host version", "warning", MB_OK | MB_ICONWARNING);
-        m_player2.Reset();
+        MessageBoxA(NULL, "not matched guest/host version", "warning", MB_OK | MB_ICONWARNING);
+        m_guest.Reset();
         m_isHost = false;
-        m_isPlayer2 = false;
+        m_isGuest = false;
         m_connected = false;
         m_lastPeriodicPingTick = 0;
-        m_player2WaitStartTick = 0;
+        m_guestWaitStartTick = 0;
 
         EnableWindow(m_btnHost, TRUE);
-        SetText(m_btnPlayer2, "as player2");
-        SetLatencyHostText("no connection");
-        EnableWindow(m_btnStartGame, FALSE);
-        return;
-    }
-}
-
-void ConnectionUI::ProcessPlayer3Network()
-{
-    bool gotAnyData = false;
-    if (!is_ver_matched)
-        return;
-    while (true)
-    {
-        Pack p;
-        bool hasData = false, hasDataOther;
-        bool connected = false, connectedOther;
-
-        {
-            if (!m_player3.PollReceive(p, hasData))
-                break;
-
-            if (!hasData)
-                break;
-
-            gotAnyData = true;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // player2 rcv ping
-            if (p.type == PACK_PING)
-            {
-                Pack reply;
-                reply.playerType = 3;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick;
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_player3.SendPack(reply);
-
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-                else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
-                {
-                    SetDelay(p.ctrl.init_setting.delay);
-                }
-            }
-            // player2 rcv pong
-            else if (p.type == PACK_PONG)
-            {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyHostText(BuildLatencyText(m_player2.GetHostIp(), m_player2.GetHostPort(), rtt));
-
-                connected = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
-            }
-        }
-        {
-            if (!m_player3.PollReceiveOther(p, hasDataOther))
-                break;
-
-            if (!hasData)
-                break;
-
-            gotAnyData = true;
-
-            if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
-                is_ver_matched = false;
-
-            // player2 rcv ping
-            if (p.type == PACK_PING)
-            {
-                Pack reply;
-                reply.playerType = 3;
-                reply.type = PACK_PONG;
-                reply.seq = p.seq;
-                reply.sendTick = p.sendTick;
-                reply.echoTick = MyGetTickCount();
-                reply.ctrl = p.ctrl;
-                reply.ctrl.init_setting.ver = MULTI_NET_VER;
-                m_player3.SendPackOther(reply);
-
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    m_startGame = true;
-                    DestroyWindow(m_hWnd);
-                }
-                else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
-                {
-                    SetDelay(p.ctrl.init_setting.delay);
-                }
-            }
-            // player2 rcv pong
-            else if (p.type == PACK_PONG)
-            {
-                ULONGLONG now = MyGetTickCount();
-                ULONGLONG rtt = now - p.sendTick;
-                SetLatencyHostText(BuildLatencyText(m_player2.GetHostIp(), m_player2.GetHostPort(), rtt));
-
-                connectedOther = true;
-                if (p.ctrl.ctrl_type == Ctrl_Start_Game)
-                {
-                    DestroyWindow(m_hWnd);
-                }
-            }
-        }
-        if (!m_connected && connected && connectedOther){
-            EnterConnectedState();
-        }
-    }
-
-    // player3 waiting
-    if (!m_connected)
-    {
-        ULONGLONG now = MyGetTickCount();
-        if (!gotAnyData && now - m_player2WaitStartTick > 1000)
-        {
-            ResetPlayer3ButtonAfterTimeout();
-            MessageBoxA(m_hWnd, "no connection", "warning", MB_OK | MB_ICONWARNING);
-        }
-    }
-    else if (!is_ver_matched)
-    {
-        MessageBoxA(NULL, "not matched player3/host version", "warning", MB_OK | MB_ICONWARNING);
-        m_player3.Reset();
-        m_isHost = false;
-        m_isPlayer3 = false;
-        m_connected = false;
-        m_lastPeriodicPingTick = 0;
-        m_player2WaitStartTick = 0;
-
-        EnableWindow(m_btnHost, TRUE);
-        SetText(m_btnPlayer3, "as player3");
-        SetLatencyHostText("no connection");
+        SetText(m_btnGuest, "as guest");
+        SetLatencyText("no connection");
         EnableWindow(m_btnStartGame, FALSE);
         return;
     }
@@ -1451,9 +588,9 @@ void ConnectionUI::OnTimer()
         ProcessHostNetwork();
         TryPeriodicPing();
     }
-    else if (m_isPlayer2)
+    else if (m_isGuest)
     {
-        ProcessPlayer2Network();
+        ProcessGuestNetwork();
         TryPeriodicPing();
     }
 }
@@ -1498,12 +635,8 @@ LRESULT ConnectionUI::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             OnClickHost();
             return 0;
 
-        case IDC_BTN_START_PLAYER2:
-            OnClickPlayer2();
-            return 0;
-
-        case IDC_BTN_START_PLAYER3:
-            OnClickPlayer3();
+        case IDC_BTN_START_GUEST:
+            OnClickGuest();
             return 0;
 
         case IDC_BTN_START_GAME:

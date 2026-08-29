@@ -30,23 +30,18 @@
 #include <stdio.h>
 #include <string.h>
 extern std::map<int, BITS_32> g_ctrl_bits_self;
-extern std::map<int, int> g_ctrl_rng_self;
-extern std::map<int, InGameCtrlType> g_ctrl_self;
-
 extern std::map<int, BITS_32> g_ctrl_bits_rcved;
 extern std::map<int, int> g_ctrl_rng_rcved;
+extern std::map<int, int> g_ctrl_rng_self;
 extern std::map<int, InGameCtrlType> g_ctrl_rcved;
-
-extern std::map<int, BITS_32> g_ctrl_bits_rcved_other;
-extern std::map<int, int> g_ctrl_rng_rcved_other;
-extern std::map<int, InGameCtrlType> g_ctrl_rcved_other;
+extern std::map<int, InGameCtrlType> g_ctrl_self;
 InGameCtrlType g_cur_ctrl = IGC_NONE;
 
 extern bool g_is_connected;
 extern bool g_is_sync;
 extern bool g_istry_to_reconnect;
 extern Host g_host;
-extern Player2 g_player2;
+extern Guest g_guest;
 extern int g_delay;
 extern bool g_is_host;
 extern bool g_is_single_mode;
@@ -222,10 +217,6 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
             g_ctrl_bits_rcved.clear();
             g_ctrl_rng_rcved.clear();
             g_ctrl_rcved.clear();
-
-            g_ctrl_bits_rcved_other.clear();
-            g_ctrl_rng_rcved_other.clear();
-            g_ctrl_rcved_other.clear();
             // g_ctrl_bits_self.clear();
             // g_ctrl_rng_self.clear();
             // g_ctrl_self.clear();
