@@ -12,6 +12,8 @@
 #define IDC_BTN_START_GAME 1008
 #define IDC_BTN_START_GAME_LOCAL 1010
 
+#define IDC_BTN_START_GUEST3 1011
+
 #define TIMER_ID_POLL 1
 #define TIMER_INTERVAL_MS 15
 
@@ -46,6 +48,7 @@ ConnectionUI::ConnectionUI(Host &h, Guest &g) : m_host(h), m_guest(g)
     m_editListenPort = NULL;
     m_btnHost = NULL;
     m_btnGuest = NULL;
+    m_btnGuest3 = NULL;
     m_staticLatency = NULL;
     m_editTargetLatency = NULL;
     m_btnStartGame = NULL;
@@ -196,11 +199,14 @@ void ConnectionUI::CreateControls(HWND hWnd)
         CreateWindowA("EDIT", port_listen, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 130, 100,
                       100, 24, hWnd, (HMENU)IDC_EDIT_LISTEN_PORT, NULL, NULL);
 
-    m_btnHost = CreateWindowA("BUTTON", "as host", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 200, 32, hWnd,
+    m_btnHost = CreateWindowA("BUTTON", "as host", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 100, 32, hWnd,
                               (HMENU)IDC_BTN_START_HOST, NULL, NULL);
 
-    m_btnGuest = CreateWindowA("BUTTON", "as guest", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 150, 200, 32, hWnd,
+    m_btnGuest = CreateWindowA("BUTTON", "as player2", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 140, 150, 100, 32, hWnd,
                                (HMENU)IDC_BTN_START_GUEST, NULL, NULL);
+
+    m_btnGuest3 = CreateWindowA("BUTTON", "as player3", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 150, 100, 32, hWnd,
+                               (HMENU)IDC_BTN_START_GUEST3, NULL, NULL);
 
     CreateWindowA("STATIC", "current state:", WS_CHILD | WS_VISIBLE, 20, 210, 80, 20, hWnd, NULL, NULL, NULL);
 
@@ -255,10 +261,10 @@ bool ConnectionUI::TryStartHost(int listenPort)
     return m_host.Start("", listenPort, AF_INET6);
 }
 
-bool ConnectionUI::TryStartGuest(const std::string &hostIp, int hostPort, int listenPort)
+bool ConnectionUI::TryStartGuest(const std::string &hostIp, int hostPort, int listenPort, int playerType)
 {
     int family = (hostIp.find(':') != std::string::npos) ? AF_INET6 : AF_INET;
-    return m_guest.Start(hostIp, hostPort, listenPort, family);
+    return m_guest.Start(hostIp, hostPort, listenPort, playerType, family);
 }
 
 void ConnectionUI::EnterHostWaitingState()
@@ -326,7 +332,8 @@ void ConnectionUI::SendPingAsHost(Control ctrl)
     p.sendTick = MyGetTickCount();
     p.echoTick = 0;
 
-    m_host.SendPack(p);
+    m_host.SendPack(p,2);
+    m_host.SendPack(p,3);
 }
 
 void ConnectionUI::SendPingAsGuest(Control ctrl)
@@ -382,7 +389,7 @@ void ConnectionUI::OnClickHost()
     EnterHostWaitingState();
 }
 
-void ConnectionUI::OnClickGuest()
+void ConnectionUI::OnClickGuest(int playerType)
 {
     is_ver_matched = true;
     std::string hostIp = GetEditText(m_editHostIp);
@@ -393,7 +400,7 @@ void ConnectionUI::OnClickGuest()
     if (listenPort == -1 || hostPort == -1)
         return;
 
-    if (!TryStartGuest(hostIp, hostPort, listenPort))
+    if (!TryStartGuest(hostIp, hostPort, listenPort, playerType))
     {
         MessageBoxA(m_hWnd, "fail to start as guest", "err", MB_OK | MB_ICONERROR);
         return;
@@ -410,8 +417,9 @@ void ConnectionUI::OnClickStartGame()
     if (!m_connected)
         return;
     m_startGame = true;
-    if (this->IsHost())
+    if (this->IsHost()){
         SendPingAsHost(Ctrl_Start_Game);
+    }
     else
         SendPingAsGuest(Ctrl_Start_Game);
     return;
@@ -448,11 +456,12 @@ void ConnectionUI::ProcessHostNetwork()
             reply.echoTick = MyGetTickCount();
             reply.ctrl = p.ctrl;
             reply.ctrl.init_setting.ver = MULTI_NET_VER;
-            m_host.SendPack(reply);
+            m_host.SendPack(reply, p.playerType);
             if (!m_connected)
                 EnterConnectedState();
             if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
+                SendPingAsHost(Ctrl_Start_Game);
                 m_startGame = true;
                 DestroyWindow(m_hWnd);
             }
@@ -468,6 +477,7 @@ void ConnectionUI::ProcessHostNetwork()
                 EnterConnectedState();
             if (p.ctrl.ctrl_type == Ctrl_Start_Game)
             {
+                SendPingAsHost(Ctrl_Start_Game);
                 DestroyWindow(m_hWnd);
             }
         }
@@ -636,7 +646,11 @@ LRESULT ConnectionUI::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             return 0;
 
         case IDC_BTN_START_GUEST:
-            OnClickGuest();
+            OnClickGuest(2);
+            return 0;
+
+        case IDC_BTN_START_GUEST3:
+            OnClickGuest(3);
             return 0;
 
         case IDC_BTN_START_GAME:

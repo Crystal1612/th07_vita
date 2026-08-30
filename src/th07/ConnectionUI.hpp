@@ -46,6 +46,7 @@ class ConnectionUI
     HWND m_editListenPort;
     HWND m_btnHost;
     HWND m_btnGuest;
+    HWND m_btnGuest3;
     HWND m_staticLatency;
     HWND m_editTargetLatency;
     HWND m_btnStartGame;
@@ -67,7 +68,7 @@ class ConnectionUI
     void CreateControls(HWND hWnd);
 
     void OnClickHost();
-    void OnClickGuest();
+    void OnClickGuest(int playerType);
     void OnClickStartGame();
     void OnTimer();
 
@@ -91,5 +92,5 @@ class ConnectionUI
     std::string BuildLatencyText(const std::string &ip, int port, ULONGLONG rtt);
 
     bool TryStartHost(int listenPort);
-    bool TryStartGuest(const std::string &hostIp, int hostPort, int listenPort);
+    bool TryStartGuest(const std::string &hostIp, int hostPort, int listenPort, int playerType);
 };

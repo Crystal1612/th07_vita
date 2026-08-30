@@ -89,8 +89,8 @@ u32 SetButtonFromDirectInputJoystate(u32 *outButtons,
                                      u32 touhouButton, u8 *inputButtons);
 
 // netplay
-bool RcvPacks();
-void SendKeys(int frame);
+bool RcvPacks(int playerType);
+void SendKeys(int frame, int playerType);
 u32 GetInput_Net(int frame, bool is_in_UI, int &cur_ctrl);
 u32 GetInput_Single(int &cur_ctrl);
 

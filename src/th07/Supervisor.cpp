@@ -30,11 +30,13 @@
 #include <stdio.h>
 #include <string.h>
 extern std::map<int, BITS_32> g_ctrl_bits_self;
-extern std::map<int, BITS_32> g_ctrl_bits_rcved;
-extern std::map<int, int> g_ctrl_rng_rcved;
 extern std::map<int, int> g_ctrl_rng_self;
-extern std::map<int, InGameCtrlType> g_ctrl_rcved;
 extern std::map<int, InGameCtrlType> g_ctrl_self;
+
+extern std::map<int, BITS_32> g_ctrl_bits_rcved[CONTROL_RECEIVER];
+extern std::map<int, int> g_ctrl_rng_rcved[CONTROL_RECEIVER];
+extern std::map<int, InGameCtrlType> g_ctrl_rcved[CONTROL_RECEIVER];
+
 InGameCtrlType g_cur_ctrl = IGC_NONE;
 
 extern bool g_is_connected;
@@ -51,6 +53,14 @@ extern bool g_is_in_insane_mode = false;
 bool g_resync_trigger = false;
 int g_resync_stage_frame = 0;// end
 int g_change_option_hotkey_cd = 40;
+
+void GCtrlRemoval(){
+    for(int i=0;i<CONTROL_RECEIVER; i++){
+        g_ctrl_bits_rcved[i].clear();
+        g_ctrl_rng_rcved[i].clear();
+        g_ctrl_rcved[i].clear();
+    }
+}
 
 // GLOBAL: TH07 0x0049ee40
 ControllerMapping g_ControllerMapping = {0, 1, 2, 4, -1, -1, -1, -1, 3};
@@ -214,9 +224,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
         if (last_frame_a > frame_a)
         {
             frame_a = s->calcCount = 0;
-            g_ctrl_bits_rcved.clear();
-            g_ctrl_rng_rcved.clear();
-            g_ctrl_rcved.clear();
+            GCtrlRemoval();
             // g_ctrl_bits_self.clear();
             // g_ctrl_rng_self.clear();
             // g_ctrl_self.clear();
@@ -259,13 +267,17 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                     if (g_resync_stage_frame <= s->calcCount)
                     {
                         g_resync_trigger = false;
-                        Controller::RcvPacks();
+                        if(g_is_host){
+                            Controller::RcvPacks(2);
+                            Controller::RcvPacks(3);
+                        }
+                        else{
+                            Controller::RcvPacks(1);
+                        }
                         g_Rng.seed = 0;
                         // s->calcCount = 0;
                         // frame_a = s->calcCount;
-                        g_ctrl_bits_rcved.clear();
-                        g_ctrl_rng_rcved.clear();
-                        g_ctrl_rcved.clear();
+                        GCtrlRemoval();
                         g_cur_ctrl = IGC_NONE;
 
                         g_is_sync = true;
@@ -291,7 +303,8 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
 
                         pack.ctrl.ctrl_type = Ctrl_Try_Resync;
                         pack.ctrl.resync_setting.frame_to_re_sync = g_resync_stage_frame;
-                        g_host.SendPack(pack);
+                        g_host.SendPack(pack,2);
+                        g_host.SendPack(pack,3);
                     }
                 }
             }
@@ -319,17 +332,29 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
             {
                 g_CurFrameRawInput = 0;
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, "try to reconnect...(%s)", g_is_sync ? "sync" : "desynced");
-                Controller::SendKeys(frame_a);
-                if (Controller::RcvPacks())
-                {
-                    g_Rng.seed = 0;
-                    g_is_connected = true;
-                    g_istry_to_reconnect = false;
-                    g_ctrl_bits_rcved.clear();
-                    g_ctrl_rng_rcved.clear();
-                    g_ctrl_rcved.clear();
-                    s->calcCount = 0;
-                    g_cur_ctrl = IGC_NONE;
+                if(g_is_host){
+                    Controller::SendKeys(frame_a,2);
+                    Controller::SendKeys(frame_a,3);
+                    if (Controller::RcvPacks(2)&&Controller::RcvPacks(3))
+                    {
+                        g_Rng.seed = 0;
+                        g_is_connected = true;
+                        g_istry_to_reconnect = false;
+                        GCtrlRemoval();
+                        s->calcCount = 0;
+                        g_cur_ctrl = IGC_NONE;
+                    }
+                }else{
+                    Controller::SendKeys(frame_a,1);
+                    if (Controller::RcvPacks(1))
+                    {
+                        g_Rng.seed = 0;
+                        g_is_connected = true;
+                        g_istry_to_reconnect = false;
+                        GCtrlRemoval();
+                        s->calcCount = 0;
+                        g_cur_ctrl = IGC_NONE;
+                    }
                 }
             }
             else
@@ -409,9 +434,7 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
     if (arg->wantedState != arg->curState)
     {
         // netplay
-        g_ctrl_bits_rcved.clear();
-        g_ctrl_rng_rcved.clear();
-        g_ctrl_rcved.clear();
+        GCtrlRemoval();
 
         arg->prevState = arg->wantedState;
         // STRING: TH07 0x00497230

@@ -40,7 +40,7 @@ LARGE_INTEGER g_LastPerfCounter;
 
 
 // netplay limiter, directly by rueee
-bool g_force_wind = false;
+bool g_force_wind = true;
 class Limiter {
 public:
 	static void Initialize();

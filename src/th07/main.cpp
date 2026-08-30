@@ -25,10 +25,9 @@
 // netplay
 Host g_host;
 Guest g_guest;
-Guest g_guest3;
+int g_playerType = 1;
 int g_delay = 1;
 bool g_is_host = false;
-bool g_is_guest_3 = false;
 bool g_is_connected = false;
 bool g_is_single_mode = false;
 
@@ -76,6 +75,9 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     ui.Show();
     g_delay = ui.GetDelay();
     g_is_host = ui.IsHost();
+    if(!g_is_host){
+        g_playerType = g_guest.GetPlayerType();
+    }
     if (!ui.IsGameStarted())
         return 1;
     if (!ui.IsConnected())
@@ -92,7 +94,7 @@ i32 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     // STRING: TH07 0x00497c60
     if (g_Supervisor.LoadConfig("th07.cfg") != ZUN_SUCCESS)
     {
-        goto stop;
+        // goto stop;
     }
 
     GameWindow::ChecksumExecutable();

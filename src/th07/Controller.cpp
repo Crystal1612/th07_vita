@@ -16,17 +16,17 @@
 #include <map>
 #define BITS_32 Bits<32>
 std::map<int, BITS_32> g_ctrl_bits_self;
-std::map<int, BITS_32> g_ctrl_bits_rcved;
-std::map<int, int> g_ctrl_rng_rcved;
+std::map<int, BITS_32> g_ctrl_bits_rcved[CONTROL_RECEIVER];
+std::map<int, int> g_ctrl_rng_rcved[CONTROL_RECEIVER];
 std::map<int, int> g_ctrl_rng_self;
-std::map<int, InGameCtrlType> g_ctrl_rcved;
+std::map<int, InGameCtrlType> g_ctrl_rcved[CONTROL_RECEIVER];
 std::map<int, InGameCtrlType> g_ctrl_self;
 
 extern Host g_host;
 extern Guest g_guest;
 extern int g_delay;
 extern bool g_is_host;
-extern bool g_is_host_p1;
+extern int g_playerType;
 extern bool g_is_connected;
 bool g_is_sync = true;
 extern bool g_istry_to_reconnect;
@@ -476,8 +476,6 @@ u32 Controller::GetInput()
             buttons |= KEY_PRESSED(DIK_G, TH_BUTTON_DOWN2);
             buttons |= KEY_PRESSED(DIK_F, TH_BUTTON_LEFT2);
             buttons |= KEY_PRESSED(DIK_H, TH_BUTTON_RIGHT2);
-        // TODO : all netplay
-        }{
 
             //Player 3
             buttons |= KEY_PRESSED(DIK_V, TH_BUTTON_SHOOT3);
@@ -509,7 +507,7 @@ void Controller::ResetKeyboard()
 
 // netplay
 
-bool Controller::RcvPacks()
+bool Controller::RcvPacks(int playerType)
 {
     bool hasdata_all = false;
     bool hasdata;
@@ -532,9 +530,9 @@ bool Controller::RcvPacks()
             int frame = pack.ctrl.frame;
             for (int i = 0; i < KeyPackFrameNum; i++)
             {
-                g_ctrl_bits_rcved[frame - i] = pack.ctrl.keys[i];
-                g_ctrl_rng_rcved[frame - i] = pack.ctrl.rng_seed[i];
-                g_ctrl_rcved[frame - i] = pack.ctrl.igc_type[i];
+                g_ctrl_bits_rcved[pack.playerType][frame - i] = pack.ctrl.keys[i];
+                g_ctrl_rng_rcved[pack.playerType][frame - i] = pack.ctrl.rng_seed[i];
+                g_ctrl_rcved[pack.playerType][frame - i] = pack.ctrl.igc_type[i];
             }
         }
         else if (pack.ctrl.ctrl_type == Ctrl_Try_Resync)
@@ -550,7 +548,7 @@ bool Controller::RcvPacks()
     return hasdata_all;
 }
 
-void Controller::SendKeys(int frame)
+void Controller::SendKeys(int frame, int playerType)
 {
     Pack pack;
     pack.echoTick = 0;
@@ -582,7 +580,7 @@ void Controller::SendKeys(int frame)
     }
     if (g_is_host)
     {
-        g_host.SendPack(pack);
+        g_host.SendPack(pack, playerType);
     }
     else
     {
@@ -619,6 +617,7 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
 {
     InGameCtrlType self_ctrl = IGC_NONE;
     InGameCtrlType rcv_ctrl = IGC_NONE;
+    InGameCtrlType rcv_ctrl3 = IGC_NONE;
 
     out_ctrl = IGC_NONE;
     if (frame - g_delay < 0)
@@ -633,9 +632,16 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     if (res2 != g_ctrl_self.end())
         self_ctrl = res2->second;
 
+    std::map<int, BITS_32>::iterator res3;
+
     u32 rcv_key = 0;
+    u32 rcv_key3 = 0;
+
+    bool is_sync = false;
+    bool is_sync3 = false;
 
     bool has_rcv_data = false;
+    bool has_rcv_data3 = false;
     static bool inited = false;
     static LARGE_INTEGER freq;
     LARGE_INTEGER cur;
@@ -649,38 +655,88 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     QueryPerformanceCounter(&cur);
     max_wait_to_time.QuadPart = cur.QuadPart + freq.QuadPart * 5.0; // 5.0s
     ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1;    // 0.1s
-    do
-    {
-        res = g_ctrl_bits_rcved.find(frame - g_delay);
-        if (res != g_ctrl_bits_rcved.end())
+    if(g_is_host){
+        do
         {
-            WriteToInt(res->second, rcv_key);
-            g_is_sync = (g_ctrl_rng_rcved[frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
-            rcv_ctrl = g_ctrl_rcved[frame - g_delay];
-            has_rcv_data = true;
-            break;
-        }
-        else
-        {
-            int n_transfer = 1;
-            while (cur.QuadPart < max_wait_to_time.QuadPart)
+            res = g_ctrl_bits_rcved[2].find(frame - g_delay);
+            if (res != g_ctrl_bits_rcved[2].end())
             {
-                if (Controller::RcvPacks())
+                WriteToInt(res->second, rcv_key);
+                is_sync = (g_ctrl_rng_rcved[2][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+                rcv_ctrl = g_ctrl_rcved[2][frame - g_delay];
+                has_rcv_data = true;
+            }
+            res3 = g_ctrl_bits_rcved[3].find(frame - g_delay);
+            if (res3 != g_ctrl_bits_rcved[3].end()) {
+                WriteToInt(res3->second, rcv_key3);
+                is_sync3 = (g_ctrl_rng_rcved[3][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+                rcv_ctrl3 = g_ctrl_rcved[3][frame - g_delay];
+                has_rcv_data3 = true;
+            }
+            if(has_rcv_data && has_rcv_data3){
+                break;
+            }else{
+                int n_transfer = 1;
+                while (cur.QuadPart < max_wait_to_time.QuadPart)
                 {
+                    bool packeds = true;
+                    if(res == g_ctrl_bits_rcved[2].end()){
+                        packeds &= Controller::RcvPacks(2);
+                    }
+                    if(res3 == g_ctrl_bits_rcved[3].end()){
+                        packeds &= Controller::RcvPacks(3);
+                    }
+                    if (packeds)
+                    {
+                        Sleep(1);
+                        break;
+                    }
                     Sleep(1);
-                    break;
-                }
-                Sleep(1);
-                QueryPerformanceCounter(&cur);
-                // send key to another player to avoid lock
-                if (cur.QuadPart > ping_key_time.QuadPart)
-                {
-                    ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
-                    Controller::SendKeys(frame);
+                    QueryPerformanceCounter(&cur);
+                    // send key to another player to avoid lock
+                    if (cur.QuadPart > ping_key_time.QuadPart)
+                    {
+                        ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
+                        Controller::SendKeys(frame, 2);
+                        Controller::SendKeys(frame, 3);
+                    }
                 }
             }
-        }
-    } while (cur.QuadPart < max_wait_to_time.QuadPart);
+        } while (cur.QuadPart < max_wait_to_time.QuadPart);
+    }else{
+        do
+        {
+            res = g_ctrl_bits_rcved[1].find(frame - g_delay);
+            if (res != g_ctrl_bits_rcved[1].end())
+            {
+                WriteToInt(res->second, rcv_key);
+                g_is_sync = (g_ctrl_rng_rcved[1][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+                rcv_ctrl = g_ctrl_rcved[1][frame - g_delay];
+                has_rcv_data = true;
+                break;
+            }
+            else
+            {
+                int n_transfer = 1;
+                while (cur.QuadPart < max_wait_to_time.QuadPart)
+                {
+                    if (Controller::RcvPacks(1))
+                    {
+                        Sleep(1);
+                        break;
+                    }
+                    Sleep(1);
+                    QueryPerformanceCounter(&cur);
+                    // send key to another player to avoid lock
+                    if (cur.QuadPart > ping_key_time.QuadPart)
+                    {
+                        ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
+                        Controller::SendKeys(frame, 1);
+                    }
+                }
+            }
+        } while (cur.QuadPart < max_wait_to_time.QuadPart);
+    }
     if (!has_rcv_data)
     {
         rcv_key = 0;
@@ -690,6 +746,8 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
         g_is_connected = false;
         g_istry_to_reconnect = false;
     }
+
+    g_is_sync = is_sync && is_sync3;
 
     if (self_ctrl != IGC_NONE && rcv_ctrl != IGC_NONE)
     {
@@ -701,7 +759,7 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     }
 
     if (is_in_UI)
-        return self_key | rcv_key;
+        return self_key | rcv_key | rcv_key3;
     u32 finres = 0;
     if (g_is_host)
     {
@@ -714,35 +772,39 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
 
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_LEFT3, TH_BUTTON_LEFT3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_RIGHT3, TH_BUTTON_RIGHT3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_UP3, TH_BUTTON_UP3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_DOWN3, TH_BUTTON_DOWN3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SHOOT3, TH_BUTTON_SHOOT3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_BOMB3, TH_BUTTON_BOMB3);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_FOCUS3, TH_BUTTON_FOCUS3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_UP, TH_BUTTON_UP3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
 
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
         finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_MENU, TH_BUTTON_MENU);
+        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
     }
     else
     {
         finres = rcv_key;
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
-
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT3, TH_BUTTON_LEFT3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT3, TH_BUTTON_RIGHT3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_UP3, TH_BUTTON_UP3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN3, TH_BUTTON_DOWN3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT3, TH_BUTTON_SHOOT3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB3, TH_BUTTON_BOMB3);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS3, TH_BUTTON_FOCUS3);
+        if(g_playerType==2){
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
+        }else if(g_playerType==3){
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
+        }
 
         finres |= TH_ISDOWN(self_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
         finres |= TH_ISDOWN(self_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
@@ -775,31 +837,44 @@ u32 Controller::GetInput_Net(int frame, bool is_in_UI, int &cur_ctrl)
 
     // remove frames
     int frame_rem = 80;
-    std::map<int, BITS_32>::iterator last_res = g_ctrl_bits_self.find(frame - frame_rem);
+    std::map<int, BITS_32>::iterator last_res;
+    std::map<int, int>::iterator last_res_seed;
+    std::map<int, InGameCtrlType>::iterator last_res_ctrl;
+
+    last_res = g_ctrl_bits_self.find(frame - frame_rem);
     if (last_res != g_ctrl_bits_self.end())
         g_ctrl_bits_self.erase(last_res);
 
-    last_res = g_ctrl_bits_rcved.find(frame - frame_rem);
-    if (last_res != g_ctrl_bits_rcved.end())
-        g_ctrl_bits_rcved.erase(last_res);
-
-    std::map<int, int>::iterator last_res_seed = g_ctrl_rng_rcved.find(frame - frame_rem);
-    if (last_res_seed != g_ctrl_rng_rcved.end())
-        g_ctrl_rng_rcved.erase(last_res_seed);
     last_res_seed = g_ctrl_rng_self.find(frame - frame_rem);
     if (last_res_seed != g_ctrl_rng_self.end())
         g_ctrl_rng_self.erase(last_res_seed);
 
-    std::map<int, InGameCtrlType>::iterator last_res_ctrl = g_ctrl_rcved.find(frame - frame_rem);
-    if (last_res_ctrl != g_ctrl_rcved.end())
-        g_ctrl_rcved.erase(last_res_ctrl);
     last_res_ctrl = g_ctrl_self.find(frame - frame_rem);
     if (last_res_ctrl != g_ctrl_self.end())
         g_ctrl_self.erase(last_res_ctrl);
 
+    for(int i=0;i<CONTROL_RECEIVER;i++){
+        last_res = g_ctrl_bits_rcved[i].find(frame - frame_rem);
+        if (last_res != g_ctrl_bits_rcved[i].end())
+            g_ctrl_bits_rcved[i].erase(last_res);
+        last_res_seed = g_ctrl_rng_rcved[i].find(frame - frame_rem);
+        if (last_res_seed != g_ctrl_rng_rcved[i].end())
+            g_ctrl_rng_rcved[i].erase(last_res_seed);
+        last_res_ctrl = g_ctrl_rcved[i].find(frame - frame_rem);
+        if (last_res_ctrl != g_ctrl_rcved[i].end())
+            g_ctrl_rcved[i].erase(last_res_ctrl);
+    }
+
     HandleControlKeys(frame);
-    Controller::SendKeys(frame);
-    RcvPacks();
+    if(g_is_host){
+        Controller::SendKeys(frame,2);
+        Controller::SendKeys(frame,3);
+        RcvPacks(2);
+        RcvPacks(3);
+    }else{
+        Controller::SendKeys(frame,1);
+        RcvPacks(1);
+    }
 
     u32 res = GetKeys(frame, is_in_UI, cur_ctrl);
     return res;

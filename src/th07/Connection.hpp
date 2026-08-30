@@ -9,6 +9,7 @@
 #include <string>
 #pragma comment(lib, "Ws2_32.lib")
 #define BITS_32 Bits<32>
+#define CONTROL_RECEIVER 4
 
 void PrintError(char *msg);
 void PrintError(char *msg, int err);
@@ -160,6 +161,7 @@ class ConnectionBase
   protected:
     SOCKET m_socket;
     int m_family;
+    int m_playerType;
 
   protected:
     static bool s_winsockInited;
@@ -169,6 +171,7 @@ class ConnectionBase
     ConnectionBase();
     virtual ~ConnectionBase();
     void Reset();
+    int GetPlayerType();
 
   protected:
     bool InitWinsock();
@@ -196,6 +199,9 @@ class Host : public ConnectionBase
 
     std::string m_guestIp;
     int m_guestPort;
+    std::string m_guestIp3;
+    int m_guestPort3;
+
     std::string m_lastBindIp;
     int m_lastBindPort;
     int m_lastFamily;
@@ -207,7 +213,7 @@ class Host : public ConnectionBase
   public:
     bool Start(const std::string &bindIp, int port, int family = AF_INET6);
     bool PollReceive(Pack &outPack, bool &hasData);
-    bool SendPack(const Pack &pack);
+    bool SendPack(Pack &pack, int playerType);
 
     bool IsHost() const;
     bool IsGuest() const;
@@ -228,7 +234,6 @@ class Guest : public ConnectionBase
 {
   private:
     std::string m_hostIp;
-    int m_playerType;
     int m_hostPort;
 
     int m_localPort;
@@ -243,9 +248,9 @@ class Guest : public ConnectionBase
     virtual ~Guest();
 
   public:
-    bool Start(const std::string &hostIp, int hostPort, int localPort, int family);
+    bool Start(const std::string &hostIp, int hostPort, int localPort, int playerType, int family);
     bool PollReceive(Pack &outPack, bool &hasData);
-    bool SendPack(const Pack &pack);
+    bool SendPack(Pack &pack);
 
     bool IsHost() const;
     bool IsGuest() const;
