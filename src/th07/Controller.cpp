@@ -436,7 +436,7 @@ u32 Controller::GetInput()
         HRESULT hr = g_Supervisor.keyboard->GetDeviceState(sizeof(keyboardState),
                                                            keyboardState);
         buttons = 0;
-        if (hr == DIERR_INPUTLOST)
+        if (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED)
         {
             g_Supervisor.keyboard->Acquire();
             return GetControllerInput(buttons);

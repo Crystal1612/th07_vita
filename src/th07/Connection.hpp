@@ -139,6 +139,7 @@ struct CtrlPack
 struct Pack
 {
     int type; // 1=HELLO, 2=PING, 3=PONG, 4=usual trans
+    int playerType;
     unsigned int seq;
     ULONGLONG sendTick;
     ULONGLONG echoTick;
@@ -227,6 +228,7 @@ class Guest : public ConnectionBase
 {
   private:
     std::string m_hostIp;
+    int m_playerType;
     int m_hostPort;
 
     int m_localPort;

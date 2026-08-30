@@ -25,8 +25,10 @@
 // netplay
 Host g_host;
 Guest g_guest;
+Guest g_guest3;
 int g_delay = 1;
 bool g_is_host = false;
+bool g_is_guest_3 = false;
 bool g_is_connected = false;
 bool g_is_single_mode = false;
 
