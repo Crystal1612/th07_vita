@@ -329,20 +329,6 @@ struct Player
     // sprite
     i32 anmFilePlayer;
     i32 anmOffsetPlayer;
-    // button
-    u32 buttonShoot;
-    u32 buttonBomb;
-    u32 buttonFocus;
-    u32 buttonUp;
-    u32 buttonDown;
-    u32 buttonLeft;
-    u32 buttonRight;
-    //do i need this?
-    // u32 buttonUpLeft;
-    // u32 buttonUpRight;
-    // u32 buttonDownLeft;
-    // u32 buttonDownRight;
-    // u32 buttonDirection;
 };
 // C_ASSERT(sizeof(Player) == 0xb7e78);
 extern Player g_Player;

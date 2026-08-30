@@ -84,6 +84,14 @@ const char *g_ShooterTableFocus[6] = {
     "data/ply02bs.sht",
 };
 
+extern i32 TH_BUTTON_SHOOT_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_SHOOT,TH_BUTTON_SHOOT2,TH_BUTTON_SHOOT3};
+extern i32 TH_BUTTON_BOMB_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_BOMB,TH_BUTTON_BOMB2,TH_BUTTON_BOMB3};
+extern i32 TH_BUTTON_FOCUS_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_FOCUS,TH_BUTTON_FOCUS2,TH_BUTTON_FOCUS3};
+extern i32 TH_BUTTON_UP_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_UP,TH_BUTTON_UP2,TH_BUTTON_UP3};
+extern i32 TH_BUTTON_DOWN_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_DOWN,TH_BUTTON_DOWN2,TH_BUTTON_DOWN3};
+extern i32 TH_BUTTON_LEFT_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_LEFT,TH_BUTTON_LEFT2,TH_BUTTON_LEFT3};
+extern i32 TH_BUTTON_RIGHT_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_RIGHT,TH_BUTTON_RIGHT2,TH_BUTTON_RIGHT3};
+
 // GLOBAL: TH07 0x004bdad8
 Player g_Player;
 Player g_Player2;
@@ -1263,43 +1271,43 @@ i32 Player::HandlePlayerInputs()
     direction = this->playerDirection;
     this->playerDirection = MOVEMENT_NONE;
 
-    if (IS_PRESSED_GAME(this->buttonUp))
+    if (IS_PRESSED_GAME(TH_BUTTON_UP_MAP[this->playerType]))
     {
         this->playerDirection = MOVEMENT_UP;
-        if (IS_PRESSED_GAME(this->buttonLeft))
+        if (IS_PRESSED_GAME(TH_BUTTON_LEFT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_UP_LEFT;
         }
-        if (IS_PRESSED_GAME(this->buttonRight))
+        if (IS_PRESSED_GAME(TH_BUTTON_RIGHT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_UP_RIGHT;
         }
     }
-    else if (IS_PRESSED_GAME(this->buttonDown))
+    else if (IS_PRESSED_GAME(TH_BUTTON_DOWN_MAP[this->playerType]))
     {
         this->playerDirection = MOVEMENT_DOWN;
-        if (IS_PRESSED_GAME(this->buttonLeft))
+        if (IS_PRESSED_GAME(TH_BUTTON_LEFT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_DOWN_LEFT;
         }
-        if (IS_PRESSED_GAME(this->buttonRight))
+        if (IS_PRESSED_GAME(TH_BUTTON_RIGHT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_DOWN_RIGHT;
         }
     }
     else
     {
-        if (IS_PRESSED_GAME(this->buttonLeft))
+        if (IS_PRESSED_GAME(TH_BUTTON_LEFT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_LEFT;
         }
-        if (IS_PRESSED_GAME(this->buttonRight))
+        if (IS_PRESSED_GAME(TH_BUTTON_RIGHT_MAP[this->playerType]))
         {
             this->playerDirection = MOVEMENT_RIGHT;
         }
     }
 
-    if (IS_PRESSED_GAME(this->buttonFocus))
+    if (IS_PRESSED_GAME(TH_BUTTON_FOCUS_MAP[this->playerType]))
     {
         this->isFocus = 1;
         switch (this->playerDirection)
@@ -1618,13 +1626,13 @@ i32 Player::HandlePlayerInputs()
             break;
         }
     }
-    if (IS_PRESSED_GAME(this->buttonShoot) && !g_Gui.HasCurrentMsgIdx())
+    if (IS_PRESSED_GAME(TH_BUTTON_SHOOT_MAP[this->playerType]) && !g_Gui.HasCurrentMsgIdx())
     {
         if (!g_GameManager.CheckGameIntegrity())
         {
             StartFireBulletTimer();
         }
-        if (!IS_PRESSED_GAME(this->buttonFocus))
+        if (!IS_PRESSED_GAME(TH_BUTTON_FOCUS_MAP[this->playerType]))
         {
             if (this->velocity.x != 0.0f)
             {
@@ -1689,7 +1697,7 @@ void Player::UpdateBombProjectiles()
 void Player::UpdateBorderAndBombState()
 {
     if (this->hasBorder != BORDER_NONE && !this->bombInfo.isInUse &&
-        IS_PRESSED_GAME(this->buttonBomb))
+        IS_PRESSED_GAME(TH_BUTTON_BOMB_MAP[this->playerType]))
     {
         BreakBorder(1);
         this->isBombing = 0;
@@ -1728,7 +1736,7 @@ void Player::UpdateBorderAndBombState()
                 this->respawnTimer != 0 &&
                 (i32)g_GameManager.globals->bombsRemaining > 0 &&
                 this->borderInvulnerabilityTime == 0 &&
-                IS_PRESSED_GAME(this->buttonBomb))
+                IS_PRESSED_GAME(TH_BUTTON_BOMB_MAP[this->playerType]))
             {
                 g_ReplayManager->replayEventFlags |= 1;
                 g_GameManager.AddBombsUsed(1);
@@ -2640,37 +2648,16 @@ ZunResult Player::RegisterChain(u32 param_1)
     }
     // apply it's controller. compatslop
     g_Player.playerEffectAttach = 24;
-    g_Player.buttonShoot = TH_BUTTON_SHOOT;
-    g_Player.buttonBomb = TH_BUTTON_BOMB;
-    g_Player.buttonFocus = TH_BUTTON_FOCUS;
-    g_Player.buttonUp = TH_BUTTON_UP;
-    g_Player.buttonDown = TH_BUTTON_DOWN;
-    g_Player.buttonLeft = TH_BUTTON_LEFT;
-    g_Player.buttonRight = TH_BUTTON_RIGHT;
     
     if(RegisteringChain(&g_Player2,param_1,2)==ZUN_ERROR){
         return ZUN_ERROR;
     }
     g_Player2.playerEffectAttach = 34;
-    g_Player2.buttonShoot = TH_BUTTON_SHOOT2;
-    g_Player2.buttonBomb = TH_BUTTON_BOMB2;
-    g_Player2.buttonFocus = TH_BUTTON_FOCUS2;
-    g_Player2.buttonUp = TH_BUTTON_UP2;
-    g_Player2.buttonDown = TH_BUTTON_DOWN2;
-    g_Player2.buttonLeft = TH_BUTTON_LEFT2;
-    g_Player2.buttonRight = TH_BUTTON_RIGHT2;
 
     if(RegisteringChain(&g_Player3,param_1,3)==ZUN_ERROR){
         return ZUN_ERROR;
     }
     g_Player3.playerEffectAttach = 35;
-    g_Player3.buttonShoot = TH_BUTTON_SHOOT3;
-    g_Player3.buttonBomb = TH_BUTTON_BOMB3;
-    g_Player3.buttonFocus = TH_BUTTON_FOCUS3;
-    g_Player3.buttonUp = TH_BUTTON_UP3;
-    g_Player3.buttonDown = TH_BUTTON_DOWN3;
-    g_Player3.buttonLeft = TH_BUTTON_LEFT3;
-    g_Player3.buttonRight = TH_BUTTON_RIGHT3;
 
     return ZUN_SUCCESS;
 }

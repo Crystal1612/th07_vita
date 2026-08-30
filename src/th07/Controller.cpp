@@ -1,6 +1,4 @@
 // netplay
-#include "Connection.hpp"
-
 #include "Controller.hpp"
 
 #include <dinput.h>
@@ -53,6 +51,14 @@ static JOYCAPSA g_JoystickCaps;
 
 // GLOBAL: TH07 0x0049fe1c
 static u16 g_AutoFocusTimer;
+
+i32 TH_BUTTON_SHOOT_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_SHOOT,TH_BUTTON_SHOOT2,TH_BUTTON_SHOOT3};
+i32 TH_BUTTON_BOMB_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_BOMB,TH_BUTTON_BOMB2,TH_BUTTON_BOMB3};
+i32 TH_BUTTON_FOCUS_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_FOCUS,TH_BUTTON_FOCUS2,TH_BUTTON_FOCUS3};
+i32 TH_BUTTON_UP_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_UP,TH_BUTTON_UP2,TH_BUTTON_UP3};
+i32 TH_BUTTON_DOWN_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_DOWN,TH_BUTTON_DOWN2,TH_BUTTON_DOWN3};
+i32 TH_BUTTON_LEFT_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_LEFT,TH_BUTTON_LEFT2,TH_BUTTON_LEFT3};
+i32 TH_BUTTON_RIGHT_MAP[CONTROL_RECEIVER] = {0,TH_BUTTON_RIGHT,TH_BUTTON_RIGHT2,TH_BUTTON_RIGHT3};
 
 #define KEY_PRESSED(scancode, thButton) \
     ((keyboardState[scancode] & 0x80) != 0 ? thButton : 0)
@@ -616,8 +622,7 @@ void HandleControlKeys(int frame)
 u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
 {
     InGameCtrlType self_ctrl = IGC_NONE;
-    InGameCtrlType rcv_ctrl = IGC_NONE;
-    InGameCtrlType rcv_ctrl3 = IGC_NONE;
+    InGameCtrlType rcv_ctrl[CONTROL_RECEIVER] = {IGC_NONE, IGC_NONE, IGC_NONE, IGC_NONE};
 
     out_ctrl = IGC_NONE;
     if (frame - g_delay < 0)
@@ -632,17 +637,13 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     if (res2 != g_ctrl_self.end())
         self_ctrl = res2->second;
 
-    std::map<int, BITS_32>::iterator res3;
+    u32 rcv_key[CONTROL_RECEIVER] = {0,0,0,0};
+    bool is_sync = true;
 
-    u32 rcv_key = 0;
-    u32 rcv_key3 = 0;
+    bool has_rcv_data[CONTROL_RECEIVER] = {false,false,false,false};
 
-    bool is_sync = false;
-    bool is_sync3 = false;
-
-    bool has_rcv_data = false;
-    bool has_rcv_data3 = false;
     static bool inited = false;
+    bool hasFail = false;
     static LARGE_INTEGER freq;
     LARGE_INTEGER cur;
     LARGE_INTEGER ping_key_time;
@@ -655,159 +656,116 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     QueryPerformanceCounter(&cur);
     max_wait_to_time.QuadPart = cur.QuadPart + freq.QuadPart * 5.0; // 5.0s
     ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1;    // 0.1s
-    if(g_is_host){
-        do
-        {
-            res = g_ctrl_bits_rcved[2].find(frame - g_delay);
-            if (res != g_ctrl_bits_rcved[2].end())
+    do
+    {
+        hasFail = false;
+        for(int i=1;i<CONTROL_RECEIVER;i++){
+            if(i==g_playerType||has_rcv_data[i]) continue;
+            res = g_ctrl_bits_rcved[i].find(frame - g_delay);
+            if (res != g_ctrl_bits_rcved[i].end())
             {
-                WriteToInt(res->second, rcv_key);
-                is_sync = (g_ctrl_rng_rcved[2][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
-                rcv_ctrl = g_ctrl_rcved[2][frame - g_delay];
-                has_rcv_data = true;
-            }
-            res3 = g_ctrl_bits_rcved[3].find(frame - g_delay);
-            if (res3 != g_ctrl_bits_rcved[3].end()) {
-                WriteToInt(res3->second, rcv_key3);
-                is_sync3 = (g_ctrl_rng_rcved[3][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
-                rcv_ctrl3 = g_ctrl_rcved[3][frame - g_delay];
-                has_rcv_data3 = true;
-            }
-            if(has_rcv_data && has_rcv_data3){
-                break;
+                WriteToInt(res->second, rcv_key[i]);
+                is_sync = is_sync && (g_ctrl_rng_rcved[i][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
+                rcv_ctrl[i] = g_ctrl_rcved[i][frame - g_delay];
+                has_rcv_data[i] = true;
             }else{
-                int n_transfer = 1;
-                while (cur.QuadPart < max_wait_to_time.QuadPart)
-                {
-                    bool packeds = true;
-                    if(res == g_ctrl_bits_rcved[2].end()){
-                        packeds &= Controller::RcvPacks(2);
-                    }
-                    if(res3 == g_ctrl_bits_rcved[3].end()){
-                        packeds &= Controller::RcvPacks(3);
-                    }
-                    if (packeds)
-                    {
-                        Sleep(1);
-                        break;
-                    }
-                    Sleep(1);
-                    QueryPerformanceCounter(&cur);
-                    // send key to another player to avoid lock
-                    if (cur.QuadPart > ping_key_time.QuadPart)
-                    {
-                        ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
-                        Controller::SendKeys(frame, 2);
-                        Controller::SendKeys(frame, 3);
-                    }
+                hasFail = true;
+            }
+        }
+        if(!hasFail){
+            break;
+        }else{
+            int n_transfer = 1;
+            while (cur.QuadPart < max_wait_to_time.QuadPart)
+            {
+                bool packeds = true;
+                for(int i=1;i<CONTROL_RECEIVER;i++){
+                    if(i==g_playerType||has_rcv_data[i]) continue;
+                    packeds |= Controller::RcvPacks(i);
                 }
-            }
-        } while (cur.QuadPart < max_wait_to_time.QuadPart);
-    }else{
-        do
-        {
-            res = g_ctrl_bits_rcved[1].find(frame - g_delay);
-            if (res != g_ctrl_bits_rcved[1].end())
-            {
-                WriteToInt(res->second, rcv_key);
-                g_is_sync = (g_ctrl_rng_rcved[1][frame - g_delay] == g_ctrl_rng_self[frame - g_delay]);
-                rcv_ctrl = g_ctrl_rcved[1][frame - g_delay];
-                has_rcv_data = true;
-                break;
-            }
-            else
-            {
-                int n_transfer = 1;
-                while (cur.QuadPart < max_wait_to_time.QuadPart)
+                if (packeds)
                 {
-                    if (Controller::RcvPacks(1))
-                    {
-                        Sleep(1);
-                        break;
-                    }
                     Sleep(1);
-                    QueryPerformanceCounter(&cur);
-                    // send key to another player to avoid lock
-                    if (cur.QuadPart > ping_key_time.QuadPart)
-                    {
-                        ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
+                    break;
+                }
+                Sleep(1);
+                QueryPerformanceCounter(&cur);
+                // send key to another player to avoid lock
+                if (cur.QuadPart > ping_key_time.QuadPart)
+                {
+                    ping_key_time.QuadPart = cur.QuadPart + freq.QuadPart * 0.1; // 0.1s
+                    if(g_is_host){
+                        for(int i=1;i<CONTROL_RECEIVER;i++){
+                            if(i==g_playerType||has_rcv_data[i]) continue;
+                            Controller::SendKeys(frame, 2);
+                        }
+                    }else{
                         Controller::SendKeys(frame, 1);
                     }
                 }
             }
-        } while (cur.QuadPart < max_wait_to_time.QuadPart);
+        }
+    } while (cur.QuadPart < max_wait_to_time.QuadPart);
+
+    hasFail = false;
+    for(int i=1;i<CONTROL_RECEIVER;i++){
+        if(i==g_playerType || has_rcv_data[i]) continue;
+        hasFail = true;
     }
-    if (!has_rcv_data)
+    if (hasFail)
     {
-        rcv_key = 0;
+        for(int i=1;i<CONTROL_RECEIVER;i++){
+            rcv_key[i] = 0;
+            rcv_ctrl[i] = IGC_NONE;
+        }
         self_key = 0;
         self_ctrl = IGC_NONE;
-        rcv_ctrl = IGC_NONE;
         g_is_connected = false;
         g_istry_to_reconnect = false;
     }
+    g_is_sync = is_sync;
 
-    g_is_sync = is_sync && is_sync3;
 
-    if (self_ctrl != IGC_NONE && rcv_ctrl != IGC_NONE)
-    {
-        out_ctrl = g_is_host ? self_ctrl : rcv_ctrl;
-    }
-    else
-    {
-        out_ctrl = (self_ctrl == IGC_NONE) ? rcv_ctrl : self_ctrl;
-    }
+    // TODO : remove all controls
+    // if (self_ctrl != IGC_NONE && rcv_ctrl != IGC_NONE)
+    // {
+    //     out_ctrl = g_is_host ? self_ctrl : rcv_ctrl;
+    // }
+    // else
+    // {
+    //     out_ctrl = (self_ctrl == IGC_NONE) ? rcv_ctrl : self_ctrl;
+    // }
 
-    if (is_in_UI)
-        return self_key | rcv_key | rcv_key3;
     u32 finres = 0;
-    if (g_is_host)
-    {
-        finres = self_key;
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_UP, TH_BUTTON_UP2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
-
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_UP, TH_BUTTON_UP3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
-
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
-        finres |= TH_ISDOWN(rcv_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_MENU, TH_BUTTON_MENU);
-        finres |= TH_ISDOWN(rcv_key3, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
-    }
-    else
-    {
-        finres = rcv_key;
-        if(g_playerType==2){
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB2);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS2);
-        }else if(g_playerType==3){
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB3);
-            finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS3);
+    if (is_in_UI){
+        for(int i=1;i<CONTROL_RECEIVER;i++){
+            if(i==g_playerType) finres |= self_key;
+            else finres |= rcv_key[i];
         }
-
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
-        finres |= TH_ISDOWN(self_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        return finres;
+    }
+    for(int i=1;i<CONTROL_RECEIVER;i++){
+        if(i==g_playerType){
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_LEFT, TH_BUTTON_LEFT_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_RIGHT, TH_BUTTON_RIGHT_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_UP, TH_BUTTON_UP_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_DOWN, TH_BUTTON_DOWN_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_SHOOT, TH_BUTTON_SHOOT_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_BOMB, TH_BUTTON_BOMB_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_FOCUS, TH_BUTTON_FOCUS_MAP[i]);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_MENU, TH_BUTTON_MENU);
+            finres |= TH_ISDOWN(self_key, TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        }else{
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_LEFT, TH_BUTTON_LEFT_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_RIGHT, TH_BUTTON_RIGHT_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_UP, TH_BUTTON_UP_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_DOWN, TH_BUTTON_DOWN_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_SHOOT, TH_BUTTON_SHOOT_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_BOMB, TH_BUTTON_BOMB_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_FOCUS, TH_BUTTON_FOCUS_MAP[i]);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_MENU, TH_BUTTON_MENU);
+            finres |= TH_ISDOWN(rcv_key[i], TH_BUTTON_SKIP, TH_BUTTON_SKIP);
+        }
     }
     return finres;
 }
@@ -867,13 +825,19 @@ u32 Controller::GetInput_Net(int frame, bool is_in_UI, int &cur_ctrl)
 
     HandleControlKeys(frame);
     if(g_is_host){
-        Controller::SendKeys(frame,2);
-        Controller::SendKeys(frame,3);
-        RcvPacks(2);
-        RcvPacks(3);
+        for(int i=1;i<CONTROL_RECEIVER;i++){
+            if(i!=g_playerType){
+                Controller::SendKeys(frame,i);
+                RcvPacks(i);
+            }
+        }
     }else{
         Controller::SendKeys(frame,1);
-        RcvPacks(1);
+        for(int i=1;i<CONTROL_RECEIVER;i++){
+            if(i!=g_playerType){
+                RcvPacks(i);
+            }
+        }
     }
 
     u32 res = GetKeys(frame, is_in_UI, cur_ctrl);
