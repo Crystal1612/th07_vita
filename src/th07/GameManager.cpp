@@ -921,7 +921,11 @@ void GameManager::AddCherryPlus(i32 amount)
         if (this->cherryPlus >= this->globals->cherryStart + 50000)
         {
             this->cherryPlus = this->globals->cherryStart + 50000;
+
+            // netplay
             g_Player.ActivateBorder();
+            g_Player2.ActivateBorder();
+            g_Player3.ActivateBorder();
         }
     }
     if (this->cherry >= this->cherryMax && oldCherry != this->cherry)
@@ -969,6 +973,8 @@ void GameManager::IncreaseCherryMax(i32 amount)
 // FUNCTION: TH07 0x0042f7df
 i32 GameManager::HasReachedMaxClears(i32 shotType)
 {
+    // netplay
+    return 1;
     return this->clrd[shotType].difficultyClearedWithRetries[DIFF_EASY] != 99 &&
                    this->clrd[shotType].difficultyClearedWithRetries[DIFF_NORMAL] != 99 &&
                    this->clrd[shotType].difficultyClearedWithRetries[DIFF_HARD] != 99 &&
@@ -980,6 +986,8 @@ i32 GameManager::HasReachedMaxClears(i32 shotType)
 // FUNCTION: TH07 0x0042f853
 i32 GameManager::HasUnlockedPhantom(i32 shotType)
 {
+    // netplay
+    return 1;
     i32 numSuccesses = 0;
     for (i32 i = 0; i < SPELLCARD_COUNT; i++)
     {
@@ -999,6 +1007,8 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
 // FUNCTION: TH07 0x0042f8de
 i32 GameManager::HasReachedMaxClearsAllShotTypes()
 {
+    //netplay
+    return 1;
     return !HasReachedMaxClears(SHOT_REIMU_A) &&
                    !HasReachedMaxClears(SHOT_REIMU_B) &&
                    !HasReachedMaxClears(SHOT_MARISA_A) &&
@@ -1013,6 +1023,8 @@ i32 GameManager::HasReachedMaxClearsAllShotTypes()
 // FUNCTION: TH07 0x0042f94c
 i32 GameManager::HasUnlockedPhantomAndMaxClears()
 {
+    // netplay
+    return 1;
     i32 j;
     i32 i;
     i32 spellCardsCaptured;

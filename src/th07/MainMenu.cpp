@@ -1899,6 +1899,8 @@ u32 MainMenu::OnUpdateSelectPracticeStage()
         allowedStages =
             g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
                 .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
+        // netplay
+        allowedStages = 99;
         if (allowedStages < 0)
         {
             allowedStages = 1;

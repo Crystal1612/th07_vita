@@ -1244,7 +1244,7 @@ void Player::ScoreGraze(Float3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3, 1, 0xff4040ff);
+    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3+(this->playerType-1), 1, 0xff4040ff);
     g_EffectManager.SpawnEffect(6, &this->positionCenter, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
@@ -2136,7 +2136,7 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1,
+        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+(this->playerType-1), 1,
                                                            0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
@@ -2169,7 +2169,7 @@ void Player::BreakBorder(u32 unused)
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4, 1,
+    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+(this->playerType-1), 1,
                                                 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
