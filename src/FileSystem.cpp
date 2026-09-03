@@ -10,6 +10,7 @@ u32 g_LastFileSize;
 
 u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
 {
+    Supervisor::DebugPrint("FileSystem::OpenFile %s %d\n", filepath,isExternalResource);
     FILE *file;
     u8 *buf;
     u32 fsize;
@@ -56,11 +57,14 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
             return buf;
         }
     }
-    Supervisor::DebugPrint("%s Load ... \n", filepath);
-    file = fopen(filepath, "rb");
+
+    char psvPath[256] = "ux0:data/th07/";
+    strcat(psvPath, filepath);
+    Supervisor::DebugPrint("%s Load ... \n", psvPath);
+    file = fopen(psvPath, "rb");
     if (!file)
     {
-        Supervisor::DebugPrint("error : %s is not found.\n", filepath);
+        Supervisor::DebugPrint("error : %s is not found.\n", psvPath);
         return NULL;
     }
 
@@ -86,9 +90,12 @@ u8 *FileSystem::OpenFile(const char *filepath, i32 isExternalResource)
 
 i32 FileSystem::CheckFileExists(const char *file)
 {
+    char psvPath[256] = "ux0:data/th07/";
+    strcat(psvPath, file);
+    Supervisor::DebugPrint("FileSystem::CheckFileExists %s", psvPath);
     FILE *fp;
 
-    fp = fopen(file, "rb");
+    fp = fopen(psvPath, "rb");
     if (fp)
     {
         fclose(fp);
@@ -99,13 +106,16 @@ i32 FileSystem::CheckFileExists(const char *file)
 
 i32 FileSystem::WriteDataToFile(const char *filename, const void *out, u32 bytesToWrite)
 {
+    char psvPath[256] = "ux0:data/th07/";
+    strcat(psvPath, filename);
+    Supervisor::DebugPrint("FileSystem::WriteDataToFile %s", psvPath);
     FILE *file;
     u32 bytesWritten;
 
-    file = fopen(filename, "wb");
+    file = fopen(psvPath, "wb");
     if (!file)
     {
-        Supervisor::DebugPrint("error : %s write error\n", filename);
+        Supervisor::DebugPrint("error : %s write error\n", psvPath);
         return -1;
     }
 
@@ -113,10 +123,10 @@ i32 FileSystem::WriteDataToFile(const char *filename, const void *out, u32 bytes
     if (bytesToWrite != bytesWritten)
     {
         fclose(file);
-        Supervisor::DebugPrint("error : %s write error\n", filename);
+        Supervisor::DebugPrint("error : %s write error\n", psvPath);
         return -2;
     }
     fclose(file);
-    Supervisor::DebugPrint("%s write ...\n", filename);
+    Supervisor::DebugPrint("%s write ...\n", psvPath);
     return 0;
 }

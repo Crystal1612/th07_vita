@@ -1,112 +1,124 @@
 #include "Gles.hpp"
-
-#include <GLES3/gl3.h>
-#include <SDL_error.h>
-#include <SDL_timer.h>
-#include <SDL_video.h>
+	
 
 #include "AnmManager.hpp"
 #include "GameWindow.hpp"
 #include "Supervisor.hpp"
 
 const char *vertexShaderSource =
-    "#version 300 es\n"
-    "uniform mat4 u_Model;\n"
-    "uniform mat4 u_View;\n"
-    "uniform mat4 u_Proj;\n"
-    "uniform mat4 u_TextureMatrix;\n"
-    "uniform bool u_ScreenSpace;\n"
-    "uniform vec4 u_Viewport;\n"
+    "struct VertexInput {\n"
+    "    float3 a_Position : POSITION;\n"
+    "    float4 a_Color : COLOR0;\n"
+    "    float2 a_TexCoord : TEXCOORD0;\n"
+    "};\n"
     "\n"
-    "layout(location = 0) in vec3 a_Position;\n"
-    "layout(location = 1) in vec4 a_Color;\n"
-    "layout(location = 2) in vec2 a_TexCoord;\n"
+    "struct VertexOutput {\n"
+    "    float4 position : POSITION;\n"
+    "    float4 v_Color : COLOR0;\n"
+    "    float2 v_TexCoord : TEXCOORD0;\n"
+    "    float v_FogFragCoord : TEXCOORD1;\n"
+    "};\n"
     "\n"
-    "out vec4 v_Color;\n"
-    "out vec2 v_TexCoord;\n"
-    "out float v_FogFragCoord;\n"
+    "VertexOutput main(\n"
+    "    VertexInput input,\n"
+    "    uniform float4x4 u_Model,\n"
+    "    uniform float4x4 u_View,\n"
+    "    uniform float4x4 u_Proj,\n"
+    "    uniform float4x4 u_TextureMatrix,\n"
+    "    uniform bool u_ScreenSpace,\n"
+    "    uniform float4 u_Viewport\n"
+    ") {\n"
+    "    VertexOutput output;\n"
+    "    output.v_Color = input.a_Color;\n"
     "\n"
-    "void main() {\n"
-    "    v_Color = a_Color;\n"
     "    if (u_ScreenSpace) {\n"
-    "        float x = (a_Position.x - u_Viewport.x) / u_Viewport.z * 2.0 - 1.0;\n"
-    "        float y = 1.0 - (a_Position.y - u_Viewport.y) / u_Viewport.w * 2.0;\n"
-    "        gl_Position = vec4(x, y, a_Position.z, 1.0);\n"
-    "        v_TexCoord = a_TexCoord;\n"
-    "        v_FogFragCoord = a_Position.z;\n"
+    "        float x = (input.a_Position.x - u_Viewport.x) / u_Viewport.z * 2.0 - 1.0;\n"
+    "        float y = 1.0 - (input.a_Position.y - u_Viewport.y) / u_Viewport.w * 2.0;\n"
+    "        output.position = float4(x, y, input.a_Position.z, 1.0);\n"
+    "        output.v_TexCoord = input.a_TexCoord;\n"
+    "        output.v_FogFragCoord = input.a_Position.z;\n"
     "    } else {\n"
-    "        vec4 worldPos = u_Model * vec4(a_Position, 1.0);\n"
-    "        vec4 viewPos = u_View * worldPos;\n"
-    "        gl_Position = u_Proj * viewPos;\n"
-    "        v_TexCoord = (u_TextureMatrix * vec4(a_TexCoord, 1.0, 0.0)).xy;\n"
-    "        v_FogFragCoord = length(viewPos.xyz);\n"
+    "        float4 worldPos = mul(u_Model, float4(input.a_Position, 1.0));\n"
+    "        float4 viewPos = mul(u_View, worldPos);\n"
+    "        output.position = mul(u_Proj, viewPos);\n"
+    "        output.v_TexCoord = mul(u_TextureMatrix, float4(input.a_TexCoord, 1.0, 0.0)).xy;\n"
+    "        output.v_FogFragCoord = length(viewPos.xyz);\n"
     "    }\n"
+    "\n"
+    "    return output;\n"
     "}\n";
 
 const char *fragmentShaderSource =
-    "#version 300 es\n"
-    "precision mediump float;\n"
+    "struct VertexOutput {\n"
+    "    float4 v_Color : COLOR0;\n"
+    "    float2 v_TexCoord : TEXCOORD0;\n"
+    "    float v_FogFragCoord : TEXCOORD1;\n"
+    "};\n"
     "\n"
-    "in vec4 v_Color;\n"
-    "in vec2 v_TexCoord;\n"
-    "in float v_FogFragCoord;\n"
-    "\n"
-    "uniform sampler2D u_Texture;\n"
-    "uniform bool u_UseTexture;\n"
-    "uniform int u_ColorOpRgb;\n"
-    "uniform int u_ColorOpAlpha;\n"
-    "uniform int u_TexArg;\n"
-    "uniform vec4 u_TextureFactor;\n"
-    "uniform bool u_AlphaTest;\n"
-    "uniform float u_AlphaRef;\n"
-    "uniform bool u_FogEnabled;\n"
-    "uniform vec4 u_FogColor;\n"
-    "uniform float u_FogNear;\n"
-    "uniform float u_FogFar;\n"
-    "\n"
-    "out vec4 FragColor;\n"
-    "\n"
-    "void main() {\n"
-    "    vec4 texColor = vec4(1.0);\n"
+    "float4 main(\n"
+    "    VertexOutput input,\n"
+    "    uniform sampler2D u_Texture : TEXUNIT0,\n"
+    "    uniform bool u_UseTexture,\n"
+    "    uniform int u_ColorOpRgb,\n"
+    "    uniform int u_ColorOpAlpha,\n"
+    "    uniform int u_TexArg,\n"
+    "    uniform float4 u_TextureFactor,\n"
+    "    uniform bool u_AlphaTest,\n"
+    "    uniform float u_AlphaRef,\n"
+    "    uniform bool u_FogEnabled,\n"
+    "    uniform float4 u_FogColor,\n"
+    "    uniform float u_FogNear,\n"
+    "    uniform float u_FogFar\n"
+    ") : COLOR {\n"
+    "    float4 texColor = float4(1.0, 1.0, 1.0, 1.0);\n"
     "    if (u_UseTexture) {\n"
-    "        texColor = texture(u_Texture, v_TexCoord);\n"
+    "        texColor = tex2D(u_Texture, input.v_TexCoord);\n"
     "    }\n"
-    "    \n"
-    "    vec4 argColor = v_Color.bgra;\n"
-    "    if (u_TexArg == 1) { // TEXTURE\n"
-    "        argColor = vec4(1.0);\n"
-    "    } else if (u_TexArg == 2) { // TFACTOR\n"
+    "\n"
+    "    float4 argColor = input.v_Color.bgra;\n"
+    "    if (u_TexArg == 1) {\n"
+    "        argColor = float4(1.0, 1.0, 1.0, 1.0);\n"
+    "    } else if (u_TexArg == 2) {\n"
     "        argColor = u_TextureFactor;\n"
     "    }\n"
-    "    \n"
-    "    vec4 finalColor = v_Color;\n"
-    "    \n"
+    "\n"
+    "    float4 finalColor = input.v_Color;\n"
+    "\n"
     "    if (u_UseTexture) {\n"
-    "        if (u_ColorOpRgb == 0) finalColor.rgb = texColor.rgb * argColor.rgb;\n"
-    "        else if (u_ColorOpRgb == 1) finalColor.rgb = min(texColor.rgb + argColor.rgb, "
-    "vec3(1.0));\n"
-    "        else if (u_ColorOpRgb == 2) finalColor.rgb = texColor.rgb;\n"
-    "        else if (u_ColorOpRgb == 3) finalColor.rgb = argColor.rgb;\n"
-    "        \n"
-    "        if (u_ColorOpAlpha == 0) finalColor.a = texColor.a * argColor.a;\n"
-    "        else if (u_ColorOpAlpha == 1) finalColor.a = min(texColor.a + argColor.a, 1.0);\n"
-    "        else if (u_ColorOpAlpha == 2) finalColor.a = texColor.a;\n"
-    "        else if (u_ColorOpAlpha == 3) finalColor.a = argColor.a;\n"
+    "        if (u_ColorOpRgb == 0) {\n"
+    "            finalColor.rgb = texColor.rgb * argColor.rgb;\n"
+    "        } else if (u_ColorOpRgb == 1) {\n"
+    "            finalColor.rgb = min(texColor.rgb + argColor.rgb, float3(1.0, 1.0, 1.0));\n"
+    "        } else if (u_ColorOpRgb == 2) {\n"
+    "            finalColor.rgb = texColor.rgb;\n"
+    "        } else if (u_ColorOpRgb == 3) {\n"
+    "            finalColor.rgb = argColor.rgb;\n"
+    "        }\n"
+    "\n"
+    "        if (u_ColorOpAlpha == 0) {\n"
+    "            finalColor.a = texColor.a * argColor.a;\n"
+    "        } else if (u_ColorOpAlpha == 1) {\n"
+    "            finalColor.a = min(texColor.a + argColor.a, 1.0);\n"
+    "        } else if (u_ColorOpAlpha == 2) {\n"
+    "            finalColor.a = texColor.a;\n"
+    "        } else if (u_ColorOpAlpha == 3) {\n"
+    "            finalColor.a = argColor.a;\n"
+    "        }\n"
     "    } else {\n"
     "        finalColor = argColor;\n"
     "    }\n"
-    "    \n"
+    "\n"
     "    if (u_AlphaTest && finalColor.a < u_AlphaRef) {\n"
     "        discard;\n"
     "    }\n"
-    "    \n"
+    "\n"
     "    if (u_FogEnabled) {\n"
-    "        float f = (u_FogFar - v_FogFragCoord) / (u_FogFar - u_FogNear);\n"
+    "        float f = (u_FogFar - input.v_FogFragCoord) / (u_FogFar - u_FogNear);\n"
     "        f = clamp(f, 0.0, 1.0);\n"
-    "        finalColor.rgb = mix(u_FogColor.rgb, finalColor.rgb, f);\n"
+    "        finalColor.rgb = lerp(u_FogColor.rgb, finalColor.rgb, f);\n"
     "    }\n"
-    "    \n"
-    "    FragColor = finalColor;\n"
+    "\n"
+    "    return finalColor;\n"
     "}\n";
 
 ZunGraphics *GlesGraphics::Init()
@@ -126,30 +138,22 @@ ZunGraphics *GlesGraphics::Init()
 
     if (SDL_GL_SetSwapInterval(1) < 0)
     {
-        // technically this isnt fatal we just go into 60 fps later on in gamewindow::render
         Supervisor::DebugPrint("SDL_GL_SetSwapInterval failed: %s\n", SDL_GetError());
     }
 
-    RenderVertexInfo unitQuadData[4] = {{{-128.0f, -128.0f, 0.0f}, {0.0f, 0.0f}},
-                                        {{128.0f, -128.0f, 0.0f}, {1.0f, 0.0f}},
-                                        {{-128.0f, 128.0f, 0.0f}, {0.0f, 1.0f}},
-                                        {{128.0f, 128.0f, 0.0f}, {1.0f, 1.0f}}};
+    RenderVertexInfo unitQuadData[4] = {
+        {{-128.0f, -128.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 128.0f, -128.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-128.0f,  128.0f, 0.0f}, {0.0f, 1.0f}},
+        {{ 128.0f,  128.0f, 0.0f}, {1.0f, 1.0f}}
+    };
 
-    glGenVertexArrays(1, &gfx->unitQuadVao);
     glGenBuffers(1, &gfx->unitQuadVbo);
-    glBindVertexArray(gfx->unitQuadVao);
     glBindBuffer(GL_ARRAY_BUFFER, gfx->unitQuadVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(unitQuadData), unitQuadData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
-                          (void *)offsetof(RenderVertexInfo, pos));
-    glDisableVertexAttribArray(1);
-    glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
-                          (void *)offsetof(RenderVertexInfo, textureUV));
-    glBindVertexArray(0);
+    glGenBuffers(1, &gfx->vbo);
 
     u32 vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
     u32 fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -162,6 +166,11 @@ ZunGraphics *GlesGraphics::Init()
     gfx->shaderProgram = glCreateProgram();
     glAttachShader(gfx->shaderProgram, vertexShader);
     glAttachShader(gfx->shaderProgram, fragmentShader);
+
+    glBindAttribLocation(gfx->shaderProgram, 0, "a_Position");
+    glBindAttribLocation(gfx->shaderProgram, 1, "a_Color");
+    glBindAttribLocation(gfx->shaderProgram, 2, "a_TexCoord");
+
     glLinkProgram(gfx->shaderProgram);
     glUseProgram(gfx->shaderProgram);
 
@@ -187,46 +196,6 @@ ZunGraphics *GlesGraphics::Init()
     gfx->u_FogNear = glGetUniformLocation(gfx->shaderProgram, "u_FogNear");
     gfx->u_FogFar = glGetUniformLocation(gfx->shaderProgram, "u_FogFar");
 
-    glGenVertexArrays(3, gfx->vaos);
-    glGenBuffers(1, &gfx->vbo);
-
-    i32 vertexStride = sizeof(VertexTex1DiffuseXyzrhw);
-    glBindVertexArray(gfx->vaos[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, gfx->vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyzrhw, pos));
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyzrhw, diffuse));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyzrhw, textureUV));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    vertexStride = sizeof(VertexTex1DiffuseXyz);
-    glBindVertexArray(gfx->vaos[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, gfx->vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyz, pos));
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyz, diffuse));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexTex1DiffuseXyz, textureUV));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    vertexStride = sizeof(VertexDiffuseXyzrhw);
-    glBindVertexArray(gfx->vaos[2]);
-    glBindBuffer(GL_ARRAY_BUFFER, gfx->vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
-                          (void *)offsetof(VertexDiffuseXyzrhw, pos));
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
-                          (void *)offsetof(VertexDiffuseXyzrhw, diffuse));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
-
     for (i32 i = 0; i < 4; i++)
     {
         gfx->transforms[i].Identity();
@@ -234,7 +203,7 @@ ZunGraphics *GlesGraphics::Init()
 
     glUniform1i(gfx->u_Texture, 0);
 
-    Supervisor::DebugPrint("using gles rendering.\n");
+    Supervisor::DebugPrint("using gles 2.0 (pib) rendering.\n");
 
     return gfx;
 }
@@ -286,7 +255,6 @@ void GlesGraphics::SetTextureFilter()
 {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
@@ -351,8 +319,6 @@ void GlesGraphics::SetBlendMode(BlendMode srcMode, BlendMode dstMode)
         glSrcMode = GL_SRC_ALPHA;
         break;
     case BLEND_ONE:
-        glSrcMode = GL_ONE;
-        break;
     case BLEND_NONE:
         glSrcMode = GL_ONE;
         break;
@@ -379,7 +345,7 @@ void GlesGraphics::SetDepthMask(bool enable)
     Flush();
 
     depthMaskEnabled = enable;
-    glDepthMask(enable);
+    glDepthMask(enable ? GL_TRUE : GL_FALSE);
 }
 
 void GlesGraphics::SetDepthFunc(DepthFunc func)
@@ -543,7 +509,18 @@ void GlesGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primit
         glMode = GL_TRIANGLE_FAN;
     }
 
-    glBindVertexArray(unitQuadVao);
+    glBindBuffer(GL_ARRAY_BUFFER, unitQuadVbo);
+    
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
+                          (void *)offsetof(RenderVertexInfo, pos));
+    
+    glDisableVertexAttribArray(1);
+    glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
+    
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
+                          (void *)offsetof(RenderVertexInfo, textureUV));
 
     glUniform1i(u_ScreenSpace, false);
     glUniform1i(u_UseTexture, true);
@@ -573,6 +550,8 @@ void GlesGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primit
     glUniform1f(u_FogFar, fogFar);
 
     glDrawArrays(glMode, startVertex, vertexCount);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const void *vertexData,
@@ -599,27 +578,56 @@ void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const
 
     bool isScreenSpace = false;
     bool hasTex = false;
-    switch (vertexStride)
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexStride, vertexData, GL_DYNAMIC_DRAW);
+
+    if (vertexStride == sizeof(VertexTex1DiffuseXyzrhw))
     {
-    case sizeof(VertexTex1DiffuseXyzrhw):
         isScreenSpace = true;
         hasTex = true;
-        glBindVertexArray(vaos[0]);
-        break;
-    case sizeof(VertexTex1DiffuseXyz):
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyzrhw, pos));
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyzrhw, diffuse));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyzrhw, textureUV));
+    }
+    else if (vertexStride == sizeof(VertexTex1DiffuseXyz))
+    {
         isScreenSpace = false;
         hasTex = true;
-        glBindVertexArray(vaos[1]);
-        break;
-    case sizeof(VertexDiffuseXyzrhw):
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyz, pos));
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyz, diffuse));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexStride,
+                              (void *)offsetof(VertexTex1DiffuseXyz, textureUV));
+    }
+    else if (vertexStride == sizeof(VertexDiffuseXyzrhw))
+    {
         isScreenSpace = true;
         hasTex = false;
-        glBindVertexArray(vaos[2]);
-        break;
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexStride,
+                              (void *)offsetof(VertexDiffuseXyzrhw, pos));
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, vertexStride,
+                              (void *)offsetof(VertexDiffuseXyzrhw, diffuse));
     }
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexStride, nullptr, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * vertexStride, vertexData);
 
     glUniform1i(u_ScreenSpace, isScreenSpace);
     glUniform1i(u_UseTexture, hasTex);
@@ -649,6 +657,8 @@ void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const
     glUniform1f(u_FogFar, fogFar);
 
     glDrawArrays(glMode, 0, vertexCount);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void GlesGraphics::SwapBuffers()

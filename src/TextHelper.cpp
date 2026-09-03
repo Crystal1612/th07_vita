@@ -7,7 +7,7 @@
 #include "Supervisor.hpp"
 #include "graphics/ZunGraphics.hpp"
 #include "inttypes.hpp"
-
+#include "thirdparty/sjis_converter.h"
 static TTF_Font *g_Font = nullptr;
 
 // stolen from
@@ -211,7 +211,7 @@ ZunResult TextHelper::CreateTextBuffer()
         return ZUN_ERROR;
     }
 
-    g_Font = TTF_OpenFont("msgothic.ttc", 10);
+    g_Font = TTF_OpenFont("ux0:data/th07/msgothic.ttc", 10);
     if (!g_Font)
     {
         g_GameErrorContext.Log("TTF_OpenFont fail : %s\n", TTF_GetError());
@@ -240,7 +240,7 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
 
     if (!g_Font)
     {
-        g_Font = TTF_OpenFont("msgothic.ttc", 10);
+        g_Font = TTF_OpenFont("ux0:data/th07/msgothic.ttc", 10);
         if (!g_Font)
         {
             g_GameErrorContext.Fatal("TTF_OpenFont fail : %s\n", TTF_GetError());
@@ -255,7 +255,7 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
     bool needsFree = false;
     if (!IsUtf8(string))
     {
-        char *tmp = SDL_iconv_string("UTF-8", "SHIFT_JIS", string, SDL_strlen(string) + 1);
+        char *tmp = sjis2utf8(string);
         if (tmp)
         {
             convStr = tmp;
@@ -267,7 +267,7 @@ void TextHelper::RenderTextToTextureBold(i32 xPos, i32 yPos, i32 spriteWidth, i3
     SDL_Surface *textSurf = TTF_RenderUTF8_Blended(g_Font, convStr, white);
     if (needsFree)
     {
-        SDL_free(convStr);
+        free(convStr); // sjis2utf8 内部是 malloc 分配的堆内存
     }
     if (!textSurf)
     {

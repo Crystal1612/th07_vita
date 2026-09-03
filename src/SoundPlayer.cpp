@@ -7,8 +7,13 @@
 #include "Supervisor.hpp"
 #include "dxutil.hpp"
 #include "utils.hpp"
+#include <psp2/kernel/threadmgr.h>
+#include <psp2/audioout.h>
 
 #define MINIAUDIO_IMPLEMENTATION
+#define MA_NO_DEVICE_IO   
+#define MA_NO_THREADING
+#define MA_NO_RUNTIME_LINKING
 #include "miniaudio.h"
 
 SoundBufferIdxVolume SOUND_BUFFER_IDX_VOL[38] = {
@@ -35,6 +40,52 @@ const char *g_SFXList[30] = {
 };
 
 SoundPlayer g_SoundPlayer;
+
+#define VITA_AUDIO_SAMPLES 1024
+
+int SoundPlayer::AudioThreadEntry(SceSize args, void* argp)
+{
+    SoundPlayer* self = *reinterpret_cast<SoundPlayer**>(argp);
+
+    self->audioPort = sceAudioOutOpenPort(
+        SCE_AUDIO_OUT_PORT_TYPE_MAIN,
+        VITA_AUDIO_SAMPLES,
+        48000,
+        SCE_AUDIO_OUT_MODE_STEREO
+    );
+
+    if (self->audioPort < 0) {
+        return sceKernelExitDeleteThread(self->audioPort);
+    }
+
+    float f32_buf[VITA_AUDIO_SAMPLES * 2];
+    int16_t s16_buf[VITA_AUDIO_SAMPLES * 2];
+
+    while (self->isAudioRunning)
+    {
+        ma_uint64 framesRead = 0;
+        ma_engine_read_pcm_frames(self->engine, f32_buf, VITA_AUDIO_SAMPLES, &framesRead);
+
+        ma_pcm_convert(
+            s16_buf,
+            ma_format_s16,
+            f32_buf,
+            ma_format_f32,
+            framesRead * 2,
+            ma_dither_mode_none
+        );
+
+        if (framesRead < VITA_AUDIO_SAMPLES) {
+            memset(&s16_buf[framesRead * 2], 0, (VITA_AUDIO_SAMPLES - framesRead) * 2 * sizeof(int16_t));
+        }
+
+        sceAudioOutOutput(self->audioPort, s16_buf);
+    }
+
+    sceAudioOutReleasePort(self->audioPort);
+    self->audioPort = -1;
+    return sceKernelExitDeleteThread(0);
+}
 
 static ma_result ThBgmDataSource_read(ma_data_source *pDataSource, void *pFramesOut,
                                       ma_uint64 frameCount, ma_uint64 *pFramesRead)
@@ -355,8 +406,9 @@ ZunResult SoundPlayer::InitializeSound()
     this->engine = new ma_engine;
 
     engineConfig = ma_engine_config_init();
-    engineConfig.sampleRate = 44100;
+    engineConfig.sampleRate = 48000;
     engineConfig.channels = 2;
+    engineConfig.noDevice = MA_TRUE;
 
     if (ma_engine_init(&engineConfig, this->engine) != MA_SUCCESS)
     {
@@ -364,6 +416,30 @@ ZunResult SoundPlayer::InitializeSound()
         SAFE_DELETE(this->engine);
         return ZUN_ERROR;
     }
+
+    this->isAudioRunning = true;
+    this->audioPort = -1;
+
+    SoundPlayer* self = this;
+    this->audioThreadUid = sceKernelCreateThread(
+        "ZunSoundThread",
+        AudioThreadEntry,
+        0XBF, 
+        0x10000,
+        0,
+        SCE_KERNEL_CPU_MASK_USER_2,
+        NULL
+    );
+
+    if (this->audioThreadUid < 0)
+    {
+        g_GameErrorContext.Log("オーディオ出力スレッドの作成に失敗しました\n");
+        ma_engine_uninit(this->engine);
+        SAFE_DELETE(this->engine);
+        return ZUN_ERROR;
+    }
+
+    sceKernelStartThread(this->audioThreadUid, sizeof(SoundPlayer*), &self);
 
     g_GameErrorContext.Log("DirectSound は正常に初期化されました\n");
     return ZUN_SUCCESS;
@@ -373,10 +449,21 @@ ZunResult SoundPlayer::Release()
 {
     i32 i;
 
+    if (this->isAudioRunning)
+    {
+        this->isAudioRunning = false;
+        if (this->audioThreadUid >= 0)
+        {
+            sceKernelWaitThreadEnd(this->audioThreadUid, NULL, NULL);
+            this->audioThreadUid = -1;
+        }
+    }
+
     if (!this->engine)
     {
         return ZUN_SUCCESS;
     }
+    StopBGM();
 
     for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundBuffers); i++)
     {
@@ -397,8 +484,6 @@ ZunResult SoundPlayer::Release()
         }
     }
 
-    StopBGM();
-
     ma_engine_uninit(this->engine);
     SAFE_DELETE(this->engine);
     for (i = 0; i < ARRAY_SIZE_SIGNED(this->bgmPreloadData); i++)
@@ -408,6 +493,7 @@ ZunResult SoundPlayer::Release()
     if (this->bgmFmtData)
     {
         free(this->bgmFmtData);
+        this->bgmFmtData = NULL;
     }
     return ZUN_SUCCESS;
 }
@@ -479,7 +565,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path)
 
     i32 fileSize = *(u32 *)(soundFileDat + 4) + 8;
 
-    ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, 2, 44100);
+    ma_decoder_config decoderConfig = ma_decoder_config_init(ma_format_f32, 2, 48000);
     if (ma_decode_memory(soundFileDat, fileSize, &decoderConfig, &frameCount, &frames) !=
         MA_SUCCESS)
     {

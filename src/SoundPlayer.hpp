@@ -6,6 +6,7 @@
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 #include "miniaudio.h"
+#include "vitasdk.h"
 
 enum AudioOpcode
 {
@@ -151,6 +152,11 @@ struct SoundPlayer
     ThBgmDataSource *bgmDataSource;
     ma_sound *backgroundMusic;
     i32 bgmSeekOffset;
+
+    SceUID audioThreadUid;
+    volatile bool isAudioRunning;
+    int audioPort;
+    static int AudioThreadEntry(SceSize args, void* argp);
 };
 
 extern SoundPlayer g_SoundPlayer;

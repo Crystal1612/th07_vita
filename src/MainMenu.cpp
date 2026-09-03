@@ -544,7 +544,7 @@ u32 MainMenu::OnUpdateOptionsMenu()
             }
             if (!g_Supervisor.cfg.preloadBgm && g_Supervisor.cfg.musicMode == MUSIC_MIDI)
             {
-                g_SoundPlayer.StartBGM("thbgm.dat");
+                g_SoundPlayer.StartBGM("ux0:data/th07/thbgm.dat");
             }
             g_Supervisor.LoadAudio(8, "bgm/th07_01.mid");
             g_Supervisor.PlayLoadedAudio(8);

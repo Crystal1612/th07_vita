@@ -3742,6 +3742,10 @@ See below for some tips on improving performance.
 extern "C" {
 #endif
 
+extern "C" inline int fileno(FILE* stream) {
+    return stream->_file;
+}
+
 #define MA_STRINGIFY(x)     #x
 #define MA_XSTRINGIFY(x)    MA_STRINGIFY(x)
 

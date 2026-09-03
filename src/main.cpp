@@ -14,6 +14,8 @@
 #include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
+#include <vitasdk.h>
+unsigned int sceLibcHeapSize = 128 * 1024 * 1024;
 
 void AnmManager::TakeScreenshotIfRequested()
 {
@@ -28,6 +30,10 @@ void AnmManager::TakeScreenshotIfRequested()
 
 int main(int argc, char *argv[])
 {
+    sceKernelChangeThreadCpuAffinityMask(SCE_KERNEL_THREAD_ID_SELF,
+                                         SCE_KERNEL_CPU_MASK_USER_0 | SCE_KERNEL_CPU_MASK_USER_1);
+
+    sceKernelChangeThreadPriority(SCE_KERNEL_THREAD_ID_SELF,0x40);
     (void)argc;
     (void)argv;
 

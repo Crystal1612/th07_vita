@@ -1,8 +1,7 @@
 #pragma once
 
-#include <GLES3/gl3.h>
-#include <SDL_video.h>
-
+#include <SDL2/SDL_opengles2.h>
+#include <SDL2/SDL_video.h>
 #include "AnmManager.hpp"
 #include "ZunGraphics.hpp"
 

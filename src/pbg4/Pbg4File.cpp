@@ -199,28 +199,30 @@ void *Pbg4File::ReadRemaining(u32 max)
 
 void Pbg4File::GetFullPath(char *out, const char *filename)
 {
-#ifdef _WIN32
-    if (strchr(filename, ':') != nullptr)
-    {
-        strcpy(out, filename);
-        return;
-    }
-#else
-    if (filename[0] == '/')
-    {
-        snprintf(out, 260, "%s", filename);
-        return;
-    }
-#endif
+// #ifdef _WIN32
+//     if (strchr(filename, ':') != nullptr)
+//     {
+//         strcpy(out, filename);
+//         return;
+//     }
+// #else
+//     if (filename[0] == '/')
+//     {
+    
+//         snprintf(out, 260, "ux0:data/th07/%s", filename);
+//         return;
+//     }
+// #endif
 
-    char *base = SDL_GetBasePath();
-    if (base)
-    {
-        snprintf(out, 260, "%s%s", base, filename);
-        SDL_free(base);
-    }
-    else
-    {
+//     char *base = SDL_GetBasePath();
+//     if (base)
+//     {
+//         snprintf(out, 260, "%s%s", base, filename);
+//         SDL_free(base);
+//     }
+//     else
+//     {
         snprintf(out, 260, "%s", filename);
-    }
+    // }
+
 }

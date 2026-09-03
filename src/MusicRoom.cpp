@@ -103,7 +103,7 @@ i32 MusicRoom::ProcessInput()
         this->selectedIdx = this->cursor;
         if (g_Supervisor.cfg.preloadBgm)
         {
-            g_SoundPlayer.StartBGM("thbgm.dat");
+            g_SoundPlayer.StartBGM("ux0:data/th07/thbgm.dat");
         }
         g_Supervisor.PlayAudio(this->trackDescriptors[this->selectedIdx].path);
         for (i = 0; i < ARRAY_SIZE_SIGNED(this->descriptionSprites); i++)
@@ -235,6 +235,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
     g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], ANM_SCRIPT_MUSIC);
     arg->waitFramesCounter = 0;
     curChar = (char *)FileSystem::OpenFile("data/musiccmt.txt", 0);
+    Supervisor::DebugPrint("%s",curChar);
     firstChar = curChar;
     if ((u8 *)curChar == NULL)
     {

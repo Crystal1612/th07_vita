@@ -3,6 +3,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <vitasdk.h>
 
 GameErrorContext g_GameErrorContext;
 
@@ -23,6 +24,7 @@ const char *GameErrorContext::Log(const char *fmt, ...)
         *this->m_BufferEnd = '\0';
     }
     va_end(args);
+    sceClibPrintf("%s\n",tmp);
     return fmt;
 }
 
@@ -43,5 +45,6 @@ const char *GameErrorContext::Fatal(const char *fmt, ...)
     }
     va_end(args);
     this->m_ShowMessageBox = true;
+    sceClibPrintf("%s\n",tmp);
     return fmt;
 }

@@ -44,10 +44,14 @@ u64 g_PerformanceCounter;
 
 void Supervisor::DebugPrint(const char *fmt, ...)
 {
+#ifdef DEBUG
+    char tmp[8192];
     va_list args;
     va_start(args, fmt);
-    vprintf(fmt, args);
+    vsprintf(tmp, fmt, args);
+    g_GameErrorContext.Log(tmp);
     va_end(args);
+#endif
 }
 
 void Supervisor::CheckTiming()
@@ -377,7 +381,7 @@ ZunResult Supervisor::SetupInput()
 ZunResult Supervisor::LoadGameData()
 {
     char verFile[128];
-    if (g_Pbg4Archive.Load("th07.dat"))
+    if (g_Pbg4Archive.Load("ux0:data/th07/th07.dat"))
     {
         sprintf(verFile, "th07_%.4x%c.ver", 256, 98);
         g_Supervisor.version = (char *)FileSystem::OpenFile(verFile, 0);
@@ -548,24 +552,25 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
         return ZUN_ERROR;
     }
 
+    g_Supervisor.cfg.preloadBgm = true;
     if (g_SoundPlayer.bgmSeekOffset == 0)
     {
         if (!g_Supervisor.cfg.preloadBgm)
         {
-            g_SoundPlayer.StartBGM("thbgm.dat");
+            g_SoundPlayer.StartBGM("ux0:data/th07/thbgm.dat");
         }
         else
         {
-            memcpy(g_SoundPlayer.bgmArchivePath, "thbgm.dat", 10);
+            memcpy(g_SoundPlayer.bgmArchivePath, "ux0:data/th07/thbgm.dat", 24);
         }
     }
     else if (!g_Supervisor.cfg.preloadBgm)
     {
-        g_SoundPlayer.StartBGM("th07.dat");
+        g_SoundPlayer.StartBGM("ux0:data/th07/th07.dat");
     }
     else
     {
-        memcpy(g_SoundPlayer.bgmArchivePath, "th07.dat", 9);
+        memcpy(g_SoundPlayer.bgmArchivePath, "ux0:data/th07/th07.dat", 23);
     }
     scoreDat = ResultScreen::OpenScore("score.dat");
     memset(&g_GameManager.plst, 0, sizeof(g_GameManager.plst));
@@ -874,7 +879,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.cfg.version = 0x70002;
         g_Supervisor.cfg.padAxisX = 600;
         g_Supervisor.cfg.padAxisY = 600;
-        bgm2 = fopen("./thbgm.dat", "rb");
+        bgm2 = fopen("ux0:data/th07/thbgm.dat", "rb");
         if (bgm2)
         {
             fread(bgm2Data, 16, 1, bgm2);
@@ -905,7 +910,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_Supervisor.cfg = *(GameConfiguration *)configFile;
         free(configFile);
 
-        bgm = fopen("./thbgm.dat", "rb");
+        bgm = fopen("ux0:data/th07/thbgm.dat", "rb");
         if (bgm)
         {
             fread(bgmData, 16, 1, bgm);
@@ -930,6 +935,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
     }
     g_Supervisor.cfg.colorAddEmulation = 1;
+    g_Supervisor.cfg.preloadBgm = true;
     if (this->cfg.noVertexBuffers)
     {
         g_GameErrorContext.Log("頂点バッファの使用を抑制します\n");
