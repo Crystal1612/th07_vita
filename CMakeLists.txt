@@ -33,8 +33,8 @@ set(VITA_VERSION "01.00")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fjump-tables -O2 -mcpu=cortex-a9 -mtune=cortex-a9 -mfloat-abi=hard -mfpu=neon -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -fjump-tables -Wno-c++26-extensions -O2 -mcpu=cortex-a9 -mtune=cortex-a9 -mfloat-abi=hard -mfpu=neon -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall ")
 # Optional. You can specify more param.sfo flags this way.
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d ATTRIBUTE2=12")
 
@@ -92,6 +92,9 @@ add_executable(${PROJECT_NAME}
     src/utils.cpp
     src/thirdparty/sjis_converter.cpp
 )
+
+
+set_source_files_properties(src/SoundPlayer.cpp PROPERTIES COMPILE_FLAGS "-O0")  #I don't understand why there is audio distortion with -O2 optimization.
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/src"

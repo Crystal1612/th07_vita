@@ -166,9 +166,9 @@ stop:
     if (res == RENDER_RESULT_EXIT_ERROR)
     {
         g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\n");
+        g_GameErrorContext.Flush();
         goto start;
     }
     FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg, sizeof(GameConfiguration));
-    g_GameErrorContext.Flush();
     return 0;
 }

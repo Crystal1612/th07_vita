@@ -235,7 +235,6 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *arg)
     g_AnmManager->SetAnmIdxAndExecuteScript(&arg->vm[0], ANM_SCRIPT_MUSIC);
     arg->waitFramesCounter = 0;
     curChar = (char *)FileSystem::OpenFile("data/musiccmt.txt", 0);
-    Supervisor::DebugPrint("%s",curChar);
     firstChar = curChar;
     if ((u8 *)curChar == NULL)
     {

@@ -552,7 +552,6 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
         return ZUN_ERROR;
     }
 
-    g_Supervisor.cfg.preloadBgm = true;
     if (g_SoundPlayer.bgmSeekOffset == 0)
     {
         if (!g_Supervisor.cfg.preloadBgm)

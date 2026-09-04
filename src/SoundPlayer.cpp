@@ -65,21 +65,16 @@ int SoundPlayer::AudioThreadEntry(SceSize args, void* argp)
     {
         ma_uint64 framesRead = 0;
         ma_engine_read_pcm_frames(self->engine, f32_buf, VITA_AUDIO_SAMPLES, &framesRead);
+        ma_convert_pcm_frames_format(s16_buf, ma_format_s16, f32_buf, ma_format_f32, framesRead, 2,ma_dither_mode_none);
 
-        ma_pcm_convert(
-            s16_buf,
-            ma_format_s16,
-            f32_buf,
-            ma_format_f32,
-            framesRead * 2,
-            ma_dither_mode_none
-        );
-
-        if (framesRead < VITA_AUDIO_SAMPLES) {
-            memset(&s16_buf[framesRead * 2], 0, (VITA_AUDIO_SAMPLES - framesRead) * 2 * sizeof(int16_t));
+        if (framesRead < VITA_AUDIO_SAMPLES)
+        {
+            memset(&s16_buf[framesRead * 2], 0,
+                   (VITA_AUDIO_SAMPLES - framesRead) * 2 * sizeof(int16_t));
         }
 
         sceAudioOutOutput(self->audioPort, s16_buf);
+        
     }
 
     sceAudioOutReleasePort(self->audioPort);
@@ -424,7 +419,7 @@ ZunResult SoundPlayer::InitializeSound()
     this->audioThreadUid = sceKernelCreateThread(
         "ZunSoundThread",
         AudioThreadEntry,
-        0XBF, 
+        0X41, 
         0x10000,
         0,
         SCE_KERNEL_CPU_MASK_USER_2,
