@@ -9,42 +9,36 @@ GameErrorContext g_GameErrorContext;
 
 const char *GameErrorContext::Log(const char *fmt, ...)
 {
-    char tmp[8192];
-    size_t tmpSize;
+    memset(m_Buffer, 0, 8192);
     va_list args;
-
     va_start(args, fmt);
-    vsprintf(tmp, fmt, args);
-    tmpSize = strlen(tmp);
-    if (this->m_BufferEnd + tmpSize < this->m_Buffer + 0x1fff)
+    vsprintf(m_Buffer, fmt, args);
+    if (LogFile)
     {
-        strcpy(this->m_BufferEnd, tmp);
-
-        this->m_BufferEnd += tmpSize;
-        *this->m_BufferEnd = '\0';
+        *LogFile << m_Buffer;
     }
     va_end(args);
-    sceClibPrintf("%s\n",tmp);
+    sceClibPrintf("%s\n", m_Buffer);
     return fmt;
 }
 
 const char *GameErrorContext::Fatal(const char *fmt, ...)
 {
-    char tmp[512];
-    size_t tmpSize;
-    va_list args;
+    memset(m_Buffer, 0, 8192);
 
+    va_list args;
     va_start(args, fmt);
-    vsprintf(tmp, fmt, args);
-    tmpSize = strlen(tmp);
-    if (this->m_BufferEnd + tmpSize < this->m_Buffer + 0x1fff)
+    vsprintf(m_Buffer, fmt, args);
+    if (LogFile)
     {
-        strcpy(this->m_BufferEnd, tmp);
-        this->m_BufferEnd += tmpSize;
-        *this->m_BufferEnd = '\0';
+        *LogFile << m_Buffer;
     }
     va_end(args);
     this->m_ShowMessageBox = true;
-    sceClibPrintf("%s\n",tmp);
+    if (this->m_ShowMessageBox)
+    {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", this->m_Buffer, NULL);
+    }
+    sceClibPrintf("%s\n", m_Buffer);
     return fmt;
 }

@@ -165,8 +165,6 @@ stop:
     SDL_ShowCursor(SDL_ENABLE);
     if (res == RENDER_RESULT_EXIT_ERROR)
     {
-        g_GameErrorContext.m_BufferEnd = g_GameErrorContext.m_Buffer;
-        *g_GameErrorContext.m_BufferEnd = '\0';
         g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\n");
         goto start;
     }

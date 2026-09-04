@@ -2,21 +2,43 @@
 
 #include <SDL2/SDL.h>
 #include <cstddef>
+#include <fstream>
 
 #include "FileSystem.hpp"
 
 struct GameErrorContext
 {
     char m_Buffer[8192];
-    char *m_BufferEnd;
+    // char *m_BufferEnd;
     i8 m_ShowMessageBox;
+    std::ofstream *LogFile;
 
     GameErrorContext()
     {
-        m_BufferEnd = m_Buffer;
-        m_Buffer[0] = '\0';
         m_ShowMessageBox = false;
-        Log("東方動作記録 --------------------------------------------- \n");
+        LogFile = new std::ofstream("ux0:data/th07/log.txt", std::ios::out);
+        if (LogFile->is_open())
+        {
+            Log("東方動作記録 --------------------------------------------- \n");
+        }
+        else
+        {
+            Fatal("ux0:data/th07/log.txt");
+            LogFile->close();
+            delete LogFile;
+            LogFile = nullptr;
+        }
+    }
+
+    ~GameErrorContext()
+    {
+        Flush();
+        if (LogFile)
+        {
+            LogFile->close();
+            delete LogFile;
+            LogFile = nullptr;
+        }
     }
 
     const char *Fatal(const char *fmt, ...);
@@ -24,14 +46,10 @@ struct GameErrorContext
 
     void Flush()
     {
-        if (this->m_BufferEnd != this->m_Buffer)
+        if (LogFile)
         {
             this->Log("---------------------------------------------------------- \n");
-            if (this->m_ShowMessageBox)
-            {
-                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", this->m_Buffer, NULL);
-            }
-            FileSystem::WriteDataToFile("./log.txt", this->m_Buffer, strlen(this->m_Buffer));
+            LogFile->flush();
         }
     }
 };
