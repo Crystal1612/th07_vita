@@ -15,7 +15,7 @@
 #include "ZunResult.hpp"
 #include "dxutil.hpp"
 #include <vitasdk.h>
-unsigned int sceLibcHeapSize = 128 * 1024 * 1024;
+unsigned int sceLibcHeapSize = 192 * 1024 * 1024;
 
 void AnmManager::TakeScreenshotIfRequested()
 {
