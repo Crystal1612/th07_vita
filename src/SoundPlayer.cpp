@@ -43,43 +43,23 @@ SoundPlayer g_SoundPlayer;
 
 #define VITA_AUDIO_SAMPLES 1024
 
-int SoundPlayer::AudioThreadEntry(SceSize args, void* argp)
+static float s_f32_buf[VITA_AUDIO_SAMPLES * 2];
+
+void SoundPlayer::SDLAudioCallback(void* userdata, Uint8* stream, int len)
 {
-    SoundPlayer* self = *reinterpret_cast<SoundPlayer**>(argp);
+    SoundPlayer* self = static_cast<SoundPlayer*>(userdata);
+    int16_t* out = reinterpret_cast<int16_t*>(stream);
 
-    self->audioPort = sceAudioOutOpenPort(
-        SCE_AUDIO_OUT_PORT_TYPE_MAIN,
-        VITA_AUDIO_SAMPLES,
-        48000,
-        SCE_AUDIO_OUT_MODE_STEREO
-    );
+    ma_uint32 requestedFrames = len / (2 * sizeof(int16_t));
+    ma_uint64 framesRead = 0;
 
-    if (self->audioPort < 0) {
-        return sceKernelExitDeleteThread(self->audioPort);
-    }
+    ma_engine_read_pcm_frames(self->engine, s_f32_buf, requestedFrames, &framesRead);
+    ma_convert_pcm_frames_format(out, ma_format_s16, s_f32_buf, ma_format_f32, framesRead, 2, ma_dither_mode_none);
 
-    float f32_buf[VITA_AUDIO_SAMPLES * 2];
-    int16_t s16_buf[VITA_AUDIO_SAMPLES * 2];
-
-    while (self->isAudioRunning)
+    if (framesRead < requestedFrames)
     {
-        ma_uint64 framesRead = 0;
-        ma_engine_read_pcm_frames(self->engine, f32_buf, VITA_AUDIO_SAMPLES, &framesRead);
-        ma_convert_pcm_frames_format(s16_buf, ma_format_s16, f32_buf, ma_format_f32, framesRead, 2,ma_dither_mode_none);
-
-        if (framesRead < VITA_AUDIO_SAMPLES)
-        {
-            memset(&s16_buf[framesRead * 2], 0,
-                   (VITA_AUDIO_SAMPLES - framesRead) * 2 * sizeof(int16_t));
-        }
-
-        sceAudioOutOutput(self->audioPort, s16_buf);
-        
+        memset(&out[framesRead * 2], 0, (requestedFrames - framesRead) * 2 * sizeof(int16_t));
     }
-
-    sceAudioOutReleasePort(self->audioPort);
-    self->audioPort = -1;
-    return sceKernelExitDeleteThread(0);
 }
 
 static ma_result ThBgmDataSource_read(ma_data_source *pDataSource, void *pFramesOut,
@@ -390,17 +370,20 @@ SoundPlayer::SoundPlayer()
 
 ZunResult SoundPlayer::InitializeSound()
 {
-    ma_engine_config engineConfig;
-
     memset(this, 0, sizeof(SoundPlayer));
     for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->unusedSoundVolRelated); i++)
     {
         this->unusedSoundVolRelated[i] = -1;
     }
 
-    this->engine = new ma_engine;
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+    {
+        g_GameErrorContext.Log("DirectSound オブジェクトの初期化が失敗したよ\n");
+        return ZUN_ERROR;
+    }
 
-    engineConfig = ma_engine_config_init();
+    this->engine = new ma_engine;
+    ma_engine_config engineConfig = ma_engine_config_init();
     engineConfig.sampleRate = 48000;
     engineConfig.channels = 2;
     engineConfig.noDevice = MA_TRUE;
@@ -412,21 +395,17 @@ ZunResult SoundPlayer::InitializeSound()
         return ZUN_ERROR;
     }
 
-    this->isAudioRunning = true;
-    this->audioPort = -1;
+    SDL_AudioSpec desired, obtained;
+    SDL_zero(desired);
+    desired.freq = 48000;             
+    desired.format = AUDIO_S16SYS;     
+    desired.channels = 2;             
+    desired.samples = VITA_AUDIO_SAMPLES;
+    desired.callback = SDLAudioCallback;
+    desired.userdata = this;
 
-    SoundPlayer* self = this;
-    this->audioThreadUid = sceKernelCreateThread(
-        "ZunSoundThread",
-        AudioThreadEntry,
-        0X41, 
-        0x10000,
-        0,
-        SCE_KERNEL_CPU_MASK_USER_2,
-        NULL
-    );
-
-    if (this->audioThreadUid < 0)
+    this->audioDevice = SDL_OpenAudioDevice(NULL, 0, &desired, &obtained, 0);
+    if (this->audioDevice == 0)
     {
         g_GameErrorContext.Log("オーディオ出力スレッドの作成に失敗しました\n");
         ma_engine_uninit(this->engine);
@@ -434,7 +413,7 @@ ZunResult SoundPlayer::InitializeSound()
         return ZUN_ERROR;
     }
 
-    sceKernelStartThread(this->audioThreadUid, sizeof(SoundPlayer*), &self);
+    SDL_PauseAudioDevice(this->audioDevice, 0);
 
     g_GameErrorContext.Log("DirectSound は正常に初期化されました\n");
     return ZUN_SUCCESS;
@@ -444,21 +423,20 @@ ZunResult SoundPlayer::Release()
 {
     i32 i;
 
-    if (this->isAudioRunning)
+    StopBGM();
+
+    if (this->audioDevice != 0)
     {
-        this->isAudioRunning = false;
-        if (this->audioThreadUid >= 0)
-        {
-            sceKernelWaitThreadEnd(this->audioThreadUid, NULL, NULL);
-            this->audioThreadUid = -1;
-        }
+        SDL_PauseAudioDevice(this->audioDevice, 1);
+        SDL_CloseAudioDevice(this->audioDevice);
+        this->audioDevice = 0;
     }
+
 
     if (!this->engine)
     {
         return ZUN_SUCCESS;
     }
-    StopBGM();
 
     for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundBuffers); i++)
     {
@@ -488,8 +466,9 @@ ZunResult SoundPlayer::Release()
     if (this->bgmFmtData)
     {
         free(this->bgmFmtData);
-        this->bgmFmtData = NULL;
     }
+
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
     return ZUN_SUCCESS;
 }
 

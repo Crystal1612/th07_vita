@@ -7,6 +7,7 @@
 #include "inttypes.hpp"
 #include "miniaudio.h"
 #include "vitasdk.h"
+#include <SDL2/SDL.h>
 
 enum AudioOpcode
 {
@@ -153,10 +154,8 @@ struct SoundPlayer
     ma_sound *backgroundMusic;
     i32 bgmSeekOffset;
 
-    SceUID audioThreadUid;
-    volatile bool isAudioRunning;
-    int audioPort;
-    static int AudioThreadEntry(SceSize args, void* argp);
+    SDL_AudioDeviceID audioDevice; 
+    static void SDLAudioCallback(void* userdata, Uint8* stream, int len);
 };
 
 extern SoundPlayer g_SoundPlayer;
