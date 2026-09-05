@@ -1362,7 +1362,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
     case RESULT_STATE_REPLAY_SELECT_SAVE_SLOT:
         if (this->frameTimer == 0)
         {
-            std::filesystem::create_directory("replay");
+            std::filesystem::create_directory("ux0:data/th07/replay");
             for (i = 0; i < ARRAY_SIZE_SIGNED(this->replays); i++)
             {
                 sprintf(replayPath, "./replay/th7_%.2d.rpy", i + 1);
@@ -1514,7 +1514,7 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             }
             else
             {
-                sprintf(replayPath2, "./replay/th7_%.2d.rpy", this->chosenReplayIdx + 1);
+                sprintf(replayPath2, "ux0:data/th07/replay/th7_%.2d.rpy", this->chosenReplayIdx + 1);
                 ReplayManager::SaveReplay(replayPath2, this->replayName);
                 this->frameTimer = 0;
                 this->resultScreenState = RESULT_STATE_EXITING;

@@ -1852,7 +1852,7 @@ u32 MainMenu::OnUpdateSelectReplay()
                 }
             }
 
-            const fs::path replay = "./replay";
+            const fs::path replay = "ux0:data/th07/replay";
             fs::create_directory(replay);
 
             std::vector<fs::directory_entry> entries(fs::directory_iterator(replay),

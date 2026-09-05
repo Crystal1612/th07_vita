@@ -37,7 +37,7 @@ void GameWindow::Present()
     g_AnmManager->TakeScreenshotIfRequested();
     if (WAS_PRESSED_RAW(TH_BUTTON_HOME))
     {
-        std::filesystem::create_directory("snapshot");
+        std::filesystem::create_directory("ux0:data/th07/snapshot");
         for (i = 0; i < 1000; i++)
         {
             sprintf(snapshotPath, "snapshot/th%.3d.bmp", i);
