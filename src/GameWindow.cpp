@@ -188,7 +188,7 @@ ZunResult GameWindow::CreateGameWindow()
     g_LastPerfCounter = SDL_GetPerformanceCounter();
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
     g_GameWindow.window = SDL_CreateWindow("東方妖々夢　〜 Perfect Cherry Blossom. ver 1.00b",

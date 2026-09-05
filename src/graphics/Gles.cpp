@@ -267,7 +267,42 @@ void GlesGraphics::GetViewport(ZunViewport &viewport)
 void GlesGraphics::SetViewport(const ZunViewport &viewport)
 {
     this->viewport = viewport;
-    glViewport(viewport.x, 480 - (viewport.y + viewport.height), viewport.width, viewport.height);
+
+    GLint vx = 0;
+    GLint vy = 0;
+    GLsizei vw = 0;
+    GLsizei vh = 0;
+
+    if (!g_Supervisor.cfg.windowed)
+    {
+        // full 16:9
+        const float scaleX = 960.0f / 640.0f; // 1.5f
+        const float scaleY = 544.0f / 480.0f; // ~1.1333f
+
+        vx = (GLint)(viewport.x * scaleX);
+        vw = (GLsizei)(viewport.width * scaleX);
+        vh = (GLsizei)(viewport.height * scaleY);
+        vy = (GLint)(544.0f - (viewport.y + viewport.height) * scaleY);
+    }
+    else
+    {
+        // zoom 4:3
+        const float scale = 544.0f / 480.0f;
+        const float offsetX = (960.0f - (640.0f * scale)) * 0.5f;
+
+        vx = (GLint)(offsetX + (float)viewport.x * scale);
+        vw = (GLsizei)((float)viewport.width * scale);
+        vh = (GLsizei)((float)viewport.height * scale);
+        vy = (GLint)(544.0f - ((float)(viewport.y + viewport.height) * scale));
+
+        // original 1:1
+        // vx = 160 + viewport.x;
+        // vw = viewport.width;
+        // vh = viewport.height;
+        // vy = 512 - (viewport.y + viewport.height); // 512 = 32 + 480
+    }
+
+    glViewport(vx, vy, vw, vh);
 }
 
 void GlesGraphics::Enable(Capabilities cap)
