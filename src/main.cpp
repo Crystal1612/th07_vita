@@ -30,10 +30,9 @@ void AnmManager::TakeScreenshotIfRequested()
 
 int main(int argc, char *argv[])
 {
-    sceKernelChangeThreadCpuAffinityMask(SCE_KERNEL_THREAD_ID_SELF,
-                                         SCE_KERNEL_CPU_MASK_USER_0 | SCE_KERNEL_CPU_MASK_USER_1);
-
-    sceKernelChangeThreadPriority(SCE_KERNEL_THREAD_ID_SELF,0x40);
+    SceUID self = sceKernelGetThreadId();
+    sceKernelChangeThreadCpuAffinityMask(self, SCE_KERNEL_CPU_MASK_USER_1);
+    sceKernelChangeThreadPriority(self,0x40);
     (void)argc;
     (void)argv;
 
@@ -167,6 +166,7 @@ stop:
     {
         g_GameErrorContext.Log("再起動を要するオプションが変更されたので再起動します\n");
         g_GameErrorContext.Flush();
+        FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg, sizeof(GameConfiguration));
         goto start;
     }
     FileSystem::WriteDataToFile("th07.cfg", &g_Supervisor.cfg, sizeof(GameConfiguration));

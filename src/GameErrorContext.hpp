@@ -23,10 +23,10 @@ struct GameErrorContext
         }
         else
         {
-            Fatal("ux0:data/th07/log.txt");
             LogFile->close();
             delete LogFile;
             LogFile = nullptr;
+            Fatal("cannot write:ux0:data/th07/log.txt");
         }
     }
 

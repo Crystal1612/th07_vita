@@ -139,7 +139,8 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     if (rawData->csum != checksum)
     {
         Supervisor::DebugPrint("warning : score.dat chksum error\r\n");
-        goto RECREATE_SCORE;
+        Supervisor::DebugPrint("checksum : %d %d\n",rawData->csum,checksum);
+        //goto RECREATE_SCORE;
     }
 
     if (rawData->dataOffset != sizeof(ScoreDatRaw))

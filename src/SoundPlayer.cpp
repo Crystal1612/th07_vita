@@ -47,6 +47,15 @@ static float s_f32_buf[VITA_AUDIO_SAMPLES * 2];
 
 void SoundPlayer::SDLAudioCallback(void* userdata, Uint8* stream, int len)
 {
+    static int initialized = 0;
+    if (!initialized) {
+        SceUID current_thid = sceKernelGetThreadId();
+        sceKernelChangeThreadPriority(current_thid, 0xBF);
+        sceKernelChangeThreadCpuAffinityMask(current_thid, SCE_KERNEL_CPU_MASK_USER_2);
+        sceClibPrintf("SDLAudioCallback priority : 0x%x\n",sceKernelGetThreadCurrentPriority());
+        initialized = 1;
+    }
+
     SoundPlayer* self = static_cast<SoundPlayer*>(userdata);
     int16_t* out = reinterpret_cast<int16_t*>(stream);
 

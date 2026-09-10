@@ -13,12 +13,12 @@ const char *GameErrorContext::Log(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     vsprintf(m_Buffer, fmt, args);
+    sceClibPrintf("%s\n", m_Buffer);
     if (LogFile)
     {
         *LogFile << m_Buffer;
     }
     va_end(args);
-    sceClibPrintf("%s\n", m_Buffer);
     return fmt;
 }
 
@@ -29,6 +29,7 @@ const char *GameErrorContext::Fatal(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     vsprintf(m_Buffer, fmt, args);
+    sceClibPrintf("%s\n", m_Buffer);
     if (LogFile)
     {
         *LogFile << m_Buffer;
@@ -39,6 +40,6 @@ const char *GameErrorContext::Fatal(const char *fmt, ...)
     {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", this->m_Buffer, NULL);
     }
-    sceClibPrintf("%s\n", m_Buffer);
+    
     return fmt;
 }
