@@ -118,4 +118,17 @@ class GlesGraphics : public ZunGraphics
         }
         return shader;
     }
+
+    bool windowed;
+
+    static inline void TransposeMatrix(GLfloat *dest, const ZunMatrix &src)
+    {
+        for (int r = 0; r < 4; ++r)
+        {
+            for (int c = 0; c < 4; ++c)
+            {
+                dest[c * 4 + r] = src.m[r][c];
+            }
+        }
+    }
 };

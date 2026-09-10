@@ -1,5 +1,4 @@
 #include "Gles.hpp"
-	
 
 #include "AnmManager.hpp"
 #include "GameWindow.hpp"
@@ -141,12 +140,10 @@ ZunGraphics *GlesGraphics::Init()
         Supervisor::DebugPrint("SDL_GL_SetSwapInterval failed: %s\n", SDL_GetError());
     }
 
-    RenderVertexInfo unitQuadData[4] = {
-        {{-128.0f, -128.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 128.0f, -128.0f, 0.0f}, {1.0f, 0.0f}},
-        {{-128.0f,  128.0f, 0.0f}, {0.0f, 1.0f}},
-        {{ 128.0f,  128.0f, 0.0f}, {1.0f, 1.0f}}
-    };
+    RenderVertexInfo unitQuadData[4] = {{{-128.0f, -128.0f, 0.0f}, {0.0f, 0.0f}},
+                                        {{128.0f, -128.0f, 0.0f}, {1.0f, 0.0f}},
+                                        {{-128.0f, 128.0f, 0.0f}, {0.0f, 1.0f}},
+                                        {{128.0f, 128.0f, 0.0f}, {1.0f, 1.0f}}};
 
     glGenBuffers(1, &gfx->unitQuadVbo);
     glBindBuffer(GL_ARRAY_BUFFER, gfx->unitQuadVbo);
@@ -204,6 +201,8 @@ ZunGraphics *GlesGraphics::Init()
     glUniform1i(gfx->u_Texture, 0);
 
     Supervisor::DebugPrint("using gles 2.0 (pib) rendering.\n");
+
+    gfx->windowed = g_Supervisor.cfg.windowed;
 
     return gfx;
 }
@@ -273,7 +272,7 @@ void GlesGraphics::SetViewport(const ZunViewport &viewport)
     GLsizei vw = 0;
     GLsizei vh = 0;
 
-    if (!g_Supervisor.cfg.windowed)
+    if (!windowed)
     {
         // full 16:9
         const float scaleX = 960.0f / 640.0f; // 1.5f
@@ -416,6 +415,7 @@ void GlesGraphics::SetAlphaTestRef(u8 ref)
 
 void GlesGraphics::Clear(u32 clearBits)
 {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     GLbitfield bits = 0;
     if (clearBits & CLEAR_COLOR_BUFFER)
     {
@@ -545,14 +545,14 @@ void GlesGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primit
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, unitQuadVbo);
-    
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
                           (void *)offsetof(RenderVertexInfo, pos));
-    
+
     glDisableVertexAttribArray(1);
     glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
-    
+
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(RenderVertexInfo),
                           (void *)offsetof(RenderVertexInfo, textureUV));
@@ -563,10 +563,20 @@ void GlesGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primit
     glUniform4f(u_Viewport, (f32)viewport.x, (f32)viewport.y, (f32)viewport.width,
                 (f32)viewport.height);
 
-    glUniformMatrix4fv(u_Model, 1, GL_FALSE, (GLfloat *)&transforms[MATRIX_MODEL]);
-    glUniformMatrix4fv(u_View, 1, GL_FALSE, (GLfloat *)&transforms[MATRIX_VIEW]);
-    glUniformMatrix4fv(u_Proj, 1, GL_FALSE, (GLfloat *)&transforms[MATRIX_PROJECTION]);
-    glUniformMatrix4fv(u_TextureMatrix, 1, GL_FALSE, (GLfloat *)&transforms[MATRIX_TEXTURE]);
+    GLfloat glModel[16];
+    GLfloat glView[16];
+    GLfloat glProj[16];
+    GLfloat glTexMat[16];
+
+    TransposeMatrix(glModel, transforms[MATRIX_MODEL]);
+    TransposeMatrix(glView, transforms[MATRIX_VIEW]);
+    TransposeMatrix(glProj, transforms[MATRIX_PROJECTION]);
+    TransposeMatrix(glTexMat, transforms[MATRIX_TEXTURE]);
+
+    glUniformMatrix4fv(u_Model, 1, GL_FALSE, glModel);
+    glUniformMatrix4fv(u_View, 1, GL_FALSE, glView);
+    glUniformMatrix4fv(u_Proj, 1, GL_FALSE, glProj);
+    glUniformMatrix4fv(u_TextureMatrix, 1, GL_FALSE, glTexMat);
 
     glUniform1i(u_ColorOpRgb, colorOpRgb);
     glUniform1i(u_ColorOpAlpha, colorOpAlpha);
@@ -585,7 +595,7 @@ void GlesGraphics::DrawPrimitive(PrimitiveType type, i32 startVertex, i32 primit
     glUniform1f(u_FogFar, fogFar);
 
     glDrawArrays(glMode, startVertex, vertexCount);
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -699,4 +709,5 @@ void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const
 void GlesGraphics::SwapBuffers()
 {
     SDL_GL_SwapWindow(g_GameWindow.window);
+    glClear(GL_COLOR_BUFFER_BIT);
 }

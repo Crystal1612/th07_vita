@@ -316,10 +316,10 @@ struct ZunMatrix
         m[0][0] = xScale;
         m[1][1] = yScale;
 
-        m[2][2] = zf / (zf - zn);
+        m[2][2] = (zf + zn) / (zf - zn);
         m[2][3] = 1.0f;
 
-        m[3][2] = -zn * zf / (zf - zn);
+        m[3][2] = -2.0f * zn * zf / (zf - zn);
         m[3][3] = 0.0f;
     }
 
