@@ -94,7 +94,6 @@ add_executable(${PROJECT_NAME}
 )
 
 
-set_source_files_properties(src/SoundPlayer.cpp PROPERTIES COMPILE_FLAGS "-O0")  #I don't understand why there is audio distortion with -O2 optimization.
 
 target_include_directories(${PROJECT_NAME} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/src"

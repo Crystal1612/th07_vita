@@ -19,8 +19,8 @@ Work is currently being done to transition the game over to being more platform-
 ### Dependencies
 
 * cmake
-* SDL2 (SDL2, SDL2_ttf, and SDL2_image)
-* OpenGL ES 3.0+
+* SDL2 (SDL2, SDL2_ttf, and SDL2_image) Tested only on"-DVIDEO_VITA_PIB=ON"
+* ~~OpenGL ES 3.0+~~
 * A compiler that supports C++17
 * A little endian machine
 
