@@ -119,7 +119,7 @@ u32 Gui::OnUpdate(Gui *arg)
     if (arg->impl->transitionToScoreScreen)
     {
         g_Supervisor.curState = SUPERVISOR_STATE_NEXT_STAGE;
-        arg->impl->transitionToScoreScreen = 0;
+        arg->impl->transitionToScoreScreen = FALSE;
     }
     arg->UpdateGui();
     arg->impl->RunMsg();
@@ -239,7 +239,7 @@ u32 Gui::OnDraw(Gui *arg)
     arg->impl->DrawDialogue();
     arg->DrawStageElements();
     arg->DrawGameScene();
-    g_AsciiManager.isGui = 1;
+    g_AsciiManager.isGui = TRUE;
     if (arg->impl->bonusScore.displayArg != GUI_DISPLAY_HIDDEN)
     {
         g_AsciiManager.color = 0xffffff80;
@@ -305,7 +305,7 @@ u32 Gui::OnDraw(Gui *arg)
         g_AsciiManager.scale.y = 1.0f;
         g_AsciiManager.color = 0xffffffff;
     }
-    g_AsciiManager.isGui = 0;
+    g_AsciiManager.isGui = FALSE;
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
@@ -381,11 +381,7 @@ ZunResult Gui::ActualAddedCallback()
     i32 i;
 
     this->frameCounter = 0;
-    if (g_Supervisor.curState == SUPERVISOR_STATE_NEXT_STAGE ||
-                g_Supervisor.curState == SUPERVISOR_STATE_RESTART_STAGE ||
-                g_Supervisor.curState == SUPERVISOR_STATE_NEXT_STAGE_USELESS
-            ? 0
-            : 1)
+    if (IsInitialStageLoad())
     {
         memset(this->impl, 0, sizeof(GuiImpl));
 
@@ -608,11 +604,7 @@ ZunResult Gui::ActualAddedCallback()
     default:
         return ZUN_ERROR;
     }
-    if (g_Supervisor.curState == SUPERVISOR_STATE_NEXT_STAGE ||
-                g_Supervisor.curState == SUPERVISOR_STATE_RESTART_STAGE ||
-                g_Supervisor.curState == SUPERVISOR_STATE_NEXT_STAGE_USELESS
-            ? 0
-            : 1)
+    if (IsInitialStageLoad())
     {
         for (k = 0; k < ARRAY_SIZE_SIGNED(this->impl->vms0); k++)
         {
@@ -723,7 +715,7 @@ void GuiImpl::MsgRead(i32 msgIdx)
     this->msg.textColorsB[0] = 0;
     this->msg.textColorsB[1] = 0;
     this->msg.dialogueSkippable = 1;
-    g_BulletManager.RemoveAllBullets(1);
+    g_BulletManager.RemoveAllBullets(ITEM_STATE_AUTOCOLLECT);
     g_EnemyManager.RemoveAllEnemies(0, 0);
     g_ItemManager.RemoveAllItems();
     if (msgIdx % 10 == 0)
@@ -780,7 +772,7 @@ ZunResult GuiImpl::RunMsg()
     {
         this->msg.timer = (u32)this->msg.curInstr->time;
     }
-    if (g_Player.hasBorder != BORDER_NONE)
+    if (g_Player.borderState != BORDER_NONE)
     {
         g_Player.BreakBorderNaturally();
     }
@@ -948,7 +940,7 @@ ZunResult GuiImpl::RunMsg()
             g_Supervisor.renderSkipFrames = 0x192;
             break;
         case MSG_NEXT_LEVEL:
-            g_Supervisor.checkTiming = 0;
+            g_Supervisor.checkTiming = FALSE;
             g_GameManager.globals->guiScore = g_GameManager.globals->score;
             if (g_GameManager.practice)
             {
@@ -968,7 +960,7 @@ ZunResult GuiImpl::RunMsg()
 
                 g_AnmManager->InitializeAndSetActiveSprite(&this->loadingSprite,
                                                            ANM_SPRITE_ASCII_LOADING);
-                this->transitionToScoreScreen = 1;
+                this->transitionToScoreScreen = TRUE;
                 this->msg.currentMsgIdx = -2;
             }
             else if (!g_GameManager.replay)
@@ -1494,14 +1486,14 @@ void Gui::DrawGameScene()
     {
         VertexDiffuseXyzrhw powerBarVerts[4];
 
-        if ((i32)g_GameManager.globals->currentPower > 0)
+        if (g_GameManager.GetPower() > 0)
         {
             powerBarVerts[0].pos = ZunVec3(496.0f, 144.0f, 0.1f);
-            powerBarVerts[1].pos = ZunVec3(
-                (f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 144.0f, 0.1f);
+            powerBarVerts[1].pos =
+                ZunVec3((f32)(g_GameManager.GetPower() + 496) + 0.0f, 144.0f, 0.1f);
             powerBarVerts[2].pos = ZunVec3(496.0f, 160.0f, 0.1f);
-            powerBarVerts[3].pos = ZunVec3(
-                (f32)((i32)g_GameManager.globals->currentPower + 0x1f0) + 0.0f, 160.0f, 0.1f);
+            powerBarVerts[3].pos =
+                ZunVec3((f32)(g_GameManager.GetPower() + 496) + 0.0f, 160.0f, 0.1f);
             powerBarVerts[0].diffuse.color = powerBarVerts[2].diffuse.color = 0xe0e0e0ff;
             powerBarVerts[1].diffuse.color = powerBarVerts[3].diffuse.color = 0x80e0e0ff;
 
@@ -1524,11 +1516,10 @@ void Gui::DrawGameScene()
         }
 
         ZunVec3 pos;
-        if ((i32)g_GameManager.globals->currentPower < 128)
+        if (g_GameManager.GetPower() < 128)
         {
             pos = ZunVec3(496.0f, 144.0f, 0.0f);
-            AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%d",
-                                        (i32)g_GameManager.globals->currentPower);
+            AsciiManager::AddFormatText(&g_AsciiManager, &pos, "%d", g_GameManager.GetPower());
         }
         else
         {
@@ -1565,7 +1556,7 @@ void Gui::DrawStageElements()
     ZunRect healthBarRect;
     u32 color1;
     u32 color2;
-    i32 leadingZeroSkipped;
+    ZunBool leadingZeroSkipped;
     i32 digitDivisor;
     i32 digit;
     Catk *catk;
@@ -1607,7 +1598,7 @@ void Gui::DrawStageElements()
         remainingBonus = g_EnemyManager.spellcardInfo.captureScore +
                          g_EnemyManager.spellcardInfo.grazeBonusScore;
         digitDivisor = 10000000;
-        leadingZeroSkipped = 0;
+        leadingZeroSkipped = FALSE;
         catk = &g_GameManager.catk[g_EnemyManager.spellcardInfo.spellcardIdx];
         if (!g_EnemyManager.spellcardInfo.isCapturing)
         {
@@ -1620,9 +1611,9 @@ void Gui::DrawStageElements()
             digit = remainingBonus / digitDivisor;
             if (digit != 0)
             {
-                leadingZeroSkipped = 1;
+                leadingZeroSkipped = TRUE;
             }
-            if (leadingZeroSkipped != 0 || digitDivisor == 1)
+            if (leadingZeroSkipped || digitDivisor == 1)
             {
                 this->impl->captureBonusVm.sprite =
                     g_AnmManager->GetSprite(digit + ANM_SPRITE_ASCII_DIGITS);
@@ -1782,9 +1773,7 @@ ZunResult Gui::DeletedCallback(Gui *arg)
     g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE_2);
     g_AnmManager->ReleaseAnm(ANM_FILE_FACE_STAGE_3);
     arg->FreeMsgFile();
-    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
-              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
-              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS))
+    if (IsInitialStageLoad())
     {
         g_AnmManager->ReleaseAnm(ANM_FILE_FRONT_0);
         g_AnmManager->ReleaseAnm(ANM_FILE_LOADING);
@@ -1802,9 +1791,7 @@ ZunResult Gui::RegisterChain()
 {
     Gui *mgr = &g_Gui;
 
-    if ((u32)(g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
-              g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
-              g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS) != 0)
+    if (IsInitialStageLoad())
     {
         memset(mgr, 0, sizeof(Gui));
         mgr->impl = new GuiImpl;
@@ -1816,7 +1803,7 @@ ZunResult Gui::RegisterChain()
     g_GuiCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
     g_GuiCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_GuiCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_GuiCalcChain, 13))
+    if (g_Chain.AddToCalcChain(&g_GuiCalcChain, CHAIN_PRIO_CALC_GUI))
     {
         return ZUN_ERROR;
     }
@@ -1825,7 +1812,7 @@ ZunResult Gui::RegisterChain()
     g_GuiDrawChain.addedCallback = NULL;
     g_GuiDrawChain.deletedCallback = NULL;
     g_GuiDrawChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_GuiDrawChain, 12);
+    g_Chain.AddToDrawChain(&g_GuiDrawChain, CHAIN_PRIO_DRAW_GUI);
     return ZUN_SUCCESS;
 }
 

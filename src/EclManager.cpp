@@ -11,6 +11,7 @@
 #include "GameErrorContext.hpp"
 #include "GameManager.hpp"
 #include "Gui.hpp"
+#include "ItemManager.hpp"
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
@@ -645,7 +646,7 @@ void EclManager::BeginSpellcard(Enemy *enemy, EclRawInstr *instr)
         spellcardName[i] = (u8)spellcardName[i] ^ 0xaa;
     }
     g_Gui.ShowSpellcard(instr->args[0].s[0], spellcardName);
-    g_BulletManager.RemoveAllBullets(1);
+    g_BulletManager.RemoveAllBullets(ITEM_STATE_AUTOCOLLECT);
     g_Stage.spellCardState = SPELLCARD_STATE_STARTING;
     g_Stage.ticksSinceSpellcardStarted = 0;
     for (i = 0; i < g_Stage.numSpellcardVms; i++)
@@ -738,7 +739,7 @@ void EclManager::EndSpellcard()
         g_Gui.EndEnemySpellcard();
         if (g_EnemyManager.spellcardInfo.isActive == 1)
         {
-            score = g_BulletManager.DespawnBullets(8000, 1);
+            score = g_BulletManager.DespawnBullets(8000, TRUE);
             score = g_EnemyManager.RemoveAllEnemies(8000, score);
             if (score != 0)
             {
@@ -1374,7 +1375,7 @@ restart:
                 break;
             case ECL_TEST_LASER_NOT_IN_USE:
                 arg = GET_INT_VALUE(enemy, 0);
-                if (enemy->lasers[arg] && enemy->lasers[arg]->inUse)
+                if (enemy->lasers[arg] && enemy->lasers[arg]->isInUse)
                 {
                     enemy->currentContext.laserNotInUse = 0;
                 }
@@ -1385,7 +1386,7 @@ restart:
                 break;
             case ECL_STOP_LASER:
                 arg = GET_INT_VALUE(enemy, 0);
-                if (enemy->lasers[arg] && enemy->lasers[arg]->inUse &&
+                if (enemy->lasers[arg] && enemy->lasers[arg]->isInUse &&
                     enemy->lasers[arg]->state < 2)
                 {
                     enemy->lasers[arg]->state = 2;
@@ -1666,14 +1667,15 @@ restart:
                     itemDropPos = enemy->pos;
                     itemDropPos.x += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     itemDropPos.y += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
-                    if ((i32)g_GameManager.globals->currentPower < 128)
+                    if (g_GameManager.GetPower() < 128)
                     {
                         g_ItemManager.SpawnItem(
-                            &itemDropPos, itemDropIdx == 0 ? ITEM_POWER_BIG : ITEM_POWER_SMALL, 0);
+                            &itemDropPos, itemDropIdx == 0 ? ITEM_POWER_BIG : ITEM_POWER_SMALL,
+                            ITEM_STATE_DEFAULT);
                     }
                     else
                     {
-                        g_ItemManager.SpawnItem(&itemDropPos, ITEM_POINT, 0);
+                        g_ItemManager.SpawnItem(&itemDropPos, ITEM_POINT, ITEM_STATE_DEFAULT);
                     }
                 }
                 break;
@@ -1684,7 +1686,7 @@ restart:
                     pointItemPos = enemy->pos;
                     pointItemPos.x += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
                     pointItemPos.y += g_Rng.GetRandomFloatInRange(128.0f) - 64.0f;
-                    g_ItemManager.SpawnItem(&pointItemPos, ITEM_POINT, 0);
+                    g_ItemManager.SpawnItem(&pointItemPos, ITEM_POINT, ITEM_STATE_DEFAULT);
                 }
                 break;
             case ECL_SET_VM_AUTO_ROTATE:
@@ -1708,14 +1710,14 @@ restart:
                 enemy->currentContext.time += GET_INT_VALUE(enemy, 0);
                 break;
             case ECL_SPAWN_ITEM:
-                g_ItemManager.SpawnItem(&enemy->pos, GET_INT_VALUE(enemy, 0), 0);
+                g_ItemManager.SpawnItem(&enemy->pos, GET_INT_VALUE(enemy, 0), ITEM_STATE_DEFAULT);
                 break;
             case ECL_SET_SCRIPT_WAIT_TIME:
                 g_Stage.scriptWaitTime = GET_INT_VALUE(enemy, 0);
                 break;
             case ECL_SET_NUM_BOSS_LIFE_MARKERS:
                 g_Gui.bossLifeMarkers = GET_INT_VALUE(enemy, 0);
-                g_GameManager.playTimeAll += 1800;
+                g_GameManager.totalPlayTime += 1800;
                 break;
             case ECL_SPAWN_ENEMY_ABS:
                 if (enemy->life > 0)
@@ -1754,7 +1756,7 @@ restart:
                 enemy->vms[instr->args[0].i].pendingInterrupt = instr->args[1].s[0];
                 break;
             case ECL_REMOVE_ALL_BULLETS_SPAWN_ITEMS:
-                g_BulletManager.RemoveAllBullets(1);
+                g_BulletManager.RemoveAllBullets(ITEM_STATE_AUTOCOLLECT);
                 break;
             case ECL_SET_BULLET_SOUND:
                 if (GET_INT_VALUE(enemy, 0) >= 0)
@@ -1828,7 +1830,7 @@ restart:
                 }
                 break;
             case ECL_REMOVE_ALL_BULLETS_NO_ITEMS:
-                g_BulletManager.RemoveAllBullets(0);
+                g_BulletManager.RemoveAllBullets(ITEM_STATE_DEFAULT);
                 break;
             case ECL_SET_SPECIAL_EFFECT_POS:
                 enemy->customSpecialEffectPos = GET_INT_VALUE(enemy, 0);

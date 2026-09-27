@@ -20,7 +20,7 @@ MidiDevice::~MidiDevice()
     Close();
 }
 
-u32 MidiDevice::OpenDevice(i32 deviceID)
+ZunBool MidiDevice::OpenDevice(i32 deviceID)
 {
     return 1;
     /*
@@ -57,19 +57,19 @@ ZunResult MidiDevice::Close()
     return ZUN_SUCCESS;*/
 }
 
-/*i32 MidiDevice::SendLongMsg(LPMIDIHDR pmh)
+/*ZunBool MidiDevice::SendLongMsg(LPMIDIHDR pmh)
 {
     if (!this->handle)
     {
-        return 0;
+        return FALSE;
     }
 
     if (midiOutPrepareHeader(this->handle, pmh, sizeof(MIDIHDR)) != MMSYSERR_NOERROR)
     {
-        return 1;
+        return TRUE;
     }
 
-    return midiOutLongMsg(this->handle, pmh, 0x40) != 0;
+    return midiOutLongMsg(this->handle, pmh, 0x40) != MMSYSERR_NOERROR;
 }*/
 
 union MidiShortMsg {
@@ -83,7 +83,7 @@ union MidiShortMsg {
     u32 dwMsg;
 };
 
-i32 MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
+ZunBool MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
 {
     return false;
     /*
@@ -91,7 +91,7 @@ i32 MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
 
     if (!this->handle)
     {
-        return false;
+        return FALSE;
     }
 
     pkt.msg.midiStatus = midiStatus;
@@ -175,8 +175,8 @@ u32 MidiOutput::SkipVariableLength(u8 **curTrackDataCursor)
 
 MidiOutput::MidiOutput()
 {
-    /*i32 local_18;
-    i32 local_14;
+    /*i32 headerIdx;
+    i32 fileDataIdx;
 
     this->tracks = NULL;
     this->divisions = 0;
@@ -186,17 +186,17 @@ MidiOutput::MidiOutput()
     this->fadeOutVolumeMultiplier = 0.0f;
     this->fadeOutLastSetVolume = 0;
     this->unused_2d0 = 0;
-    this->disableFadeOut = 0;
+    this->disableFadeOut = FALSE;
     this->unused_2d8 = 0;
     this->fadeOutState = 0;
-    this->fadeOutFlag = 0;
-    for (local_14 = 0; local_14 < ARRAY_SIZE_SIGNED(this->midiFileData); local_14 = local_14 + 1)
+    this->fadeOutFlag = FALSE;
+    for (fileDataIdx = 0; fileDataIdx < ARRAY_SIZE_SIGNED(this->midiFileData); fileDataIdx++)
     {
-        this->midiFileData[local_14] = NULL;
+        this->midiFileData[fileDataIdx] = NULL;
     }
-    for (local_18 = 0; local_18 < ARRAY_SIZE_SIGNED(this->midiHeaders); local_18 = local_18 + 1)
+    for (headerIdx = 0; headerIdx < ARRAY_SIZE_SIGNED(this->midiHeaders); headerIdx++)
     {
-        this->midiHeaders[local_18] = NULL;
+        this->midiHeaders[headerIdx] = NULL;
     }
     this->fileIdx = -1;
     this->midiHeadersCursor = 0;*/
@@ -325,7 +325,7 @@ void MidiOutput::LoadTracks()
     track = this->tracks;
     this->fadeOutVolumeMultiplier = 1.0f;
     this->fadeOutState = 0;
-    this->fadeOutFlag = 0;
+    this->fadeOutFlag = FALSE;
     this->volume = 0;
     this->field_0x130 = 0;
     for (i = 0; i < this->numTracks; i++, track++)
@@ -420,7 +420,7 @@ ZunResult MidiOutput::SetFadeOut(i32 interval)
     this->fadeOutInterval = interval;
     this->fadeOutElapsedMs = 0;
     this->fadeOutState = 0;
-    this->fadeOutFlag = 1;
+    this->fadeOutFlag = TRUE;
     return ZUN_SUCCESS;
 }
 
@@ -428,9 +428,9 @@ void MidiOutput::OnTimerElapsed()
 {
     /*u64 local_14;
     i32 i;
-    i32 trackLoaded;
+    ZunBool trackLoaded;
 
-    trackLoaded = false;
+    trackLoaded = FALSE;
 
     local_14 = this->field_0x130 + this->volume * this->divisions * 1000 / this->tempo;
     if (this->fadeOutFlag)
@@ -456,7 +456,7 @@ void MidiOutput::OnTimerElapsed()
     {
         if (this->tracks[i].trackPlaying != 0)
         {
-            trackLoaded = true;
+            trackLoaded = TRUE;
             while (this->tracks[i].trackPlaying != 0)
             {
                 if (this->tracks[i].trackLengthOther <= local_14)

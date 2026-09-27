@@ -100,28 +100,28 @@ i32 GameManager::IsInBounds(f32 x, f32 y, f32 widthPx, f32 heightPx)
     return 1;
 }
 
-i32 GameManager::ByteCsumAccumulator(u8 *param_1, i32 param_2)
+i32 GameManager::CalcChecksum(u8 *address, i32 size)
 {
-    i32 local_c;
+    i32 sum;
     i32 i;
 
-    local_c = 0;
-    for (i = 0; i < param_2; i++, param_1++)
+    sum = 0;
+    for (i = 0; i < size; i++, address++)
     {
-        local_c += (u32)*param_1;
+        sum += (u32)*address;
         g_GameManager.globals->curCsum += g_GameManager.globals->csumData[2];
     }
-    return local_c;
+    return sum;
 }
 
 i32 GameManager::ComputeGameIntegrityCsum()
 {
-    i32 csum = ByteCsumAccumulator((u8 *)g_GameManager.globals->rng1,
-                                   (u8 *)&this->globals->curCsum - (u8 *)this->globals->rng1);
-    csum += ByteCsumAccumulator((u8 *)g_GameManager.globals->csumData,
-                                sizeof(g_GameManager.globals->csumData));
-    csum += ByteCsumAccumulator((u8 *)g_GameManager.defaultCfg, sizeof(GameConfiguration));
-    csum += ByteCsumAccumulator((u8 *)&g_Supervisor.cfg, sizeof(GameConfiguration));
+    i32 csum = CalcChecksum((u8 *)g_GameManager.globals->rng1,
+                            (u8 *)&this->globals->curCsum - (u8 *)this->globals->rng1);
+    csum += CalcChecksum((u8 *)g_GameManager.globals->csumData,
+                         sizeof(g_GameManager.globals->csumData));
+    csum += CalcChecksum((u8 *)g_GameManager.defaultCfg, sizeof(GameConfiguration));
+    csum += CalcChecksum((u8 *)&g_Supervisor.cfg, sizeof(GameConfiguration));
     return csum;
 }
 
@@ -160,7 +160,7 @@ u32 GameManager::OnUpdate(GameManager *arg)
         g_GameManager.arcadeRegionTopLeftPos.y = 16.0f;
         g_GameManager.arcadeRegionSize.x = 384.0f;
         g_GameManager.arcadeRegionSize.y = 448.0f;
-        arg->isPaused = 1;
+        arg->isPaused = TRUE;
         if (g_GameManager.currentStage != STAGE6 || g_Gui.frameCounter >= 300)
         {
             g_SoundPlayer.PushCommand(AUDIO_PAUSE, 0, "Pause");
@@ -478,7 +478,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     i32 shotTypeAndChar;
     u32 size;
 
-    g_Supervisor.checkTiming = 0;
+    g_Supervisor.checkTiming = FALSE;
     arg->difficultyMask = 1 << arg->difficulty;
     arg->shotTypeAndCharacter = arg->character * 2 + arg->shotType;
     g_Supervisor.currentTime = SDL_GetTicks64();
@@ -521,7 +521,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
         arg->ResetRegionsPos();
         arg->globals->currentPower = 0.0f;
         arg->RegenerateGameIntegrityCsum();
-        arg->playTimeAll = 0;
+        arg->totalPlayTime = 0;
         arg->globals->guiScore = 0;
         arg->globals->score = 0;
         arg->globals->guiScoreDifference = 0;
@@ -703,7 +703,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     if (g_GameManager.replay)
     {
         arg->InitializeRank();
-        ReplayManager::RegisterChain(1, g_GameManager.replayFilename);
+        ReplayManager::RegisterChain(TRUE, g_GameManager.replayFilename);
         oldSeed = g_Rng.seed;
         arg->RegenerateGameIntegrityCsum();
         g_Rng.seed = oldSeed;
@@ -749,7 +749,7 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
 
     if (!g_GameManager.replay)
     {
-        ReplayManager::RegisterChain(0, "replay/th7_00.rpy");
+        ReplayManager::RegisterChain(FALSE, "replay/th7_00.rpy");
     }
     g_Supervisor.LoadAudio(0, g_Stage.stdData->bgmPaths[0]);
     g_Supervisor.LoadAudio(1, g_Stage.stdData->bgmPaths[1]);
@@ -821,7 +821,7 @@ ZunResult GameManager::RegisterChain()
     g_GameManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_GameManagerCalcChain.arg = mgr;
     mgr->framesThisStage = 0;
-    if (g_Chain.AddToCalcChain(&g_GameManagerCalcChain, 2))
+    if (g_Chain.AddToCalcChain(&g_GameManagerCalcChain, CHAIN_PRIO_CALC_GAMEMANAGER))
     {
         return ZUN_ERROR;
     }
@@ -830,7 +830,7 @@ ZunResult GameManager::RegisterChain()
     g_GameManagerDrawChain.addedCallback = NULL;
     g_GameManagerDrawChain.deletedCallback = NULL;
     g_GameManagerDrawChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_GameManagerDrawChain, 2);
+    g_Chain.AddToDrawChain(&g_GameManagerDrawChain, CHAIN_PRIO_DRAW_GAMEMANAGER);
     return ZUN_SUCCESS;
 }
 
@@ -838,7 +838,7 @@ void GameManager::CutChain()
 {
     g_Chain.Cut(&g_GameManagerCalcChain);
     g_Chain.Cut(&g_GameManagerDrawChain);
-    if (1000000000 <= g_GameManager.globals->score)
+    if (g_GameManager.globals->score >= 1000000000)
     {
         g_GameManager.globals->score = 999999999;
     }
@@ -848,7 +848,7 @@ void GameManager::CutChain()
 void GameManager::IncreaseSubrank(i32 amount)
 {
     this->subrank += amount;
-    while (100 <= this->subrank)
+    while (this->subrank >= 100)
     {
         this->rank.rank++;
         this->subrank -= 100;
@@ -881,7 +881,7 @@ void GameManager::AddCherryPlus(i32 amount)
     {
         this->cherry = this->cherryMax;
     }
-    if (0 < amount && g_Player.hasBorder == BORDER_NONE)
+    if (amount > 0 && g_Player.borderState == BORDER_NONE)
     {
         this->cherryPlus = this->cherryPlus + amount;
         if (this->cherryPlus >= this->globals->cherryStart + 50000)
@@ -928,17 +928,15 @@ void GameManager::IncreaseCherryMax(i32 amount)
     }
 }
 
-i32 GameManager::HasReachedMaxClears(i32 shotType)
+ZunBool GameManager::HasReachedMaxClearsAnyDifficulty(i32 shotType)
 {
-    return this->clrd[shotType].difficultyClearedWithRetries[DIFF_EASY] != 99 &&
-                   this->clrd[shotType].difficultyClearedWithRetries[DIFF_NORMAL] != 99 &&
-                   this->clrd[shotType].difficultyClearedWithRetries[DIFF_HARD] != 99 &&
-                   this->clrd[shotType].difficultyClearedWithRetries[DIFF_LUNATIC] != 99
-               ? 0
-               : 1;
+    return this->clrd[shotType].difficultyClearedWithRetries[DIFF_EASY] == 99 ||
+           this->clrd[shotType].difficultyClearedWithRetries[DIFF_NORMAL] == 99 ||
+           this->clrd[shotType].difficultyClearedWithRetries[DIFF_HARD] == 99 ||
+           this->clrd[shotType].difficultyClearedWithRetries[DIFF_LUNATIC] == 99;
 }
 
-i32 GameManager::HasUnlockedPhantom(i32 shotType)
+ZunBool GameManager::HasUnlockedPhantasm(i32 shotType)
 {
     i32 numSuccesses = 0;
     for (i32 i = 0; i < SPELLCARD_COUNT; i++)
@@ -955,16 +953,17 @@ i32 GameManager::HasUnlockedPhantom(i32 shotType)
     return this->clrd[shotType].difficultyClearedWithRetries[DIFF_PHANTASM] == 99;
 }
 
-i32 GameManager::HasReachedMaxClearsAllShotTypes()
+ZunBool GameManager::HasReachedMaxClearsAnyShotType()
 {
-    return !HasReachedMaxClears(SHOT_REIMU_A) && !HasReachedMaxClears(SHOT_REIMU_B) &&
-                   !HasReachedMaxClears(SHOT_MARISA_A) && !HasReachedMaxClears(SHOT_MARISA_B) &&
-                   !HasReachedMaxClears(SHOT_SAKUYA_A) && !HasReachedMaxClears(SHOT_SAKUYA_B)
-               ? 0
-               : 1;
+    return HasReachedMaxClearsAnyDifficulty(SHOT_REIMU_A) ||
+           HasReachedMaxClearsAnyDifficulty(SHOT_REIMU_B) ||
+           HasReachedMaxClearsAnyDifficulty(SHOT_MARISA_A) ||
+           HasReachedMaxClearsAnyDifficulty(SHOT_MARISA_B) ||
+           HasReachedMaxClearsAnyDifficulty(SHOT_SAKUYA_A) ||
+           HasReachedMaxClearsAnyDifficulty(SHOT_SAKUYA_B);
 }
 
-i32 GameManager::HasUnlockedPhantomAndMaxClears()
+ZunBool GameManager::HasUnlockedPhantasmAndMaxClears()
 {
     i32 j;
     i32 i;

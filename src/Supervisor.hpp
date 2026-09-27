@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MidiOutput.hpp"
+#include "ZunBool.hpp"
 #include "ZunMath.hpp"
 #include "graphics/ZunGraphics.hpp"
 #include "inttypes.hpp"
@@ -139,7 +140,7 @@ struct Supervisor
     ZunResult PlayAudio(const char *path);
     ZunResult PlayLoadedAudio(i32 idx);
     ZunResult SetupInput();
-    i32 SnapshotScreen(const char *filename);
+    i32 TakeSnapshot(const char *filename);
     ZunResult StopAudio();
     void TickTimer(i32 *frames, f32 *subFrames);
     void UpdateStartupTime();
@@ -147,17 +148,17 @@ struct Supervisor
 
     i32 IsSlowMode();
 
-    i32 IsSoftwareTexturing()
+    ZunBool IsSoftwareTexturing()
     {
         return this->cfg.disableTextureBlend | this->cfg.colorAddEmulation;
     }
 
-    i32 IsClearingBackbuffer()
+    ZunBool IsClearingBackbuffer()
     {
         return this->cfg.forceBackBufferClear | this->cfg.disableItemDrawAroundPlayfield;
     }
 
-    i32 VsyncDisabled()
+    ZunBool VsyncDisabled()
     {
         return this->vsyncDisabled;
     }
@@ -175,9 +176,9 @@ struct Supervisor
     i32 prevState;
     i32 unused_160;
     i32 renderSkipFrames;
-    i32 isInEnding;
-    i32 vsyncDisabled;
-    i32 lockableBackBuffer;
+    ZunBool isInEnding;
+    ZunBool vsyncDisabled;
+    ZunBool lockableBackBuffer;
     u32 lastFrameTime;
     f32 effectiveFramerateMultiplier;
     MidiOutput *midiOutput;
@@ -209,14 +210,21 @@ struct Supervisor
     i32 maxTimingError;
     i32 timingSpikeAccumulator;
     i32 timingBadCount;
-    i32 checkTiming;
-    i32 fogEnabled;
+    ZunBool checkTiming;
+    ZunBool fogEnabled;
     i32 exeChecksum;
     i32 exeSize;
-    i32 versionTableSize;
-    char *version;
+    i32 versionDataSize;
+    char *versionData;
 };
 
 extern Supervisor g_Supervisor;
 
 #define NUKE_SUPERVISOR() memset(&g_Supervisor, -1, sizeof(g_Supervisor))
+
+inline ZunBool IsInitialStageLoad()
+{
+    return g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE &&
+           g_Supervisor.curState != SUPERVISOR_STATE_RESTART_STAGE &&
+           g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE_USELESS;
+}

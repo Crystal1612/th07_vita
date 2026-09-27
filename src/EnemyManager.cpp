@@ -6,6 +6,7 @@
 #include "EclManager.hpp"
 #include "GameManager.hpp"
 #include "Gui.hpp"
+#include "ItemManager.hpp"
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "SoundPlayer.hpp"
@@ -417,10 +418,11 @@ i32 Enemy::HandleLifeCallback()
                     enemy->deathCallbackSub = -1;
                 }
             }
-            return 1;
+            return TRUE;
         }
     }
-    return 0;
+
+    return FALSE;
 }
 
 i32 Enemy::HandleTimerCallback()
@@ -505,12 +507,10 @@ i32 Enemy::HandleTimerCallback()
         this->bulletRankAmount2Low = 0;
         this->bulletRankAmount2High = 0;
         this->stackDepth = 0;
-        return 1;
+        return TRUE;
     }
-    else
-    {
-        return 0;
-    }
+
+    return FALSE;
 }
 
 void Enemy::Despawn()
@@ -572,8 +572,8 @@ void Enemy::CheckBulletPlayerCollision(ZunVec3 *bulletCenter, ZunVec3 *bulletSiz
         g_Player.CheckGraze(bulletCenter, &grazeSize);
     }
     grazeSize = *bulletSize / 1.5f;
-    if (g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 && this->canDie &&
-        (!this->isBoss && !this->isProjectile))
+    if (g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == PLAYER_COLLISION_HIT &&
+        this->canDie && (!this->isBoss && !this->isProjectile))
     {
         this->life = this->life - 10;
     }
@@ -610,7 +610,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         {
             g_GameManager.IncreaseSubrank(100);
         }
-        g_GameManager.playTimeAll++;
+        g_GameManager.totalPlayTime++;
     }
     for (i = 0; i < ARRAY_SIZE_SIGNED(arg->enemyHead); i++)
     {
@@ -676,24 +676,24 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         }
         if (!enemy->hasNoCollision && !enemy->isInBounds &&
             g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y, enemy->primaryVm.sprite->widthPx,
-                                     enemy->primaryVm.sprite->heightPx) != 0)
+                                     enemy->primaryVm.sprite->heightPx))
         {
             enemy->isInBounds = 1;
         }
         if (enemy->isInBounds == 1 &&
-            (((enemy->trailFlags == 0 &&
-               g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y,
+            ((enemy->trailFlags == 0 &&
+              !g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y,
                                         enemy->primaryVm.sprite->widthPx,
-                                        enemy->primaryVm.sprite->heightPx) == 0) ||
-              (enemy->trailFlags != 0 &&
-               (g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y,
-                                         enemy->primaryVm.sprite->widthPx,
-                                         enemy->primaryVm.sprite->heightPx) == 0 &&
-                g_GameManager.IsInBounds(enemy->enemyHistory[enemy->trailCount - 1].pos.x,
-                                         enemy->enemyHistory[enemy->trailCount - 1].pos.y,
-                                         enemy->primaryVm.sprite->widthPx,
-                                         enemy->primaryVm.sprite->heightPx) == 0))) &&
-             !enemy->disableOOBDespawn))
+                                        enemy->primaryVm.sprite->heightPx)) ||
+             (enemy->trailFlags != 0 &&
+              !g_GameManager.IsInBounds(enemy->pos.x, enemy->pos.y,
+                                        enemy->primaryVm.sprite->widthPx,
+                                        enemy->primaryVm.sprite->heightPx) &&
+              !g_GameManager.IsInBounds(enemy->enemyHistory[enemy->trailCount - 1].pos.x,
+                                        enemy->enemyHistory[enemy->trailCount - 1].pos.y,
+                                        enemy->primaryVm.sprite->widthPx,
+                                        enemy->primaryVm.sprite->heightPx))) &&
+            !enemy->disableOOBDespawn)
         {
             enemy->active = 0;
             enemy->Despawn();
@@ -769,7 +769,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                             cherryGain = 70;
                         }
                         if (cherryGain == 0 &&
-                            (g_Player.isFocus == 0 || (enemy->timer.GetCurrent() & 1) != 0))
+                            (!g_Player.isFocus || (enemy->timer.GetCurrent() & 1) != 0))
                         {
                             cherryGain = 10;
                         }
@@ -873,12 +873,12 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                              fabsf(diffToPlayer.x) > fabsf(enemyDiff.x)))
                         {
                             g_Player.sakuyaTargetPosition = enemy->pos;
-                            g_Player.targetingEnemy = 1;
+                            g_Player.targetingEnemy = TRUE;
                         }
                     }
                     else
                     {
-                        g_Player.targetingEnemy = 1;
+                        g_Player.targetingEnemy = TRUE;
                     }
                 }
                 if (!g_Player.targetingEnemy)
@@ -962,7 +962,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 }
                 if (enemy->isBoss && !g_EnemyManager.spellcardInfo.isActive)
                 {
-                    removedScore = g_BulletManager.DespawnBullets(8000, 1);
+                    removedScore = g_BulletManager.DespawnBullets(8000, TRUE);
                     removedScore = g_EnemyManager.RemoveAllEnemies(8000, removedScore);
                     if (removedScore != 0)
                     {
@@ -1373,7 +1373,7 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerCalcChain.addedCallback = (ChainLifecycleCallback)AddedCallback;
     g_EnemyManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_EnemyManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, 10))
+    if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, CHAIN_PRIO_CALC_ENEMYMANAGER))
     {
         return ZUN_ERROR;
     }
@@ -1382,7 +1382,8 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerDrawChain1.addedCallback = NULL;
     g_EnemyManagerDrawChain1.deletedCallback = NULL;
     g_EnemyManagerDrawChain1.arg = mgr;
-    if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain1, 5) != ZUN_SUCCESS)
+    if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain1, CHAIN_PRIO_DRAW_ENEMYMANAGER_HIGH_PRIO) !=
+        ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -1391,7 +1392,8 @@ ZunResult EnemyManager::RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerDrawChain2.addedCallback = NULL;
     g_EnemyManagerDrawChain2.deletedCallback = NULL;
     g_EnemyManagerDrawChain2.arg = mgr;
-    if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain2, 7) != ZUN_SUCCESS)
+    if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain2, CHAIN_PRIO_DRAW_ENEMYMANAGER_LOW_PRIO) !=
+        ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -1432,7 +1434,7 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
         enemy->life = 0;
         if (enemy->isProjectile)
         {
-            g_ItemManager.SpawnItem(&enemy->pos, ITEM_POINT_BULLET, 1);
+            g_ItemManager.SpawnItem(&enemy->pos, ITEM_POINT_BULLET, ITEM_STATE_AUTOCOLLECT);
             g_AsciiManager.CreatePopup1(&enemy->pos, popupScore,
                                         popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
             totalScore += popupScore;
@@ -1445,7 +1447,8 @@ i32 EnemyManager::RemoveAllEnemies(i32 scoreMax, i32 scoreMin)
             {
                 for (j = 0; j < enemy->trailCount; j += 6)
                 {
-                    g_ItemManager.SpawnItem(&enemy->enemyHistory[j].pos, ITEM_POINT_BULLET, 1);
+                    g_ItemManager.SpawnItem(&enemy->enemyHistory[j].pos, ITEM_POINT_BULLET,
+                                            ITEM_STATE_AUTOCOLLECT);
                     g_AsciiManager.CreatePopup1(&enemy->enemyHistory[j].pos, popupScore,
                                                 popupScore >= scoreMax ? 0xffffff00 : 0xffffffff);
                     totalScore += popupScore;

@@ -181,7 +181,7 @@ u32 MainMenu::OnUpdatePreInput()
             this->idleFrames = 0;
             g_AnmManager->SetInterruptActiveVms(this->vms, this->vmCount, 13);
             this->curDescriptionVm->SetInterrupt(2);
-            g_GameManager.SetReplay(0);
+            g_GameManager.SetIsReplay(FALSE);
             return CHAIN_CALLBACK_RESULT_CONTINUE;
         }
         if (this->isPracticeMode)
@@ -205,7 +205,7 @@ u32 MainMenu::OnUpdatePreInput()
         i = MoveCursorVertical(ARRAY_SIZE_SIGNED(g_MainMenuStrings));
         if (i != 0)
         {
-            while (g_GameManager.HasReachedMaxClearsAllShotTypes() == 0 && this->cursor == 1)
+            while (g_GameManager.HasReachedMaxClearsAnyShotType() == 0 && this->cursor == 1)
             {
                 this->cursor += i;
             }
@@ -238,7 +238,7 @@ u32 MainMenu::OnUpdatePreInput()
             }
             else
             {
-                g_GameManager.SetReplay(1);
+                g_GameManager.SetIsReplay(TRUE);
                 g_GameManager.demo = 1;
                 g_GameManager.demoFrames = 0;
                 g_GameManager.difficulty = this->currentReplay->data.difficulty;
@@ -308,7 +308,7 @@ u32 MainMenu::OnUpdatePreInput()
                 this->curDescriptionVm->SetInterrupt(2);
                 return CHAIN_CALLBACK_RESULT_CONTINUE;
             case MENU_CURSOR_PREINPUT_EXTRA_START:
-                if (g_GameManager.HasReachedMaxClearsAllShotTypes())
+                if (g_GameManager.HasReachedMaxClearsAnyShotType())
                 {
                     g_GameManager.practice = 0;
                     this->cursor = g_Supervisor.cfg.defaultDifficulty == 5;
@@ -1017,7 +1017,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             {
                 g_AnmManager->SetInterruptActiveVms(this->vms, this->vmCount, 7);
             }
-            else if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
+            else if (!g_GameManager.HasUnlockedPhantasmAndMaxClears())
             {
                 g_AnmManager->SetInterruptActiveVms(this->vms, this->vmCount, 12);
                 this->cursor = MENU_CURSOR_SELECTDIFFICULTY_EXTRA;
@@ -1072,7 +1072,7 @@ u32 MainMenu::OnUpdateSelectDifficulty()
         break;
     case MENU_SUBSTATE_SELECT_INPUT:
         numDifficulties = this->menuState != MENU_STATE_EXTRA_SELECT_DIFFICULTY ? 4
-                          : g_GameManager.HasUnlockedPhantomAndMaxClears()      ? 2
+                          : g_GameManager.HasUnlockedPhantasmAndMaxClears()     ? 2
                                                                                 : 1;
         if (MoveCursorVertical(numDifficulties))
         {
@@ -1189,7 +1189,7 @@ u32 MainMenu::OnUpdateSelectCharacter()
             }
             else
             {
-                if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
+                if (!g_GameManager.HasUnlockedPhantasmAndMaxClears())
                 {
                     this->vms[161].SetInterrupt(9);
                 }
@@ -1201,8 +1201,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
             this->cursor = g_GameManager.character;
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
-                while (!g_GameManager.HasReachedMaxClears(this->cursor * 2) &&
-                       !g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1))
+                while (!g_GameManager.HasReachedMaxClearsAnyDifficulty(this->cursor * 2) &&
+                       !g_GameManager.HasReachedMaxClearsAnyDifficulty(this->cursor * 2 + 1))
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTCHARACTER_COUNT)
@@ -1213,8 +1213,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == DIFF_PHANTASM)
             {
-                while (g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                       g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasUnlockedPhantasm(this->cursor << 1) == 0 &&
+                       g_GameManager.HasUnlockedPhantasm(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTCHARACTER_COUNT)
@@ -1335,8 +1335,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
         {
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
-                while (!g_GameManager.HasReachedMaxClears(this->cursor * 2) &&
-                       !g_GameManager.HasReachedMaxClears(this->cursor * 2 + 1))
+                while (!g_GameManager.HasReachedMaxClearsAnyDifficulty(this->cursor * 2) &&
+                       !g_GameManager.HasReachedMaxClearsAnyDifficulty(this->cursor * 2 + 1))
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTCHARACTER_COUNT)
@@ -1347,8 +1347,8 @@ u32 MainMenu::OnUpdateSelectCharacter()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == 5)
             {
-                while (g_GameManager.HasUnlockedPhantom(this->cursor << 1) == 0 &&
-                       g_GameManager.HasUnlockedPhantom(this->cursor * 2 + 1) == 0)
+                while (g_GameManager.HasUnlockedPhantasm(this->cursor << 1) == 0 &&
+                       g_GameManager.HasUnlockedPhantasm(this->cursor * 2 + 1) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTCHARACTER_COUNT)
@@ -1477,7 +1477,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             }
             else
             {
-                if (!g_GameManager.HasUnlockedPhantomAndMaxClears())
+                if (!g_GameManager.HasUnlockedPhantasmAndMaxClears())
                 {
                     this->vms[161].SetInterrupt(9);
                 }
@@ -1504,8 +1504,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             this->cursor = g_GameManager.shotType;
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
-                while (!g_GameManager.HasReachedMaxClears(this->cursor +
-                                                          (u32)g_GameManager.character * 2))
+                while (!g_GameManager.HasReachedMaxClearsAnyDifficulty(
+                    this->cursor + (u32)g_GameManager.character * 2))
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTSHOTTYPE_COUNT)
@@ -1516,8 +1516,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == DIFF_PHANTASM)
             {
-                while (!g_GameManager.HasUnlockedPhantom(this->cursor +
-                                                         (u32)g_GameManager.character * 2))
+                while (!g_GameManager.HasUnlockedPhantasm(this->cursor +
+                                                          (u32)g_GameManager.character * 2))
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTSHOTTYPE_COUNT)
@@ -1576,8 +1576,8 @@ u32 MainMenu::OnUpdateSelectShotType()
         {
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
-                while (!g_GameManager.HasReachedMaxClears(this->cursor +
-                                                          (u32)g_GameManager.character * 2))
+                while (!g_GameManager.HasReachedMaxClearsAnyDifficulty(
+                    this->cursor + (u32)g_GameManager.character * 2))
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTSHOTTYPE_COUNT)
@@ -1588,8 +1588,8 @@ u32 MainMenu::OnUpdateSelectShotType()
             }
             else if (g_Supervisor.cfg.defaultDifficulty == DIFF_PHANTASM)
             {
-                while (g_GameManager.HasUnlockedPhantom(this->cursor +
-                                                        (u32)g_GameManager.character * 2) == 0)
+                while (g_GameManager.HasUnlockedPhantasm(this->cursor +
+                                                         (u32)g_GameManager.character * 2) == 0)
                 {
                     this->cursor++;
                     if (this->cursor >= MENU_CURSOR_SELECTSHOTTYPE_COUNT)
@@ -1637,7 +1637,7 @@ u32 MainMenu::OnUpdateSelectShotType()
                     g_GameManager.currentStage = g_GameManager.difficulty + 2;
                 }
                 g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
-                g_GameManager.SetReplay(0);
+                g_GameManager.SetIsReplay(FALSE);
                 g_Supervisor.StopAudio();
                 while (g_SoundPlayer.ProcessQueues())
                     ;
@@ -1811,9 +1811,9 @@ bool ReplayFileMatches(const std::string &name)
 
 u32 MainMenu::OnUpdateSelectReplay()
 {
-    char local_54[64];
-    ReplayFile *file;
-    i32 local_10;
+    char buf[64];
+    ReplayFile *replayFile;
+    i32 replayIdx;
     i32 i;
 
     switch (this->menuSubState)
@@ -1831,24 +1831,24 @@ u32 MainMenu::OnUpdateSelectReplay()
             this->menuSubState = MENU_SUBSTATE_SELECT_INIT;
             this->inputDelayTimer = 0;
             this->curDescriptionVm = NULL;
-            local_10 = 0;
+            replayIdx = 0;
             for (i = 0; i < 15; i++)
             {
-                sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
-                file = (ReplayFile *)FileSystem::OpenFile(local_54, 1);
-                if (!file)
+                sprintf(buf, "./replay/th7_%.2d.rpy", i + 1);
+                replayFile = (ReplayFile *)FileSystem::OpenFile(buf, 1);
+                if (!replayFile)
                 {
                     continue;
                 }
 
-                file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
-                if (file)
+                replayFile = ReplayManager::ValidateReplayData(replayFile, g_LastFileSize);
+                if (replayFile)
                 {
-                    this->replays[local_10] = *file;
-                    strcpy(this->replayFilenames[local_10], local_54);
-                    sprintf(this->replayLabels[local_10], "No.%.2d", i + 1);
-                    local_10++;
-                    ReplayManager::FreeReplay(file);
+                    this->replays[replayIdx] = *replayFile;
+                    strcpy(this->replayFilenames[replayIdx], buf);
+                    sprintf(this->replayLabels[replayIdx], "No.%.2d", i + 1);
+                    replayIdx++;
+                    ReplayManager::FreeReplay(replayFile);
                 }
             }
 
@@ -1867,26 +1867,27 @@ u32 MainMenu::OnUpdateSelectReplay()
                 {
                     continue;
                 }
-                if (local_10 >= 45)
+                if (replayIdx >= 45)
                 {
                     break;
                 }
-                file = (ReplayFile *)FileSystem::OpenFile(("./replay/" + filename).c_str(), 1);
-                if (!file)
+                replayFile =
+                    (ReplayFile *)FileSystem::OpenFile(("./replay/" + filename).c_str(), 1);
+                if (!replayFile)
                 {
                     continue;
                 }
-                file = ReplayManager::ValidateReplayData(file, g_LastFileSize);
-                if (file)
+                replayFile = ReplayManager::ValidateReplayData(replayFile, g_LastFileSize);
+                if (replayFile)
                 {
-                    this->replays[local_10] = *file;
-                    sprintf(this->replayFilenames[local_10], "./replay/%s", filename.c_str());
-                    sprintf(this->replayLabels[local_10], "User ");
-                    ReplayManager::FreeReplay(file);
-                    local_10++;
+                    this->replays[replayIdx] = *replayFile;
+                    sprintf(this->replayFilenames[replayIdx], "./replay/%s", filename.c_str());
+                    sprintf(this->replayLabels[replayIdx], "User ");
+                    ReplayManager::FreeReplay(replayFile);
+                    replayIdx++;
                 }
             }
-            this->replayFilesNum = local_10;
+            this->replayFilesNum = replayIdx;
             this->replayPage = 0;
         }
         if (this->stateTimer >= 30)
@@ -2018,7 +2019,7 @@ u32 MainMenu::OnUpdateSelectReplay()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            g_GameManager.SetReplay(1);
+            g_GameManager.SetIsReplay(TRUE);
             strcpy(g_GameManager.replayFilename, this->replayFilenames[this->chosenReplay]);
             g_GameManager.difficulty = this->currentReplay->data.difficulty;
             g_GameManager.character = this->currentReplay->data.shotType / 2;
@@ -2027,8 +2028,7 @@ u32 MainMenu::OnUpdateSelectReplay()
             ReplayManager::FreeReplay(this->currentReplay);
             this->currentReplay = NULL;
             g_GameManager.currentStage =
-                g_GameManager.difficulty >= DIFF_PHANTASM ? EXTRASTAGE
-                                                          : this->selectedStage;
+                g_GameManager.difficulty >= DIFF_PHANTASM ? EXTRASTAGE : this->selectedStage;
             g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
             g_GameManager.replayStage = (u8)this->cursor;
             g_Supervisor.StopAudio();
@@ -2095,7 +2095,7 @@ i32 MainMenu::DrawReplayMenu()
     if ((this->menuSubState == 2 || this->menuSubState == 3) && this->currentReplay != NULL)
     {
         g_AsciiManager.color = 0xffffffff;
-        g_AsciiManager.isSelected = 0;
+        g_AsciiManager.isSelected = FALSE;
         vm = &this->vms[133];
         AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "       %2.3f%%",
                                     (f64)this->currentReplay->data.slowdownRate);
@@ -2159,25 +2159,25 @@ i32 MainMenu::DrawReplayMenu()
         }
     }
     g_AsciiManager.color = 0xffffffff;
-    g_AsciiManager.isSelected = 0;
+    g_AsciiManager.isSelected = FALSE;
     return 1;
 }
 
 i32 MainMenu::DrawPracticeMenu()
 {
-    ZunVec3 local_1c;
-    i32 local_10;
+    ZunVec3 textPos;
+    i32 cleared;
     i32 i;
     AnmVm *vm;
 
     g_AsciiManager.color = 0xffffffff;
-    g_AsciiManager.isSelected = 0;
+    g_AsciiManager.isSelected = FALSE;
     vm = &this->vms[131];
     AsciiManager::AddFormatText(&g_AsciiManager, &vm->pos, "Stage    HI-Score");
-    local_1c = vm->pos;
-    local_1c.y += 16.0f;
-    local_10 = g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
-                   .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
+    textPos = vm->pos;
+    textPos.y += 16.0f;
+    cleared = g_GameManager.clrd[g_GameManager.character * 2 + g_GameManager.shotType]
+                  .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
 
     for (i = 0; i < ARRAY_SIZE_SIGNED(g_StagePracticeStrings); i++)
     {
@@ -2186,7 +2186,7 @@ i32 MainMenu::DrawPracticeMenu()
         {
             g_AsciiManager.color = 0xffffffff;
         }
-        else if (i < local_10)
+        else if (i < cleared)
         {
             g_AsciiManager.color = 0xffa0a0a0;
         }
@@ -2194,7 +2194,7 @@ i32 MainMenu::DrawPracticeMenu()
         {
             g_AsciiManager.color = 0xff404040;
         }
-        AsciiManager::AddFormatText(&g_AsciiManager, &local_1c, "%s %9d0 (%3d)",
+        AsciiManager::AddFormatText(&g_AsciiManager, &textPos, "%s %9d0 (%3d)",
                                     g_StagePracticeStrings[i],
                                     g_GameManager
                                         .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
@@ -2204,10 +2204,10 @@ i32 MainMenu::DrawPracticeMenu()
                                         .pscr[g_GameManager.character * 2 + g_GameManager.shotType]
                                              [i][g_Supervisor.cfg.defaultDifficulty]
                                         .playCount);
-        local_1c.y += 16.0f;
+        textPos.y += 16.0f;
     }
     g_AsciiManager.color = 0xffffffff;
-    g_AsciiManager.isSelected = 0;
+    g_AsciiManager.isSelected = FALSE;
     return 1;
 }
 
@@ -2280,7 +2280,7 @@ i32 MainMenu::MoveCursorHorizontal(i32 max)
 u32 MainMenu::OnDraw(MainMenu *arg)
 {
     ZunVec3 savedPos;
-    AnmVm *local_c;
+    AnmVm *vm;
     i32 i;
 
     g_AnmManager->SetTexture(0);
@@ -2294,22 +2294,22 @@ u32 MainMenu::OnDraw(MainMenu *arg)
         arg->DrawPracticeMenu();
         break;
     }
-    local_c = arg->vms;
-    for (i = 0; i < arg->vmCount; i++, local_c++)
+    vm = arg->vms;
+    for (i = 0; i < arg->vmCount; i++, vm++)
     {
-        if (g_AnmManager->ShouldDraw(local_c))
+        if (g_AnmManager->ShouldDraw(vm))
         {
-            savedPos = local_c->pos;
-            local_c->pos += local_c->offset;
-            if (local_c->rotation.z != 0.0f)
+            savedPos = vm->pos;
+            vm->pos += vm->offset;
+            if (vm->rotation.z != 0.0f)
             {
-                g_AnmManager->Draw(local_c);
+                g_AnmManager->Draw(vm);
             }
             else
             {
-                g_AnmManager->DrawNoRotation(local_c);
+                g_AnmManager->DrawNoRotation(vm);
             }
-            local_c->pos = savedPos;
+            vm->pos = savedPos;
         }
     }
     if (arg->curDescriptionVm)
@@ -2322,12 +2322,12 @@ u32 MainMenu::OnDraw(MainMenu *arg)
 ZunResult MainMenu::ActualAddedCallback()
 {
     i32 i;
-    ZunRect local_34;
-    ZunColor local_24;
-    ZunColor local_20;
-    ZunRect local_1c;
+    ZunRect fadeOutRect;
+    ZunColor fadeOutColor;
+    ZunColor fadeInColor;
+    ZunRect fadeInRect;
     i32 frameCount;
-    ScoreDat *local_8;
+    ScoreDat *scoreDat;
 
     SAFE_DELETE(g_GameManager.defaultCfg);
     g_GameManager.defaultCfg = new GameConfiguration;
@@ -2343,11 +2343,11 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.replay = 0;
     }
-    local_8 = ResultScreen::OpenScore("score.dat");
-    ResultScreen::ParseClrd(local_8, g_GameManager.clrd);
-    ResultScreen::ParsePscr(local_8, &g_GameManager.pscr[0][0][0]);
-    ResultScreen::ParseCatk(local_8, g_GameManager.catk);
-    ResultScreen::ReleaseScoreDat(local_8);
+    scoreDat = ResultScreen::OpenScore("score.dat");
+    ResultScreen::ParseClrd(scoreDat, g_GameManager.clrd);
+    ResultScreen::ParsePscr(scoreDat, &g_GameManager.pscr[0][0][0]);
+    ResultScreen::ParseCatk(scoreDat, g_GameManager.catk);
+    ResultScreen::ReleaseScoreDat(scoreDat);
     if (g_GameManager.plst.gameHours < 7)
     {
         g_GameManager.maxRetries = 3;
@@ -2360,7 +2360,7 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.maxRetries = 5;
     }
-    if (!g_GameManager.phantasmUnlocked && g_GameManager.HasUnlockedPhantomAndMaxClears())
+    if (!g_GameManager.phantasmUnlocked && g_GameManager.HasUnlockedPhantasmAndMaxClears())
     {
         frameCount = 0;
         g_AnmManager->LoadSurface(0, "data/title/phantasm.jpg");
@@ -2378,27 +2378,27 @@ ZunResult MainMenu::ActualAddedCallback()
             g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
             if (frameCount < 60)
             {
-                local_1c.left = 0.0f;
-                local_1c.top = 0.0f;
-                local_1c.right = 639.0f;
-                local_1c.bottom = 479.0f;
-                local_20.bytes.a = (60 - frameCount) * 255 / 60;
-                local_20.bytes.r = local_20.bytes.g = local_20.bytes.b = 0;
-                ScreenEffect::DrawSquare(&local_1c, local_20.color);
+                fadeInRect.left = 0.0f;
+                fadeInRect.top = 0.0f;
+                fadeInRect.right = 639.0f;
+                fadeInRect.bottom = 479.0f;
+                fadeInColor.bytes.a = (60 - frameCount) * 255 / 60;
+                fadeInColor.bytes.r = fadeInColor.bytes.g = fadeInColor.bytes.b = 0;
+                ScreenEffect::DrawSquare(&fadeInRect, fadeInColor.color);
             }
             else if (frameCount > 840)
             {
-                local_34.left = 0.0f;
-                local_34.top = 0.0f;
-                local_34.right = 639.0f;
-                local_34.bottom = 479.0f;
-                local_24.bytes.a = (frameCount - 840) * 255 / 60;
-                local_24.bytes.r = local_24.bytes.g = local_24.bytes.b = 0;
-                ScreenEffect::DrawSquare(&local_34, local_24.color);
+                fadeOutRect.left = 0.0f;
+                fadeOutRect.top = 0.0f;
+                fadeOutRect.right = 639.0f;
+                fadeOutRect.bottom = 479.0f;
+                fadeOutColor.bytes.a = (frameCount - 840) * 255 / 60;
+                fadeOutColor.bytes.r = fadeOutColor.bytes.g = fadeOutColor.bytes.b = 0;
+                ScreenEffect::DrawSquare(&fadeOutRect, fadeOutColor.color);
             }
             g_CurFrameRawInput = Controller::GetInput();
             g_Supervisor.gfxDevice->SwapBuffers();
-            if (120 <= frameCount && frameCount < 840 &&
+            if (frameCount >= 120 && frameCount < 840 &&
                 WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU | TH_BUTTON_BOMB))
             {
                 frameCount = 840;
@@ -2409,7 +2409,7 @@ ZunResult MainMenu::ActualAddedCallback()
         }
         g_AnmManager->ReleaseSurface(0);
     }
-    g_GameManager.phantasmUnlocked = g_GameManager.HasUnlockedPhantomAndMaxClears();
+    g_GameManager.phantasmUnlocked = g_GameManager.HasUnlockedPhantasmAndMaxClears();
     this->menuState = MENU_STATE_PRE_INPUT;
     InitializeTimingVars(&g_Supervisor);
     switch (g_Supervisor.prevState)
@@ -2514,14 +2514,14 @@ ZunResult MainMenu::RegisterChain()
     mgr->calcChain->arg = mgr;
     mgr->calcChain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     mgr->calcChain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-    if (g_Chain.AddToCalcChain(mgr->calcChain, 3))
+    if (g_Chain.AddToCalcChain(mgr->calcChain, CHAIN_PRIO_CALC_MAINMENU))
     {
         return ZUN_ERROR;
     }
 
     mgr->drawChain = g_Chain.CreateElem((ChainCallback)OnDraw);
     mgr->drawChain->arg = mgr;
-    g_Chain.AddToDrawChain(mgr->drawChain, 0);
+    g_Chain.AddToDrawChain(mgr->drawChain, CHAIN_PRIO_DRAW_MAINMENU);
 
     return ZUN_SUCCESS;
 }

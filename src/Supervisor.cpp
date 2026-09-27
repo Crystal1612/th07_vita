@@ -96,7 +96,7 @@ void Supervisor::CheckTiming()
         {
             this->timingErrorCount--;
         }
-        this->checkTiming = 0;
+        this->checkTiming = FALSE;
     }
 
     if (this->maxTimingError >= 40 || this->timingBadCount >= 16)
@@ -384,9 +384,9 @@ ZunResult Supervisor::LoadGameData()
     if (g_Pbg4Archive.Load("ux0:data/th07/th07.dat"))
     {
         sprintf(verFile, "th07_%.4x%c.ver", 256, 98);
-        g_Supervisor.version = (char *)FileSystem::OpenFile(verFile, 0);
-        g_Supervisor.versionTableSize = g_LastFileSize;
-        if (!g_Supervisor.version)
+        g_Supervisor.versionData = (char *)FileSystem::OpenFile(verFile, 0);
+        g_Supervisor.versionDataSize = g_LastFileSize;
+        if (!g_Supervisor.versionData)
         {
             g_GameErrorContext.Fatal("error : データのバージョンが違います\n");
             return ZUN_ERROR;
@@ -467,13 +467,13 @@ i32 Supervisor::CheckVSync()
         {
             g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます\n");
             g_GameErrorContext.Log("強制６０フレームモードで動作します\n");
-            g_Supervisor.vsyncDisabled = 1;
+            g_Supervisor.vsyncDisabled = TRUE;
         }
         else if (fpsSum >= 65.0f)
         {
             g_GameErrorContext.Log("垂直同期が取れてないか、リフレッシュレートが高すぎます。\n");
             g_GameErrorContext.Log("強制６０フレームモードで動作します\n");
-            g_Supervisor.vsyncDisabled = 1;
+            g_Supervisor.vsyncDisabled = TRUE;
             return -2;
         }
     }
@@ -496,7 +496,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
         return ZUN_ERROR;
     }
     g_AnmManager->LoadSurface(0, "data/title/th07logo.jpg");
-    g_Supervisor.isInEnding = 1;
+    g_Supervisor.isInEnding = TRUE;
     if (!g_Supervisor.vsyncDisabled)
     {
         if (CheckVSync())
@@ -516,7 +516,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
         }
     }
     g_AnmManager->ReleaseSurface(0);
-    arg->isInEnding = 0;
+    arg->isInEnding = FALSE;
     arg->renderSkipFrames = 0;
     arg->lastTotalPlayTimeUpdate = SDL_GetTicks64();
     g_Rng.SetSeed(arg->lastTotalPlayTimeUpdate);
@@ -588,7 +588,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *arg)
 
 ZunResult Supervisor::DeletedCallback(Supervisor *arg)
 {
-    SAFE_FREE(g_Supervisor.version);
+    SAFE_FREE(g_Supervisor.versionData);
     g_AnmManager->ReleaseVertexBuffer();
     g_AnmManager->ReleaseAnm(ANM_FILE_TEXT);
     AsciiManager::CutChain();
@@ -629,7 +629,7 @@ ZunResult Supervisor::RegisterChain()
     chain->arg = mgr;
     chain->addedCallback = (ChainLifecycleCallback)AddedCallback;
     chain->deletedCallback = (ChainLifecycleCallback)DeletedCallback;
-    res = g_Chain.AddToCalcChain(chain, 0);
+    res = g_Chain.AddToCalcChain(chain, CHAIN_PRIO_CALC_SUPERVISOR);
     if (res)
     {
         return res;
@@ -637,7 +637,7 @@ ZunResult Supervisor::RegisterChain()
 
     chain = g_Chain.CreateElem((ChainCallback)OnDraw);
     chain->arg = mgr;
-    g_Chain.AddToDrawChain(chain, 15);
+    g_Chain.AddToDrawChain(chain, CHAIN_PRIO_DRAW_SUPERVISOR);
     return ZUN_SUCCESS;
 }
 
@@ -843,8 +843,7 @@ void Supervisor::TickTimer(i32 *frames, f32 *subframes)
     }
 }
 
-// ZUN name: snapShotScreen
-i32 Supervisor::SnapshotScreen(const char *param_1)
+i32 Supervisor::TakeSnapshot(const char *filename)
 {
     u8 *pixels = new u8[640 * 480 * 4];
     this->gfxDevice->ReadPixels(0, 0, 640, 480, pixels);
@@ -852,7 +851,7 @@ i32 Supervisor::SnapshotScreen(const char *param_1)
     SDL_Surface *surf =
         SDL_CreateRGBSurfaceWithFormatFrom(pixels, 640, 480, 32, 640 * 4, SDL_PIXELFORMAT_RGBA32);
 
-    SDL_SaveBMP(surf, param_1);
+    SDL_SaveBMP(surf, filename);
     SDL_FreeSurface(surf);
     delete[] pixels;
     return 0;
@@ -962,7 +961,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     {
         g_GameErrorContext.Log("デプステストを抑制します\n");
     }
-    this->vsyncDisabled = 0;
+    this->vsyncDisabled = FALSE;
     this->cfg.unused = 0;
     if (this->cfg.disableTextureBlend)
     {
@@ -993,7 +992,7 @@ ZunResult Supervisor::LoadConfig(const char *configFilename)
     if (this->cfg.disableVsync)
     {
         g_GameErrorContext.Log("垂直同期を取りません\n");
-        g_Supervisor.vsyncDisabled = 1;
+        g_Supervisor.vsyncDisabled = TRUE;
     }
     if (FileSystem::WriteDataToFile(configFilename, &g_Supervisor.cfg, sizeof(GameConfiguration)))
     {
@@ -1172,9 +1171,9 @@ i32 Supervisor::IsSlowMode()
 i32 Supervisor::EnableFog()
 {
     g_AnmManager->Flush();
-    if (this->fogEnabled != 1)
+    if (this->fogEnabled != TRUE)
     {
-        this->fogEnabled = 1;
+        this->fogEnabled = TRUE;
         g_Supervisor.gfxDevice->Enable(CAPS_FOG);
         return 1;
     }
@@ -1187,7 +1186,7 @@ i32 Supervisor::DisableFog()
     g_AnmManager->Flush();
     if (this->fogEnabled)
     {
-        this->fogEnabled = 0;
+        this->fogEnabled = FALSE;
         g_Supervisor.gfxDevice->Disable(CAPS_FOG);
         return 1;
     }

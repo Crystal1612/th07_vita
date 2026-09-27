@@ -84,20 +84,26 @@ struct ReplayFile
     u8 *rawData;
 };
 
+enum ReplayManagerAction
+{
+    REPLAY_MANAGER_ACTION_RECORD,
+    REPLAY_MANAGER_ACTION_PLAY,
+};
+
 struct ReplayManager
 {
     ReplayManager()
     {
     }
 
-    static ZunResult RegisterChain(i32 isDemo, const char *replayFilename);
+    static ZunResult RegisterChain(ZunBool isDemo, const char *replayFilename);
 
-    static ZunResult AddedCallback(ReplayManager *arg);
-    static ZunResult AddedCallbackDemo(ReplayManager *arg);
+    static ZunResult AddedCallbackRecord(ReplayManager *arg);
+    static ZunResult AddedCallbackPlayback(ReplayManager *arg);
     static ZunResult DeletedCallback(ReplayManager *arg);
-    static u32 OnUpdate(ReplayManager *arg);
-    static u32 OnUpdateDemoHighPrio(ReplayManager *arg);
-    static u32 OnUpdateDemoLowPrio(ReplayManager *arg);
+    static u32 OnUpdateRecord(ReplayManager *arg);
+    static u32 OnUpdatePlayback(ReplayManager *arg);
+    static u32 OnUpdatePlaybackLowPrio(ReplayManager *arg);
     static u32 OnUpdateRng(ReplayManager *arg);
 
     static void SaveReplay(const char *filename, char *replayName);
@@ -106,14 +112,14 @@ struct ReplayManager
     static ReplayFile *ValidateReplayData(ReplayFile *data, i32 size);
     static void FreeReplay(ReplayFile *replay);
 
-    i32 StageReplayExists(i32 stage)
+    ZunBool StageReplayExists(i32 stage)
     {
         return this->data->stageReplayData[stage] != NULL;
     }
 
-    i32 IsDemo()
+    i32 GetAction()
     {
-        return this->isDemo;
+        return this->action;
     }
 
     i32 frameId;
@@ -121,7 +127,7 @@ struct ReplayManager
     i32 stageReplayDataSize[REPLAY_STAGE_COUNT];
     i32 stageEndDataSize[REPLAY_STAGE_COUNT];
     void *unused_40;
-    i32 isDemo;
+    i32 action;
     const char *replayFilename;
     u8 unused_4c[54];
     i16 unused_82;
@@ -132,7 +138,7 @@ struct ReplayManager
     uintptr_t replayDataEndPointers[REPLAY_STAGE_COUNT];
     ChainElem *calcChain;
     ChainElem *drawChain;
-    ChainElem *demoCalcChain;
+    ChainElem *calcChain2;
     ChainElem *rngCalcChain;
     u16 rngSeed;
     u16 replayEventFlags;

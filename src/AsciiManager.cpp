@@ -62,7 +62,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
         curPopup = arg->popups;
         for (i = 0; i < ARRAY_SIZE_SIGNED(arg->popups); i++, curPopup++)
         {
-            if (!curPopup->inUse)
+            if (!curPopup->isInUse)
             {
                 continue;
             }
@@ -71,7 +71,7 @@ u32 AsciiManager::OnUpdate(AsciiManager *arg)
             curPopup->timer++;
             if (curPopup->timer > 60)
             {
-                curPopup->inUse = 0;
+                curPopup->isInUse = 0;
             }
         }
     }
@@ -127,8 +127,8 @@ void AsciiManager::InitializeVms()
     memset(&this->retryMenu, 0, sizeof(RetryMenu));
     memset(&this->popups, 0, sizeof(this->popups));
     this->numStrings = 0;
-    this->isGui = 0;
-    this->isSelected = 0;
+    this->isGui = FALSE;
+    this->isSelected = FALSE;
     this->nextPopupIndex1 = 0;
     this->nextPopupIndex2 = 0;
     this->unused_74e4 = 0;
@@ -140,7 +140,7 @@ void AsciiManager::InitializeVms()
     g_AnmManager->InitializeAndSetActiveSprite(&this->smallScorePopupVm,
                                                ANM_SPRITE_ASCII_SMALL_SCORE);
     this->largeTextVm.pos.z = 0.1f;
-    this->isSelected = 0;
+    this->isSelected = FALSE;
     this->fontSpacing = 14;
     this->SetFadeState(this->uiFadeState);
 }
@@ -197,7 +197,7 @@ ZunResult AsciiManager::RegisterChain()
     g_AsciiManagerCalcChain.deletedCallback = (ChainLifecycleCallback)DeletedCallback;
     g_AsciiManagerCalcChain.arg = mgr;
 
-    if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, 1))
+    if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, CHAIN_PRIO_CALC_ASCIIMANAGER))
     {
         return ZUN_ERROR;
     }
@@ -206,12 +206,12 @@ ZunResult AsciiManager::RegisterChain()
     g_AsciiManagerOnDrawMenusChain.addedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, 16);
+    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, CHAIN_PRIO_DRAW_ASCIIMANAGER_MENUS);
     g_AsciiManagerOnDrawPopupsChain.callback = (ChainCallback)OnDrawPopups;
     g_AsciiManagerOnDrawPopupsChain.addedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChain, 11);
+    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChain, CHAIN_PRIO_DRAW_ASCIIMANAGER_POPUPS);
     return ZUN_SUCCESS;
 }
 
@@ -250,7 +250,7 @@ void AsciiManager::AddString(ZunVec3 *pos, const char *text)
     }
     else
     {
-        curString->isSelected = 0;
+        curString->isSelected = FALSE;
     }
 }
 
@@ -269,12 +269,12 @@ void AsciiManager::AddFormatText(AsciiManager *manager, ZunVec3 *pos, const char
 void AsciiManager::DrawStrings()
 {
     f32 charWidth;
-    i32 guiString;
+    ZunBool guiString;
     char *text;
     AsciiManagerString *string;
     i32 i;
 
-    guiString = 1;
+    guiString = TRUE;
     string = this->strings;
     this->smallScorePopupVm.visible = 1;
     this->smallScorePopupVm.anchor = 3;
@@ -289,7 +289,7 @@ void AsciiManager::DrawStrings()
         {
             guiString = string->isGui;
             g_AnmManager->Flush();
-            if (guiString != 0)
+            if (guiString)
             {
                 g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;
                 g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
@@ -376,7 +376,7 @@ void AsciiManager::CreatePopup1(ZunVec3 *pos, i32 value, u32 color)
         this->nextPopupIndex1 = 0;
     }
     popup = this->popups + this->nextPopupIndex1;
-    popup->inUse = 1;
+    popup->isInUse = 1;
     characterCount = 0;
     if (value >= 0)
     {
@@ -413,7 +413,7 @@ void AsciiManager::CreatePopup2(ZunVec3 *pos, i32 value, u32 color)
         this->nextPopupIndex2 = 0;
     }
     popup = &this->popups[this->nextPopupIndex2 + MAX_POPUP1];
-    popup->inUse = 1;
+    popup->isInUse = 1;
     characterCount = 0;
     if (value >= 0)
     {
@@ -800,9 +800,10 @@ void PauseMenu::OnDraw()
         g_Supervisor.gfxDevice->SetViewport(g_Supervisor.viewport);
         if (g_Supervisor.hasLockableBackbuffer && this->curState != PAUSE_MENU_STATE_INIT)
         {
-            AnmVm local_25c = this->menuBackground;
-            local_25c.zWriteDisable = 1;
-            g_AnmManager->DrawNoRotation(&local_25c);
+            // This is indeed an entire AnmVm on the stack
+            AnmVm menuBg = this->menuBackground;
+            menuBg.zWriteDisable = 1;
+            g_AnmManager->DrawNoRotation(&menuBg);
         }
         for (i = 0; i < ARRAY_SIZE_SIGNED(this->menuSprites); i++)
         {
@@ -1072,7 +1073,7 @@ void AsciiManager::DrawPopups()
 
     for (i = 0; i < ARRAY_SIZE_SIGNED(this->popups); i++, popup++)
     {
-        if (!popup->inUse)
+        if (!popup->isInUse)
         {
             continue;
         }
@@ -1226,7 +1227,7 @@ void AsciiManager::DrawPopups()
 
         cherry = g_GameManager.cherryPlus - g_GameManager.globals->cherryStart;
 
-        if (g_Player.hasBorder)
+        if (g_Player.borderState != BORDER_NONE)
         {
             this->cherryDigit.color.bytes.r = 255;
             divisor = cherry % 4000;
@@ -1269,7 +1270,7 @@ void AsciiManager::DrawPopups()
         this->cherryDigit.scale.x = 1.0f;
         this->cherryDigit.scale.y = 1.0f;
 
-        if (g_Player.hasBorder == BORDER_ACTIVE)
+        if (g_Player.borderState == BORDER_ACTIVE)
         {
             this->cherryBorderActive.pos = this->cherryGauge.pos;
             this->cherryBorderActive.pos.x += 24.0f;
