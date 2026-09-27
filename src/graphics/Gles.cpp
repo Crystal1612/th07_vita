@@ -6,15 +6,15 @@
 
 const char *vertexShaderSource =
     "struct VertexInput {\n"
-    "    float3 a_Position : POSITION;\n"
-    "    float4 a_Color : COLOR0;\n"
-    "    float2 a_TexCoord : TEXCOORD0;\n"
+    "    half3 a_Position : POSITION;\n"
+    "    half4 a_Color : COLOR0;\n"
+    "    half2 a_TexCoord : TEXCOORD0;\n"
     "};\n"
     "\n"
     "struct VertexOutput {\n"
-    "    float4 position : POSITION;\n"
-    "    float4 v_Color : COLOR0;\n"
-    "    float2 v_TexCoord : TEXCOORD0;\n"
+    "    half4 position : POSITION;\n"
+    "    half4 v_Color : COLOR0;\n"
+    "    half2 v_TexCoord : TEXCOORD0;\n"
     "    float v_FogFragCoord : TEXCOORD1;\n"
     "};\n"
     "\n"
@@ -25,22 +25,22 @@ const char *vertexShaderSource =
     "    uniform float4x4 u_Proj,\n"
     "    uniform float4x4 u_TextureMatrix,\n"
     "    uniform bool u_ScreenSpace,\n"
-    "    uniform float4 u_Viewport\n"
+    "    uniform half4 u_Viewport\n"
     ") {\n"
     "    VertexOutput output;\n"
     "    output.v_Color = input.a_Color;\n"
     "\n"
     "    if (u_ScreenSpace) {\n"
-    "        float x = (input.a_Position.x - u_Viewport.x) / u_Viewport.z * 2.0 - 1.0;\n"
-    "        float y = 1.0 - (input.a_Position.y - u_Viewport.y) / u_Viewport.w * 2.0;\n"
-    "        output.position = float4(x, y, input.a_Position.z, 1.0);\n"
+    "        half x = (input.a_Position.x - u_Viewport.x) / u_Viewport.z * 2.0 - 1.0;\n"
+    "        half y = 1.0 - (input.a_Position.y - u_Viewport.y) / u_Viewport.w * 2.0;\n"
+    "        output.position = half4(x, y, input.a_Position.z, 1.0);\n"
     "        output.v_TexCoord = input.a_TexCoord;\n"
     "        output.v_FogFragCoord = input.a_Position.z;\n"
     "    } else {\n"
-    "        float4 worldPos = mul(u_Model, float4(input.a_Position, 1.0));\n"
-    "        float4 viewPos = mul(u_View, worldPos);\n"
+    "        half4 worldPos = mul(u_Model, half4(input.a_Position, 1.0));\n"
+    "        half4 viewPos = mul(u_View, worldPos);\n"
     "        output.position = mul(u_Proj, viewPos);\n"
-    "        output.v_TexCoord = mul(u_TextureMatrix, float4(input.a_TexCoord, 1.0, 0.0)).xy;\n"
+    "        output.v_TexCoord = mul(u_TextureMatrix, half4(input.a_TexCoord, 1.0, 0.0)).xy;\n"
     "        output.v_FogFragCoord = length(viewPos.xyz);\n"
     "    }\n"
     "\n"
@@ -49,45 +49,45 @@ const char *vertexShaderSource =
 
 const char *fragmentShaderSource =
     "struct VertexOutput {\n"
-    "    float4 v_Color : COLOR0;\n"
-    "    float2 v_TexCoord : TEXCOORD0;\n"
-    "    float v_FogFragCoord : TEXCOORD1;\n"
+    "    half4 v_Color : COLOR0;\n"
+    "    half2 v_TexCoord : TEXCOORD0;\n"
+    "    half v_FogFragCoord : TEXCOORD1;\n"
     "};\n"
     "\n"
-    "float4 main(\n"
+    "half4 main(\n"
     "    VertexOutput input,\n"
     "    uniform sampler2D u_Texture : TEXUNIT0,\n"
     "    uniform bool u_UseTexture,\n"
     "    uniform int u_ColorOpRgb,\n"
     "    uniform int u_ColorOpAlpha,\n"
     "    uniform int u_TexArg,\n"
-    "    uniform float4 u_TextureFactor,\n"
+    "    uniform half4 u_TextureFactor,\n"
     "    uniform bool u_AlphaTest,\n"
-    "    uniform float u_AlphaRef,\n"
+    "    uniform half u_AlphaRef,\n"
     "    uniform bool u_FogEnabled,\n"
-    "    uniform float4 u_FogColor,\n"
-    "    uniform float u_FogNear,\n"
-    "    uniform float u_FogFar\n"
+    "    uniform half4 u_FogColor,\n"
+    "    uniform half u_FogNear,\n"
+    "    uniform half u_FogFar\n"
     ") : COLOR {\n"
-    "    float4 texColor = float4(1.0, 1.0, 1.0, 1.0);\n"
+    "    half4 texColor = half4(1.0, 1.0, 1.0, 1.0);\n"
     "    if (u_UseTexture) {\n"
     "        texColor = tex2D(u_Texture, input.v_TexCoord);\n"
     "    }\n"
     "\n"
-    "    float4 argColor = input.v_Color.bgra;\n"
+    "    half4 argColor = input.v_Color.bgra;\n"
     "    if (u_TexArg == 1) {\n"
-    "        argColor = float4(1.0, 1.0, 1.0, 1.0);\n"
+    "        argColor = half4(1.0, 1.0, 1.0, 1.0);\n"
     "    } else if (u_TexArg == 2) {\n"
     "        argColor = u_TextureFactor;\n"
     "    }\n"
     "\n"
-    "    float4 finalColor = input.v_Color;\n"
+    "    half4 finalColor = input.v_Color;\n"
     "\n"
     "    if (u_UseTexture) {\n"
     "        if (u_ColorOpRgb == 0) {\n"
     "            finalColor.rgb = texColor.rgb * argColor.rgb;\n"
     "        } else if (u_ColorOpRgb == 1) {\n"
-    "            finalColor.rgb = min(texColor.rgb + argColor.rgb, float3(1.0, 1.0, 1.0));\n"
+    "            finalColor.rgb = min(texColor.rgb + argColor.rgb, half3(1.0, 1.0, 1.0));\n"
     "        } else if (u_ColorOpRgb == 2) {\n"
     "            finalColor.rgb = texColor.rgb;\n"
     "        } else if (u_ColorOpRgb == 3) {\n"
@@ -112,7 +112,7 @@ const char *fragmentShaderSource =
     "    }\n"
     "\n"
     "    if (u_FogEnabled) {\n"
-    "        float f = (u_FogFar - input.v_FogFragCoord) / (u_FogFar - u_FogNear);\n"
+    "        half f = (u_FogFar - input.v_FogFragCoord) / (u_FogFar - u_FogNear);\n"
     "        f = clamp(f, 0.0, 1.0);\n"
     "        finalColor.rgb = lerp(u_FogColor.rgb, finalColor.rgb, f);\n"
     "    }\n"
@@ -274,17 +274,15 @@ void GlesGraphics::SetViewport(const ZunViewport &viewport)
 
     if (!windowed)
     {
-        // full 16:9
-        const float scaleX = 960.0f / 640.0f; // 1.5f
-        const float scaleY = 544.0f / 480.0f; // ~1.1333f
+        // // full 16:9
+        // const float scaleX = 960.0f / 640.0f; // 1.5f
+        // const float scaleY = 544.0f / 480.0f; // ~1.1333f
 
-        vx = (GLint)(viewport.x * scaleX);
-        vw = (GLsizei)(viewport.width * scaleX);
-        vh = (GLsizei)(viewport.height * scaleY);
-        vy = (GLint)(544.0f - (viewport.y + viewport.height) * scaleY);
-    }
-    else
-    {
+        // vx = (GLint)(viewport.x * scaleX);
+        // vw = (GLsizei)(viewport.width * scaleX);
+        // vh = (GLsizei)(viewport.height * scaleY);
+        // vy = (GLint)(544.0f - (viewport.y + viewport.height) * scaleY);
+
         // zoom 4:3
         const float scale = 544.0f / 480.0f;
         const float offsetX = (960.0f - (640.0f * scale)) * 0.5f;
@@ -293,15 +291,22 @@ void GlesGraphics::SetViewport(const ZunViewport &viewport)
         vw = (GLsizei)((float)viewport.width * scale);
         vh = (GLsizei)((float)viewport.height * scale);
         vy = (GLint)(544.0f - ((float)(viewport.y + viewport.height) * scale));
-
+    }
+    else
+    {
         // original 1:1
-        // vx = 160 + viewport.x;
-        // vw = viewport.width;
-        // vh = viewport.height;
-        // vy = 512 - (viewport.y + viewport.height); // 512 = 32 + 480
+        const float scale = 544.0f / 480.0f;
+
+        vx = 160 + viewport.x;
+        vw = viewport.width;
+        vh = viewport.height;
+        vy = 512 - (viewport.y + viewport.height); // 512 = 32 + 480
     }
 
     glViewport(vx, vy, vw, vh);
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(vx, vy, vw, vh);
 }
 
 void GlesGraphics::Enable(Capabilities cap)
@@ -353,6 +358,8 @@ void GlesGraphics::SetBlendMode(BlendMode srcMode, BlendMode dstMode)
         glSrcMode = GL_SRC_ALPHA;
         break;
     case BLEND_ONE:
+        glSrcMode = GL_ONE;
+        break;
     case BLEND_NONE:
         glSrcMode = GL_ONE;
         break;
@@ -415,7 +422,6 @@ void GlesGraphics::SetAlphaTestRef(u8 ref)
 
 void GlesGraphics::Clear(u32 clearBits)
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     GLbitfield bits = 0;
     if (clearBits & CLEAR_COLOR_BUFFER)
     {
@@ -709,5 +715,4 @@ void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const
 void GlesGraphics::SwapBuffers()
 {
     SDL_GL_SwapWindow(g_GameWindow.window);
-    glClear(GL_COLOR_BUFFER_BIT);
 }
