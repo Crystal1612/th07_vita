@@ -131,4 +131,15 @@ class GlesGraphics : public ZunGraphics
             }
         }
     }
+
+    GLuint fbo = 0;
+    GLuint fboColorTex = 0;
+    GLuint fboDepthRb = 0;
+
+    GLuint screenQuadVbo = 0;
+    GLuint screenProgram = 0;
+    GLint u_ScreenTex = -1;
+
+    void InitFBO();
+    void DestroyFBO();
 };

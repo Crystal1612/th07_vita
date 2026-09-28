@@ -15,7 +15,7 @@ const char *vertexShaderSource =
     "    half4 position : POSITION;\n"
     "    half4 v_Color : COLOR0;\n"
     "    half2 v_TexCoord : TEXCOORD0;\n"
-    "    float v_FogFragCoord : TEXCOORD1;\n"
+    "    half v_FogFragCoord : TEXCOORD1;\n"
     "};\n"
     "\n"
     "VertexOutput main(\n"
@@ -120,6 +120,31 @@ const char *fragmentShaderSource =
     "    return finalColor;\n"
     "}\n";
 
+const char *screenVsSource =
+    "struct VertexInput {\n"
+    "    half2 a_Position : POSITION;\n"
+    "    half2 a_TexCoord : TEXCOORD0;\n"
+    "};\n"
+    "struct VertexOutput {\n"
+    "    half4 position : POSITION;\n"
+    "    half2 v_TexCoord : TEXCOORD0;\n"
+    "};\n"
+    "VertexOutput main(VertexInput input) {\n"
+    "    VertexOutput output;\n"
+    "    output.position = half4(input.a_Position, 0.0, 1.0);\n"
+    "    output.v_TexCoord = input.a_TexCoord;\n"
+    "    return output;\n"
+    "}\n";
+
+const char *screenFsSource =
+    "struct VertexOutput {\n"
+    "    half2 v_TexCoord : TEXCOORD0;\n"
+    "};\n"
+    "half4 main(VertexOutput input, uniform sampler2D u_ScreenTex : TEXUNIT0) : COLOR {\n"
+    "    half4 c = tex2D(u_ScreenTex, input.v_TexCoord);\n"
+    "    return half4(c.rgb, 1.0);\n"
+    "}\n";
+
 ZunGraphics *GlesGraphics::Init()
 {
     GlesGraphics *gfx = new GlesGraphics;
@@ -204,11 +229,18 @@ ZunGraphics *GlesGraphics::Init()
 
     gfx->windowed = g_Supervisor.cfg.windowed;
 
+    gfx->InitFBO();
     return gfx;
 }
 
 void GlesGraphics::Exit()
 {
+    glDeleteFramebuffers(1, &this->fbo);
+    glDeleteTextures(1, &this->fboColorTex);
+    glDeleteRenderbuffers(1, &this->fboDepthRb);
+    glDeleteBuffers(1, &this->screenQuadVbo);
+    glDeleteProgram(this->screenProgram);
+
     SDL_GL_DeleteContext(this->ctx);
 }
 
@@ -266,47 +298,12 @@ void GlesGraphics::GetViewport(ZunViewport &viewport)
 void GlesGraphics::SetViewport(const ZunViewport &viewport)
 {
     this->viewport = viewport;
+    GLint vy = 480 - (viewport.y + viewport.height);
 
-    GLint vx = 0;
-    GLint vy = 0;
-    GLsizei vw = 0;
-    GLsizei vh = 0;
-
-    if (!windowed)
-    {
-        // // full 16:9
-        // const float scaleX = 960.0f / 640.0f; // 1.5f
-        // const float scaleY = 544.0f / 480.0f; // ~1.1333f
-
-        // vx = (GLint)(viewport.x * scaleX);
-        // vw = (GLsizei)(viewport.width * scaleX);
-        // vh = (GLsizei)(viewport.height * scaleY);
-        // vy = (GLint)(544.0f - (viewport.y + viewport.height) * scaleY);
-
-        // zoom 4:3
-        const float scale = 544.0f / 480.0f;
-        const float offsetX = (960.0f - (640.0f * scale)) * 0.5f;
-
-        vx = (GLint)(offsetX + (float)viewport.x * scale);
-        vw = (GLsizei)((float)viewport.width * scale);
-        vh = (GLsizei)((float)viewport.height * scale);
-        vy = (GLint)(544.0f - ((float)(viewport.y + viewport.height) * scale));
-    }
-    else
-    {
-        // original 1:1
-        const float scale = 544.0f / 480.0f;
-
-        vx = 160 + viewport.x;
-        vw = viewport.width;
-        vh = viewport.height;
-        vy = 512 - (viewport.y + viewport.height); // 512 = 32 + 480
-    }
-
-    glViewport(vx, vy, vw, vh);
+    glViewport(viewport.x, vy, viewport.width, viewport.height);
 
     glEnable(GL_SCISSOR_TEST);
-    glScissor(vx, vy, vw, vh);
+    glScissor(viewport.x, vy, viewport.width, viewport.height);
 }
 
 void GlesGraphics::Enable(Capabilities cap)
@@ -380,13 +377,12 @@ void GlesGraphics::SetBlendMode(BlendMode srcMode, BlendMode dstMode)
     }
     glBlendFunc(glSrcMode, glDstMode);
 }
-
 void GlesGraphics::SetDepthMask(bool enable)
 {
     Flush();
 
     depthMaskEnabled = enable;
-    glDepthMask(enable ? GL_TRUE : GL_FALSE);
+    glDepthMask(enable);
 }
 
 void GlesGraphics::SetDepthFunc(DepthFunc func)
@@ -714,5 +710,114 @@ void GlesGraphics::DrawPrimitiveUP(PrimitiveType type, i32 primitiveCount, const
 
 void GlesGraphics::SwapBuffers()
 {
+    glDisable(GL_SCISSOR_TEST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 960, 544);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (!windowed)
+    {
+        const float scale = 544.0f / 480.0f;
+        const GLsizei targetW = (GLsizei)(640.0f * scale);
+        const GLsizei targetH = 544;
+        const GLint offsetX = (960 - targetW) / 2;
+        glViewport(offsetX, 0, targetW, targetH);
+    }
+    else
+    {
+        glViewport((960 - 640) / 2, (544 - 480) / 2, 640, 480);
+    }
+
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(screenProgram);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboColorTex);
+    glUniform1i(u_ScreenTex, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, screenQuadVbo);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+    glDisableVertexAttribArray(2);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     SDL_GL_SwapWindow(g_GameWindow.window);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glUseProgram(shaderProgram);
+
+    glViewport(0, 0, 640, 480);
+    glScissor(0, 0, 640, 480);
+    if (this->viewport.width > 0 && this->viewport.height > 0)
+    {
+        this->SetViewport(this->viewport);
+    }
+}
+
+void GlesGraphics::InitFBO()
+{
+    glGenTextures(1, &fboColorTex);
+    glBindTexture(GL_TEXTURE_2D, fboColorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 640, 480, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glGenRenderbuffers(1, &fboDepthRb);
+    glBindRenderbuffer(GL_RENDERBUFFER, fboDepthRb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 640, 480);
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboColorTex, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fboDepthRb);
+
+    struct ScreenVertex {
+        float x, y;
+        float u, v;
+    };
+    ScreenVertex quadVerts[4] = {
+        {-1.0f, -1.0f, 0.0f, 0.0f},
+        { 1.0f, -1.0f, 1.0f, 0.0f},
+        {-1.0f,  1.0f, 0.0f, 1.0f},
+        { 1.0f,  1.0f, 1.0f, 1.0f}
+    };
+    glGenBuffers(1, &screenQuadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, screenQuadVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerts), quadVerts, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    u32 vs = CompileShader(GL_VERTEX_SHADER, screenVsSource);
+    u32 fs = CompileShader(GL_FRAGMENT_SHADER, screenFsSource);
+    screenProgram = glCreateProgram();
+    glAttachShader(screenProgram, vs);
+    glAttachShader(screenProgram, fs);
+    glBindAttribLocation(screenProgram, 0, "a_Position");
+    glBindAttribLocation(screenProgram, 1, "a_TexCoord");
+    glLinkProgram(screenProgram);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    u_ScreenTex = glGetUniformLocation(screenProgram, "u_ScreenTex");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
